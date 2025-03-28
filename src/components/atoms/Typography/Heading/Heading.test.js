@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
 
 import Heading from ".";
+
+import "@testing-library/jest-dom";
 
 describe("Heading", () => {
   test("Passing Cildren", () => {

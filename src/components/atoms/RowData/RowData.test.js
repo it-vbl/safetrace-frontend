@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
 
 import RowData from ".";
+
+import "@testing-library/jest-dom";
 
 describe("RowData", () => {
   test("Pass label props", () => {

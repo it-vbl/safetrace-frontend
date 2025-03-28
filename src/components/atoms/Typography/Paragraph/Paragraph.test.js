@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import Paragraph from ".";
+
+import "@testing-library/jest-dom";
 
 describe("Heading", () => {
   test("Passing onClick custom props", () => {

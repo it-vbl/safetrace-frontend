@@ -1,7 +1,7 @@
-import axios from 'axios';
-import querystring from 'qs';
 import Router from 'next/router';
+import axios from 'axios';
 import Cookies from 'js-cookie';
+import querystring from 'qs';
 
 let controller = new AbortController();
 

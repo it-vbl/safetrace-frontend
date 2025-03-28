@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
-import { render, fireEvent, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import Label from ".";
+
+import "@testing-library/jest-dom";
 
 describe("Label", () => {
   test("Pass onClick custom props", () => {

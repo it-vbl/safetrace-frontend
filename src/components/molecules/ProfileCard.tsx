@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
+
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+
 import Icon from '../atoms/Icon';
 import Text from '../atoms/Text';
 

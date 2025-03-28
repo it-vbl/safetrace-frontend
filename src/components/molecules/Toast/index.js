@@ -1,13 +1,14 @@
-import PropTypes from "prop-types";
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 import Checklist from "@/components/atoms/Icons/Checklist";
 import Close from "@/components/atoms/Icons/Close";
 import Warning from "@/components/atoms/Icons/Warning";
 
 import tailwindConfig from "../../../../tailwind.config";
+
+import "react-toastify/dist/ReactToastify.css";
 
 const CloseButton = ({ closeToast }) => (
   <div className="flex items-center">
