@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 
-import "@testing-library/jest-dom";
 import StatusLabel from "./";
+
+import "@testing-library/jest-dom";
 
 describe("StatusLabel component", () => {
   test("renders correctly with status success", () => {

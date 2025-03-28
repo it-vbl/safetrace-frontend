@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
 
 import StudentDetail from ".";
+
+import "@testing-library/jest-dom";
 
 describe("StudentDetail", () => {
   test("Should be rendered", () => {

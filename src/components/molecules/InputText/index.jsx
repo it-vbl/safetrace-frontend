@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import { cn } from '@/utils/cn';
 
@@ -10,17 +10,17 @@ import Label from '../../atoms/Label';
 import Paragraph from '../../atoms/Typography/Paragraph';
 
 const InputText = ({
-  placeholder,
+  placeholder = '',
   value = '',
   onChange,
-  label,
+  label = '',
   helperText = '',
   isError = false,
   type = 'text',
-  prefix,
-  suffix,
-  className,
-  containerClassName,
+  prefix = null,
+  suffix = null,
+  className = '',
+  containerClassName = '',
   isRequired = false,
   disabled = false,
   formatter = null,

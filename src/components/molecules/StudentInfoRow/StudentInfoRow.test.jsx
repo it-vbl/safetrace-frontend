@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 
-import "@testing-library/jest-dom";
 import StudentDetailCard from ".";
+
+import "@testing-library/jest-dom";
 
 jest.mock("../../atoms/RowData", () => {
   const MockRowData = ({ label, value }) => (

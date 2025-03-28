@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
 
 import Accordion from ".";
+
+import "@testing-library/jest-dom";
 
 describe("Accordion", () => {
   test("Should be rendered", () => {

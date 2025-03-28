@@ -1,8 +1,10 @@
-import "@testing-library/dom";
-import { render, screen } from "@testing-library/react";
 import { color } from "storybook/internal/theming";
 
+import { render, screen } from "@testing-library/react";
+
 import Chatbox from ".";
+
+import "@testing-library/dom";
 
 describe("Chatbox", () => {
   test("Renders bell icon without notification when total is 0", () => {

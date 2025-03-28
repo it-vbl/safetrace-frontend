@@ -1,8 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent,render, screen } from "@testing-library/react";
+
+import RemoveRedEye from "../../atoms/Icons/RemoveRedEye";
+
+import Action from "./";
 
 import "@testing-library/jest-dom";
-import Action from "./";
-import RemoveRedEye from "../../atoms/Icons/RemoveRedEye";
 
 describe("Action Component", () => {
   const mockOnClick = jest.fn();

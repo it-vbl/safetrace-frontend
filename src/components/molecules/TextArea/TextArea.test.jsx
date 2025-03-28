@@ -1,7 +1,8 @@
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent,render } from "@testing-library/react";
+
+import TextArea from ".";
 
 import "@testing-library/jest-dom";
-import TextArea from ".";
 
 describe("TextArea Unit Tests", () => {
   const mockOnChange = jest.fn();

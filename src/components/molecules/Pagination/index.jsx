@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactPaginate from 'react-paginate';
 
-import { cn } from '@/utils/cn';
 import useScreenSize from '@/helpers/utils/useScreenSize';
+import { cn } from '@/utils/cn';
 
 import ChevronLeft from '../../atoms/Icons/ChevronLeft';
 import ChevronRight from '../../atoms/Icons/ChevronRight';

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 import { cn } from '@/utils/cn';
 
-const Heading = ({ children, level = 1, className }) => {
+const Heading = ({ children, level = 1, className = '' }) => {
   const HeadingClassName = {
     1: 'text-2xl lg:text-[32px]',
     2: 'text-xl lg:text-[28px]',

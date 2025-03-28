@@ -1,51 +1,24 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:storybook/recommended"
-  ],
-  "plugins": [
-    "simple-import-sort"
-  ],
+  "extends": ["next/core-web-vitals", "plugin:storybook/recommended"],
+  "plugins": ["simple-import-sort"],
   "rules": {
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error"
   },
   "overrides": [
     {
-      "files": [
-        "**/*.js",
-        "**/*.ts",
-        "**/*.tsx"
-      ],
+      "files": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
       "rules": {
         "simple-import-sort/imports": [
           "error",
           {
             "groups": [
-              [
-                "^react$",
-                "^next",
-                "^[a-z]"
-              ],
-              [
-                "^~",
-                "^@"
-              ],
-              [
-                "^\\.\\.(?!/?$)",
-                "^\\.\\./?$"
-              ],
-              [
-                "^\\./(?=.*/)(?!/?$)",
-                "^\\.(?!/?$)",
-                "^\\./?$"
-              ],
-              [
-                "^.+\\.s?css$"
-              ],
-              [
-                "^\\u0000"
-              ]
+              ["^react$", "^next", "^[a-z]"],
+              ["^~", "^@"],
+              ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+              ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+              ["^.+\\.s?css$"],
+              ["^\\u0000"]
             ]
           }
         ]

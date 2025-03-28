@@ -1,7 +1,8 @@
-import "@testing-library/dom";
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent,render } from "@testing-library/react";
 
 import Toggle from ".";
+
+import "@testing-library/dom";
 
 describe("Toggle", () => {
   test("Toggel should be rendered ", () => {

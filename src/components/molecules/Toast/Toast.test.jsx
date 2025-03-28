@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
 
 import Toast from ".";
+
+import "@testing-library/jest-dom";
 
 describe("Toast component", () => {
   test("Toast should be rendered", () => {

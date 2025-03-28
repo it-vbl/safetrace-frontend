@@ -39,7 +39,7 @@ const ClaimForm = () => {
           // router.replace('/id');
         } else {
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('ERROR', err);
         setErrorSubmit(err?.response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
       }
@@ -48,9 +48,9 @@ const ClaimForm = () => {
 
   const handleUploadFile = async (e: any) => {
     try {
-      const response = await uploadFile({ file: e.value });
+      const response: any = await uploadFile({ file: e.value });
       if (response) {
-        const temp = [...formik.values.foto_bukti];
+        const temp: any = [...formik.values.foto_bukti];
         temp.push(response.data.filepath);
         console.log('CHECK DATA', temp);
         formik.setFieldValue('foto_bukti', temp);
@@ -60,21 +60,7 @@ const ClaimForm = () => {
     }
   };
 
-  const handleOCRKTP = async (e: any) => {
-    try {
-      const temp = [];
-      temp.push(e.value);
-      handleUploadFile(e, 'ktp_file_path');
-      const response = await ocrKTP({ images: e.value });
-      if (response) {
-        formik.setFieldValue('no_ktp', response.data.NIK);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRemovePhoto = (index) => {
+  const handleRemovePhoto = (index: any) => {
     const temp = [...formik.values.foto_bukti];
     temp.splice(index, 1);
     formik.setFieldValue('foto_bukti', temp);
@@ -121,7 +107,7 @@ const ClaimForm = () => {
               <div className='grid grid-cols-2 gap-4'>
                 {formik.values.foto_bukti.map((data, index) => {
                   return (
-                    <div className='relative'>
+                    <div key={`foto-detail-kerusakan-${index}`} className='relative'>
                       <div className='z-2 absolute right-4 top-4 rounded-full bg-white p-2'>
                         <TrashIcon color='red' onClick={() => handleRemovePhoto(index)} />
                       </div>
@@ -131,6 +117,7 @@ const ClaimForm = () => {
                         width={200}
                         objectFit='contain'
                         src={process.env.NEXT_PUBLIC_BASE_URL + data}
+                        alt='Foto Detail Kerusakan'
                       />
                     </div>
                   );
@@ -151,27 +138,6 @@ const ClaimForm = () => {
           <Button type='submit'>Submit</Button>
         </form>
       </div>
-      <Modal visible={false} title='Detail Reimburse' subtitle='Lembar 1'>
-        <Accordion
-          accordionItemClassName='!border rounded-sm'
-          items={[
-            {
-              title: 'How do I login?',
-              description: (
-                <p className='text-[14px] font-medium leading-[18px] text-[#414347]'>
-                  Please check this video.{' '}
-                  <span
-                    className='cursor-pointer font-bold text-[#4C79AB] underline'
-                    onClick={() => console.log('clicked!')}
-                  >
-                    Click Here
-                  </span>
-                </p>
-              ),
-            },
-          ]}
-        />
-      </Modal>
     </div>
   );
 };

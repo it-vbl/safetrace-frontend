@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 import { cn } from '@/utils/cn';
 
-const Paragraph = ({ children = '', level = 1, className = '', ...props }) => {
+const Paragraph = ({ children, level = 1, className = '', ...props }) => {
   const ParagraphClassName = {
     1: 'text-xl',
     2: 'text-base',
@@ -18,7 +18,6 @@ const Paragraph = ({ children = '', level = 1, className = '', ...props }) => {
 };
 
 Paragraph.propTypes = {
-  children: PropTypes.node,
   level: PropTypes.oneOf([1, 2, 3, 4]),
   className: PropTypes.string,
 };

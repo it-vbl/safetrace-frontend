@@ -1,6 +1,6 @@
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import React, { useEffect, useMemo, useState } from 'react';
 
 import Button from '@/components/atoms/Button';
 import Document from '@/components/atoms/Icons/Document';
@@ -13,7 +13,7 @@ import Toast from '../Toast';
 const Upload = ({
   error = false,
   file = null,
-  onChangeValue = () => {},
+  onChangeValue = (e) => {},
   label = '',
   isRequired = false,
   allowedFiles = [

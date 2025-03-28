@@ -1,7 +1,8 @@
-import "@testing-library/dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import Alert from ".";
+
+import "@testing-library/dom";
 
 describe("Alert", () => {
   test("Calls onclose function when close icon is clicked", () => {

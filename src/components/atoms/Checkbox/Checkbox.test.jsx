@@ -1,7 +1,8 @@
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent,render } from "@testing-library/react";
+
+import Checkbox from "./";
 
 import "@testing-library/jest-dom";
-import Checkbox from "./";
 
 describe("Checkbox Unit Tests", () => {
   const mockOnChange = jest.fn();

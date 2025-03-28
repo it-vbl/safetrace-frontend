@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { cn } from '@/utils/cn';
 import theme from '@/utils/tailwindTheme';
@@ -34,9 +34,9 @@ const Button = ({
   isDisabled = false,
   isLoading = false,
   textClassName = '',
-  className,
-  style,
-  icon,
+  className = '',
+  style = {},
+  icon = null,
   isFullWidth = false,
   ...props
 }) => {

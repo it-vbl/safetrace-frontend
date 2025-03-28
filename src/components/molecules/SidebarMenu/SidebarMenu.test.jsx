@@ -1,10 +1,11 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { useRouter } from "next/router";
 import React from "react";
+import { useRouter } from "next/router";
 
-import "@testing-library/jest-dom";
+import { fireEvent,render, screen } from "@testing-library/react";
 
 import SidebarMenu from ".";
+
+import "@testing-library/jest-dom";
 
 jest.mock("next/router", () => ({
   useRouter: jest.fn(),
