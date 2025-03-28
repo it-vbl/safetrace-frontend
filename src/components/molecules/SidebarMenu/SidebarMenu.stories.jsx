@@ -1,5 +1,5 @@
-import SidebarMenu from ".";
 import Home from "../../atoms/Icons/Home";
+import SidebarMenu from ".";
 
 export default {
   component: SidebarMenu,

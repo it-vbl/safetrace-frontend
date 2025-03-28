@@ -1,20 +1,21 @@
 'use client';
 
 import React from 'react';
-import { useFormik } from 'formik';
-import UploadField from '@/components/molecules/UploadField';
-import * as Yup from 'yup';
-import InputText from '@/components/molecules/InputText';
-import Select from '@/components/molecules/Select';
-import Upload from '@/components/molecules/Upload';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+import receiptImage from '@/assets/images/receipt.jpg';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Image from 'next/image';
-import receiptImage from '@/assets/images/receipt.jpg';
-import Modal from '@/components/molecules/Modal';
 import Accordion from '@/components/molecules/Accordion';
+import InputText from '@/components/molecules/InputText';
+import Modal from '@/components/molecules/Modal';
+import Select from '@/components/molecules/Select';
+import Upload from '@/components/molecules/Upload';
+import UploadField from '@/components/molecules/UploadField';
 
 const SignupForm = () => {
   const t = useTranslations('ReimburseSubmission');

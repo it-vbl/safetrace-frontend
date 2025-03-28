@@ -9,9 +9,9 @@ import Lock from '@/components/atoms/Icons/Lock';
 import PersonPinindex from '@/components/atoms/Icons/PersonPinindex';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import useTouchOutside from '@/helpers/hooks/useTouchOutside';
-import theme from '@/utils/tailwindTheme';
 import { setUpdatePasswordModalVisibility, setUpdateProfileModalVisibility } from '@/store/data/actions';
 import { userLogout } from '@/store/user/actions';
+import theme from '@/utils/tailwindTheme';
 
 const NavbarProfile = ({ avatarUrl, studentName, schoolType }) => {
   const dispatch = useDispatch();

@@ -1,11 +1,12 @@
-import moment from "moment";
-import "moment/locale/id";
 import { useRouter } from "next/router";
+import moment from "moment";
 
 import Heading from "@/components/atoms/Typography/Heading";
 import Paragraph from "@/components/atoms/Typography/Paragraph";
 
 import DefaultBackgound from "../../../assets/images/default_image_information.webp";
+
+import "moment/locale/id";
 
 const CardInformation = ({ announcement }) => {
   const router = useRouter();

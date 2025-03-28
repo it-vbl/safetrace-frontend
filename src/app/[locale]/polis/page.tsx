@@ -1,19 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import InputText from '@/components/molecules/InputText';
-import Upload from '@/components/molecules/Upload';
-import { useTranslations } from 'next-intl';
+
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Modal from '@/components/molecules/Modal';
 import Accordion from '@/components/molecules/Accordion';
+import InputText from '@/components/molecules/InputText';
+import Modal from '@/components/molecules/Modal';
+import Upload from '@/components/molecules/Upload';
 import { ocrKTP, registerPolis, uploadFile } from '@/services/polis';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 const SignupForm = () => {

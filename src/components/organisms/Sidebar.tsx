@@ -1,18 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
-import NavItem from '../molecules/NavItem';
-import ProfileCard from '../molecules/ProfileCard';
+
 import {
-  HomeIcon,
   BellIcon,
-  ChatBubbleLeftRightIcon,
-  MagnifyingGlassIcon,
-  HeartIcon,
   BookmarkIcon,
+  ChatBubbleLeftRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  HeartIcon,
+  HomeIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
+
+import NavItem from '../molecules/NavItem';
+import ProfileCard from '../molecules/ProfileCard';
 
 const Sidebar: React.FC = () => {
   const [isGroupOpen, setIsGroupOpen] = useState(false);

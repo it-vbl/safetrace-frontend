@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
 
 import ColData from ".";
+
+import "@testing-library/jest-dom";
 
 describe("ColData", () => {
   test("Render with passing label", () => {

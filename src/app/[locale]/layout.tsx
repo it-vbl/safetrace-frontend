@@ -1,24 +1,22 @@
 import type { Metadata } from 'next';
 import { Open_Sans, Raleway } from 'next/font/google';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { IoLogoFacebook, IoLogoInstagram, IoLogoTwitter } from 'react-icons/io5';
 
 import { Logo } from '@/components/logo';
+import DashboardTemplate from '@/components/templates/DashboardTemplate';
 import { Toaster } from '@/components/ui/toaster';
+import { routing } from '@/i18n/routing';
 import { cn } from '@/utils/cn';
 import { Analytics } from '@vercel/analytics/react';
 
 import { Navigation } from './navigation';
 
 import '@/styles/globals.css';
-import DashboardTemplate from '@/components/templates/DashboardTemplate';
-
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

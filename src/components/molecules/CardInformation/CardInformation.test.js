@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import moment from "moment";
 import { useRouter } from "next/router";
+import moment from "moment";
+
+import { fireEvent,render, screen } from "@testing-library/react";
 
 import CardInformation from ".";
 
