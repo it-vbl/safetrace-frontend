@@ -1,0 +1,209 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RadioButton Component should match snapshot with default props 1`] = `
+<DocumentFragment>
+  <div
+    class="flex flex-col gap-1"
+  >
+    <div
+      class="flex flex-col gap-5"
+    >
+      <div
+        class="radio-button-group flex items-center justify-between"
+      >
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer border-gray-500"
+            name="test-radio"
+            type="radio"
+            value="option1"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 1
+          </p>
+        </label>
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer border-gray-500"
+            name="test-radio"
+            type="radio"
+            value="option2"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 2
+          </p>
+        </label>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RadioButton Component should match snapshot with error state 1`] = `
+<DocumentFragment>
+  <div
+    class="flex flex-col gap-1"
+  >
+    <div
+      class="flex flex-col gap-5"
+    >
+      <div
+        class="radio-button-group flex items-center justify-between"
+      >
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer !border-error5"
+            name="test-radio"
+            type="radio"
+            value="option1"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 1
+          </p>
+        </label>
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer !border-error5"
+            name="test-radio"
+            type="radio"
+            value="option2"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 2
+          </p>
+        </label>
+      </div>
+    </div>
+    <p
+      class="text-xs text-error5"
+    >
+      Error message
+    </p>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RadioButton Component should match snapshot with label and required 1`] = `
+<DocumentFragment>
+  <div
+    class="flex flex-col gap-1"
+  >
+    <div
+      class="flex flex-col gap-5"
+    >
+      <div
+        class="flex flex-row"
+      >
+        <p
+          class="text-sm font-bold text-neutral11"
+        >
+          Test Label
+        </p>
+        <p
+          class="text-sm font-bold text-[red]"
+        >
+          *
+        </p>
+      </div>
+      <div
+        class="radio-button-group flex items-center justify-between"
+      >
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer border-gray-500"
+            name="test-radio"
+            type="radio"
+            value="option1"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 1
+          </p>
+        </label>
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer border-gray-500"
+            name="test-radio"
+            type="radio"
+            value="option2"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 2
+          </p>
+        </label>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RadioButton Component should match snapshot with selected value 1`] = `
+<DocumentFragment>
+  <div
+    class="flex flex-col gap-1"
+  >
+    <div
+      class="flex flex-col gap-5"
+    >
+      <div
+        class="radio-button-group flex items-center justify-between"
+      >
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            class="radio-button cursor-pointer border-gray-500"
+            name="test-radio"
+            type="radio"
+            value="option1"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 1
+          </p>
+        </label>
+        <label
+          class="radio-label flex w-full items-center gap-2"
+        >
+          <input
+            checked=""
+            class="radio-button cursor-pointer border-gray-500"
+            name="test-radio"
+            type="radio"
+            value="option2"
+          />
+          <p
+            class="text-base cursor-pointer text-neutral9"
+          >
+            Option 2
+          </p>
+        </label>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

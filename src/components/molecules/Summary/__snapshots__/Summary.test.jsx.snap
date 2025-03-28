@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Summary Component matches the snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center justify-between"
+  >
+    <p
+      class="text-xs font-medium text-neutral8"
+    >
+      Label 1
+    </p>
+    <p
+      class="text-sm font-bold text-neutral10"
+    >
+      Value 1
+    </p>
+  </div>
+  <div
+    class="flex items-center justify-between"
+  >
+    <p
+      class="text-xs font-medium text-neutral8"
+    >
+      Label 2
+    </p>
+    <p
+      class="text-sm font-bold text-neutral10"
+    >
+      Value 2
+    </p>
+  </div>
+  <div
+    class="flex items-center justify-between"
+  >
+    <p
+      class="text-xs font-medium text-neutral8"
+    >
+      Label 3
+    </p>
+    <p
+      class="text-xl font-bold"
+    >
+      Value 3
+    </p>
+  </div>
+</DocumentFragment>
+`;

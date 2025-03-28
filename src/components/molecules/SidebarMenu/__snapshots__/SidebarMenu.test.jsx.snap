@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SidebarMenu should match snapshot 1`] = `
+<DocumentFragment>
+  <a
+    class="flex w-full cursor-pointer flex-row items-center justify-start gap-[10px] rounded-full p-[10px] hover:!bg-blue0 hover:text-blue8"
+    data-testid="sidebar-menu-home"
+    href="/home"
+  >
+    <span
+      color="currentColor"
+      size="16"
+    >
+      🏠
+    </span>
+    <p
+      class="text-sm font-semibold hover:text-blue8"
+    >
+      Home
+    </p>
+  </a>
+</DocumentFragment>
+`;

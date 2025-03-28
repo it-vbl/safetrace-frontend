@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingOverlay Component should match snapshot when isVisible is false 1`] = `<DocumentFragment />`;
+
+exports[`LoadingOverlay Component should match snapshot when isVisible is true 1`] = `
+<DocumentFragment>
+  <div
+    class="fixed z-[999] flex h-full w-screen items-center justify-center bg-black bg-opacity-30"
+  >
+    <div
+      class="spinner-border text-white"
+      role="status"
+    >
+      <div
+        class="lds-ring !scale-[0.6]"
+        data-testid="loading-spinner"
+      >
+        <div />
+        <div />
+        <div />
+        <div />
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

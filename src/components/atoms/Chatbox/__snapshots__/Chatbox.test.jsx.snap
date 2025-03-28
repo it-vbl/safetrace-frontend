@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Chatbox Chatbox snapshot Matches snapshot with default props 1`] = `
+<DocumentFragment>
+  <div
+    class="relative w-max"
+    data-testid="chatbox"
+  >
+    <svg
+      data-testid="bell-icon"
+      fill="none"
+      height="20"
+      viewBox="0 0 20 20"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5.58125 2.08L4.15125 0.65C1.75125 2.48 0.17125 5.3 0.03125 8.5H2.03125C2.18125 5.85 3.54125 3.53 5.58125 2.08ZM17.9712 8.5H19.9712C19.8212 5.3 18.2413 2.48 15.8513 0.65L14.4313 2.08C16.4513 3.53 17.8212 5.85 17.9712 8.5ZM16.0013 9C16.0013 5.93 14.3612 3.36 11.5013 2.68V2C11.5013 1.17 10.8313 0.5 10.0013 0.5C9.17125 0.5 8.50125 1.17 8.50125 2V2.68C5.63125 3.36 4.00125 5.92 4.00125 9V14L2.00125 16V17H18.0012V16L16.0013 14V9ZM10.0013 20C10.1413 20 10.2712 19.99 10.4012 19.96C11.0512 19.82 11.5813 19.38 11.8413 18.78C11.9413 18.54 11.9913 18.28 11.9913 18H7.99125C8.00125 19.1 8.89125 20 10.0013 20Z"
+        fill="#262626"
+      />
+    </svg>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Chatbox Chatbox snapshot Matches snapshot with total > 0 1`] = `
+<DocumentFragment>
+  <div
+    class="relative w-max"
+    data-testid="chatbox"
+  >
+    <svg
+      data-testid="bell-icon"
+      fill="none"
+      height="20"
+      viewBox="0 0 20 20"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5.58125 2.08L4.15125 0.65C1.75125 2.48 0.17125 5.3 0.03125 8.5H2.03125C2.18125 5.85 3.54125 3.53 5.58125 2.08ZM17.9712 8.5H19.9712C19.8212 5.3 18.2413 2.48 15.8513 0.65L14.4313 2.08C16.4513 3.53 17.8212 5.85 17.9712 8.5ZM16.0013 9C16.0013 5.93 14.3612 3.36 11.5013 2.68V2C11.5013 1.17 10.8313 0.5 10.0013 0.5C9.17125 0.5 8.50125 1.17 8.50125 2V2.68C5.63125 3.36 4.00125 5.92 4.00125 9V14L2.00125 16V17H18.0012V16L16.0013 14V9ZM10.0013 20C10.1413 20 10.2712 19.99 10.4012 19.96C11.0512 19.82 11.5813 19.38 11.8413 18.78C11.9413 18.54 11.9913 18.28 11.9913 18H7.99125C8.00125 19.1 8.89125 20 10.0013 20Z"
+        fill="#262626"
+      />
+    </svg>
+    <div
+      class="absolute right-[-5px] top-[-5px] flex size-4 items-center justify-center rounded-full bg-primary"
+    >
+      <p
+        class="text-[8px] font-semibold leading-[8px] text-[#FDEBED]"
+      >
+        5
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;

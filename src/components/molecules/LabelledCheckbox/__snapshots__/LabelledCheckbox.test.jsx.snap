@@ -1,0 +1,135 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LabelledCheckboxSnapshots checkbox should be checked when value is true and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2 py-1"
+  >
+    <input
+      checked=""
+      class="size-4"
+      type="checkbox"
+    />
+    <div
+      class="flex flex-row"
+    >
+      <p
+        class="text-sm text-neutral11 font-normal"
+      >
+        Checked Label
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`LabelledCheckboxSnapshots checkbox should not be checked when value is false and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2 py-1"
+  >
+    <input
+      class="size-4"
+      type="checkbox"
+    />
+    <div
+      class="flex flex-row"
+    >
+      <p
+        class="text-sm text-neutral11 font-normal"
+      >
+        Unchecked Label
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`LabelledCheckboxSnapshots renders correctly with default props and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2 py-1"
+  >
+    <input
+      class="size-4"
+      type="checkbox"
+    />
+    <div
+      class="flex flex-row"
+    >
+      <p
+        class="text-sm text-neutral11 font-normal"
+      >
+        Test Label
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`LabelledCheckboxSnapshots renders disabled checkbox and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2 py-1"
+  >
+    <input
+      class="size-4"
+      disabled=""
+      type="checkbox"
+    />
+    <div
+      class="flex flex-row"
+    >
+      <p
+        class="text-sm text-neutral11 font-normal"
+      >
+        Disabled Test
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`LabelledCheckboxSnapshots updates the checked state when value prop changes and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2 py-1"
+  >
+    <input
+      class="size-4"
+      type="checkbox"
+    />
+    <div
+      class="flex flex-row"
+    >
+      <p
+        class="text-sm text-neutral11 font-normal"
+      >
+        Dynamic Value Test
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`LabelledCheckboxSnapshots updates the checked state when value prop changes and matches snapshot 2`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2 py-1"
+  >
+    <input
+      class="size-4"
+      type="checkbox"
+    />
+    <div
+      class="flex flex-row"
+    >
+      <p
+        class="text-sm text-neutral11 font-normal"
+      >
+        Dynamic Value Test
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;

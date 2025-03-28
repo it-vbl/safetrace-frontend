@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccordionItem snapshot Closed AccordionItem 1`] = `
+<DocumentFragment>
+  <div
+    class="flex flex-col gap-6 border-b px-2 py-4"
+    data-testid="accordion-item"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <p
+        class="text-sm font-medium leading-[18px] text-[#414347]"
+        data-testid="accordion-item-title"
+      >
+        This is a title
+      </p>
+      <div
+        class="cursor-pointer"
+        data-testid="accordion-item-icon"
+      >
+        <svg
+          data-testid="plus-icon"
+          fill="none"
+          height="12"
+          viewBox="0 0 12 12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g
+            clip-path="url(#clip0_7_2141)"
+          >
+            <path
+              d="M11.5 5.5H6.5V0.5C6.5 0.367392 6.44732 0.240215 6.35355 0.146447C6.25979 0.0526784 6.13261 0 6 0V0C5.86739 0 5.74021 0.0526784 5.64645 0.146447C5.55268 0.240215 5.5 0.367392 5.5 0.5V5.5H0.5C0.367392 5.5 0.240215 5.55268 0.146447 5.64645C0.0526784 5.74021 0 5.86739 0 6H0C0 6.13261 0.0526784 6.25979 0.146447 6.35355C0.240215 6.44732 0.367392 6.5 0.5 6.5H5.5V11.5C5.5 11.6326 5.55268 11.7598 5.64645 11.8536C5.74021 11.9473 5.86739 12 6 12C6.13261 12 6.25979 11.9473 6.35355 11.8536C6.44732 11.7598 6.5 11.6326 6.5 11.5V6.5H11.5C11.6326 6.5 11.7598 6.44732 11.8536 6.35355C11.9473 6.25979 12 6.13261 12 6C12 5.86739 11.9473 5.74021 11.8536 5.64645C11.7598 5.55268 11.6326 5.5 11.5 5.5Z"
+              fill="#9B9C9D"
+            />
+          </g>
+          <defs>
+            <clippath
+              id="clip0_7_2141"
+            >
+              <rect
+                fill="#9B9C9D"
+                height="12"
+                width="12"
+              />
+            </clippath>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`AccordionItem snapshot Opened AccordionItem 1`] = `
+<DocumentFragment>
+  <div
+    class="flex flex-col gap-6 border-b px-2 py-4"
+    data-testid="accordion-item"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <p
+        class="text-sm font-medium leading-[18px] text-[#414347]"
+        data-testid="accordion-item-title"
+      >
+        This is a title
+      </p>
+      <div
+        class="cursor-pointer"
+        data-testid="accordion-item-icon"
+      >
+        <svg
+          data-testid="minus-icon"
+          fill="none"
+          height="12"
+          viewBox="0 0 12 12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M11.5 5.5H0.5C0.223858 5.5 0 5.72386 0 6C0 6.27615 0.223858 6.50001 0.5 6.50001H11.5C11.7761 6.50001 12 6.27615 12 6C12 5.72386 11.7761 5.5 11.5 5.5Z"
+            fill="#9B9C9D"
+          />
+        </svg>
+      </div>
+    </div>
+    <div
+      data-testid="accordion-item-description"
+    >
+      &lt;p&gt;This is a description&lt;/p&gt;
+    </div>
+  </div>
+</DocumentFragment>
+`;

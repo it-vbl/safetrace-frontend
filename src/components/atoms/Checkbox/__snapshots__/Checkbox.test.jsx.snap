@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CheckboxSnapshot matches snapshot when checkbox is checked 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="container cursor-pointer flex items-center"
+    >
+      <input
+        checked=""
+        data-testd="checkbox"
+        style="width: 18px; height: 18px;"
+        type="checkbox"
+      />
+      <span
+        class="checkmark"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`CheckboxSnapshot matches snapshot when checkbox is clicked and state changes 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="container cursor-pointer flex items-center"
+    >
+      <input
+        data-testd="checkbox"
+        style="width: 18px; height: 18px;"
+        type="checkbox"
+      />
+      <span
+        class="checkmark"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`CheckboxSnapshot matches snapshot when checkbox is disabled 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="container cursor-not-allowed border-gray-300 bg-gray-200 flex items-center"
+    >
+      <input
+        data-testd="checkbox"
+        disabled=""
+        style="width: 18px; height: 18px;"
+        type="checkbox"
+      />
+      <span
+        class="checkmark"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`CheckboxSnapshot matches snapshot when checkbox is not checked 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="container cursor-pointer flex items-center"
+    >
+      <input
+        data-testd="checkbox"
+        style="width: 18px; height: 18px;"
+        type="checkbox"
+      />
+      <span
+        class="checkmark"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`CheckboxSnapshot matches snapshot when value prop changes 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="container cursor-pointer flex items-center"
+    >
+      <input
+        data-testd="checkbox"
+        style="width: 18px; height: 18px;"
+        type="checkbox"
+      />
+      <span
+        class="checkmark"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`CheckboxSnapshot renders correctly with default props and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="container cursor-pointer flex items-center"
+    >
+      <input
+        data-testd="checkbox"
+        style="width: 18px; height: 18px;"
+        type="checkbox"
+      />
+      <span
+        class="checkmark"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

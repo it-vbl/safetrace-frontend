@@ -1,0 +1,162 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CardBillingStatus Component renders correctly and matches snapshot 1`] = `
+<div>
+  <div
+    class="w-full rounded-lg border border-neutral4 p-4"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <p
+        class="text-xl font-bold text-neutral10"
+      >
+        Status Tagihan
+      </p>
+      <p
+        class="text-xl font-bold text-blue6"
+      >
+        Rp5.000.000
+      </p>
+    </div>
+    <div
+      class="my-4 grid grid-cols-2 gap-x-7 gap-y-[14px] break-all rounded bg-neutral3 p-4"
+    >
+      <div
+        class="flex flex-col gap-y-[2px]"
+      >
+        <p
+          class="text-sm line-clamp-1 font-medium text-neutral8"
+        >
+          Billkey
+        </p>
+        <p
+          class="text-base line-clamp-1 font-bold text-neutral10"
+        >
+          12345
+        </p>
+      </div>
+      <div
+        class="flex flex-col gap-y-[2px]"
+      >
+        <p
+          class="text-sm line-clamp-1 font-medium text-neutral8"
+        >
+          Semester
+        </p>
+        <p
+          class="text-base line-clamp-1 font-bold text-neutral10"
+        >
+          2024
+        </p>
+      </div>
+      <div
+        class="flex flex-col gap-y-[2px]"
+      >
+        <p
+          class="text-sm line-clamp-1 font-medium text-neutral8"
+        >
+          Nama Tagihan
+        </p>
+        <p
+          class="text-base line-clamp-1 font-bold text-neutral10"
+        >
+          Tuition Fee
+        </p>
+      </div>
+      <div
+        class="flex flex-col gap-y-[2px]"
+      >
+        <p
+          class="text-sm line-clamp-1 font-medium text-neutral8"
+        >
+          Kelas
+        </p>
+        <p
+          class="text-base line-clamp-1 font-bold text-neutral10"
+        >
+          Grade 12
+        </p>
+      </div>
+      <div
+        class="flex flex-col gap-y-[2px]"
+      >
+        <p
+          class="text-sm line-clamp-1 font-medium text-neutral8"
+        >
+          Tanggal Dibuat
+        </p>
+        <p
+          class="text-base line-clamp-1 font-bold text-neutral10"
+        >
+          2024-01-01
+        </p>
+      </div>
+      <div
+        class="flex flex-col gap-y-[2px]"
+      >
+        <p
+          class="text-sm line-clamp-1 font-medium text-neutral8"
+        >
+          Tanggal Berakhir
+        </p>
+        <p
+          class="text-base line-clamp-1 font-bold text-neutral10"
+        >
+          2024-12-31
+        </p>
+      </div>
+    </div>
+    <div>
+      <button
+        class="rounded-[6px] flex whitespace-nowrap justify-center items-center font-bold gap-1 h-[44px] py-2 px-6 text-sm bg-blue8 hover:bg-blue9 text-white disabled:bg-secondary2 mb-4 w-full"
+        data-testid="btn-pay-card-billing-status"
+      >
+        <div
+          class="flex items-center text-center"
+        >
+          Bayar Sekarang
+        </div>
+      </button>
+      <div
+        class="h-1 w-full self-end bg-neutral3"
+      />
+      <div
+        class="mt-4 flex items-center justify-between"
+      >
+        <div
+          class="flex cursor-pointer items-center gap-x-1"
+          data-testid="btn-detail-card-billing-status"
+        >
+          <p
+            class="text-xs font-bold text-neutral8"
+          >
+            Detail
+          </p>
+          <svg
+            fill="none"
+            height="12"
+            viewBox="0 0 12 12"
+            width="12"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 9.5H3C2.725 9.5 2.5 9.275 2.5 9V3C2.5 2.725 2.725 2.5 3 2.5H5.5C5.775 2.5 6 2.275 6 2C6 1.725 5.775 1.5 5.5 1.5H2.5C1.945 1.5 1.5 1.95 1.5 2.5V9.5C1.5 10.05 1.95 10.5 2.5 10.5H9.5C10.05 10.5 10.5 10.05 10.5 9.5V6.5C10.5 6.225 10.275 6 10 6C9.725 6 9.5 6.225 9.5 6.5V9C9.5 9.275 9.275 9.5 9 9.5ZM7 2C7 2.275 7.225 2.5 7.5 2.5H8.795L4.23 7.065C4.035 7.26 4.035 7.575 4.23 7.77C4.425 7.965 4.74 7.965 4.935 7.77L9.5 3.205V4.5C9.5 4.775 9.725 5 10 5C10.275 5 10.5 4.775 10.5 4.5V1.5H7.5C7.225 1.5 7 1.725 7 2Z"
+              fill="#24586F"
+            />
+          </svg>
+        </div>
+        <div
+          class="rounded-full px-4 py-[6px] text-center capitalize bg-error1"
+        >
+          <p
+            class="text-xs text-error7"
+          >
+            Belum Dibayar
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

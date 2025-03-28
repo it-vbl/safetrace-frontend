@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Heading Level 1 1`] = `
+<div>
+  <p
+    class="text-xl"
+  />
+</div>
+`;
+
+exports[`Heading Level 2 1`] = `
+<div>
+  <p
+    class="text-base"
+  />
+</div>
+`;
+
+exports[`Heading Level 3 1`] = `
+<div>
+  <p
+    class="text-sm"
+  />
+</div>
+`;
+
+exports[`Heading Level 4 1`] = `
+<div>
+  <p
+    class="text-xs"
+  />
+</div>
+`;
+
+exports[`Heading Passing Cildren 1`] = `
+<div>
+  <p
+    class="text-xl"
+  >
+    Testing
+  </p>
+</div>
+`;
+
+exports[`Heading Passing className 1`] = `
+<div>
+  <p
+    class="text-xl bg-red-400"
+  />
+</div>
+`;

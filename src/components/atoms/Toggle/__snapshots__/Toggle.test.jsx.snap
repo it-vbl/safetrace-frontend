@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Toggle snapshot To render the toggle if the value is false 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2"
+    data-testid="toggle-wrapper"
+  >
+    <label
+      class="relative inline-flex cursor-pointer items-center"
+      data-testid="label"
+    >
+      <input
+        class="peer sr-only"
+        data-testid="toggle"
+        type="checkbox"
+      />
+      <div
+        class="h-4 w-8 rounded-full bg-error6 after:absolute after:start-[2px] after:top-[2px] after:h-3 after:w-3 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 after:border after:border-error6 peer-checked:after:border-green6"
+        data-testid="toggle-background"
+      />
+    </label>
+    <p
+      class="text-sm text-blue10"
+    >
+      Nonaktif
+    </p>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Toggle snapshot To render the toggle if the value is false and disabled 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2"
+    data-testid="toggle-wrapper"
+  >
+    <label
+      class="relative inline-flex cursor-pointer items-center"
+      data-testid="label"
+    >
+      <input
+        class="peer sr-only"
+        data-testid="toggle"
+        type="checkbox"
+      />
+      <div
+        class="h-4 w-8 rounded-full bg-error6 after:absolute after:start-[2px] after:top-[2px] after:h-3 after:w-3 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 after:border after:border-error6 peer-checked:after:border-green6"
+        data-testid="toggle-background"
+      />
+    </label>
+    <p
+      class="text-sm text-blue10"
+    >
+      Nonaktif
+    </p>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Toggle snapshot To render the toggle if the value is true 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-2"
+    data-testid="toggle-wrapper"
+  >
+    <label
+      class="relative inline-flex cursor-pointer items-center"
+      data-testid="label"
+    >
+      <input
+        checked=""
+        class="peer sr-only"
+        data-testid="toggle"
+        type="checkbox"
+      />
+      <div
+        class="h-4 w-8 rounded-full after:absolute after:start-[2px] after:top-[2px] after:h-3 after:w-3 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 bg-green6 after:border after:border-error6 peer-checked:after:border-green6"
+        data-testid="toggle-background"
+      />
+    </label>
+    <p
+      class="text-sm text-blue10"
+    >
+      Aktif
+    </p>
+  </div>
+</DocumentFragment>
+`;

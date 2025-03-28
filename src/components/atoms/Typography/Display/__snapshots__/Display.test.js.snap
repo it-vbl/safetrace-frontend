@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Display Level 1 1`] = `
+<div>
+  <span
+    class="font-bold text-[60px] undefined"
+  />
+</div>
+`;
+
+exports[`Display Level 2 1`] = `
+<div>
+  <span
+    class="font-bold text-[52px] undefined"
+  />
+</div>
+`;
+
+exports[`Display Level 3 1`] = `
+<div>
+  <span
+    class="font-bold text-[46px] undefined"
+  />
+</div>
+`;
+
+exports[`Display Level 4 1`] = `
+<div>
+  <span
+    class="font-bold text-[36px] undefined"
+  />
+</div>
+`;
+
+exports[`Display Passing Cildren 1`] = `
+<div>
+  <span
+    class="font-bold text-[60px] undefined"
+  >
+    Testing
+  </span>
+</div>
+`;
+
+exports[`Display Passing className 1`] = `
+<div>
+  <span
+    class="font-bold text-[60px] bg-red-400"
+  />
+</div>
+`;

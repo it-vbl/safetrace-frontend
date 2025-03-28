@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SplashScreen is not transitioning 1`] = `
+<div>
+  <div
+    class="transition-opacity duration-500 ease-in-out opacity-100"
+  >
+    <div
+      class="fixed inset-0 flex items-center justify-center bg-white"
+    >
+      <img
+        alt="Logo"
+        class="relative top-[-20px] h-auto w-[200px] object-contain"
+        src="/siprusEduLogo.webp"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SplashScreen is transitioning 1`] = `
+<div>
+  <div
+    class="transition-opacity duration-500 ease-in-out opacity-0"
+  >
+    <div
+      class="fixed inset-0 flex items-center justify-center bg-white"
+    >
+      <img
+        alt="Logo"
+        class="relative top-[-20px] h-auto w-[200px] object-contain"
+        src="/siprusEduLogo.webp"
+      />
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Breadcrumb snapshot All props and code is stable 1`] = `
+<DocumentFragment>
+  <nav
+    aria-label="breadcrumb"
+  >
+    <ol
+      class="flex list-none flex-wrap rounded bg-white"
+    >
+      <li
+        class="flex items-center text-xs "
+        data-testid="breadcrumb-item"
+      >
+        <a
+          class="text-xs text-neutral8"
+          href="/"
+        >
+          Home
+        </a>
+        <span
+          class="mx-2 text-[#6c757d]"
+        >
+          /
+        </span>
+      </li>
+      <li
+        class="flex items-center text-xs "
+        data-testid="breadcrumb-item"
+      >
+        <a
+          class="text-xs text-neutral8"
+          href="/category"
+        >
+          Category
+        </a>
+        <span
+          class="mx-2 text-[#6c757d]"
+        >
+          /
+        </span>
+      </li>
+      <li
+        class="flex items-center text-xs "
+        data-testid="breadcrumb-item"
+      >
+        <a
+          class="text-xs text-neutral8"
+          href="/item"
+        >
+          Item
+        </a>
+        <span
+          class="mx-2 text-[#6c757d]"
+        >
+          /
+        </span>
+      </li>
+      <li
+        class="flex items-center text-xs text-blue8"
+        data-testid="breadcrumb-item"
+      >
+        Detail
+      </li>
+    </ol>
+  </nav>
+</DocumentFragment>
+`;

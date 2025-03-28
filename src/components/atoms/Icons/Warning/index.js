@@ -1,0 +1,28 @@
+import PropTypes from "prop-types";
+
+import tailwindConfig from "../../../../../tailwind.config";
+
+const Warning = ({
+  size = 20,
+  fill = tailwindConfig.theme.extend.colors.error6,
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M3.72494 17.5001H16.2749C17.5583 17.5001 18.3583 16.1084 17.7166 15.0001L11.4416 4.1584C10.7999 3.05007 9.19994 3.05007 8.55827 4.1584L2.28327 15.0001C1.6416 16.1084 2.4416 17.5001 3.72494 17.5001ZM9.99994 11.6667C9.5416 11.6667 9.1666 11.2917 9.1666 10.8334V9.16673C9.1666 8.7084 9.5416 8.3334 9.99994 8.3334C10.4583 8.3334 10.8333 8.7084 10.8333 9.16673V10.8334C10.8333 11.2917 10.4583 11.6667 9.99994 11.6667ZM10.8333 15.0001H9.1666V13.3334H10.8333V15.0001Z"
+      fill={fill}
+    />
+  </svg>
+);
+
+Warning.propTypes = {
+  size: PropTypes.number,
+  fill: PropTypes.string,
+};
+
+export default Warning;

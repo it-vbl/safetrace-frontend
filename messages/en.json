@@ -1,0 +1,8 @@
+{
+  "ReimburseSubmission": {
+    "reimbursement_name_field_label": "Reimbursement Name",
+    "reimbursement_name_field_placeholder": "Example, August 2024 Reimbursement",
+    "approver_field_label": "Approver",
+    "approver_field_placeholder": "Select Approver"
+  }
+}

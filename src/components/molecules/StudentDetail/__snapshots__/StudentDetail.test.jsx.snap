@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StudentDetail snapshot All props and code is stable 1`] = `
+<DocumentFragment>
+  <div
+    class="rounded bg-neutral3 p-4"
+    data-testid="student-detail"
+  >
+    <div
+      class="grid grid-cols-3 gap-x-[200px] gap-y-3 p-0"
+    >
+      <div
+        class="flex items-center justify-between"
+      >
+        <p
+          class="text-xs font-medium text-neutral8"
+        >
+          data 1
+        </p>
+        <p
+          class="text-sm font-bold text-neutral10"
+        >
+          data 1
+        </p>
+      </div>
+      <div
+        class="flex items-center justify-between"
+      >
+        <p
+          class="text-xs font-medium text-neutral8"
+        >
+          data 2
+        </p>
+        <p
+          class="text-sm font-bold text-neutral10"
+        >
+          data 2
+        </p>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

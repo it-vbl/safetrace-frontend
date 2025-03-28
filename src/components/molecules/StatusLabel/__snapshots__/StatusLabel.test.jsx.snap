@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusLabel Snapshot matches snapshot with success failed 1`] = `
+<DocumentFragment>
+  <div
+    class="rounded-full px-4 py-[6px] text-center capitalize bg-green1"
+  >
+    <p
+      class="text-xs text-green8"
+    >
+      Unit testing
+    </p>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`StatusLabel Snapshot matches snapshot with success pending 1`] = `
+<DocumentFragment>
+  <div
+    class="rounded-full px-4 py-[6px] text-center capitalize bg-green1"
+  >
+    <p
+      class="text-xs text-green8"
+    >
+      Unit testing
+    </p>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`StatusLabel Snapshot matches snapshot with success status 1`] = `
+<DocumentFragment>
+  <div
+    class="rounded-full px-4 py-[6px] text-center capitalize bg-green1"
+  >
+    <p
+      class="text-xs text-green8"
+    >
+      Unit testing
+    </p>
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,65 @@
+'use client';
+
+import { AgGridReact } from 'ag-grid-react';
+import { useState } from 'react';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { Button } from '@/components/ui/button';
+
+// Register all Community features
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+const ActionsCellRenderer = () => {
+  return <Button size={'sm'}>View</Button>;
+};
+
+const ReimbursementClaimPage = () => {
+  // Row Data: The data to be displayed.
+  const [rowData, setRowData] = useState([
+    {
+      reimbursementName: 'Adam Davarel',
+      claimDate: '20 August 2025',
+      total: 64950,
+      approver: 'M Abyan',
+      status: 'waiting-approval',
+    },
+    {
+      reimbursementName: 'Berly Setiawan',
+      claimDate: '20 August 2025',
+      total: 29600,
+      approver: 'M Abyan',
+      status: 'waiting-approval',
+    },
+    {
+      reimbursementName: 'Ulfa Maria Irawan',
+      claimDate: '20 August 2025',
+      total: 29600,
+      approver: 'M Abyan',
+      status: 'waiting-approval',
+    },
+  ]);
+
+  // Column Definitions: Defines the columns to be displayed.
+  const colDefs = [
+    { field: 'reimbursementName' },
+    { field: 'claimDate' },
+    { field: 'approver' },
+    { field: 'total' },
+    { field: 'status' },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      cellRenderer: ActionsCellRenderer,
+    },
+  ];
+
+  return (
+    <div className='flex h-full w-full flex-col'>
+      <div className='flex w-full flex-1 flex-col'>
+        <AgGridReact rowData={rowData} columnDefs={colDefs} />
+      </div>
+    </div>
+  );
+  // ...
+};
+
+export default ReimbursementClaimPage;

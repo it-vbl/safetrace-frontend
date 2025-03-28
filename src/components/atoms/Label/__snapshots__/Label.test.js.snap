@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Label Pass children props 1`] = `
+<div>
+  <div
+    class="flex flex-row"
+  >
+    <p
+      class="text-sm font-bold text-neutral11"
+    >
+      Testing
+    </p>
+  </div>
+</div>
+`;
+
+exports[`Label Pass className props 1`] = `
+<div>
+  <div
+    class="flex flex-row"
+  >
+    <p
+      class="text-sm font-bold text-neutral11 bg-red-400"
+    />
+  </div>
+</div>
+`;
+
+exports[`Label Pass required props 1`] = `
+<div>
+  <div
+    class="flex flex-row"
+  >
+    <p
+      class="text-sm font-bold text-neutral11"
+    />
+    <p
+      class="text-sm font-bold text-[red]"
+    >
+      *
+    </p>
+  </div>
+</div>
+`;

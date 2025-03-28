@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cascader should match snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex w-full flex-row items-center gap-[10px] px-3 py-2 text-neutral10 hover:bg-blue1"
+    data-testid="cascader-container"
+  >
+    <p
+      class="text-sm w-full"
+      data-testid="paragraph"
+    >
+      Test Cascader
+    </p>
+  </div>
+</DocumentFragment>
+`;

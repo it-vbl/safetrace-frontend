@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modal Component Snapshot matches snapshot when not visible 1`] = `<DocumentFragment />`;
+
+exports[`Modal Component Snapshot matches snapshot when visible 1`] = `<DocumentFragment />`;

@@ -1,0 +1,9 @@
+{
+  "ReimburseSubmission": {
+    "reimbursement_name_field_label": "Nama Reimbursement",
+    "claim_field_ktp_number_label": "Nomor KTP",
+    "reimbursement_name_field_placeholder": "Contoh, Agustus 2024 Reimbursement",
+    "approver_field_label": "Penyetuju",
+    "approver_field_placeholder": "Pilih Penyetuju"
+  }
+}

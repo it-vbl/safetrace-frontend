@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ColData Render with passing all props 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-y-[2px]"
+  >
+    <p
+      class="text-sm line-clamp-1 font-medium text-neutral8"
+    >
+      Testing
+    </p>
+    <p
+      class="text-base line-clamp-1 font-bold text-neutral10 bg-red-300"
+    >
+      Testing
+    </p>
+  </div>
+</div>
+`;
+
+exports[`ColData Render with passing className 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-y-[2px]"
+  >
+    <p
+      class="text-sm line-clamp-1 font-medium text-neutral8"
+    >
+      -
+    </p>
+    <p
+      class="text-base line-clamp-1 font-bold text-neutral10 bg-red-300"
+    >
+      -
+    </p>
+  </div>
+</div>
+`;
+
+exports[`ColData Render with passing label 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-y-[2px]"
+  >
+    <p
+      class="text-sm line-clamp-1 font-medium text-neutral8"
+    >
+      Testing
+    </p>
+    <p
+      class="text-base line-clamp-1 font-bold text-neutral10"
+    >
+      -
+    </p>
+  </div>
+</div>
+`;
+
+exports[`ColData Render with passing value 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-y-[2px]"
+  >
+    <p
+      class="text-sm line-clamp-1 font-medium text-neutral8"
+    >
+      -
+    </p>
+    <p
+      class="text-base line-clamp-1 font-bold text-neutral10"
+    >
+      Testing
+    </p>
+  </div>
+</div>
+`;

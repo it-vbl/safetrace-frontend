@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RowData Pass all props 1`] = `
+<div>
+  <div
+    class="flex items-center justify-between gap-x-2 break-all"
+  >
+    <p
+      class="text-sm shrink-0 font-medium text-neutral8"
+    >
+      Testing
+    </p>
+    <p
+      class="text-base text-end font-bold text-neutral10 bg-red-400"
+    >
+      Testing
+    </p>
+  </div>
+</div>
+`;
+
+exports[`RowData Pass className props 1`] = `
+<div>
+  <div
+    class="flex items-center justify-between gap-x-2 break-all"
+  >
+    <p
+      class="text-sm shrink-0 font-medium text-neutral8"
+    >
+      -
+    </p>
+    <p
+      class="text-base text-end font-bold text-neutral10 bg-red-400"
+    >
+      -
+    </p>
+  </div>
+</div>
+`;
+
+exports[`RowData Pass label props 1`] = `
+<div>
+  <div
+    class="flex items-center justify-between gap-x-2 break-all"
+  >
+    <p
+      class="text-sm shrink-0 font-medium text-neutral8"
+    >
+      Testing
+    </p>
+    <p
+      class="text-base text-end font-bold text-neutral10"
+    >
+      -
+    </p>
+  </div>
+</div>
+`;
+
+exports[`RowData Pass value props 1`] = `
+<div>
+  <div
+    class="flex items-center justify-between gap-x-2 break-all"
+  >
+    <p
+      class="text-sm shrink-0 font-medium text-neutral8"
+    >
+      -
+    </p>
+    <p
+      class="text-base text-end font-bold text-neutral10"
+    >
+      Testing
+    </p>
+  </div>
+</div>
+`;
