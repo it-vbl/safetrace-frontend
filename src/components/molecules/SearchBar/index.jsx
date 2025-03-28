@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import useTouchOutside from '@/helpers/hooks/useTouchOutside';

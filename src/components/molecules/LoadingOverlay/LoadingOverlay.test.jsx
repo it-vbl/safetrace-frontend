@@ -1,10 +1,12 @@
-import { render, screen } from "@testing-library/react";
 import React from "react";
-import "@testing-library/jest-dom";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
 
+import { render, screen } from "@testing-library/react";
+
 import LoadingOverlay from ".";
+
+import "@testing-library/jest-dom";
 
 const mockStore = (state) => createStore(() => state);
 

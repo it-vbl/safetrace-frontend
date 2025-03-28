@@ -1,10 +1,11 @@
 import React from 'react';
+import { LinkProps } from 'next/link';
 import { IconType } from 'react-icons';
 
 import Icon from '../atoms/Icon';
 import Text from '../atoms/Text';
 
-interface NavItemProps {
+interface NavItemProps extends LinkProps {
   icon: IconType;
   label: string;
   onClick?: () => void;

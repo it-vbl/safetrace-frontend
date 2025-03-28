@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,15 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const ActionsCellRenderer = () => {
   return <Button size={'sm'}>View</Button>;
 };
+
+interface ReimbursementData {
+  reimbursementName: string;
+  claimDate: string;
+  total: number;
+  approver: string;
+  status: string;
+  // action: any;
+}
 
 const ReimbursementClaimPage = () => {
   // Row Data: The data to be displayed.
@@ -40,17 +49,17 @@ const ReimbursementClaimPage = () => {
   ]);
 
   // Column Definitions: Defines the columns to be displayed.
-  const colDefs = [
+  const colDefs: ColDef<ReimbursementData>[] = [
     { field: 'reimbursementName' },
     { field: 'claimDate' },
     { field: 'approver' },
     { field: 'total' },
     { field: 'status' },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      cellRenderer: ActionsCellRenderer,
-    },
+    // {
+    //   field: 'action',
+    //   headerName: 'Actions',
+    //   cellRenderer: ActionsCellRenderer,
+    // },
   ];
 
   return (

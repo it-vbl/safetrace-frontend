@@ -1,8 +1,8 @@
-import { render, fireEvent, screen } from "@testing-library/react";
 import { Provider, useDispatch } from "react-redux";
 
 import { store } from "@/store";
 import { setSelectedSort } from "@/store/data/actions";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import CustomColHeader from ".";
 

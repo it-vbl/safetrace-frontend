@@ -1,6 +1,7 @@
-import { render, fireEvent, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import Cascader from "./";
+
 import "@testing-library/jest-dom";
 
 describe("Cascader", () => {

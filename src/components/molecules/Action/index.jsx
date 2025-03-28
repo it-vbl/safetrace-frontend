@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { cloneElement } from 'react';
+import PropTypes from 'prop-types';
 
 import { cn } from '@/utils/cn';
 

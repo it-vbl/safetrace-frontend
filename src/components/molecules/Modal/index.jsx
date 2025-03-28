@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 
 import Close from '@/components/atoms/Icons/Close';
@@ -11,17 +11,17 @@ import { cn } from '@/utils/cn';
 const Modal = ({
   children,
   visible = false,
-  onClose,
-  title,
-  subtitle,
-  overlayClassName,
-  containerClassName,
-  bodyClassName,
+  onClose = () => {},
+  title = '',
+  subtitle = '',
+  overlayClassName = '',
+  containerClassName = '',
+  bodyClassName = '',
   renderFooter = () => {},
   isCloseWhenClickOutside = true,
   titleProps = {},
-  customRightHeader,
-  isBottomSheet,
+  customRightHeader = null,
+  isBottomSheet = false,
   dataTestId = '',
 }) => {
   const modalRef = useRef(null);
@@ -117,7 +117,7 @@ const Modal = ({
 Modal.propTypes = {
   children: PropTypes.node,
   visible: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
   title: PropTypes.string,
   subtitle: PropTypes.string,
   overlayClassName: PropTypes.string,

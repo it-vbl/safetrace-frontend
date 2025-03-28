@@ -14,8 +14,6 @@ import { routing } from '@/i18n/routing';
 import { cn } from '@/utils/cn';
 import { Analytics } from '@vercel/analytics/react';
 
-import { Navigation } from './navigation';
-
 import '@/styles/globals.css';
 
 // Register all Community features
@@ -68,7 +66,6 @@ async function AppBar() {
   return (
     <header className='flex items-center justify-between py-8'>
       <Logo />
-      <Navigation />
     </header>
   );
 }

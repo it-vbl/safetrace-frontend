@@ -1,18 +1,19 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
-import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
-import Minus from '../../atoms/Icons/Minus';
-import Plus from '../../atoms/Icons/Plus';
-import Paragraph from '../../atoms/Typography/Paragraph';
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
   ChevronDownIcon,
   ChevronUpIcon,
 } from '@heroicons/react/24/outline';
+
+import Minus from '../../atoms/Icons/Minus';
+import Plus from '../../atoms/Icons/Plus';
+import Paragraph from '../../atoms/Typography/Paragraph';
 
 const AccordionItem = ({ title = '', description = <></>, className = '' }) => {
   const [isOpened, setIsOpened] = useState(false);

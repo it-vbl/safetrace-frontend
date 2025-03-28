@@ -5,8 +5,8 @@ import Sort from '@/components/atoms/Icons/Sort';
 import SortDown from '@/components/atoms/Icons/SortDown';
 import SortUp from '@/components/atoms/Icons/SortUp';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import { cn } from '@/utils/cn';
 import { setSelectedSort } from '@/store/data/actions';
+import { cn } from '@/utils/cn';
 
 const CustomColHeader = (props) => {
   const dispatch = useDispatch();

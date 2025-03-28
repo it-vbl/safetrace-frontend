@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import { cn } from '@/utils/cn';

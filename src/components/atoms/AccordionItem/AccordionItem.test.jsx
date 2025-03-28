@@ -1,7 +1,8 @@
-import "@testing-library/jest-dom";
-import { render, fireEvent } from "@testing-library/react";
+import { fireEvent,render } from "@testing-library/react";
 
 import AccordionItem from ".";
+
+import "@testing-library/jest-dom";
 
 describe("Accordion", () => {
   test("Should be rendered", () => {

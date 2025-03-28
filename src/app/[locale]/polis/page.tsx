@@ -25,7 +25,7 @@ const SignupForm = () => {
   });
   const [errorSubmit, setErrorSubmit] = useState();
 
-  const formik = useFormik({
+  const formik: any = useFormik({
     initialValues: {
       ktp_file_path: '',
       no_ktp: '',
@@ -49,7 +49,7 @@ const SignupForm = () => {
         }
       } catch (err) {
         console.error('ERROR', err);
-        setErrorSubmit(err?.response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
+        setErrorSubmit((err as any).response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
       }
     },
   });
@@ -125,6 +125,7 @@ const SignupForm = () => {
                   height={300}
                   width={200}
                   src={process.env.NEXT_PUBLIC_BASE_URL + formik.values.ktp_file_path}
+                  alt='KTP user'
                 />
               ) : (
                 <Upload onChangeValue={handleOCRKTP} />
@@ -133,7 +134,6 @@ const SignupForm = () => {
                 name='no_ktp'
                 onChange={formik.handleChange}
                 value={formik.values.no_ktp}
-                // label={t('claim_field_ktp_number_label')}
                 placeholder={'Nomor KTP'}
               />
             </div>
@@ -158,6 +158,7 @@ const SignupForm = () => {
                       height={300}
                       width={200}
                       src={process.env.NEXT_PUBLIC_BASE_URL + formik.values[data.field]}
+                      alt='foto-mobil'
                     />
                   </div>
                 );
@@ -221,27 +222,6 @@ const SignupForm = () => {
           <Button type='submit'>Submit</Button>
         </form>
       </div>
-      <Modal visible={false} title='Detail Reimburse' subtitle='Lembar 1'>
-        <Accordion
-          accordionItemClassName='!border rounded-sm'
-          items={[
-            {
-              title: 'How do I login?',
-              description: (
-                <p className='text-[14px] font-medium leading-[18px] text-[#414347]'>
-                  Please check this video.{' '}
-                  <span
-                    className='cursor-pointer font-bold text-[#4C79AB] underline'
-                    onClick={() => console.log('clicked!')}
-                  >
-                    Click Here
-                  </span>
-                </p>
-              ),
-            },
-          ]}
-        />
-      </Modal>
     </div>
   );
 };

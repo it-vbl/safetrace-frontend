@@ -26,7 +26,7 @@ const ClaimDetail = () => {
     reimbursementName: Yup.string().required('Reimbursement name is required'),
   });
   const [errorSubmit, setErrorSubmit] = useState();
-  const [claimDetail, setClaimDetail] = useState();
+  const [claimDetail, setClaimDetail] = useState<any>();
 
   const newDent = claimDetail?.claim?.is_new_dent === 1;
 
@@ -45,7 +45,7 @@ const ClaimDetail = () => {
           // router.replace('/id');
         } else {
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('ERROR', err);
         setErrorSubmit(err?.response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
       }
@@ -56,7 +56,7 @@ const ClaimDetail = () => {
     try {
       const response = await uploadFile({ file: e.value });
       if (response) {
-        const temp = [...formik.values.foto_bukti];
+        const temp: any = [...formik.values.foto_bukti];
         temp.push(response.data.filepath);
         console.log('CHECK DATA', temp);
         formik.setFieldValue('foto_bukti', temp);
@@ -66,21 +66,7 @@ const ClaimDetail = () => {
     }
   };
 
-  const handleOCRKTP = async (e: any) => {
-    try {
-      const temp = [];
-      temp.push(e.value);
-      handleUploadFile(e, 'ktp_file_path');
-      const response = await ocrKTP({ images: e.value });
-      if (response) {
-        formik.setFieldValue('no_ktp', response.data.NIK);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRemovePhoto = (index) => {
+  const handleRemovePhoto = (index: any) => {
     const temp = [...formik.values.foto_bukti];
     temp.splice(index, 1);
     formik.setFieldValue('foto_bukti', temp);
@@ -158,6 +144,7 @@ const ClaimDetail = () => {
                   width={200}
                   objectFit='contain'
                   src={process.env.NEXT_PUBLIC_BASE_URL + claimDetail?.polis?.front_car_path}
+                  alt='foto tampak depan'
                 />
               </div>
               <div>
@@ -168,6 +155,7 @@ const ClaimDetail = () => {
                   width={200}
                   objectFit='contain'
                   src={process.env.NEXT_PUBLIC_BASE_URL + claimDetail?.polis?.back_car_path}
+                  alt='foto tampak belakang'
                 />
               </div>
               <div>
@@ -178,6 +166,7 @@ const ClaimDetail = () => {
                   width={200}
                   objectFit='contain'
                   src={process.env.NEXT_PUBLIC_BASE_URL + claimDetail?.polis?.left_car_path}
+                  alt='foto tampak kiri'
                 />
               </div>
               <div>
@@ -188,6 +177,7 @@ const ClaimDetail = () => {
                   width={200}
                   objectFit='contain'
                   src={process.env.NEXT_PUBLIC_BASE_URL + claimDetail?.polis?.right_car_path}
+                  alt='foto tampak kanan'
                 />
               </div>
             </div>
@@ -204,14 +194,16 @@ const ClaimDetail = () => {
                 placeholder={'Kronologi kerusakan'}
               />
               <div className='grid grid-cols-2 gap-4'>
-                {claimDetail?.supporting_photos?.map((data, index) => {
+                {claimDetail?.supporting_photos?.map((data: any, index: Number) => {
                   return (
                     <Image
+                      key={`foto-detail-kerusakan-${index}`}
                       className='h-[300px] w-full rounded-xl bg-gray-100 object-contain'
                       height={300}
                       width={200}
                       objectFit='contain'
                       src={process.env.NEXT_PUBLIC_BASE_URL + data?.path}
+                      alt='foto detail kerusakan'
                     />
                   );
                 })}
@@ -260,27 +252,6 @@ const ClaimDetail = () => {
           </div>
         </form>
       </div>
-      <Modal visible={false} title='Detail Reimburse' subtitle='Lembar 1'>
-        <Accordion
-          accordionItemClassName='!border rounded-sm'
-          items={[
-            {
-              title: 'How do I login?',
-              description: (
-                <p className='text-[14px] font-medium leading-[18px] text-[#414347]'>
-                  Please check this video.{' '}
-                  <span
-                    className='cursor-pointer font-bold text-[#4C79AB] underline'
-                    onClick={() => console.log('clicked!')}
-                  >
-                    Click Here
-                  </span>
-                </p>
-              ),
-            },
-          ]}
-        />
-      </Modal>
     </div>
   );
 };

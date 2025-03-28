@@ -1,8 +1,10 @@
-import { render, fireEvent, screen } from "@testing-library/react";
 import React from "react";
 
-import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+
 import SelectMultiple from "./";
+
+import "@testing-library/jest-dom";
 
 const defaultProps = {
   label: "Test Label",

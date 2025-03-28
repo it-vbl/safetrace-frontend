@@ -1,8 +1,10 @@
-import { render, fireEvent, screen, cleanup } from "@testing-library/react";
+import { cleanup,fireEvent, render, screen } from "@testing-library/react";
+
+import Tridots from "../../atoms/Icons/Tridots";
 
 import CustomColAction from ".";
+
 import "@testing-library/jest-dom";
-import Tridots from "../../atoms/Icons/Tridots";
 
 describe("CustomColAction Component", () => {
   let portalRoot;

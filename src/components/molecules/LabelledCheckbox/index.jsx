@@ -1,10 +1,11 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
-import './LabelledCheckbox.module.css';
 import { cn } from '@/utils/cn';
 
 import Label from '../../atoms/Label';
+
+import './LabelledCheckbox.module.css';
 
 const LabelledCheckbox = ({
   value = false,
