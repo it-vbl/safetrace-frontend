@@ -1,0 +1,31 @@
+# Default values for .helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  name: poc-jasindo-frontend
+  namespace: poc-jasindo
+
+replicaCount: 1
+
+image:
+  name: registry.gitlab.com/gudangsolusi/poc-jasindo-claim-frontend/poc-jasindo-claim-frontend
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1.0.0"
+
+imagePullSecrets: "gitlab-registry-secret"
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: NodePort
+  port: 3000
+  targetPort: 3000
+  protocol: TCP
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
