@@ -1,6 +1,5 @@
 # Gunakan image Node.js yang ringan
-FROM node:18.20.5-alpine3.20 AS base
-
+FROM node:18.20.5-alpine3.20 AS builder
 
 # Install dependencies
 RUN apk add --no-cache nano bash libc6-compat python3 make g++ git
