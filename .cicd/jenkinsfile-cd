@@ -1,0 +1,125 @@
+def ShortCommit
+def ImageTag
+
+def notifyDiscord(String message) {
+    def discordWebhookUrl = 'https://discordapp.com/api/webhooks/1361541254654988398/_LwrODznzRHOajE1dyjtGoiQrcXGMcIub-E2DxDuvcy9slWsi3ZLNrB73WEeb1srVjJP'
+    def payload = [
+        content: message
+    ]
+
+    sh """
+    curl -X POST -H 'Content-Type: application/json' -d '${groovy.json.JsonOutput.toJson(payload)}' ${discordWebhookUrl}
+    """
+}
+
+pipeline {
+    agent any
+    environment {
+        PATH = "/var/lib/jenkins/google-cloud-sdk/bin:${env.PATH}"
+    }
+    post {
+    failure {
+        script {
+            updateGitlabCommitStatus name: "${env.STAGE_NAME}", state: 'failed'
+            notifyDiscord("""```diff
+- Build failed for ${env.JOB_NAME} #${env.BUILD_NUMBER}
+```""")
+        }
+    }
+    success {
+        script {
+            updateGitlabCommitStatus name: "${env.STAGE_NAME}", state: 'success'
+            notifyDiscord("""```diff
++ Build succeeded for ${env.JOB_NAME} #${env.BUILD_NUMBER}
+```""")
+        }
+    }
+    aborted {
+        script {
+            updateGitlabCommitStatus name: "${env.STAGE_NAME}", state: 'canceled'
+            notifyDiscord("""```fix
+Build aborted for ${env.JOB_NAME} #${env.BUILD_NUMBER}
+```""")
+        }
+    }
+
+    }
+    stages {
+        stage('preparation') {
+            steps {
+                updateGitlabCommitStatus name: STAGE_NAME, state: 'pending'
+                script {
+                    ShortCommit = "${GIT_COMMIT[0..7]}"
+                    ImageTag = "dev-1.0.${ShortCommit}-$BUILD_NUMBER"
+                    echo "${ImageTag}"
+                }
+
+                script {
+
+                    // Delete the old .env file if it exists
+                    if (fileExists('.env')) {
+                        sh 'rm -rf .env'
+                    }
+
+                    // Define the content of the new .env file
+                    def envContent = """
+                    NEXT_PUBLIC_BASE_URL = 'https://poc-jasindo.digiform.co.id/api/'
+                    """
+
+                    writeFile file: '.env', text: envContent.stripIndent()
+                }
+
+                updateGitlabCommitStatus name: STAGE_NAME, state: 'success'
+
+            }
+        }
+
+        stage('build & push') {
+            steps {
+                updateGitlabCommitStatus name: STAGE_NAME, state: 'pending'
+
+                script {
+                    docker.withRegistry('https://registry.gitlab.com/', '4f17be08-4d61-4ba1-bb27-000c596d4d47') {
+
+                        def customImage = docker.build("registry.gitlab.com/gudangsolusi/poc-jasindo-claim-frontend/poc-jasindo-claim-frontend:${ImageTag}","-f Dockerfile .")
+
+                        /* Push the container to the custom Registry */
+                        customImage.push()
+                    }
+                }
+                updateGitlabCommitStatus name: STAGE_NAME, state: 'success'
+
+            }
+        }
+
+        // stage('SonarQube Analysis') {
+        //     environment {
+        //         SONAR_TOKEN = 'squ_b2c2fb24351b6a68e8dcaf99a1885c45774cc4b0'
+        //         SONARQUBE_URL = 'http://20.20.1.40:31113'
+        //         scannerHome = tool 'sonar-scanner';
+        //     }
+        //    steps {
+        //       withSonarQubeEnv(credentialsId: 'sonarqube-token', installationName: 'sonar-scanner') {
+        //         sh "${scannerHome}/bin/sonar-scanner \
+        //                     -Dsonar.projectKey=otsuka-invoice-fe-dev \
+        //                     -Dsonar.sources=. \
+        //                     -Dsonar.host.url=${SONARQUBE_URL} \
+        //                     -Dsonar.token=${SONAR_TOKEN}"
+        //       }
+        //     }
+        // }
+
+        // stage('Deploy') {
+        //     steps {
+        //         updateGitlabCommitStatus name: STAGE_NAME, state: 'pending'
+
+        //             withKubeConfig([credentialsId: 'kubernetes-config-office-new', serverUrl: 'https://20.20.1.40:6443']) {
+        //             sh "kubectl set image deployment/otsuka-invoicing-fe otsuka-invoicing-fe=registry.gitlab.com/gudangsolusi/otsuka-invoicing-fe/otsuka-invoicing-fe:${ImageTag} -n otsuka"
+
+        //             sh "kubectl rollout status deployment/otsuka-invoicing-fe -n otsuka"
+        //         }
+        //         updateGitlabCommitStatus name: STAGE_NAME, state: 'success'
+        //     }
+        // }
+    }
+}
