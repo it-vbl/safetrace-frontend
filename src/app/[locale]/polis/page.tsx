@@ -10,7 +10,6 @@ import * as Yup from 'yup';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Accordion from '@/components/molecules/Accordion';
 import InputText from '@/components/molecules/InputText';
 import Modal from '@/components/molecules/Modal';
 import Upload from '@/components/molecules/Upload';
@@ -24,6 +23,8 @@ const SignupForm = () => {
     reimbursementName: Yup.string().required('Reimbursement name is required'),
   });
   const [errorSubmit, setErrorSubmit] = useState();
+  const [polisID, setPolisID] = useState();
+  const [modalPolisCreated, setModalPolisCreated] = useState(false);
 
   const formik: any = useFormik({
     initialValues: {
@@ -44,7 +45,8 @@ const SignupForm = () => {
       try {
         const response = await registerPolis(values);
         if (response.status == 201) {
-          // router.replace('/id');
+          setPolisID(response.data.id);
+          setModalPolisCreated(true);
         } else {
         }
       } catch (err) {
@@ -222,6 +224,18 @@ const SignupForm = () => {
           <Button type='submit'>Submit</Button>
         </form>
       </div>
+      <Modal
+        title='Pengajuan polis berhasil di buat'
+        onClose={() => {
+          setModalPolisCreated(false);
+          router.push('/');
+        }}
+        visible={modalPolisCreated}
+      >
+        <div>
+          <Paragraph>ID Polis kamu adalah {polisID}</Paragraph>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -12,7 +12,9 @@ import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import Upload from '@/components/molecules/Upload';
-import { claimPolis, uploadFile } from '@/services/polis';
+import { claimPolis, evaluatePolis, ocrKTP, registerPolis, uploadFile } from '@/services/polis';
+import { TrashIcon } from '@radix-ui/react-icons';
+import Toggle from '@/components/atoms/Toggle';
 import Checkbox from '@/components/atoms/Checkbox';
 
 const EvaluationForm = () => {
@@ -181,7 +183,9 @@ const EvaluationForm = () => {
           }),
         };
 
-        const response = await claimPolis(payload);
+        console.log('check payload ', payload);
+
+        const response = await evaluatePolis(payload);
         if (response.status == 201) {
           // router.replace('/id');
         } else {
@@ -218,10 +222,9 @@ const EvaluationForm = () => {
   return (
     <div className='h-min-screen relative min-h-screen w-full px-[64px] py-[64px] md:px-[120px]'>
       <div>
-        <Heading level={3}>Claim Asuransi Otomotif</Heading>
-        <Paragraph level={3}>Isi form dibawah ini untuk melakukan claim</Paragraph>
+        <Heading level={3}>Input Evaluasi Kendaraan</Heading>
       </div>
-      <div className='mt-8 flex flex-1 flex-col'>
+      <div className='flex flex-1 flex-col'>
         <form onSubmit={formik.handleSubmit} className='flex flex-col gap-8'>
           <div>
             <Heading level={4}>Informasi Mobil</Heading>
@@ -242,7 +245,12 @@ const EvaluationForm = () => {
             <Heading level={4}>Detail Kerusakan Mobil</Heading>
             <Paragraph level={2}>Silahkan pilih titik-titik kerusakan Mobil</Paragraph>
             <div className='mt-4 flex flex-col gap-4'>
-              <InputText name='damage_reason' onChange={formik.handleChange} placeholder={'Kronologi kerusakan'} />
+              <InputText
+                name='damage_reason'
+                onChange={formik.handleChange}
+                // label={t('claim_field_ktp_number_label')}
+                placeholder={'Kronologi kerusakan'}
+              />
               <div>
                 <div className='flex flex-col gap-8 md:flex-row'>
                   {Object.keys(checklistDamage).map((key: any) => {

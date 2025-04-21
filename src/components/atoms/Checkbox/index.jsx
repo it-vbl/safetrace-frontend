@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
-import "./Checkbox.module.css";
+import './Checkbox.module.css';
 
-const Checkbox = ({ value = false, onChange, disabled = false, size = 18 }) => {
+const Checkbox = ({ value = false, onChange = (e) => {}, name = '', disabled = false, size = 18, label = '' }) => {
   const [isChecked, setIsChecked] = useState(value);
 
   useEffect(() => {
@@ -16,16 +16,14 @@ const Checkbox = ({ value = false, onChange, disabled = false, size = 18 }) => {
   };
 
   return (
-    <div className="flex items-center">
+    <div className='flex items-center gap-2'>
       <div
-        className={`container ${
-          disabled
-            ? "cursor-not-allowed border-gray-300 bg-gray-200"
-            : "cursor-pointer"
-        } flex items-center`}
+        className={` bg-red-300 ${
+          disabled ? 'cursor-not-allowed border-gray-300 bg-gray-200' : 'cursor-pointer'
+        } flex items-start items-center`}
       >
         <input
-          type="checkbox"
+          type='checkbox'
           checked={isChecked}
           onChange={handleOnChange}
           disabled={disabled}
@@ -33,10 +31,12 @@ const Checkbox = ({ value = false, onChange, disabled = false, size = 18 }) => {
             width: size,
             height: size,
           }}
-          data-testd="checkbox"
+          name={name}
+          data-testd='checkbox'
         />
-        <span className="checkmark" />
+        <span className='' />
       </div>
+      {label}
     </div>
   );
 };

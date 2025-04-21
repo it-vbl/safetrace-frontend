@@ -27,6 +27,9 @@ const Upload = ({
   maxSize = 10,
   url = null,
   isToastShowed = true,
+  disabled = false,
+  name: nameField = '',
+  keyField = '',
 }) => {
   const [errorState, setErrorState] = useState('');
   const [valueFile, setValueFile] = useState(file);
@@ -134,7 +137,7 @@ const Upload = ({
       <div
         className={`flex items-center justify-between rounded-md border-2 px-6 py-[21px] ${
           error ? 'border-error5' : 'border-[#b7b7b7]'
-        } gap-x-2 border-dashed`}
+        } gap-x-2 border-dashed ${disabled ? 'bg-gray-200' : ''}`}
         data-testid='upload-container'
       >
         <div className='flex flex-col'>
@@ -148,9 +151,11 @@ const Upload = ({
                 <UploadAction
                   onChange={handleOnFileChange}
                   className='text-secondary10 min-w-max cursor-pointer text-[12px] leading-[14px] underline'
-                  id={`change-file-${label.trim()}`}
+                  id={`upload-file-${keyField}`}
                   label='Ubah File'
                   allowedFiles={allowedFiles}
+                  name={nameField}
+                  keyField={keyField}
                 />
               )}
             </div>
@@ -172,11 +177,16 @@ const Upload = ({
           </Button>
         ) : (
           <UploadAction
+            disabled={disabled}
             onChange={handleOnFileChange}
-            className='h-auto cursor-pointer rounded-md border border-primary px-4 py-[7px] text-[12px] font-bold leading-[14px] text-primary hover:bg-primaryLight1 md:h-7'
-            id={`upload-file-${label.trim()}`}
+            className={`h-auto cursor-pointer rounded-md border border-primary px-4 py-[7px] text-[12px] font-bold leading-[14px] text-primary ${
+              !disabled ? 'hover:bg-primaryLight1' : '!border-gray-400 text-gray-400'
+            } md:h-7`}
+            id={`upload-file-${keyField}`}
             label='Unggah File'
             allowedFiles={allowedFiles}
+            name={nameField}
+            keyField={keyField}
           />
         )}
       </div>
