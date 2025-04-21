@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['highlandindonesia.com', '127.0.0.1', 'localhost', 'https://poc-jasindo.digiform.co.id/'],
+    domains: ['highlandindonesia.com', '127.0.0.1', 'localhost', 'poc-jasindo.digiform.co.id'],
   },
 };
 
