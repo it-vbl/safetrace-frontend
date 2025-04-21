@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -10,16 +10,12 @@ import * as Yup from 'yup';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Accordion from '@/components/molecules/Accordion';
 import InputText from '@/components/molecules/InputText';
-import Modal from '@/components/molecules/Modal';
-import Upload from '@/components/molecules/Upload';
-import { claimPolis, getClaimDetail, ocrKTP, registerPolis, uploadFile } from '@/services/polis';
-import { TrashIcon } from '@radix-ui/react-icons';
+import { claimPolis, getClaimDetail, uploadFile } from '@/services/polis';
+import convertSnakeCaseToTitleCase from '@/utils/convertSnakeCaseToTitleCase';
 
 const ClaimDetail = () => {
   const params = useParams();
-  const router = useRouter();
   const { claimId } = params;
   const t = useTranslations('ReimburseSubmission');
   const schemaValidation = Yup.object().shape({
@@ -58,7 +54,6 @@ const ClaimDetail = () => {
       if (response) {
         const temp: any = [...formik.values.foto_bukti];
         temp.push(response.data.filepath);
-        console.log('CHECK DATA', temp);
         formik.setFieldValue('foto_bukti', temp);
       }
     } catch (err) {
@@ -183,14 +178,14 @@ const ClaimDetail = () => {
             </div>
           </div>
           <div>
-            <Heading level={4}>Foto Kerusakan</Heading>
+            <Heading level={4}>Detail Kerusakan Mobil</Heading>
+            <Paragraph level={2}>Silahkan pilih titik-titik kerusakan Mobil</Paragraph>
             <div className='mt-4 flex flex-col gap-4'>
               <InputText
                 name='damage_reason'
                 label='Kronologi Kerusakan'
                 onChange={formik.handleChange}
                 value={claimDetail?.claim?.damage_reason}
-                // label={t('claim_field_ktp_number_label')}
                 placeholder={'Kronologi kerusakan'}
               />
               <div className='grid grid-cols-2 gap-4'>
@@ -216,23 +211,80 @@ const ClaimDetail = () => {
           </div>
           <div>
             <Heading level={4}>Hasil Analisa</Heading>
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='mt-4 flex flex-col gap-2'>
-                <Paragraph className='font-bold' level={3}>
-                  Skor Kesamaan : {claimDetail?.claim?.similarity_score}
-                </Paragraph>
-                <Paragraph level={3}>{claimDetail?.claim?.similarity_reason}</Paragraph>
+            <div className='mt-8 rounded-md border border-gray-100 p-4'>
+              <Heading level={5} className='mb-2 '>
+                Kerusakan lama yang di claim oleh customer:
+              </Heading>
+              <div className='flex flex-col gap-4'>
+                {claimDetail?.analysis_results?.map((data: any, index: Number) => {
+                  return (
+                    <div
+                      key={`detail-claim-${index}`}
+                      className='flex flex-col items-start rounded-md border border-gray-100 p-6'
+                    >
+                      <Paragraph level={2} className='mb-2 line-clamp-1 font-medium text-neutral8'>
+                        {index + 1}. {convertSnakeCaseToTitleCase(data?.damage_section)}
+                      </Paragraph>
+                      <div className={'flex w-full flex-row gap-4'}>
+                        <Image
+                          className='h-[300px] w-full rounded-xl bg-gray-100 object-contain'
+                          height={300}
+                          width={200}
+                          objectFit='contain'
+                          src={process.env.NEXT_PUBLIC_BASE_URL + data?.polis_photo_path}
+                          alt='foto detail kerusakan'
+                        />
+                        <Image
+                          className='h-[300px] w-full rounded-xl bg-gray-100 object-contain'
+                          height={300}
+                          width={200}
+                          objectFit='contain'
+                          src={process.env.NEXT_PUBLIC_BASE_URL + data?.claim_photo_path}
+                          alt='foto detail kerusakan'
+                        />
+                      </div>
+                      <div
+                        className={`mt-4 !w-auto rounded-md p-2 ${
+                          data?.is_new_dent ? 'bg-red-100 text-red-900' : 'bg-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <Paragraph level={2} className='font-bold'>
+                          {data?.is_new_dent ? 'Terdapat kerusakan baru' : 'Tidak terdapat kerusakan baru'}
+                        </Paragraph>
+                        {data?.is_new_dent ? <Paragraph level={3}>{data?.new_dent_reason}</Paragraph> : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className='mt-4 flex flex-col gap-2'>
-                <Paragraph
-                  className={`rounded-md px-3 py-2 font-bold ${
-                    newDent ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                  }`}
-                  level={3}
-                >
-                  {newDent ? 'Terdapat Kerusakan Baru' : 'Tidak Terdapat Kerusakan Baru'}
-                </Paragraph>
-                <Paragraph level={3}>{claimDetail?.claim?.new_dent_reason}</Paragraph>
+            </div>
+            <div className='mt-8 rounded-md border border-gray-100 p-4'>
+              <Heading level={5} className='mb-2 '>
+                Kerusakan baru
+              </Heading>
+              <div className='flex flex-col gap-4'>
+                {claimDetail?.new_damages?.map((data: any, index: Number) => {
+                  return (
+                    <div
+                      key={`detail-claim-${index}`}
+                      className='flex flex-col items-start rounded-md border border-gray-100 p-6'
+                    >
+                      <Paragraph level={2} className='mb-2 line-clamp-1 font-medium text-neutral8'>
+                        {index + 1}. {convertSnakeCaseToTitleCase(data?.damage_section)}
+                      </Paragraph>
+                      <div className={'flex w-full flex-row gap-4'}>
+                        <Image
+                          className='h-[300px] w-full rounded-xl bg-gray-100 object-contain'
+                          height={300}
+                          width={200}
+                          objectFit='contain'
+                          src={process.env.NEXT_PUBLIC_BASE_URL + data?.path}
+                          alt='foto detail kerusakan'
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
