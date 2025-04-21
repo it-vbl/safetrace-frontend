@@ -1,12 +1,13 @@
 'use client';
 
-import { AgGridReact } from 'ag-grid-react';
 import { useCallback, useEffect, useState } from 'react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { Button } from '@/components/ui/button';
-import Heading from '@/components/atoms/Typography/Heading';
-import { getClaimList } from '@/services/polis';
 import { useRouter } from 'next/navigation';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
+
+import Heading from '@/components/atoms/Typography/Heading';
+import { Button } from '@/components/ui/button';
+import { getClaimList } from '@/services/polis';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -34,7 +35,7 @@ const ReimbursementClaimPage = () => {
     [rowData]
   );
   // Column Definitions: Defines the columns to be displayed.
-  const colDefs = [
+  const colDefs: any = [
     { field: 'id', headerName: 'ID Polis' },
     { field: 'nama_pemilik', headerName: 'Nama Pemilik' },
     { field: 'jenis_mobil', headerName: 'Jenis Mobil' },

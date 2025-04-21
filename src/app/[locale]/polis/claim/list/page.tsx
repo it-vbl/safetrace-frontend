@@ -1,12 +1,13 @@
 'use client';
 
-import { AgGridReact } from 'ag-grid-react';
 import { useCallback, useEffect, useState } from 'react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { Button } from '@/components/ui/button';
-import Heading from '@/components/atoms/Typography/Heading';
-import { getClaimList } from '@/services/polis';
 import { useRouter } from 'next/navigation';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
+
+import Heading from '@/components/atoms/Typography/Heading';
+import { Button } from '@/components/ui/button';
+import { getClaimList } from '@/services/polis';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -16,6 +17,7 @@ const ReimbursementClaimPage = () => {
   // Row Data: The data to be displayed.
   const [rowData, setRowData] = useState([
     {
+      id: '1',
       nama_pemilik: 'Adam Davarel',
       jenis_mobil: '20 August 2025',
       no_plat: 'BG 1234 AB',
@@ -34,7 +36,7 @@ const ReimbursementClaimPage = () => {
     [rowData]
   );
   // Column Definitions: Defines the columns to be displayed.
-  const colDefs = [
+  const colDefs: any = [
     { field: 'id', headerName: 'ID Polis' },
     { field: 'nama_pemilik', headerName: 'Nama Pemilik' },
     { field: 'jenis_mobil', headerName: 'Jenis Mobil' },

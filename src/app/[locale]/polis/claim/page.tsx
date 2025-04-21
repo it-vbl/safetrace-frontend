@@ -8,12 +8,12 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
+import Checkbox from '@/components/atoms/Checkbox';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import Upload from '@/components/molecules/Upload';
 import { claimPolis, uploadFile } from '@/services/polis';
-import Checkbox from '@/components/atoms/Checkbox';
 
 const EvaluationForm = () => {
   const router = useRouter();
@@ -29,9 +29,9 @@ const EvaluationForm = () => {
     left: false,
   });
 
-  const [uploadedPath, setUploadedPath] = useState({});
+  const [uploadedPath, setUploadedPath] = useState();
 
-  const [checklistDamage, setCheckListDamage] = useState({
+  const [checklistDamage, setCheckListDamage] = useState<any>({
     front: {
       title: 'Depan',
       fields: {
@@ -173,7 +173,7 @@ const EvaluationForm = () => {
       try {
         const payload = {
           ...values,
-          damages: Object.keys(uploadedPath).map((key: String) => {
+          damages: Object.keys(uploadedPath || {}).map((key: string) => {
             return {
               part: key,
               image_path: uploadedPath?.[key],
@@ -198,7 +198,7 @@ const EvaluationForm = () => {
       try {
         const response: any = await uploadFile({ file: e.value });
         if (response) {
-          setUploadedPath((prev) => {
+          setUploadedPath((prev: any) => {
             return { ...prev, [fieldName]: response.data.filepath };
           });
         }
@@ -208,12 +208,6 @@ const EvaluationForm = () => {
     },
     [checklistDamage]
   );
-
-  const handleRemovePhoto = (index: any) => {
-    const temp = [...formik.values.foto_bukti];
-    temp.splice(index, 1);
-    formik.setFieldValue('foto_bukti', temp);
-  };
 
   return (
     <div className='h-min-screen relative min-h-screen w-full px-[64px] py-[64px] md:px-[120px]'>
@@ -245,9 +239,9 @@ const EvaluationForm = () => {
               <InputText name='damage_reason' onChange={formik.handleChange} placeholder={'Kronologi kerusakan'} />
               <div>
                 <div className='flex flex-col gap-8 md:flex-row'>
-                  {Object.keys(checklistDamage).map((key: any) => {
+                  {Object.keys(checklistDamage).map((key: string) => {
                     return (
-                      <div className='flex flex-col gap-2'>
+                      <div key={`section-${key}`} className='flex flex-col gap-2'>
                         <Paragraph level={2} className='font-bold'>
                           {checklistDamage?.[key]?.title}
                         </Paragraph>
@@ -255,6 +249,7 @@ const EvaluationForm = () => {
                           {Object.keys(checklistDamage?.[key]?.fields).map((key2: any) => {
                             return (
                               <Checkbox
+                                key={`cb-${key2}`}
                                 value={checklistDamage?.[key]?.fields?.[key2]?.checked}
                                 name={key2}
                                 label={checklistDamage?.[key]?.fields?.[key2]?.label}
@@ -284,8 +279,8 @@ const EvaluationForm = () => {
                   })}
                 </div>
                 <div className='mt-8 grid grid-cols-1 gap-8 md:grid-cols-2'>
-                  {Object.keys(checklistDamage).map((key: any) => {
-                    return Object.keys(checklistDamage?.[key]?.fields).map((key2: any, index) => {
+                  {Object.keys(checklistDamage).map((key: string) => {
+                    return Object.keys(checklistDamage?.[key]?.fields).map((key2: string, index: number) => {
                       return (
                         checklistDamage?.[key]?.fields?.[key2]?.checked && (
                           <div key={key2} className='flex flex-col gap-4 rounded-md border border-gray-300 p-6'>
