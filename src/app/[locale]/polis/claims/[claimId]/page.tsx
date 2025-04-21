@@ -216,7 +216,7 @@ const ClaimDetail = () => {
                 Kerusakan lama yang di claim oleh customer:
               </Heading>
               <div className='flex flex-col gap-4'>
-                {claimDetail?.analysis_results?.map((data: any, index: Number) => {
+                {claimDetail?.analysis_results?.map((data: any, index: number) => {
                   return (
                     <div
                       key={`detail-claim-${index}`}
@@ -263,7 +263,7 @@ const ClaimDetail = () => {
                 Kerusakan baru
               </Heading>
               <div className='flex flex-col gap-4'>
-                {claimDetail?.new_damages?.map((data: any, index: Number) => {
+                {claimDetail?.new_damages?.map((data: any, index: number) => {
                   return (
                     <div
                       key={`detail-claim-${index}`}
