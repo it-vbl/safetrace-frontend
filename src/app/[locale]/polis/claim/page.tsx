@@ -12,6 +12,7 @@ import Checkbox from '@/components/atoms/Checkbox';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
+import Modal from '@/components/molecules/Modal';
 import Upload from '@/components/molecules/Upload';
 import { claimPolis, uploadFile } from '@/services/polis';
 
@@ -30,6 +31,8 @@ const EvaluationForm = () => {
   });
 
   const [uploadedPath, setUploadedPath] = useState();
+  const [isSubmiting, setIsSubmitting] = useState<boolean>(false);
+  const [modalPolisCreated, setModalPolisCreated] = useState(false);
 
   const [checklistDamage, setCheckListDamage] = useState<any>({
     front: {
@@ -171,6 +174,7 @@ const EvaluationForm = () => {
     },
     onSubmit: async (values) => {
       try {
+        setIsSubmitting(true);
         const payload = {
           ...values,
           damages: Object.keys(uploadedPath || {}).map((key: string) => {
@@ -183,13 +187,13 @@ const EvaluationForm = () => {
 
         const response = await claimPolis(payload);
         if (response.status == 201) {
-          // router.replace('/id');
-        } else {
+          setModalPolisCreated(true);
         }
       } catch (err: any) {
         console.error('ERROR', err);
         setErrorSubmit(err?.response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
       }
+      setIsSubmitting(false);
     },
   });
 
@@ -218,17 +222,12 @@ const EvaluationForm = () => {
       <div className='mt-8 flex flex-1 flex-col'>
         <form onSubmit={formik.handleSubmit} className='flex flex-col gap-8'>
           <div>
-            <Heading level={4}>Informasi Mobil</Heading>
-            <Paragraph level={2}>
-              Pihak asuransi memerlukan foto mobil kamu untuk memproses polis. Tolong masukan informasi sesuai dengan
-              data yang kamu miliki
-            </Paragraph>
-            <div className='mt-6 grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-2 gap-4'>
               <InputText
                 name='id_polis'
                 onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'Nomor Polis'}
+                label={'Nomor Polis'}
+                placeholder={'Masukkan Nomor Polis'}
               />
             </div>
           </div>
@@ -318,9 +317,37 @@ const EvaluationForm = () => {
               {errorSubmit}
             </Paragraph>
           ) : null}
-          <Button type='submit'>Submit</Button>
+          <Button isLoading={isSubmiting} type='submit'>
+            Submit
+          </Button>
         </form>
       </div>
+      <Modal
+        containerClassName='max-w-[300px]'
+        title='Klaim Berhasil Diajukan!'
+        onClose={() => {
+          setModalPolisCreated(false);
+          router.push('/');
+        }}
+        visible={modalPolisCreated}
+      >
+        <div>
+          <Paragraph className='text-center'>
+            Data klaim Anda untuk kerusakan mobil telah berhasil diinput. Tim kami akan segera memproses klaim Anda.
+          </Paragraph>
+          <div className='flex w-full flex-row items-end justify-center'>
+            <Button
+              onClick={() => {
+                setModalPolisCreated(false);
+                router.push('/');
+              }}
+              className='mt-4'
+            >
+              Oke
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

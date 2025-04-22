@@ -18,7 +18,7 @@ const Checkbox = ({ value = false, onChange = (e) => {}, name = '', disabled = f
   return (
     <div className='flex items-center gap-2'>
       <div
-        className={` bg-red-300 ${
+        className={` ${
           disabled ? 'cursor-not-allowed border-gray-300 bg-gray-200' : 'cursor-pointer'
         } flex items-start items-center`}
       >

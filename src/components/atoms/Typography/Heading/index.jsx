@@ -14,7 +14,7 @@ const Heading = ({ children, level = 1, className = '' }) => {
 
   const Tag = `h${level}`;
 
-  return <Tag className={cn('font-bold', HeadingClassName[level], className)}>{children}</Tag>;
+  return <Tag className={cn('break-normal font-bold', HeadingClassName[level], className)}>{children}</Tag>;
 };
 
 Heading.propTypes = {

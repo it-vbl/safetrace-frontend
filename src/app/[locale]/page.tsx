@@ -9,11 +9,28 @@ const OtomotifLandingPage = () => {
           Dapatkan perlindungan asuransi yang komprehensif untuk kendaraan Anda dan berkendara dengan tenang.
         </p>
       </div>
-      <Link href='/id/polis/register'>
-        <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-          Daftar Polis
-        </button>
-      </Link>
+      <div className='flex flex-row gap-4'>
+        <Link href='/id/polis/register'>
+          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
+            Daftar Polis
+          </button>
+        </Link>
+        <Link href='/id/polis/evaluation'>
+          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
+            Polis Underwrite
+          </button>
+        </Link>
+        <Link href='/id/polis/claim'>
+          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
+            Claim
+          </button>
+        </Link>
+        <Link href='/id/polis/claim/list'>
+          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
+            Claim List
+          </button>
+        </Link>
+      </div>
     </div>
   );
 };

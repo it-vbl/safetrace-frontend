@@ -11,7 +11,7 @@ const Paragraph = ({ children, level = 1, className = '', ...props }) => {
   };
 
   return (
-    <p className={cn(ParagraphClassName[level], className)} {...props}>
+    <p className={cn('break-normal', ParagraphClassName[level], className)} {...props}>
       {children}
     </p>
   );

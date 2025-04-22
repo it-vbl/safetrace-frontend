@@ -1,4 +1,4 @@
-import { useEffect, useMemo,useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
@@ -18,18 +18,18 @@ import theme from '@/utils/tailwindTheme';
 
 const Select = ({
   label = '',
-  onChange = () => {},
+  onChange = (e) => {},
   disabled = false,
   options = [],
   placeholder = '',
   isRequired = false,
   isError = false,
-  helperText,
+  helperText = null,
   block = true,
-  value,
-  name,
-  containerClassName,
-  selectClassName,
+  value = null,
+  name = '',
+  containerClassName = '',
+  selectClassName = '',
   allowAddOption = {
     visible: false,
     placeholder: 'Add new option',
@@ -42,6 +42,7 @@ const Select = ({
   },
   isCustomScrollBar = false,
   position = null,
+  showSearchBar = false,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value);
@@ -206,7 +207,7 @@ const Select = ({
               isCustomScrollBar && 'custom-scrollbar'
             )}
           >
-            {options.length > 5 && (
+            {showSearchBar && (
               <div ref={searchInputRef}>
                 <InputText
                   placeholder={`Cari ${label?.toLocaleLowerCase()}`}

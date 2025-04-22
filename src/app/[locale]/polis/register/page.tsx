@@ -10,20 +10,53 @@ import * as Yup from 'yup';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Accordion from '@/components/molecules/Accordion';
 import InputText from '@/components/molecules/InputText';
 import Modal from '@/components/molecules/Modal';
+import Select from '@/components/molecules/Select';
 import Upload from '@/components/molecules/Upload';
 import { ocrKTP, registerPolis, uploadFile } from '@/services/polis';
 import { TrashIcon } from '@radix-ui/react-icons';
+
+const carType: any = [
+  { label: 'SUV', value: 'SUV' },
+  { label: 'Sedan', value: 'Sedan' },
+  { label: 'Hatchback', value: 'Hatchback' },
+  { label: 'MPV', value: 'MPV' },
+  { label: 'Pickup', value: 'Pickup' },
+  { label: 'Convertible', value: 'Convertible' },
+  { label: 'Coupe', value: 'Coupe' },
+  { label: 'Wagon', value: 'Wagon' },
+  { label: 'Van', value: 'Van' },
+  { label: 'Crossover', value: 'Crossover' },
+];
+
+const carCategories: any = [
+  { label: 'Mobil Penumpang', value: 'Mobil Penumpang' },
+  { label: 'Mobil Niaga', value: 'Mobil Niaga' },
+  { label: 'Mobil Sport', value: 'Mobil Sport' },
+  { label: 'Mobil Listrik', value: 'Mobil Listrik' },
+  { label: 'Mobil Hybrid', value: 'Mobil Hybrid' },
+  { label: 'Mobil Balap', value: 'Mobil Balap' },
+  { label: 'Mobil Polisi', value: 'Mobil Polisi' },
+  { label: 'Mobil Ambulans', value: 'Mobil Ambulans' },
+  { label: 'Mobil Pemadam', value: 'Mobil Pemadam' },
+  { label: 'Mobil Dinas', value: 'Mobil Dinas' },
+];
 
 const SignupForm = () => {
   const router = useRouter();
   const t = useTranslations('ReimburseSubmission');
   const schemaValidation = Yup.object().shape({
-    reimbursementName: Yup.string().required('Reimbursement name is required'),
+    ktp_file_path: Yup.string().required('KTP is required'),
+    front_car_path: Yup.string().required('Field is required'),
+    back_car_path: Yup.string().required('Field is required'),
+    left_car_path: Yup.string().required('Field is required'),
+    right_car_path: Yup.string().required('Field is required'),
   });
   const [errorSubmit, setErrorSubmit] = useState('');
+  const [loadingSubmission, setLoadingSubmission] = useState(false);
+  const [polisID, setPolisID] = useState();
+  const [modalPolisCreated, setModalPolisCreated] = useState(false);
 
   const formik: any = useFormik({
     initialValues: {
@@ -40,18 +73,22 @@ const SignupForm = () => {
       no_plat: '',
       nama_pemilik: '',
     },
+    validationSchema: schemaValidation,
     onSubmit: async (values) => {
       try {
+        setLoadingSubmission(true);
         setErrorSubmit('');
         const response = await registerPolis(values);
         if (response.status == 201) {
-          // router.replace('/id');
+          setPolisID(response.data.id);
+          setModalPolisCreated(true);
         } else {
         }
       } catch (err) {
         console.error('ERROR', err);
         setErrorSubmit((err as any)?.response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
       }
+      setLoadingSubmission(false);
     },
   });
 
@@ -105,24 +142,14 @@ const SignupForm = () => {
         <Heading level={3}>Lengkapi data untuk claim Asuransi</Heading>
       </div>
       <div className='flex flex-1 flex-col'>
-        <form onSubmit={formik.handleSubmit} className='flex flex-col gap-8'>
-          {/* <Select
-            name='approver'
-            onChange={() => {}}
-            label={t('approver_field_label')}
-            placeholder={t('approver_field_placeholder')}
-            options={[
-              { label: 'Abyan Pratama', value: 1 },
-              { label: 'Faathir Muhammad', value: 2 },
-            ]}
-          /> */}
+        <form onSubmit={formik.handleSubmit} className='mt-4 flex flex-col gap-8'>
           <div>
             <Heading level={4}>Foto KTP</Heading>
             <Paragraph level={2}>Pihak asuransi membutuhkan KTP kamu sebagai bagian dari pembuatan polis</Paragraph>
             <div className='mt-4 flex flex-col'>
               {formik.values.ktp_file_path ? (
                 <Image
-                  className='my-8'
+                  className='my-8 h-[300px] w-full bg-gray-50 object-contain'
                   height={300}
                   width={200}
                   src={process.env.NEXT_PUBLIC_BASE_URL + formik.values.ktp_file_path}
@@ -133,11 +160,14 @@ const SignupForm = () => {
               )}
               <InputText
                 name='no_ktp'
+                disabled={true}
                 onChange={formik.handleChange}
                 value={formik.values.no_ktp}
-                // label={t('claim_field_ktp_number_label')}
                 placeholder={'Nomor KTP'}
               />
+              <Paragraph level={6} className='mt-2 text-xs'>
+                * Nomor KTP akan otomatis terisi oleh sistem
+              </Paragraph>
             </div>
           </div>
           <div>
@@ -174,44 +204,43 @@ const SignupForm = () => {
           <div>
             <Heading level={4}>Informasi Mobil</Heading>
             <Paragraph level={2}>
-              Pihak asuransi memerlukan foto mobil kamu untuk memproses polis. Tolong masukan informasi sesuai dengan
-              data yang kamu miliki
+              Pihak asuransi memerlukan informasi mobil kamu untuk memproses polis. Tolong isi informasi mobil kamu
+              dengan benar!
             </Paragraph>
             <div className='mt-6 grid grid-cols-2 gap-4'>
-              <InputText
+              <Select
                 name='jenis_mobil'
                 onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'Jenis Mobil'}
+                label={'Jenis Mobil'}
+                placeholder={'Pilih jenis mobil'}
+                value={formik.values.jenis_mobil}
+                options={carType}
               />
+              <Select
+                name='tipe_mobil'
+                onChange={formik.handleChange}
+                label={'Tipe Mobil'}
+                value={formik.values.tipe_mobil}
+                placeholder={'Pilih tipe mobil'}
+                options={carCategories}
+              />
+              <InputText name='no_plat' onChange={formik.handleChange} label={'No Plat'} placeholder={'No Plat'} />
               <InputText
                 name='no_mesin'
                 onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'No Mesin'}
-              />
-              <InputText
-                name='no_plat'
-                onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'No Plat'}
-              />
-              <InputText
-                name='tipe_mobil'
-                onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'Tipe Mobil'}
+                label={'No Mesin'}
+                placeholder={'No Mesin, ex: MH1HABD123K123321'}
               />
               <InputText
                 name='no_rangka'
                 onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'No Rangka'}
+                label={'No Rangka'}
+                placeholder={'No Rangka, ex: WDB1245678B123456'}
               />
               <InputText
                 name='nama_pemilik'
                 onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
+                label={'Nama Pemilik'}
                 placeholder={'Nama Pemilik'}
               />
             </div>
@@ -221,9 +250,34 @@ const SignupForm = () => {
               {errorSubmit}
             </Paragraph>
           ) : null}
-          <Button type='submit'>Submit</Button>
+          <Button isLoading={loadingSubmission} type='submit'>
+            Submit
+          </Button>
         </form>
       </div>
+      <Modal
+        title='Pengajuan polis berhasil di buat'
+        onClose={() => {
+          setModalPolisCreated(false);
+          router.push('/');
+        }}
+        visible={modalPolisCreated}
+      >
+        <div>
+          <Paragraph className='text-center'>ID Polis kamu adalah {polisID}</Paragraph>
+          <div className='flex w-full flex-row items-end justify-center'>
+            <Button
+              onClick={() => {
+                setModalPolisCreated(false);
+                router.push('/');
+              }}
+              className='mt-4'
+            >
+              Oke
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

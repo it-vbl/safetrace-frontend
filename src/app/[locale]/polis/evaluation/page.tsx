@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
@@ -12,6 +13,7 @@ import Checkbox from '@/components/atoms/Checkbox';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
+import Modal from '@/components/molecules/Modal';
 import Upload from '@/components/molecules/Upload';
 import { evaluatePolis, uploadFile } from '@/services/polis';
 
@@ -30,6 +32,8 @@ const EvaluationForm = () => {
   });
 
   const [uploadedPath, setUploadedPath] = useState<any>({});
+  const [isSubmiting, setSubmitting] = useState<boolean>(false);
+  const [modalPolisCreated, setModalPolisCreated] = useState(false);
 
   const [checklistDamage, setCheckListDamage] = useState<any>({
     front: {
@@ -171,6 +175,7 @@ const EvaluationForm = () => {
     },
     onSubmit: async (values) => {
       try {
+        setSubmitting(true);
         const payload = {
           ...values,
           damages: Object.keys(uploadedPath).map((key: string) => {
@@ -183,13 +188,14 @@ const EvaluationForm = () => {
 
         const response = await evaluatePolis(payload);
         if (response.status == 201) {
-          // router.replace('/id');
-        } else {
+          setModalPolisCreated(true);
         }
       } catch (err: any) {
         console.error('ERROR', err);
+        toast.error(err?.response?.data?.error || 'Terjadi Kesalahan, mohon coba lagi');
         setErrorSubmit(err?.response?.data?.reason || 'Terjadi Kesalahan, mohon coba lagi');
       }
+      setSubmitting(false);
     },
   });
 
@@ -213,21 +219,17 @@ const EvaluationForm = () => {
     <div className='h-min-screen relative min-h-screen w-full px-[64px] py-[64px] md:px-[120px]'>
       <div>
         <Heading level={3}>Input Evaluasi Kendaraan</Heading>
+        <Paragraph level={2}>Silahkan input data evaluasi kendaraan</Paragraph>
       </div>
       <div className='flex flex-1 flex-col'>
         <form onSubmit={formik.handleSubmit} className='flex flex-col gap-8'>
           <div>
-            <Heading level={4}>Informasi Mobil</Heading>
-            <Paragraph level={2}>
-              Pihak asuransi memerlukan foto mobil kamu untuk memproses polis. Tolong masukan informasi sesuai dengan
-              data yang kamu miliki
-            </Paragraph>
             <div className='mt-6 grid grid-cols-2 gap-4'>
               <InputText
                 name='id_polis'
                 onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'Nomor Polis'}
+                label={'Nomor Polis'}
+                placeholder={'Masukkan Nomor Polis'}
               />
             </div>
           </div>
@@ -235,12 +237,7 @@ const EvaluationForm = () => {
             <Heading level={4}>Detail Kerusakan Mobil</Heading>
             <Paragraph level={2}>Silahkan pilih titik-titik kerusakan Mobil</Paragraph>
             <div className='mt-4 flex flex-col gap-4'>
-              <InputText
-                name='damage_reason'
-                onChange={formik.handleChange}
-                // label={t('claim_field_ktp_number_label')}
-                placeholder={'Kronologi kerusakan'}
-              />
+              <InputText name='damage_reason' onChange={formik.handleChange} placeholder={'Kronologi kerusakan'} />
               <div>
                 <div className='flex flex-col gap-8 md:flex-row'>
                   {Object.keys(checklistDamage).map((key: any) => {
@@ -322,9 +319,38 @@ const EvaluationForm = () => {
               {errorSubmit}
             </Paragraph>
           ) : null}
-          <Button type='submit'>Submit</Button>
+          <Button isLoading={isSubmiting} type='submit'>
+            Submit
+          </Button>
         </form>
       </div>
+      <Modal
+        containerClassName='max-w-[300px]'
+        title='Data Hasil Pengecekan Mobil Berhasil Disimpan!'
+        onClose={() => {
+          setModalPolisCreated(false);
+          router.push('/');
+        }}
+        visible={modalPolisCreated}
+      >
+        <div>
+          <Paragraph className='text-center'>
+            Data pengecekan mobil untuk registrasi polis telah berhasil diinput. Data ini akan digunakan sebagai acuan
+            untuk proses klaim polis.
+          </Paragraph>
+          <div className='flex w-full flex-row items-end justify-center'>
+            <Button
+              onClick={() => {
+                setModalPolisCreated(false);
+                router.push('/');
+              }}
+              className='mt-4'
+            >
+              Oke
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

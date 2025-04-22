@@ -60,7 +60,7 @@ const Button = ({
         : null}
       {children && (
         <div className={cn('flex items-center text-center', textClassName)}>
-          {!isLoading ? children : <LoadingSpinner size={size} />}
+          {!isLoading ? children : <LoadingSpinner size='small' color='white' />}
         </div>
       )}
     </button>

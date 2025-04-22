@@ -12,7 +12,6 @@ import Paragraph from '../../atoms/Typography/Paragraph';
 const InputText = ({
   placeholder = '',
   value = '',
-  onChange,
   label = '',
   helperText = '',
   isError = false,
@@ -27,6 +26,7 @@ const InputText = ({
   minNumber = null,
   maxNumber = null,
   maxChar = null,
+  onChange = (e) => {},
   ...props
 }) => {
   const [inputValue, setInputValue] = useState(value);
