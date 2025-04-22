@@ -10,8 +10,7 @@ export const getClaimList = () => api.get(`/polis/claims`);
 
 export const getClaimDetail = (claimId) => api.get(`/polis/claims/${claimId}`);
 
-export const updateClaimStatus = (claimId, status) =>
-  api.update(`/polis/claims/${claimId}/updateStatus`, null, { status });
+export const updateClaimStatus = (claimId, status) => api.put(`/polis/claims/${claimId}/status`, null, { status });
 
 export const uploadFile = (file) => api.postData(`/upload`, file);
 
