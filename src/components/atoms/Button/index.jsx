@@ -36,7 +36,7 @@ const Button = ({
   textClassName = '',
   className = '',
   style = {},
-  icon = null,
+  icon = React.ReactNode | null | undefined,
   isFullWidth = false,
   ...props
 }) => {

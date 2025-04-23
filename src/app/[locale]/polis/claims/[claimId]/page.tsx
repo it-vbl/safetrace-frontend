@@ -15,13 +15,6 @@ import { claimPolis, getClaimDetail, updateClaimStatus, uploadFile } from '@/ser
 import convertSnakeCaseToTitleCase from '@/utils/convertSnakeCaseToTitleCase';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 
-const status = {
-  rejected: 'Ditolak',
-  approved: 'Disetujui',
-  'on-analyzing': 'Dalam Analisa',
-  'waiting-approval': 'Menunggu Persetujuan',
-};
-
 const ClaimDetail = () => {
   const router = useRouter();
   const params = useParams();
@@ -107,7 +100,7 @@ const ClaimDetail = () => {
 
   return (
     <div className='h-min-screen relative min-h-screen w-full px-[64px] py-[64px] md:px-[120px]'>
-      <Button onClick={() => router.back()} className='mb-4' variant='tertiary' size='small' icon={<ArrowLeftIcon />}>
+      <Button onClick={() => router.back()} className='mb-4' variant='tertiary' size='small'>
         Kembali
       </Button>
       <div>
