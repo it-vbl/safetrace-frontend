@@ -13,9 +13,15 @@ import { getClaimList } from '@/services/polis';
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
+const status: any = {
+  rejected: { label: 'Ditolak', className: 'text-red-500' },
+  approved: { label: 'Disetujui', className: 'text-green-500' },
+  'on-analyzing': { label: 'Dalam Analisa', className: 'text-blue-500' },
+  'waiting-approval': { label: 'Menunggu Persetujuan', className: 'text-orange-500' },
+};
+
 const ReimbursementClaimPage = () => {
   const router = useRouter();
-  // Row Data: The data to be displayed.
   const [rowData, setRowData] = useState([
     {
       id: '1',
@@ -42,9 +48,19 @@ const ReimbursementClaimPage = () => {
     { field: 'claim_id', headerName: 'ID Claim' },
     { field: 'date_claim', headerName: 'Tanggal Klaim' },
     { field: 'jenis_mobil', headerName: 'Jenis Mobil' },
+    { field: 'tipe_mobil', headerName: 'Tipe Mobil' },
     { field: 'no_plat', headerName: 'Plat Nomor' },
     { field: 'owner_name', headerName: 'Nama Pemilik' },
-    { field: 'status', headerName: 'Status' },
+    { field: 'car_damage_description', headerName: 'Detail Kerusakan' },
+    {
+      field: 'status',
+      headerName: 'Status',
+      cellRenderer: (e: any) => {
+        return (
+          <p className={`font-bold ${status?.[e?.data?.status]?.className}`}>{status?.[e?.data?.status]?.label}</p>
+        );
+      },
+    },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -86,7 +102,7 @@ const ReimbursementClaimPage = () => {
   }, []);
 
   return (
-    <div className='flex h-full w-full flex-col px-[200px] py-8'>
+    <div className='flex h-full w-full flex-col px-[64px] py-[64px] md:px-[120px]'>
       <Heading level={2} className='mb-8'>
         List Klaim
       </Heading>

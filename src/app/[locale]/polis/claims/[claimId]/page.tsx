@@ -13,6 +13,14 @@ import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import { claimPolis, getClaimDetail, updateClaimStatus, uploadFile } from '@/services/polis';
 import convertSnakeCaseToTitleCase from '@/utils/convertSnakeCaseToTitleCase';
+import { ArrowLeftIcon } from '@radix-ui/react-icons';
+
+const status = {
+  rejected: 'Ditolak',
+  approved: 'Disetujui',
+  'on-analyzing': 'Dalam Analisa',
+  'waiting-approval': 'Menunggu Persetujuan',
+};
 
 const ClaimDetail = () => {
   const router = useRouter();
@@ -98,7 +106,10 @@ const ClaimDetail = () => {
   };
 
   return (
-    <div className='h-min-screen relative min-h-screen w-full py-[64px] sm:px-[32px] md:px-[124px] xl:px-[200px]'>
+    <div className='h-min-screen relative min-h-screen w-full px-[64px] py-[64px] md:px-[120px]'>
+      <Button onClick={() => router.back()} className='mb-4' variant='tertiary' size='small' icon={<ArrowLeftIcon />}>
+        Kembali
+      </Button>
       <div>
         <Heading level={3}>Detail Claim</Heading>
         <Heading level={5} className='my-4 w-auto rounded-md bg-blue-50 px-4 py-2'>
@@ -114,16 +125,37 @@ const ClaimDetail = () => {
             <Paragraph level={2}>Detail Informasi Kepemilikan mobil</Paragraph>
             <div className='mt-6 grid grid-cols-2 gap-4'>
               <InputText
+                disabled={true}
                 name='jenis_mobil'
                 onChange={formik.handleChange}
                 value={claimDetail?.polis?.jenis_mobil}
                 placeholder={'Jenis Mobil'}
               />
-              <InputText name='no_mesin' value={claimDetail?.polis?.no_mesin} placeholder={'No Mesin'} />
-              <InputText name='no_plat' value={claimDetail?.polis?.no_plat} placeholder={'No Plat'} />
-              <InputText name='tipe_mobil' value={claimDetail?.polis?.tipe_mobil} placeholder={'Tipe Mobil'} />
-              <InputText name='no_rangka' value={claimDetail?.polis?.no_rangka} placeholder={'No Rangka'} />
-              <InputText name='nama_pemilik' value={claimDetail?.polis?.nama_pemilik} placeholder={'Nama Pemilik'} />
+              <InputText
+                disabled={true}
+                name='no_mesin'
+                value={claimDetail?.polis?.no_mesin}
+                placeholder={'No Mesin'}
+              />
+              <InputText disabled={true} name='no_plat' value={claimDetail?.polis?.no_plat} placeholder={'No Plat'} />
+              <InputText
+                disabled={true}
+                name='tipe_mobil'
+                value={claimDetail?.polis?.tipe_mobil}
+                placeholder={'Tipe Mobil'}
+              />
+              <InputText
+                disabled={true}
+                name='no_rangka'
+                value={claimDetail?.polis?.no_rangka}
+                placeholder={'No Rangka'}
+              />
+              <InputText
+                disabled={true}
+                name='nama_pemilik'
+                value={claimDetail?.polis?.nama_pemilik}
+                placeholder={'Nama Pemilik'}
+              />
               <div>
                 <Heading level={6}>Foto Tampak Depan</Heading>
                 <Image
@@ -175,9 +207,9 @@ const ClaimDetail = () => {
             <Paragraph level={2}>Silahkan pilih titik-titik kerusakan Mobil</Paragraph>
             <div className='mt-4 flex flex-col gap-4'>
               <InputText
+                disabled={true}
                 name='damage_reason'
                 label='Kronologi Kerusakan'
-                onChange={formik.handleChange}
                 value={claimDetail?.claim?.damage_reason}
                 placeholder={'Kronologi kerusakan'}
               />

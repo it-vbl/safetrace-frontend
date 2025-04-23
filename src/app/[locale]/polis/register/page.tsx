@@ -137,7 +137,7 @@ const SignupForm = () => {
   };
 
   return (
-    <div className='h-min-screen relative min-h-screen w-full px-[200px] py-[64px]'>
+    <div className='h-min-screen relative min-h-screen w-full px-[64px] py-[64px] md:px-[120px]'>
       <div>
         <Heading level={3}>Lengkapi data untuk claim Asuransi</Heading>
       </div>
@@ -148,13 +148,22 @@ const SignupForm = () => {
             <Paragraph level={2}>Pihak asuransi membutuhkan KTP kamu sebagai bagian dari pembuatan polis</Paragraph>
             <div className='mt-4 flex flex-col'>
               {formik.values.ktp_file_path ? (
-                <Image
-                  className='my-8 h-[300px] w-full bg-gray-50 object-contain'
-                  height={300}
-                  width={200}
-                  src={process.env.NEXT_PUBLIC_BASE_URL + formik.values.ktp_file_path}
-                  alt={`Foto KTP`}
-                />
+                <div className='relative my-8 h-[300px] w-full bg-gray-50'>
+                  <Image
+                    className='h-[300px] w-full bg-gray-50 object-contain'
+                    height={300}
+                    width={200}
+                    src={process.env.NEXT_PUBLIC_BASE_URL + formik.values.ktp_file_path}
+                    alt={`Foto KTP`}
+                  />
+                  <TrashIcon
+                    onClick={() => {
+                      formik.setFieldValue('ktp_file_path', '');
+                      formik.setFieldValue('no_ktp', '');
+                    }}
+                    className='absolute right-2 top-2 h-6 w-6 cursor-pointer text-red-500'
+                  />
+                </div>
               ) : (
                 <Upload onChangeValue={handleOCRKTP} />
               )}
@@ -195,10 +204,6 @@ const SignupForm = () => {
                   </div>
                 );
               })}
-              {/* <Upload label='Foto Tampak Depan' onChangeValue={(e) => handleUploadFile(e, 'front_car_path')} />
-              <Upload label='Foto Tampak Belakang' onChangeValue={(e) => handleUploadFile(e, 'back_car_path')} />
-              <Upload label='Foto Tampak Samping Kiri' onChangeValue={(e) => handleUploadFile(e, 'left_car_path')} />
-              <Upload label='Foto Tampak Samping Kanan' onChangeValue={(e) => handleUploadFile(e, 'right_car_path')} /> */}
             </div>
           </div>
           <div>

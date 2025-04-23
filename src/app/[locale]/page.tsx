@@ -17,17 +17,17 @@ const OtomotifLandingPage = () => {
         </Link>
         <Link href='/id/polis/evaluation'>
           <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            Polis Underwrite
+            Evaluasi Polis
           </button>
         </Link>
         <Link href='/id/polis/claim'>
           <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            Claim
+            Klaim
           </button>
         </Link>
         <Link href='/id/polis/claim/list'>
           <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            Claim List
+            List Klaim
           </button>
         </Link>
       </div>
