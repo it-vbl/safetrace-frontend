@@ -1,36 +1,22 @@
+'use client';
+
 import Link from 'next/link';
+import { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 
 const OtomotifLandingPage = () => {
+  const Map = useMemo(
+    () =>
+      dynamic(() => import('@/components/organisms/MapView'), {
+        loading: () => <p>A map is loading</p>,
+        ssr: false,
+      }),
+    []
+  );
+
   return (
-    <div className='flex h-screen flex-col items-center justify-center'>
-      <div className=' mt-10 text-center'>
-        <h1 className='mb-4 text-4xl font-bold'>Lindungi Kendaraan Anda, Lindungi Masa Depan Anda</h1>
-        <p className='mb-8 text-lg'>
-          Dapatkan perlindungan asuransi yang komprehensif untuk kendaraan Anda dan berkendara dengan tenang.
-        </p>
-      </div>
-      <div className='flex flex-row gap-4'>
-        <Link href='/id/polis/register'>
-          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            Daftar Polis
-          </button>
-        </Link>
-        <Link href='/id/polis/evaluation'>
-          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            Evaluasi Polis
-          </button>
-        </Link>
-        <Link href='/id/polis/claim'>
-          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            Klaim
-          </button>
-        </Link>
-        <Link href='/id/polis/claim/list'>
-          <button className='z-3 mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'>
-            List Klaim
-          </button>
-        </Link>
-      </div>
+    <div className='m-0 h-screen w-screen'>
+      <Map />
     </div>
   );
 };

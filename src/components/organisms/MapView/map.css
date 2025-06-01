@@ -1,0 +1,4 @@
+.leaflet-popup-content {
+  max-width: none !important;
+  width: auto !important;
+}

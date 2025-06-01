@@ -81,7 +81,7 @@ const ReimbursementClaimPage = () => {
             claim_id: claim.id,
             status: claim.status,
             owner_name: polis.nama_pemilik,
-            date_claim: moment(claim.created_at, 'YYYY-04-20 hh:mm:ss').format('DD MMM YYYY'),
+            date_claim: moment(claim.created_at, 'YYYY-MM-DD hh:mm:ss').format('DD MMM YYYY'),
           });
         }
         setRowData(tempDatas);

@@ -6,6 +6,8 @@ export const claimPolis = (payload) => api.post(`/polis/claim`, null, payload);
 
 export const evaluatePolis = (payload) => api.post(`/polis/evaluation`, null, payload);
 
+export const calculatePremi = (payload) => api.post(`/premi/calculate`, null, payload);
+
 export const getClaimList = () => api.get(`/polis/claims`);
 
 export const getClaimDetail = (claimId) => api.get(`/polis/claims/${claimId}`);
@@ -15,3 +17,5 @@ export const updateClaimStatus = (claimId, status) => api.put(`/polis/claims/${c
 export const uploadFile = (file) => api.postData(`/upload`, file);
 
 export const ocrKTP = (file) => api.postData(`/ai/ocr-ktp`, file);
+
+export const ocrSTNK = (file) => api.postData(`/ai/ocr-stnk`, file);

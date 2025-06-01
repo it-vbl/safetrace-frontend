@@ -77,7 +77,9 @@ const ReimbursementClaimPage = () => {
         List Klaim
       </Heading>
       <div className='flex w-full flex-1 flex-col'>
-        <AgGridReact rowData={rowData} columnDefs={colDefs} />
+        <div className='flex w-full flex-1 flex-col'>
+          <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={rowData} columnDefs={colDefs} />
+        </div>
       </div>
     </div>
   );

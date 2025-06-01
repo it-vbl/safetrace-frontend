@@ -17,7 +17,7 @@ const InputText = ({
   isError = false,
   type = 'text',
   prefix = null,
-  suffix = null,
+  suffix = '',
   className = '',
   containerClassName = '',
   isRequired = false,
@@ -152,7 +152,7 @@ const InputText = ({
               </button>
             )}
             {suffix && (
-              <Paragraph level={2} className={cn('shrink-0 text-neutral8', disabled && 'text-neutral6')}>
+              <Paragraph level={2} className={cn('w-auto text-neutral8', disabled && 'text-neutral6')}>
                 {suffix}
               </Paragraph>
             )}
@@ -177,7 +177,7 @@ InputText.propTypes = {
   isError: PropTypes.bool,
   type: PropTypes.oneOf(['text', 'password', 'email', 'number']),
   prefix: PropTypes.node,
-  suffix: PropTypes.node,
+  suffix: PropTypes.node || PropTypes.string,
   className: PropTypes.string,
   containerClassName: PropTypes.string,
   isRequired: PropTypes.bool,

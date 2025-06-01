@@ -1,8 +1,10 @@
 .radio-button {
   appearance: none;
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   background-color: white;
   border: 1px solid gray;
   border-radius: 50%;
@@ -20,7 +22,7 @@
 }
 
 .radio-button:checked::before {
-  content: "";
+  content: '';
   display: block;
   width: 10px;
   height: 10px;

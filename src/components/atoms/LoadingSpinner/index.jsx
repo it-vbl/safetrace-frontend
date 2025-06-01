@@ -9,7 +9,7 @@ const LoadingSpinner = ({ className, size = 'medium' }) => {
   };
 
   return (
-    <div data-testid='loading-spinner' className={cn('lds-ring', sizeClass[size], className)}>
+    <div data-testid='loading-spinner' className={cn(className, 'lds-ring', sizeClass[size])}>
       <div></div>
       <div></div>
       <div></div>

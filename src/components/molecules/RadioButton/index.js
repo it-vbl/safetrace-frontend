@@ -1,20 +1,20 @@
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
-import Label from "@/components/atoms/Label";
-import Paragraph from "@/components/atoms/Typography/Paragraph";
+import Label from '@/components/atoms/Label';
+import Paragraph from '@/components/atoms/Typography/Paragraph';
 
-import styles from "./RadioButton.module.css";
+import styles from './RadioButton.module.css';
 
 const RadioButton = ({
   options = [],
-  name = "",
-  onChange = () => {},
-  label,
-  isRequired,
-  helperText,
-  isError,
-  value,
-  onChangeValue = () => {},
+  name = '',
+  onChange = (e) => {},
+  label = null,
+  isRequired = false,
+  helperText = null,
+  isError = null,
+  value = null | undefined,
+  onChangeValue = (e) => {},
 }) => {
   const handleOnChange = (e) => {
     onChange(e);
@@ -22,24 +22,21 @@ const RadioButton = ({
   };
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex flex-col gap-5">
+    <div className='flex flex-col gap-1'>
+      <div className='flex flex-col gap-5'>
         {label && <Label isRequired={isRequired}>{label}</Label>}
-        <div className="radio-button-group flex items-center justify-between">
+        <div className='radio-button-group flex items-center justify-between'>
           {options.map((option) => (
-            <label
-              key={option.value}
-              className="radio-label flex w-full items-center gap-2"
-            >
+            <label key={option.value} className='radio-label flex w-full items-center gap-2'>
               <input
-                type="radio"
+                type='radio'
                 name={name}
                 value={option.value}
                 checked={value === option.value}
                 onChange={handleOnChange}
-                className={`${styles["radio-button"]} cursor-pointer ${isError ? "!border-error5" : "border-gray-500"}`}
+                className={`${styles['radio-button']} cursor-pointer ${isError ? '!border-error5' : 'border-gray-500'}`}
               />
-              <Paragraph className="cursor-pointer text-neutral9" level={2}>
+              <Paragraph className='cursor-pointer text-neutral9' level={3}>
                 {option.label}
               </Paragraph>
             </label>
@@ -47,7 +44,7 @@ const RadioButton = ({
         </div>
       </div>
       {helperText && (
-        <Paragraph level={4} className="text-error5">
+        <Paragraph level={4} className='text-error5'>
           {helperText}
         </Paragraph>
       )}

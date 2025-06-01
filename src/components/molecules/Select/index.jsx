@@ -214,6 +214,7 @@ const Select = ({
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className='relative'
+                  containerClassName='mb-2'
                   suffix={<Search />}
                 />
               </div>
