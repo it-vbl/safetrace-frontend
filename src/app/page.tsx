@@ -12,21 +12,31 @@ import { useRouter } from 'next/navigation';
 import Heading from '@/components/atoms/Typography/Heading';
 import Close from '@/components/atoms/Icons/Close';
 import Select from '@/components/molecules/Select';
-import Image from 'next/image';
-import Logo1 from '@/assets/images/logo1.png';
-import Logo2 from '@/assets/images/logo2.png';
-import Logo3 from '@/assets/images/logo3.png';
-import { ChevronDownIcon } from '@radix-ui/react-icons';
-import pekebuns from '@/consts/pekebuns';
+import pekebuns from '@/constants/pekebuns';
 import getPolygonCenter from '@/utils/getPolygonCenter';
+import Checkbox from '@/components/atoms/Checkbox';
+import SearchBar from '@/components/molecules/SearchBar';
+import useKomoditas from '@/hooks/useKomoditas';
+import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
+import useSTDB from '@/hooks/useSTDB';
+import useFitPolygonBounds from '@/hooks/useFitPolygonBounds';
+import { useDispatch } from 'react-redux';
+import { setFilterKomoditas } from '@/store/slices/stdb';
+import useReferences from '@/hooks/useReferences';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const MapDashboard = () => {
+  const dispatch = useDispatch();
   const [showTable, setShowTable] = useState(false);
   const [rowData, setRowData] = useState(pekebuns);
   const [selectedPekebun, setSelectedPekebun] = useState<any>(pekebuns[0]);
+
+  const { komoditas } = useKomoditas();
+  const { kecamatanSanggau } = useKecamatanSanggau();
+  const { stdb, filterKomoditas } = useSTDB();
+  const { stdbStatuses } = useReferences();
 
   const handleOnLihatClicked = (data: any) => {
     setShowTable(false);
@@ -45,15 +55,21 @@ const MapDashboard = () => {
       headerName: 'Actions',
       cellRenderer: ActionsCellRenderer,
     },
-    { field: 'id_kebun', headerName: 'ID Kebun' },
-    { field: 'coordinate', headerName: 'Titik Koordinat' },
-    { field: 'status_lahan', headerName: 'Nama Pemilik' },
-    { field: 'komoditas', headerName: 'Komoditas' },
-    { field: 'luas_lahan', headerName: 'Luas Lahan(m2) ' },
-    { field: 'kecamatan', headerName: 'Kecamatan' },
-    { field: 'kelurahan', headerName: 'Kelurahan' },
+    { field: 'id', headerName: 'ID Kebun' },
+    {
+      field: 'geom.coordinates',
+      headerName: 'Titik Koordinat',
+      valueFormatter: (params: any) => {
+        return params.value.join(', ');
+      },
+    },
+    { field: 'kelembagaan_tani', headerName: 'Nama Pemilik' },
+    { field: 'komoditas_kelembagaan_label', headerName: 'Komoditas' },
+    { field: 'luas_lahan', headerName: 'Luas Lahan(m2)' },
+    { field: 'kecamatan_label', headerName: 'Kecamatan' },
+    { field: 'desa_label', headerName: 'Kelurahan' },
     { field: 'data_peta', headerName: 'Data Peta' },
-    { field: 'pekebun', headerName: 'Pekebun' },
+    { field: 'pekebun.user.full_name', headerName: 'Pekebun' },
     { field: 'stdb', headerName: 'STDB' },
   ];
 
@@ -64,11 +80,13 @@ const MapDashboard = () => {
   }, []);
 
   const centerMap = useMemo(() => {
-    if (selectedPekebun) {
-      return getPolygonCenter(selectedPekebun?.polygonCoords);
+    if (selectedPekebun?.geom?.coordinates) {
+      return getPolygonCenter(selectedPekebun?.geom?.coordinates);
     }
     return [-0.5, 114.9];
   }, [selectedPekebun]);
+
+  const zoomMap = 7;
 
   const Map = useMemo(
     () =>
@@ -79,138 +97,75 @@ const MapDashboard = () => {
     []
   );
 
+  const handleFilterKomoditasChange = (value: any, komoditas: any) => {
+    let temp = [...filterKomoditas];
+    if (value.target.checked) {
+      temp.push(komoditas.value);
+    } else {
+      temp = filterKomoditas.filter((fk: any) => fk !== komoditas.value);
+    }
+    dispatch(setFilterKomoditas(temp));
+  };
+
   return (
-    <html>
-      <body className='h-full w-full overflow-x-clip'>
-        <div className='flex h-[72px] w-full flex-row items-center bg-white px-4 '>
-          {/* logo */}
-          <div className='flex flex-1'>SIPEKEBUN 2.0</div>
-          <div className='ml-auto flex flex-row items-center gap-4'>
-            <Image src={Logo1.src} width={30} height={30} alt='logo' />
-            <Image src={Logo2.src} width={30} height={30} alt='logo' />
-            <Image src={Logo3.src} width={30} height={30} alt='logo' />
-          </div>
-          <div className='ml-auto flex flex-1 flex-row items-center justify-end gap-4 uppercase'>
-            <div>Map</div>
-            <div>Dashboard</div>
-            <div className='flex flex-row items-center gap-2 font-bold'>
-              Fajar Sukmara <ChevronDownIcon />
-            </div>
-          </div>
-        </div>
-        <div className='relative max-h-[calc(100vh-72px)]'>
-          <Map position={centerMap} data={pekebuns} activeDataId={selectedPekebun?.id} />
-          <div className='absolute right-4 top-4 z-[400]'>
-            <div
-              onClick={() => setShowTable(!showTable)}
-              className='flex flex-row items-center gap-2 rounded-[4px] border border-primary bg-white px-[10px] py-[10px] py-[10px] py-[10px]'
-            >
-              <Statistic color={theme.colors?.primary} />
-              <Paragraph level={3} className='font-bold text-primary'>
-                Data Pekebun
-              </Paragraph>
-            </div>
-          </div>
+    <div className=' h-full w-full'>
+      <div className='relative max-h-[calc(100vh-72px)]'>
+        <Map
+          highlightedPolygon={selectedPekebun?.geom?.coordinates}
+          zoom={zoomMap}
+          position={centerMap}
+          data={stdb}
+          activeDataId={selectedPekebun?.id}
+        />
+        <div className='absolute right-4 top-4 z-[400]'>
           <div
-            className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-scroll rounded-xl border bg-white p-4 duration-500 ease-in-out ${
-              showTable ? 'translate-x-0' : 'left-[200px] translate-x-full'
-            }`}
+            onClick={() => setShowTable(!showTable)}
+            className='flex flex-row items-center gap-2 rounded-[4px] border border-primary bg-white px-[10px] py-[10px] py-[10px] py-[10px]'
           >
-            <div className='flex h-full flex-col gap-4'>
-              <div className='flex flex-row items-center justify-between'>
-                <Heading level={2}>Data Pekebun</Heading>
-                <div className='flex flex-row items-center gap-8'>
-                  <div className='flex flex-row items-center gap-2'>
-                    <Select
-                      containerClassName='w-[200px]'
-                      placeholder='Pilih Komoditas'
-                      options={[
-                        {
-                          label: 'Sawit',
-                          value: 'sawit',
-                        },
-                        {
-                          label: 'Padi',
-                          value: 'padi',
-                        },
-                        {
-                          label: 'Jagung',
-                          value: 'jagung',
-                        },
-                        {
-                          label: 'Kedelai',
-                          value: 'kedelai',
-                        },
-                        {
-                          label: 'Kacang',
-                          value: 'kacang',
-                        },
-                      ]}
-                    />
-                    <Select
-                      containerClassName='w-[200px]'
-                      placeholder='Pilih Kecamatan'
-                      options={[
-                        {
-                          label: 'Sawit',
-                          value: 'sawit',
-                        },
-                        {
-                          label: 'Padi',
-                          value: 'padi',
-                        },
-                        {
-                          label: 'Jagung',
-                          value: 'jagung',
-                        },
-                        {
-                          label: 'Kedelai',
-                          value: 'kedelai',
-                        },
-                        {
-                          label: 'Kacang',
-                          value: 'kacang',
-                        },
-                      ]}
-                    />
-                    <Select
-                      containerClassName='w-[200px]'
-                      placeholder='Pilih STDB'
-                      options={[
-                        {
-                          label: 'Sawit',
-                          value: 'sawit',
-                        },
-                        {
-                          label: 'Padi',
-                          value: 'padi',
-                        },
-                        {
-                          label: 'Jagung',
-                          value: 'jagung',
-                        },
-                        {
-                          label: 'Kedelai',
-                          value: 'kedelai',
-                        },
-                        {
-                          label: 'Kacang',
-                          value: 'kacang',
-                        },
-                      ]}
-                    />
-                  </div>
-                  <Close onClick={() => setShowTable(false)} />
+            <Statistic color={theme.colors?.primary} />
+            <Paragraph level={3} className='font-bold text-primary'>
+              Data Pekebun
+            </Paragraph>
+          </div>
+        </div>
+        <div
+          className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-scroll rounded-xl border bg-white p-4 duration-500 ease-in-out ${
+            showTable ? 'translate-x-0' : 'left-[200px] translate-x-full'
+          }`}
+        >
+          <div className='flex h-full flex-col gap-4'>
+            <div className='flex flex-row items-center justify-between'>
+              <Heading level={2}>Data Pekebun</Heading>
+              <div className='flex flex-row items-center gap-8'>
+                <div className='flex flex-row items-center gap-2'>
+                  <SearchBar placeholder='Cari Pekebun' />
+                  <Select containerClassName='w-[200px]' placeholder='Pilih Komoditas' options={komoditas} />
+                  <Select containerClassName='w-[200px]' placeholder='Pilih Kecamatan' options={kecamatanSanggau} />
+                  <Select containerClassName='w-[200px]' placeholder='Pilih STDB' options={stdb} />
                 </div>
+                <Close onClick={() => setShowTable(false)} />
               </div>
-              <div className='w-full flex-1'>
-                <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={rowData} columnDefs={colDefs} />
-              </div>
+            </div>
+            <div className='w-full flex-1'>
+              <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={stdb} columnDefs={colDefs} />
             </div>
           </div>
         </div>
-      </body>
-    </html>
+      </div>
+      <div className='absolute left-[64px] top-[calc(72px+9px)] z-[400] rounded-[8px] border-[2px] border-black50/60 bg-white p-4'>
+        <div className='flex flex-col gap-2'>
+          {komoditas?.map((data: any) => {
+            return (
+              <Checkbox
+                value={filterKomoditas?.includes(data?.value)}
+                onChange={(v) => handleFilterKomoditasChange(v, data)}
+                label={data?.label}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 };
 

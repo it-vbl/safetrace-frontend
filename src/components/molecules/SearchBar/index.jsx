@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import useTouchOutside from '@/helpers/hooks/useTouchOutside';
+import useTouchOutside from '@/hooks/useTouchOutside';
 import { cn } from '@/utils/cn';
 
 import CloseIcon from '../../atoms/Icons/Close';
@@ -49,8 +49,8 @@ const SearchBar = ({
 
   return (
     <div
-      className={cn('relative flex h-[44px] w-[300px] rounded-md border border-[#C7C8C9] py-2.5 pl-4', className, {
-        'bg-neutral4 cursor-not-allowed': disabled,
+      className={cn('relative flex h-[42px] w-[300px] rounded-[6px] border border-neutral6 py-2.5 pl-4', className, {
+        'cursor-not-allowed bg-neutral4': disabled,
       })}
     >
       <input
@@ -74,7 +74,7 @@ const SearchBar = ({
 
       {showSuffix && (
         <>
-          <div className='bg-neutral4 mr-3 h-full w-[2px]' />
+          <div className='mr-3 h-full w-[2px] bg-neutral4' />
           {suffixComponent()}
         </>
       )}

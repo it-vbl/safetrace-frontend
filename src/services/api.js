@@ -1,7 +1,8 @@
-import Router from 'next/router';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import querystring from 'qs';
+import { toast } from 'react-toastify';
+import { addAbortController, abortAllRequests } from '@/libs/utils/requestController';
 
 let controller = new AbortController();
 
@@ -27,25 +28,89 @@ api.interceptors.request.use(function (config) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  const controller = new AbortController();
+  config.signal = controller.signal;
+  addAbortController(controller);
+
   return config;
 });
 
-const APIResponseValidation = async (response, promise, showErrorPage = false, auth = true) => {
+const logout = () => {
+  Cookies.remove('token');
+  Cookies.remove('refreshToken');
+  const homeUrl = window?.location?.origin;
+  window.location.href = `${homeUrl}/login?redirect=${window?.location?.pathname || ''}${
+    window?.location?.search || ''
+  }`;
+};
+
+const APIResponseValidation = async (response, promise, toastError = true, showErrorPage = false, auth = true) => {
   // prevent refresh token checking when func executed in server or auth parameter is false
   if (isServer) return promise;
 
-  const homeUrl = window?.location?.origin;
+  const access_token = await Cookies.get('token');
+  const refresh_token = await Cookies.get('refreshToken');
 
-  if (window.location.pathname != '/')
-    if (response?.status === 401 || response?.message === 'Unauthenticated.') {
-      Cookies.remove('token');
-      Cookies.remove('storeProfile');
+  // check if access token is not exist / not login
+  if (response?.status === 401) {
+    if (!auth) return promise;
 
-      Router.push(`${homeUrl}`);
-
+    if (!access_token) {
+      logout();
       return promise;
     }
 
+    try {
+      const refreshTokenResponse = await APIInstance.post(
+        '/accounts/token/refresh/',
+        null,
+        {
+          refresh: refresh_token,
+        },
+        null,
+        null,
+        false
+      );
+
+      if (refreshTokenResponse?.status === 401) {
+        logout();
+      }
+
+      return axios
+        .request({
+          ...response.config,
+          headers: {
+            ...response.config.headers,
+            Authorization: `Bearer ${refreshTokenResponse.data.access_token}`,
+          },
+        })
+        .then((response) => {
+          return Promise.resolve(response.data);
+        })
+        .catch((err) => {
+          // APIResponseValidation(err.response);
+          return Promise.reject(err);
+        });
+    } catch (err) {
+      // logout the user
+      console.log(err);
+      logout();
+    }
+  }
+  // show toast error message if API not success
+  else if (response?.status && response?.status !== 200) {
+    // check refresh token
+    if (showErrorPage) {
+      // APIResponseErrorValidation({ response });
+      return promise;
+    }
+
+    if (toastError)
+      toast({
+        type: 'danger',
+        text: response?.data?.errors?.[0]?.message,
+      });
+  }
   return promise;
 };
 
@@ -109,7 +174,6 @@ const APIInstance = {
     json = {},
     reqConfig = {},
     onUploadProgress = () => {},
-    // token = Cookies.get('token') || null,
     auth = true,
     showErrorPage = false,
     toastError = false,
@@ -118,10 +182,6 @@ const APIInstance = {
     api.defaults.headers['Content-Type'] = form ? 'application/x-www-form-urlencoded' : 'application/json';
 
     const data = querystring.stringify(form) || json;
-
-    // if (token) {
-    //   api.defaults.headers.Authorization = `Bearer ${token}`;
-    // }
 
     return api
       .post(url, data, {
@@ -160,7 +220,6 @@ const APIInstance = {
     keys.map((key) => {
       data[key] instanceof File ? formData.append(key, data[key], data[key].name) : formData.append(key, data[key]);
     });
-    console.log('check', formData);
     return api
       .post(url, formData, {
         baseURL: BASE_URL,

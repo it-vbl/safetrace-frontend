@@ -1,129 +1,54 @@
-import { useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import { createPortal } from 'react-dom';
+import { Close } from '@/assets/icons';
+import Button from '@/components/atoms/Button';
 
-import Close from '@/components/atoms/Icons/Close';
-import Heading from '@/components/atoms/Typography/Heading';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import useTouchOutside from '@/hooks/useTouchOutside';
-import { cn } from '@/utils/cn';
-
-const Modal = ({
+const BaseModal = ({
+  open = false,
+  setOpen = () => {},
+  label = '-',
   children,
-  visible = false,
-  onClose = () => {},
-  title = '',
-  subtitle = '',
-  overlayClassName = '',
-  containerClassName = '',
-  bodyClassName = '',
-  renderFooter = () => {},
-  isCloseWhenClickOutside = true,
-  titleProps = {},
-  customRightHeader = null,
-  isBottomSheet = false,
-  dataTestId = '',
+  handleOnNoClick = () => {},
+  handleOnYesClick = () => {},
+  className = '',
+  isReject = false,
+  isLoading = false,
+  showBottomButton = true,
+  leftButtonLabel = 'NO',
+  rightButtonLabel = 'YES',
+  closeOnOuterWrapper = true,
+  onclose = () => {},
 }) => {
-  const modalRef = useRef(null);
-  const [isRendered, setIsRendered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (visible) {
-      setIsRendered(true);
-
-      // Use requestAnimationFrame to ensure the transition happens
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsVisible(true);
-        });
-      });
-      document.body.style.overflow = 'hidden';
-    } else {
-      setIsVisible(false);
-      const timer = setTimeout(() => setIsRendered(false), 300);
-      document.body.style.overflow = 'unset';
-      return () => clearTimeout(timer);
+  const handleOnWrapperClick = (e) => {
+    if (e.target === e.currentTarget && closeOnOuterWrapper) {
+      setOpen(false);
     }
+  };
+  const handleCloseModal = () => {
+    setOpen(false);
+    onclose();
+  };
 
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [visible]);
+  if (!open) {
+    return;
+  }
 
-  useTouchOutside(modalRef, () => isCloseWhenClickOutside && onClose());
-
-  if (!isRendered) return null;
-
-  return createPortal(
+  return (
     <div
-      className={cn(
-        'fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-3 transition-opacity duration-300 ease-in-out md:px-0',
-        isVisible ? 'opacity-100' : 'opacity-0',
-        isBottomSheet && '!items-end p-0',
-        overlayClassName
-      )}
-      data-testid={dataTestId}
+      className='fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50'
+      onClick={handleOnWrapperClick}
     >
       <div
-        className={cn(
-          'w-auto max-w-[90vw] rounded-lg border border-neutral5 bg-white text-base shadow-md transition-all duration-300 ease-in-out md:min-w-[522px]',
-          isVisible
-            ? isBottomSheet
-              ? 'translate-y-0 scale-100 opacity-100'
-              : 'scale-100 opacity-100'
-            : isBottomSheet
-            ? 'translate-y-full opacity-0'
-            : 'scale-95 opacity-0',
-          isBottomSheet && '!min-w-full !rounded-b-none !rounded-t-lg md:!rounded-lg',
-          containerClassName
-        )}
-        id='modal'
-        ref={modalRef}
-        role='dialog'
+        className={`max-h-[90vh] w-full max-w-[552px] overflow-auto rounded-lg border border-[#D3D2D2] bg-white p-6 ${className}`}
       >
-        <div className='flex items-center justify-between gap-x-4 border-b border-neutral5 p-4 md:px-6'>
-          <div className='break-all'>
-            {title && (
-              <Heading level={4} {...titleProps}>
-                {title}
-              </Heading>
-            )}
-            {subtitle && <Paragraph level={3}>{subtitle}</Paragraph>}
+        <div className='flex items-center justify-between bg-[#FFFEFE]'>
+          <p className='text-[14px] font-bold font-bold leading-6 tracking-[1px] text-neutral10'>{label}</p>
+          <div className='cursor-pointer' onClick={handleCloseModal}>
+            <Close />
           </div>
-
-          {customRightHeader || (
-            <button
-              className='cursor-pointer'
-              onClick={onClose}
-              aria-label='Close modal'
-              data-testid='button-close-modal'
-            >
-              <Close size={24} />
-            </button>
-          )}
         </div>
-
-        <div className={cn('max-h-[calc(100dvh-128px)] overflow-auto break-all p-4 md:p-6', bodyClassName)}>
-          {children}
-        </div>
-        {renderFooter()}
+        {children}
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
 
-Modal.propTypes = {
-  children: PropTypes.node,
-  visible: PropTypes.bool,
-  onClose: PropTypes.func,
-  title: PropTypes.string,
-  subtitle: PropTypes.string,
-  overlayClassName: PropTypes.string,
-  bodyClassName: PropTypes.string,
-  renderFooter: PropTypes.node,
-  isClosingWhenClickOutside: PropTypes.bool,
-};
-
-export default Modal;
+export default BaseModal;

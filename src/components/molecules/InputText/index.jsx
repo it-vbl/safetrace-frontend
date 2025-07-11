@@ -12,6 +12,7 @@ import Paragraph from '../../atoms/Typography/Paragraph';
 const InputText = ({
   placeholder = '',
   value = '',
+  onChange = (e) => {},
   label = '',
   helperText = '',
   isError = false,
@@ -26,7 +27,10 @@ const InputText = ({
   minNumber = null,
   maxNumber = null,
   maxChar = null,
-  onChange = (e) => {},
+  errors,
+  touched,
+  onBlur,
+  name,
   ...props
 }) => {
   const [inputValue, setInputValue] = useState(value);
@@ -43,8 +47,8 @@ const InputText = ({
   };
 
   const errorClassName = {
-    field: isError ? '!border-error5' : '',
-    helperText: isError ? 'text-error5' : '',
+    field: touched?.[name] && errors[name] ? '!border-error5' : '',
+    helperText: touched?.[name] && errors[name] ? 'text-error5' : '',
   };
   const inputType = useMemo(() => {
     if (isPassword) {
@@ -88,12 +92,35 @@ const InputText = ({
 
     if (validateTwoSpaces(value)) return;
 
+    if (type === 'latitude' || type === 'longitude') {
+      let val = e.target.value;
+      val = val.replace(/(?!^)-|[^0-9.-]/g, '');
+
+      // Step 2: Allow only one decimal point
+      const dotParts = val.split('.');
+      if (dotParts.length > 2) {
+        val = dotParts[0] + '.' + dotParts.slice(1).join('');
+      }
+
+      // Step 3: Allow only one negative sign
+      const negativeParts = val.split('-');
+      if (negativeParts.length > 2) {
+        val = negativeParts[0] + '-' + negativeParts.slice(1).join('');
+      }
+
+      e.target.value = val;
+    }
+
     setInputValue(e.target.value);
     onChange(e);
   };
 
   const handleTogglePassword = () => {
     setIsShowPassword(!isShowPassword);
+  };
+
+  const handleOnBlur = (e) => {
+    onBlur(e);
   };
 
   useEffect(() => {
@@ -103,13 +130,13 @@ const InputText = ({
   return (
     <div className={cn('flex w-full flex-col gap-1', containerClassName)}>
       {label && (
-        <Label isRequired={isRequired} disabled={disabled}>
+        <Label isRequired={isRequired} className=' text-[12px] font-bold text-gray-500' disabled={disabled}>
           {label}
         </Label>
       )}
       <div
         className={cn(
-          'group relative flex h-[40px] w-full items-center gap-[10px] rounded-md border border-neutral5 bg-white',
+          'group relative flex h-[32px] w-full items-center gap-[10px] rounded-[4px] border border-neutral5 bg-white',
           filledClassName.field,
           disabledClassName.field,
           errorClassName.field,
@@ -118,7 +145,7 @@ const InputText = ({
       >
         {prefix && (
           <div className='shrink-0 pl-3 text-neutral8'>
-            <Paragraph level={2}>{prefix}</Paragraph>
+            <Paragraph level={3}>{prefix}</Paragraph>
           </div>
         )}
 
@@ -126,15 +153,17 @@ const InputText = ({
           type={inputType}
           value={inputValue}
           onChange={handleOnChange}
+          onBlur={handleOnBlur}
           placeholder={placeholder}
           className={cn(
-            'h-full w-full rounded-md px-3 text-base placeholder:text-neutral6 focus:outline-none',
+            'h-full w-full rounded-[4px] px-3 text-[14px] placeholder:text-neutral6 focus:outline-none',
             className,
             disabledClassName.input
           )}
           disabled={disabled}
           min={minNumber}
           max={maxNumber}
+          name={name}
           {...props}
         />
         {(isError || isPassword || suffix) && (
@@ -164,6 +193,11 @@ const InputText = ({
           {helperText}
         </Paragraph>
       )}
+      {errors?.[name] && touched?.[name] && (
+        <Paragraph level={4} className='text-error mt-1 text-red-500'>
+          {errors?.[name]}
+        </Paragraph>
+      )}
     </div>
   );
 };
@@ -186,6 +220,10 @@ InputText.propTypes = {
   minNumber: PropTypes.number,
   maxNumber: PropTypes.number,
   maxChar: PropTypes.number,
+  errors: PropTypes.object,
+  touched: PropTypes.object,
+  onBlur: PropTypes.func,
+  name: PropTypes.string.isRequired,
 };
 
 export default InputText;

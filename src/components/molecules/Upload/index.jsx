@@ -29,6 +29,9 @@ const Upload = ({
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const validateFile = (file) => {
+    if (file.name.includes('.shp')) {
+      return;
+    }
     const validTypes = [
       'application/pdf',
       'image/jpeg',
@@ -40,7 +43,13 @@ const Upload = ({
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/octet-stream',
+      'application/geo+json',
+      'application/x-esri-shapefile',
+      '.shp',
+      '.geojson',
     ];
+
     const selectedFileType = validTypes.filter((item) => allowedFiles?.some((subString) => item?.includes(subString)));
     const _maxSize = maxSize * 1024 * 1024; // MB
 
@@ -113,15 +122,15 @@ const Upload = ({
   };
 
   const formatting = useMemo(() => {
-    const excelFiles = allowedFiles.filter((file) => file.includes('excel') || file.includes('spreadsheetml'));
-    const otherFiles = allowedFiles.filter((file) => !file.includes('excel') && !file.includes('spreadsheetml'));
+    const excelFiles = allowedFiles?.filter((file) => file.includes('excel') || file.includes('spreadsheetml'));
+    const otherFiles = allowedFiles?.filter((file) => !file.includes('excel') && !file.includes('spreadsheetml'));
 
     if (excelFiles.length > 1) {
-      const format = ['Excel', ...otherFiles.map((file) => file.split('/')[1].toUpperCase())];
+      const format = ['Excel', ...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase())];
 
       return format;
     } else {
-      const format = [...otherFiles.map((file) => file.split('/')[1].toUpperCase())];
+      const format = [...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase())];
 
       return format;
     }

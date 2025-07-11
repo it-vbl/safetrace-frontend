@@ -1,6 +1,7 @@
 function getPolygonCenter(coords: any) {
-  const total = coords.length;
-  const sum = coords.reduce(
+  if (!coords) return false;
+  const total = coords?.length;
+  const sum = coords?.reduce(
     (acc: any, [lat, lng]: any) => {
       acc.lat += lat;
       acc.lng += lng;

@@ -1,0 +1,18 @@
+import BorderBottomColData from '../../../molecules/BorderBottomColData';
+
+const DataLahan = ({ data }) => {
+  return (
+    <div className='flex w-full flex-col'>
+      <div className='flex flex-1 font-bold'>Informasi Lahan</div>
+      <div className='grid h-auto w-full grid-cols-3'>
+        <BorderBottomColData label='Eks Plasma' value={data?.lahan?.eks_plasma} />
+        <BorderBottomColData label='Status Lahan' value={data?.lahan?.status_lahan_label} />
+        <BorderBottomColData label='Luas Lahan(m2)' value={data?.lahan?.luas_lahan} />
+        <BorderBottomColData label='No Dokumen' value={data?.lahan?.no_dokumen} />
+        <BorderBottomColData label='Kecamatan' value={data?.lahan?.kecamatan_label} />
+        <BorderBottomColData label='Kelurahan' value={data?.lahan?.desa_label} />
+      </div>
+    </div>
+  );
+};
+export default DataLahan;

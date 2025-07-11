@@ -43,6 +43,9 @@ const Select = ({
   isCustomScrollBar = false,
   position = null,
   showSearchBar = false,
+  errors = {},
+  touched = {},
+  onBlur = () => {},
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value);
@@ -146,10 +149,14 @@ const Select = ({
     setIsAddOption(true);
   };
 
+  const handleBlur = () => {
+    onBlur({ target: { name } });
+  };
+
   return (
     <div className={cn('flex flex-col gap-1', !isInsideModal && 'relative', block && 'w-full', containerClassName)}>
       {label && (
-        <Label data-testid='label-container' isRequired={isRequired}>
+        <Label data-testid='label-container' className=' text-[12px] font-bold text-gray-500' isRequired={isRequired}>
           {label}
         </Label>
       )}
@@ -159,8 +166,9 @@ const Select = ({
           tabIndex={0}
           data-testid='select-field'
           onClick={handleSelectFieldClick}
+          onBlur={handleBlur}
           className={cn(
-            'flex min-h-[40px] w-full cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[6px] border px-3 py-2',
+            ' flex min-h-[40px] w-full cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[6px] border bg-white px-3 py-2',
             {
               'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7': disabled,
               'hover:border-blue6 focus:border-blue6 focus:outline-none': !disabled,
@@ -173,8 +181,8 @@ const Select = ({
         >
           <Paragraph
             data-testid='selected-value'
-            className={cn('w-full overflow-hidden', {
-              'text-neutral9': selectedValue && !disabled,
+            className={cn('w-full overflow-hidden text-[14px]', {
+              '': selectedValue && !disabled,
               'text-neutral6': !selectedValue && !disabled,
               'text-neutral7': disabled,
             })}
@@ -185,6 +193,7 @@ const Select = ({
           <div className='flex flex-row items-center gap-2'>
             {isError && <ErrorOutline data-testid='error-icon' />}
             <ExpandMore
+              size={16}
               data-testid='expand-icon'
               className={cn({ 'rotate-180': isDropdownOpen })}
               color={disabled ? theme?.colors?.neutral7 : theme?.colors?.neutral8}
@@ -305,6 +314,11 @@ const Select = ({
           })}
         >
           {helperText}
+        </Paragraph>
+      )}
+      {errors?.[name] && touched?.[name] && (
+        <Paragraph level={4} className='text-error mt-1 text-red-500'>
+          {errors?.[name]}
         </Paragraph>
       )}
     </div>

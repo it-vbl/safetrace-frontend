@@ -1,22 +1,17 @@
-import PropTypes from 'prop-types';
+import { MinusIcon, PlusIcon } from '@radix-ui/react-icons';
+import { useState } from 'react';
 
-import AccordionItem from '../../atoms/AccordionItem';
-
-const Accordion = ({ items = [], accordionItemClassName = '' }) => (
-  <div data-testid='accordion'>
-    {items.map((item, index) => (
-      <AccordionItem title={item.title} description={item.description} key={index} className={accordionItemClassName} />
-    ))}
-  </div>
-);
-
-Accordion.propTypes = {
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      description: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
-    })
-  ),
+const Accordion = ({ title = '', children = <></>, defaultIsOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultIsOpen);
+  return (
+    <div className='w-full border border-gray-300'>
+      <div className='flex w-full cursor-pointer flex-row items-center p-4' onClick={() => setIsOpen(!isOpen)}>
+        <div className='flex flex-1 text-[14px] font-bold tracking-[1px]'>{title}</div>
+        {isOpen ? <MinusIcon width={16} /> : <PlusIcon width={16} />}
+      </div>
+      {isOpen ? <div className=' px-4 pb-4'>{children}</div> : null}
+    </div>
+  );
 };
 
 export default Accordion;

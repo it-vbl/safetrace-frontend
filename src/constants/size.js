@@ -1,0 +1,4 @@
+export default {
+  SIDEBAR_WIDTH: 234,
+  SIDEBAR_WIDTH_COLLAPSED: 90,
+};

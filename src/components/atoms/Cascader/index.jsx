@@ -19,14 +19,14 @@ const Cascader = ({
   variant = 'parent',
   ...props
 }) => {
-  const selectedClassName = isSelected ? `text-blue8` : '';
+  const selectedClassName = isSelected ? `text-primary` : '';
   return (
     <div
       className={cn(
         'flex w-full flex-row items-center gap-[10px] px-3 py-2',
         {
           'text-gray-300': disabled,
-          'text-neutral10 hover:bg-blue1': !disabled,
+          'text-neutral10 hover:bg-primary/10': !disabled,
           'pl-[30px]': variant === 'child',
         },
         className

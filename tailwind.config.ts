@@ -42,7 +42,7 @@ const config: Config = {
           foreground: 'hsl(var(--card-foreground))',
         },
         primary: '#0C7C59',
-        secondary: '#F75233',
+        secondary: '#D1FBED',
         tertiary: '#D8F733',
         primaryLight10: '#2a70f8',
         primaryLight9: '#4180f9',
