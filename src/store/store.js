@@ -7,6 +7,7 @@ import pekebunReducer from './slices/pekebun';
 import wilayah from './slices/wilayah';
 import createKebunFormReducer from './slices/createKebunForm';
 import kebunReducer from './slices/kebun';
+import appReducer from './slices/app';
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     wilayah,
     createKebunForm: createKebunFormReducer,
     kebun: kebunReducer,
+    app: appReducer,
   },
 });
 

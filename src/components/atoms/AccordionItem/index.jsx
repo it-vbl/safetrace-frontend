@@ -4,15 +4,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  ChevronDoubleDownIcon,
-  ChevronDoubleUpIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
-import Minus from '../../atoms/Icons/Minus';
-import Plus from '../../atoms/Icons/Plus';
 import Paragraph from '../../atoms/Typography/Paragraph';
 
 const AccordionItem = ({ title = '', description = <></>, className = '' }) => {

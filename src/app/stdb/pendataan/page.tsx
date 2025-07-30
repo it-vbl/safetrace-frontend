@@ -1,18 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
-import Statistic from '@/components/atoms/Icons/Statistic';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import theme from '@/utils/tailwindTheme';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { useRouter } from 'next/navigation';
 import Heading from '@/components/atoms/Typography/Heading';
-import Close from '@/components/atoms/Icons/Close';
 import Select from '@/components/molecules/Select';
-import getPolygonCenter from '@/utils/getPolygonCenter';
-import Checkbox from '@/components/atoms/Checkbox';
 import SearchBar from '@/components/molecules/SearchBar';
 import useKomoditas from '@/hooks/useKomoditas';
 import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
@@ -22,6 +15,12 @@ import { useDispatch } from 'react-redux';
 import { setFilterKomoditas } from '@/store/slices/stdb';
 import useReferences from '@/hooks/useReferences';
 import Button from '@/components/atoms/Button';
+import Pagination from '@/components/organisms/Pagination';
+import debounce from 'lodash/debounce';
+import ModalConfirmDeletePekebun from '@/components/organisms/Modal/ModalConfirmDeletePekebun';
+import { deletePekebun } from '@/services/pekebun';
+import { toast } from 'react-toastify';
+import { DownloadCloudIcon } from 'lucide-react';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -32,21 +31,42 @@ const MapDashboard = () => {
   const [showTable, setShowTable] = useState(false);
   const [rowData, setRowData] = useState([]);
   const [selectedPekebun, setSelectedPekebun] = useState<any>(null);
+  const [showModalConfirmDeletePekebun, setShowModalConfirmDeletePekebun] = useState(false);
+  const [selectedPekebunToDelete, setSelectedPekebunToDelete] = useState(false);
+
+  const [search, setSearch] = useState('');
+  //pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const { komoditas } = useKomoditas();
   const { kecamatanSanggau } = useKecamatanSanggau();
   const { stdb, filterKomoditas } = useSTDB();
   const { stdbStatuses } = useReferences();
-  const { pekebuns, onPendataanPekebuns, fetchPekebunOnPendataan } = usePekebuns();
+  const { loading, onPendataanPekebuns, fetchPekebunOnPendataan, totalPekebun } = usePekebuns();
 
   useEffect(() => {
-    fetchPekebunOnPendataan();
-  }, []);
+    fetchPekebunOnPendataan({
+      page: currentPage,
+      page_size: pageSize,
+      search: search,
+    });
+  }, [currentPage, pageSize, search]);
 
+  /**
+   * Handles when the user clicks on the "Lihat" button on the table row.
+   * This will navigate the user to the detail page of the selected pekebun.
+   * @param {object} data - The data of the selected pekebun.
+   */
   const handleOnLihatClicked = (data: any) => {
     router.push(`/stdb/pendataan/${data.pekebun.id}/detail`);
     setShowTable(false);
     setSelectedPekebun(data);
+  };
+
+  const handleOnLihatClickedDelete = (data: any) => {
+    setSelectedPekebunToDelete(data);
+    setShowModalConfirmDeletePekebun(true);
   };
 
   const ActionsCellRenderer = useCallback(
@@ -56,7 +76,7 @@ const MapDashboard = () => {
           <Button size={'extraSmall'} onClick={() => handleOnLihatClicked(e.data)}>
             Lihat
           </Button>
-          <Button variant={'danger'} size={'extraSmall'} onClick={() => handleOnLihatClicked(e.data)}>
+          <Button variant={'danger'} size={'extraSmall'} onClick={() => handleOnLihatClickedDelete(e.data)}>
             Hapus
           </Button>
         </div>
@@ -89,24 +109,6 @@ const MapDashboard = () => {
     };
   }, []);
 
-  const centerMap = useMemo(() => {
-    if (selectedPekebun?.geom?.coordinates) {
-      return getPolygonCenter(selectedPekebun?.geom?.coordinates);
-    }
-    return [-0.5, 114.9];
-  }, [selectedPekebun]);
-
-  const zoomMap = 7;
-
-  const Map = useMemo(
-    () =>
-      dynamic(() => import('@/components/organisms/MapView'), {
-        loading: () => <p>A map is loading</p>,
-        ssr: false,
-      }),
-    []
-  );
-
   const handleFilterKomoditasChange = (value: any, komoditas: any) => {
     let temp = [...filterKomoditas];
     if (value.target.checked) {
@@ -117,6 +119,41 @@ const MapDashboard = () => {
     dispatch(setFilterKomoditas(temp));
   };
 
+  const handlePageChange = useCallback((newPage: number) => {
+    setCurrentPage(newPage);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+  }, []);
+
+  const handleSearchTextChange = useCallback(
+    debounce((e: any) => {
+      setSearch(e.target.value);
+    }, 300),
+    []
+  );
+
+  const handleDeletePekebun = async () => {
+    try {
+      const res = await deletePekebun(selectedPekebunToDelete?.id);
+      if (res.status == 200) {
+        setShowModalConfirmDeletePekebun(false);
+        fetchPekebunOnPendataan({
+          page: currentPage,
+          page_size: pageSize,
+          search: search,
+        });
+        toast.success('Data pekebun berhasil dihapus');
+      }
+    } catch (err) {
+      toast.error('Data pekebun gagal dihapus');
+    }
+
+    return true;
+  };
+
   return (
     <div className='relative max-h-[calc(100vh-72px)] w-full'>
       <div className='flex h-full flex-col gap-4'>
@@ -124,17 +161,43 @@ const MapDashboard = () => {
           <Heading level={2}>Pendataan</Heading>
           <div className='flex flex-row items-center gap-8'>
             <div className='flex flex-row items-center gap-2'>
-              <SearchBar placeholder='Cari Pekebun' />
+              <SearchBar onChange={handleSearchTextChange} placeholder='Cari Pekebun' />
               <Select containerClassName='w-[200px]' placeholder='Pilih Komoditas' options={komoditas} />
               <Select containerClassName='w-[200px]' placeholder='Pilih Kecamatan' options={kecamatanSanggau} />
+              <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />
               <Button onClick={() => router.push(`/stdb/pendataan/tambah-pekebun`)}>Tambah Pekebun</Button>
             </div>
           </div>
         </div>
         <div className='w-full flex-1'>
-          <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={onPendataanPekebuns} columnDefs={colDefs} />
+          <AgGridReact
+            loading={loading}
+            autoSizeStrategy={autoSizeStrategy}
+            rowData={onPendataanPekebuns}
+            columnDefs={colDefs}
+          />
         </div>
+        <Pagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalItems={totalPekebun}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          showRowsPerPage={true}
+          labels={{
+            rowsPerPage: 'Baris Per Halaman',
+            showing: 'Menampilkan',
+            of: 'dari',
+          }}
+        />
       </div>
+      <ModalConfirmDeletePekebun
+        open={showModalConfirmDeletePekebun}
+        setOpen={setShowModalConfirmDeletePekebun}
+        namaPekebun={selectedPekebunToDelete?.pekebun?.nama}
+        jumlahKebun={selectedPekebunToDelete?.jumlah_kebun}
+        handleSubmit={handleDeletePekebun}
+      />
     </div>
   );
 };

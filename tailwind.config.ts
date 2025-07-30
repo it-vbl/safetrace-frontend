@@ -44,6 +44,7 @@ const config: Config = {
         primary: '#0C7C59',
         secondary: '#D1FBED',
         tertiary: '#D8F733',
+        bgColor: '#EDF5F7',
         primaryLight10: '#2a70f8',
         primaryLight9: '#4180f9',
         primaryLight8: '#4d91fa',

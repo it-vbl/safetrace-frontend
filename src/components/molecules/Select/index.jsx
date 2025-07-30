@@ -1,8 +1,8 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
-
 import Button from '@/components/atoms/Button';
 import Cascader from '@/components/atoms/Cascader';
 import ErrorOutline from '@/components/atoms/Icons/ErrorOutline';
@@ -201,109 +201,112 @@ const Select = ({
           </div>
         </div>
 
-        {isDropdownOpen && (
-          <div
-            data-testid='dropdown-menu'
-            style={{
-              width: dropdownRef.current && dropdownRef.current.offsetWidth,
-            }}
-            className={cn(
-              'absolute z-[9999] rounded-[6px] bg-white p-2 shadow-sm',
-              {
-                '-translate-y-[120%]': (position || dropdownPosition) === 'top',
-                'translate-y-0': (position || dropdownPosition) === 'bottom',
-              },
-              isCustomScrollBar && 'custom-scrollbar'
-            )}
-          >
-            {showSearchBar && (
-              <div ref={searchInputRef}>
-                <InputText
-                  placeholder={`Cari ${label?.toLocaleLowerCase()}`}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className='relative'
-                  containerClassName='mb-2'
-                  suffix={<Search />}
-                />
-              </div>
-            )}
-
-            <div className='max-h-[200px] overflow-y-auto'>
-              {filteredOptions?.length > 0 ? (
-                filteredOptions?.map((option) => (
-                  <Cascader
-                    data-testid={`option-${option.value}`}
-                    key={option.value}
-                    onClick={() => handleOptionChange(option.value)}
-                    value={option.value}
-                    isSelected={selectedValue === option?.value}
-                    disabled={option?.disabled}
-                  >
-                    {option.label}
-                  </Cascader>
-                ))
-              ) : (
-                <Paragraph data-testid='no-options' level={4} className='py-2 text-center'>
-                  Tidak ada pilihan
-                </Paragraph>
-              )}
-            </div>
-
-            {allowAddOption.visible && (
-              <form
-                ref={formAddOptionRef}
-                onSubmit={handleSubmitNewOption}
-                className='my-2'
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className='flex flex-col gap-2'>
-                  {isAddOption && (
-                    <InputText
-                      value={formik.values.newOption}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      name='newOption'
-                      placeholder={allowAddOption.placeholder}
-                      onClick={(e) => e.stopPropagation()}
-                      containerClassName='mb-0 flex-1 px-2 mb-3'
-                      isError={formik.touched.newOption && formik.errors.newOption}
-                      helperText={formik.touched.newOption && formik.errors.newOption}
-                      maxChar={allowAddOption.maxLength}
-                    />
-                  )}
-                  <div className='flex items-center gap-2 px-2'>
-                    <Button
-                      variant='tertiary'
-                      className='flex w-[135px] items-center gap-1.5 whitespace-nowrap'
-                      icon={<Plus size={8} />}
-                      size='small'
-                      disabled={isAddOption}
-                      onClick={handleAddOptionClick}
-                    >
-                      {allowAddOption.addButtonText}
-                    </Button>
-                    <Button
-                      onClick={handleApplyClick}
-                      variant='primary'
-                      size='small'
-                      isFullWidth
-                      disabled={
-                        allowAddOption.isLoading ||
-                        !formik.values.newOption ||
-                        !isAddOption ||
-                        (formik.touched.newOption && formik.errors.newOption) ||
-                        !formik.isValid
-                      }
-                    >
-                      {allowAddOption.applyButtonText}
-                    </Button>
-                  </div>
+        {isDropdownOpen &&
+          createPortal(
+            <div
+              data-testid='dropdown-menu'
+              style={{
+                position: 'absolute',
+                top:
+                  dropdownPosition === 'top'
+                    ? dropdownRef.current.getBoundingClientRect().top -
+                      (document?.querySelector('[data-testid="dropdown-menu"]')?.clientHeight || 200)
+                    : dropdownRef.current.getBoundingClientRect().bottom,
+                left: dropdownRef.current.getBoundingClientRect().left,
+                width: dropdownRef.current.offsetWidth,
+                zIndex: 99999,
+              }}
+              className={cn('rounded-[6px] bg-white p-2 shadow-sm', isCustomScrollBar && 'custom-scrollbar')}
+            >
+              {showSearchBar && (
+                <div ref={searchInputRef}>
+                  <InputText
+                    placeholder={`Cari ${label?.toLocaleLowerCase()}`}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className='relative'
+                    containerClassName='mb-2'
+                    suffix={<Search />}
+                  />
                 </div>
-              </form>
-            )}
-          </div>
-        )}
+              )}
+
+              <div className='max-h-[200px] overflow-y-auto'>
+                {filteredOptions?.length > 0 ? (
+                  filteredOptions?.map((option) => (
+                    <Cascader
+                      data-testid={`option-${option.value}`}
+                      key={option.value}
+                      onClick={() => handleOptionChange(option.value)}
+                      value={option.value}
+                      isSelected={selectedValue === option?.value}
+                      disabled={option?.disabled}
+                    >
+                      {option.label}
+                    </Cascader>
+                  ))
+                ) : (
+                  <Paragraph data-testid='no-options' level={4} className='py-2 text-center'>
+                    Tidak ada pilihan
+                  </Paragraph>
+                )}
+              </div>
+
+              {allowAddOption.visible && (
+                <form
+                  ref={formAddOptionRef}
+                  onSubmit={handleSubmitNewOption}
+                  className='my-2'
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className='flex flex-col gap-2'>
+                    {isAddOption && (
+                      <InputText
+                        value={formik.values.newOption}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        name='newOption'
+                        placeholder={allowAddOption.placeholder}
+                        onClick={(e) => e.stopPropagation()}
+                        containerClassName='mb-0 flex-1 px-2 mb-3'
+                        isError={formik.touched.newOption && formik.errors.newOption}
+                        helperText={formik.touched.newOption && formik.errors.newOption}
+                        maxChar={allowAddOption.maxLength}
+                      />
+                    )}
+                    <div className='flex items-center gap-2 px-2'>
+                      <Button
+                        variant='tertiary'
+                        className='flex w-[135px] items-center gap-1.5 whitespace-nowrap'
+                        icon={<Plus size={8} />}
+                        size='small'
+                        disabled={isAddOption}
+                        onClick={handleAddOptionClick}
+                      >
+                        {allowAddOption.addButtonText}
+                      </Button>
+                      <Button
+                        onClick={handleApplyClick}
+                        variant='primary'
+                        size='small'
+                        isFullWidth
+                        disabled={
+                          allowAddOption.isLoading ||
+                          !formik.values.newOption ||
+                          !isAddOption ||
+                          (formik.touched.newOption && formik.errors.newOption) ||
+                          !formik.isValid
+                        }
+                      >
+                        {allowAddOption.applyButtonText}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>,
+            document.body
+          )}
       </div>
       {helperText && (
         <Paragraph

@@ -1,4 +1,4 @@
-import { useCallback,useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Cascader from '@/components/atoms/Cascader';
@@ -99,26 +99,26 @@ const SelectMultiple = ({
   }, [selectedValues, options]);
 
   return (
-    <div className={cn('relative flex flex-col gap-1', block && 'w-full', containerClassName)}>
+    <div className={cn(' relative flex flex-col gap-1', block && 'w-full', containerClassName)}>
       {label && (
-        <Label isRequired={isRequired} className='text-neutral11 font-bold'>
+        <Label isRequired={isRequired} className='font-bold text-neutral11'>
           {label}
         </Label>
       )}
-      <div className='relative' ref={dropdownRef}>
+      <div className='relative ' ref={dropdownRef}>
         <div
           aria-disabled={disabled}
           tabIndex={0}
           onClick={handleSelectFieldClick}
-          className={cn('flex min-h-[52px] w-full cursor-pointer items-center gap-1 rounded-[6px] border px-3 py-2', {
-            'border-neutral6 bg-neutral4 text-neutral7 cursor-not-allowed': disabled,
+          className={cn('flex h-[40px] w-full cursor-pointer items-center gap-1 rounded-[6px] border px-3 py-2', {
+            'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7': disabled,
             'border-neutral8 hover:border-blue6': selectedValues.length > 0 && !disabled && !isError,
             'border-neutral5 hover:border-blue6': selectedValues.length === 0 && !disabled && !isError,
             'focus:border-blue6 focus:outline-none': !disabled && !isError,
             'border-error5': isError,
           })}
         >
-          <div className='hidden-barscrolling flex max-h-[130px] w-full flex-wrap gap-1 overflow-y-auto'>
+          <div className=' hide-scrollbar flex h-auto w-full flex-row items-end gap-1 overflow-x-auto '>
             {selectedValues.length > 0 ? (
               selectedOptions.map((option) => (
                 <div
@@ -127,10 +127,10 @@ const SelectMultiple = ({
                     handleOptionChange(option.value);
                   }}
                   key={option.value}
-                  className={`flex min-w-[100px] items-center justify-between gap-1.5 rounded-full border border-[#DEDEDE] px-3 py-1 ${chipClassName}`}
+                  className={`flex items-center justify-between gap-1.5 self-center rounded-full border border-[#DEDEDE] px-3 py-1 ${chipClassName}`}
                 >
                   <Paragraph level={4}>{option.label}</Paragraph>
-                  <button className='bg-blue8 hover:text-blue9 flex size-4 items-center justify-center rounded-full'>
+                  <button className='flex size-2 items-center justify-center rounded-full bg-blue8 hover:text-blue9'>
                     <Close size={14} color='white' />
                   </button>
                 </div>
@@ -179,7 +179,7 @@ const SelectMultiple = ({
       {helperText && (
         <Paragraph
           level={4}
-          className={cn('text-neutral7 relative z-0', {
+          className={cn('relative z-0 text-neutral7', {
             'text-error5': isError,
           })}
         >

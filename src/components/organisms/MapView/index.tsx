@@ -14,6 +14,37 @@ import 'leaflet.pm';
 import getPolygonCenter from '@/utils/getPolygonCenter';
 import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
 import { EditControl } from 'react-leaflet-draw';
+import Link from 'next/link';
+import { ArrowRightIcon } from 'lucide-react';
+import STDBStatusChip from '@/components/atoms/STDBStatusChip';
+
+const tileLayers = {
+  osm: {
+    name: 'OpenStreetMap',
+    type: 'base',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  },
+  light: {
+    name: 'Light',
+    type: 'base',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  },
+  dark: {
+    name: 'Dark',
+    type: 'base',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  },
+  satellite: {
+    name: 'Satellite',
+    type: 'base',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution:
+      'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+  },
+};
 
 const DrawControl = ({
   onCreate = (e: any) => {},
@@ -151,40 +182,47 @@ const DrawControl = ({
   );
 };
 
-function CustomButtonControl() {
+function CustomButtonControl({ onFilterChange = (e) => {}, activeFilter = '' }) {
   const map = useMap();
 
   useEffect(() => {
-    const CustomControl = L.Control.extend({
-      onAdd: function () {
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-        container.style.backgroundColor = 'white';
-        container.style.width = '34px';
-        container.style.height = '34px';
-        container.style.fontSize = '16px';
-        container.style.display = 'flex';
-        container.style.alignItems = 'center';
-        container.style.justifyContent = 'center';
-        container.style.cursor = 'pointer';
-        container.title = 'Custom Action';
+    const createControl = (title, innerHTML, position, onClick) => {
+      const Control = L.Control.extend({
+        onAdd: function () {
+          const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+          container.style.backgroundColor = 'white';
+          container.style.width = '34px';
+          container.style.height = '34px';
+          container.style.fontSize = '16px';
+          container.style.display = 'flex';
+          container.style.alignItems = 'center';
+          container.style.justifyContent = 'center';
+          container.style.cursor = 'pointer';
+          container.style.borderColor = activeFilter === title ? 'green' : '';
+          container.title = title;
 
-        container.innerHTML = '🥬';
+          container.innerHTML = innerHTML;
 
-        container.onclick = () => {
-          alert('Custom button clicked!');
-        };
+          container.onclick = onClick;
 
-        return container;
-      },
-    });
+          return container;
+        },
+      });
 
-    const control = new CustomControl({ position: 'topleft' });
-    map.addControl(control);
+      const control = new Control({ position });
+      map.addControl(control);
 
-    return () => {
-      map.removeControl(control);
+      return () => map.removeControl(control);
     };
-  }, [map]);
+
+    const controls = [
+      createControl('Filter Komoditas', '🥬', 'topleft', () => onFilterChange('komoditas')),
+      createControl('Filter Kecamatan', '📍', 'topleft', () => onFilterChange('kecamatan')),
+      createControl('Tile Layer', '🗺️', 'topleft', () => onFilterChange('tilelayer')),
+    ];
+
+    return () => controls.forEach((control) => control());
+  }, [map, onFilterChange, activeFilter]);
 
   return null;
 }
@@ -197,8 +235,8 @@ function EnableRulerTool() {
     map.pm.addControls({
       position: 'topleft',
       drawMarker: false,
-      drawPolygon: true,
-      drawPolyline: false, // use this for measuring
+      drawPolygon: false,
+      drawPolyline: true, // use this for measuring
       drawCircle: false,
       drawCircleMarker: false,
       drawRectangle: false,
@@ -262,8 +300,14 @@ export default function MyMap(props: any) {
     onDeletePath = () => {},
     enableDrawPolygon = false,
     enableEditDeletePath = false,
+    showCustomControls = false,
+    onFilterChange = (e) => {},
+    activeFilter = '',
+    tileLayer = 'osm',
   } = props;
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+
+  console.log('highlightedPolygon', highlightedPolygon);
 
   const finalPosition = position ? position : [-0.5, 114.9];
 
@@ -275,6 +319,12 @@ export default function MyMap(props: any) {
       scrollWheelZoom={true}
       ref={mapRef}
     >
+      {showCustomControls && (
+        <>
+          <EnableRulerTool />
+          <CustomButtonControl onFilterChange={onFilterChange} activeFilter={activeFilter} />
+        </>
+      )}
       <DrawControl
         disableDrawPolygon={!enableDrawPolygon}
         disableEditDeletePath={!enableEditDeletePath}
@@ -283,9 +333,7 @@ export default function MyMap(props: any) {
         onDeleted={onDeletePath}
         polygons={polygons}
       />
-      {/* <EnableRulerTool /> */}
-      {/* <CustomButtonControl /> */}
-      <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+      <TileLayer attribution={tileLayers[tileLayer].attribution} url={tileLayers[tileLayer].url} />
       <MapCenterUpdater zoom={zoom} position={finalPosition} />
       <ZoomUpdater coordinates={highlightedPolygon} />
       {data?.map((data: any) => {
@@ -296,20 +344,22 @@ export default function MyMap(props: any) {
               click: () => setOpenPopupId(data?.id),
             }}
             positions={data?.peta?.geom?.coordinates}
-            pathOptions={{ color: data.id == activeDataId ? 'green' : 'red', fillOpacity: 0.4 }}
+            pathOptions={{ color: data.id == activeDataId ? 'green' : 'gray', fillOpacity: 0.4 }}
           >
             {showPolygonPopup ? (
               <Popup closeButton={false}>
                 <div className='w-full'>
                   {/* Header */}
-                  <div className='flex w-full items-center justify-between'>
-                    <Paragraph>DETAIL</Paragraph>
+                  <div className='flex h-[32px] items-center justify-between '>
+                    <Paragraph className='font-bold ' level={2}>
+                      DETAIL
+                    </Paragraph>
                     <ClosePopupButton />
                   </div>
-                  <div className='w-[400px]'>
+                  <div className='w-[500px]'>
                     <div className='grid grid-cols-3'>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-4'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Titik koordinat</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-4'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Titik koordinat</Paragraph>
                         <Paragraph className='!m-0 text-[16px]'>
                           {convertCoordsToDMS(
                             data?.peta?.titik_koordinat?.coordinates[0],
@@ -317,84 +367,58 @@ export default function MyMap(props: any) {
                           )}
                         </Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>ID Kebun</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.id}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>ID Kebun</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.id}</Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Status Lahan</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Status Lahan</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.status_lahan_label}</Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Komoditas</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.komoditas_kelembagaan_label}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Komoditas</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.komoditas_info}</Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Luas Lahan (m2)</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.luas_lahan}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Luas Lahan (m2)</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.luas_lahan}</Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Kecamatan</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.kecamatan_label}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kecamatan</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.kecamatan_label}</Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Kelurahan</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.desa_label}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kelurahan</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.desa_label}</Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Data Peta</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.data_peta}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Data Peta</Paragraph>
+                        <Paragraph
+                          className={`!m-0 text-[14px] font-bold ${
+                            data?.peta?.geom?.coordinates?.length > 0 ? 'text-primary' : ' text-red-900'
+                          }`}
+                        >
+                          {data?.peta?.geom?.coordinates?.length > 0 ? 'Ada' : 'Tidak Ada'}
+                        </Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold'>Pekebun</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>{data?.pekebun?.user?.full_name}</Paragraph>
+                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Pekebun</Paragraph>
+                        <Paragraph className='!m-0 text-[14px]'>{data?.pekebun?.nama}</Paragraph>
                       </div>
+                      <div className='border-b-1 flex flex-col items-start gap-1 border-b border-dashed py-4 pr-8'>
+                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>STDB Terbit</Paragraph>
+                        <STDBStatusChip value={data?.status_stdb} label={data?.status_stdb_label} />
+                      </div>
+                    </div>
+                    <div className='absolute bottom-6 right-6'>
+                      <Link href={`/mapview`}>
+                        <div className='flex flex-row items-center gap-2 self-end text-primary'>
+                          Lihat selengkapnya
+                          <ArrowRightIcon size={12} />
+                        </div>
+                      </Link>
                     </div>
                   </div>
-                  {/* <div className='flex flex-col gap-4'>
-                  <div className='flex gap-4'>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Titik koordinat</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>{data?.coordinate}</Paragraph>
-                    </div>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>ID Kebun</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>{data?.id}</Paragraph>
-                    </div>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Status Lahan</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                  </div>
-                  <div className='flex gap-4'>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Komoditas</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Luas Lahan (m2)</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Kecamatan</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                  </div>
-                  <div className='flex gap-4'>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Kelurahan</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Data Peta</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                    <div className='flex flex-col gap-1'>
-                      <Paragraph className='!m-0 text-[12px] font-bold'>Pekebun</Paragraph>
-                      <Paragraph className='!m-0 text-[16px]'>3°5'18"N, 103°15'12"E</Paragraph>
-                    </div>
-                  </div>
-                </div> */}
                 </div>
               </Popup>
             ) : null}

@@ -11,12 +11,13 @@ import { usePathname } from 'next/navigation';
 import { IoHome, IoHomeOutline, IoSettings } from 'react-icons/io5';
 import { ChevronDownIcon, ChevronUpIcon, DashboardIcon } from '@radix-ui/react-icons';
 
-const Sidebar = ({ isMobile = false, isSidebarOpen, toggleSidebar }) => {
+const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const storedValue = Cookies.get('storeProfile');
   const profile = storedValue ? JSON.parse(storedValue) : null;
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState(null);
   const [isSubMenuOpened, setIsSubMenuOpened] = useState(false);
+  const { sidebarOpen } = useSelector((state) => state.app);
 
   const router = useRouter();
   const isMobileScreen = false;
@@ -111,9 +112,10 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, toggleSidebar }) => {
 
   return (
     <div
-      className={`h-full ${isMobile ? 'inset-0 z-[100] bg-opacity-50' : 'bg-opacity-100'} ${
-        isMobile && !isSidebarOpen ? 'hidden' : 'block'
-      }`}
+      style={{ width: (isMobile && !isSidebarOpen) || !sidebarOpen ? 0 : `${size.SIDEBAR_WIDTH}px` }}
+      className={`h-full overflow-x-hidden transition-all duration-300 ${
+        isMobile ? 'inset-0 z-[100] bg-opacity-50' : 'bg-opacity-100'
+      } ${(isMobile && !isSidebarOpen) || !sidebarOpen ? 'opacity-0' : 'opacity-100'}`}
     >
       <div
         className='bg-primary700 flex h-full flex-col border-r border-r-gray-200 px-4 pt-8 text-white'

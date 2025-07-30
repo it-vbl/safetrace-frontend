@@ -15,6 +15,9 @@ const RadioButton = ({
   isError = null,
   value = null | undefined,
   onChangeValue = (e) => {},
+  size = 12,
+  labelClassName = '',
+  containerClassName = '',
 }) => {
   const handleOnChange = (e) => {
     onChange(e);
@@ -25,7 +28,7 @@ const RadioButton = ({
     <div className='flex flex-col gap-1'>
       <div className='flex flex-col gap-5'>
         {label && <Label isRequired={isRequired}>{label}</Label>}
-        <div className='radio-button-group flex items-center justify-between'>
+        <div className={`radio-button-group flex flex-col items-center justify-between ${containerClassName}`}>
           {options.map((option) => (
             <label key={option.value} className='radio-label flex w-full items-center gap-2'>
               <input
@@ -34,9 +37,10 @@ const RadioButton = ({
                 value={option.value}
                 checked={value === option.value}
                 onChange={handleOnChange}
+                style={{ width: size, height: size }}
                 className={`${styles['radio-button']} cursor-pointer ${isError ? '!border-error5' : 'border-gray-500'}`}
               />
-              <Paragraph className='cursor-pointer text-neutral9' level={3}>
+              <Paragraph className={`cursor-pointer text-neutral9 ${labelClassName}`} level={3}>
                 {option.label}
               </Paragraph>
             </label>

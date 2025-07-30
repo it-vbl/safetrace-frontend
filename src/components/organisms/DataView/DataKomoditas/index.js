@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import BorderBottomColData from '../../../molecules/BorderBottomColData';
+import Checkbox from '@/components/atoms/Checkbox';
 
-const DataKomoditas = ({ komoditas }) => {
+const DataKomoditas = ({ komoditas = [], mode = 'pendataan', onVerifyChange = (e) => {}, verified = false, data }) => {
   const [activeKomoditasIndex, setActiveKomoditasIndex] = useState(0);
 
   const dataKomoditas = useMemo(() => {
@@ -46,6 +47,18 @@ const DataKomoditas = ({ komoditas }) => {
       </div>
       <div className='border border-gray-300 p-4'>
         <div className='flex flex-1 font-bold'>Informasi Pola Tanam</div>
+        {mode === 'verifikasi' && (
+          <div className='mt-3'>
+            <Checkbox
+              value={verified}
+              onChange={onVerifyChange}
+              size={14}
+              labelClassName={`${data?.status_stdb === '3' ? 'text-gray-400' : 'text-primary'}  text-[12px] font-bold`}
+              label='Terverifikasi?'
+              disabled={data?.status_stdb === '3'}
+            />
+          </div>
+        )}
         <div className='grid h-auto w-full grid-cols-3'>
           <BorderBottomColData label='Komoditas' value={activeKomoditas?.data?.nama_label} />
           <BorderBottomColData label='Tahun Tanam' value={activeKomoditas?.data?.tahun_tanam} />

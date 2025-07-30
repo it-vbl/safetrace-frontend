@@ -10,3 +10,4 @@ export const createKomoditas = (payload) => api.post(`/pekebun/kebun/komoditas/c
 export const editKomoditas = (payload) => api.post(`/pekebun/kebun/komoditas/edit/`, null, payload);
 export const deleteKomoditas = (payload) => api.post(`/pekebun/kebun/komoditas/delete/`, null, payload);
 export const deleteKebun = (payload) => api.post(`/pekebun/kebun/delete/`, null, payload);
+export const downloadSHPKebun = (idKebun) => api.get(`/pekebun/kebun/peta/download/${idKebun}`);

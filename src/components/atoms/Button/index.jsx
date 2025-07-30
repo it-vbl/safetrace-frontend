@@ -4,8 +4,7 @@ import PropTypes from 'prop-types';
 import { cn } from '@/utils/cn';
 import theme from '@/utils/tailwindTheme';
 
-import LoadingSpinner from '../LoadingSpinner';
-import { BiLoader, BiLoaderCircle } from 'react-icons/bi';
+import { BiLoaderCircle } from 'react-icons/bi';
 
 const sizeClassName = {
   extraSmall: 'h-[28px] py-2 px-4 text-xs',
@@ -15,11 +14,11 @@ const sizeClassName = {
 };
 
 const variantClassName = {
-  primary: 'bg-primary hover:bg-primaryLight7 text-white disabled:bg-grey-200',
-  secondary: 'border border-primary hover:bg-secondaryLight2 text-primary disabled:bg-gray-200',
+  primary: 'bg-primary hover:bg-primary/10 text-white disabled:bg-grey-200',
+  secondary: 'border border-primary hover:bg-primary/10 text-primary disabled:bg-gray-200',
   tertiary:
     'border-neutral6 border bg-neutral1 hover:bg-secondary2 disabled:bg-gray-200 text-neutral8 disabled:bg-neutral3',
-  danger: 'border border-error6 hover:bg-error7 disabled:bg-gray-200 text-error6 disabled:bg-neutral3',
+  danger: 'hover:bg-error1 disabled:bg-gray-200 bg-error6 text-white disabled:bg-neutral3',
 };
 
 const iconColor = {
@@ -42,14 +41,14 @@ const Button = ({
   onClick = () => {},
   ...props
 }) => {
-  const baseClassName = `rounded-[4px] leading-[16px] flex whitespace-nowrap justify-center items-center gap-1 ${
+  const baseClassName = `rounded-[4px] leading-[16px] flex whitespace-nowrap justify-center items-center gap-2 ${
     isFullWidth ? 'w-full' : ''
   }`;
   const buttonClassName = cn(
     baseClassName,
     sizeClassName[size],
     variantClassName[variant],
-    (isLoading || isDisabled) && 'cursor-not-allowed !bg-gray-200',
+    (isLoading || isDisabled) && 'cursor-not-allowed !bg-gray-300 border-none text-gray-500',
     className
   );
 
@@ -57,7 +56,7 @@ const Button = ({
     <button className={buttonClassName} disabled={isLoading || isDisabled} style={style} onClick={onClick} {...props}>
       {icon
         ? React.cloneElement(icon, {
-            color: iconColor[variant],
+            color: isLoading || isDisabled ? theme.colors.gray[500] : iconColor[variant],
           })
         : null}
       {children && (

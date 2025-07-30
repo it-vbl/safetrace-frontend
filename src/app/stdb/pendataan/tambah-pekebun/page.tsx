@@ -5,9 +5,6 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { useRouter } from 'next/navigation';
 import Select from '@/components/molecules/Select';
 import useWilayah from '@/hooks/useWilayah';
-import useSTDB from '@/hooks/useSTDB';
-import usePekebuns from '@/hooks/usePekebuns';
-import { useDispatch } from 'react-redux';
 import useReferences from '@/hooks/useReferences';
 import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
@@ -24,6 +21,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 const CreatePekebun = () => {
   const [isNIKRegistered, setIsNIKRegistered] = useState(true);
+  const [isCheckNIK, setIsCheckNIK] = useState(false);
 
   const router = useRouter();
   const {
@@ -41,7 +39,9 @@ const CreatePekebun = () => {
 
   const schemaValidation = Yup.object().shape({
     nama: Yup.string().required('Nama harus diisi'),
-    nik: Yup.string().required('NIK harus diisi'),
+    nik: Yup.string()
+      .required('NIK harus diisi')
+      .matches(/^\d{16}$/, 'NIK harus 16 digit angka'),
     no_ponsel: Yup.string().required('No ponsel harus diisi'),
     tempat_lahir: Yup.string().required('Tempat lahir harus diisi'),
     tanggal_lahir: Yup.string().required('Tanggal lahir harus diisi'),
@@ -54,7 +54,37 @@ const CreatePekebun = () => {
     alamat_ktp: Yup.string().required('Alamat KTP harus diisi'),
   });
 
-  const { handleSubmit, values, touched, errors, handleBlur, handleChange } = useFormik({
+  function formatErrorMessage(response) {
+    let message = `${response.message}:\n\n`;
+
+    // Collect all error messages from the errors object
+    const errorList = [];
+    for (const key in response.errors) {
+      if (Array.isArray(response.errors[key])) {
+        errorList.push(...response.errors[key]);
+      }
+    }
+
+    // Append numbered errors
+    errorList.forEach((err, index) => {
+      message += `${index > 0 ? ',' : ''} ${err.replace(/\.$/, '')}\n`;
+    });
+
+    return message.trim();
+  }
+
+  const {
+    handleSubmit,
+    validateForm,
+    values,
+    touched,
+    setTouched,
+    errors,
+    setErrors,
+    handleBlur,
+    handleChange,
+    isSubmitting,
+  } = useFormik({
     initialValues: {
       nama: '',
       nik: '',
@@ -79,24 +109,36 @@ const CreatePekebun = () => {
         }
       } catch (error) {
         console.error(error);
+        toast.error(formatErrorMessage(error?.response?.data));
       } finally {
         setSubmitting(false);
       }
     },
   });
 
+  console.log('FORMIK ERROR', errors);
+
   const periksaNIK = async () => {
     try {
-      const res = await checkNIK(values.nik);
-      if (res.status == 200) {
-        if (!res.data?.data?.terdaftar) {
-          setIsNIKRegistered(false);
+      setIsCheckNIK(true);
+      const errors = await validateForm();
+      setErrors(errors);
+      if (!errors.nik) {
+        const res = await checkNIK(values.nik);
+        if (res.status == 200) {
+          if (!res.data?.data?.terdaftar) {
+            setIsNIKRegistered(false);
+            setErrors({});
+            setTouched({});
+          }
+          toast.success(res.data?.message);
         }
-        toast.success(res.data?.message);
       }
     } catch (error) {
       console.error(error);
       toast.error('NIK sudah digunakan');
+    } finally {
+      setIsCheckNIK(false);
     }
   };
 
@@ -128,7 +170,11 @@ const CreatePekebun = () => {
     <form onSubmit={handleSubmit} className='relative max-h-[calc(100vh-72px)] w-full'>
       <Accordion defaultIsOpen={true} title='IDENTITAS PEKEBUN'>
         <>
-          <div className='flex flex-row items-end justify-start gap-2'>
+          <div
+            className={`flex flex-row ${
+              errors?.nik && touched?.nik ? 'items-center' : 'items-end'
+            } justify-start gap-2`}
+          >
             <InputText
               isRequired={true}
               label='NIK'
@@ -138,9 +184,16 @@ const CreatePekebun = () => {
               containerClassName='w-[300px]'
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.nik && errors.nik}
+              errors={errors}
+              touched={touched}
             />
-            <Button onClick={periksaNIK} variant='secondary' className='h-[30px]'>
+            <Button
+              isDisabled={errors?.nik}
+              isLoading={isCheckNIK}
+              onClick={periksaNIK}
+              variant='secondary'
+              className='h-[30px]'
+            >
               Cari
             </Button>
           </div>
@@ -156,7 +209,8 @@ const CreatePekebun = () => {
                   value={values.nama}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.nama && errors.nama}
+                  errors={errors}
+                  touched={touched}
                 />
                 <InputText
                   isRequired={true}
@@ -167,7 +221,8 @@ const CreatePekebun = () => {
                   value={values.tempat_lahir}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.tempat_lahir && errors.tempat_lahir}
+                  errors={errors}
+                  touched={touched}
                 />
                 <DatePicker
                   label='Tanggal Lahir'
@@ -176,7 +231,8 @@ const CreatePekebun = () => {
                   value={values.tanggal_lahir ? moment(values.tanggal_lahir, 'YYYY-MM-DD').format('DD-MM-YYYY') : ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.tanggal_lahir && errors.tanggal_lahir}
+                  errors={errors}
+                  touched={touched}
                 />
               </div>
               <div className='grid grid-cols-3 gap-6 border-b border-dashed border-b-gray-300 py-4'>
@@ -189,7 +245,8 @@ const CreatePekebun = () => {
                   value={values.jenis_kelamin}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.jenis_kelamin && errors.jenis_kelamin}
+                  errors={errors}
+                  touched={touched}
                 />
                 <Select
                   selectClassName='!min-h-[30px] h-[30px]'
@@ -200,7 +257,8 @@ const CreatePekebun = () => {
                   value={values.provinsi}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.provinsi && errors.provinsi}
+                  errors={errors}
+                  touched={touched}
                   showSearchBar={true}
                 />
                 <Select
@@ -212,7 +270,8 @@ const CreatePekebun = () => {
                   value={values.kabupaten}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.kabupaten && errors.kabupaten}
+                  errors={errors}
+                  touched={touched}
                   showSearchBar={true}
                 />
               </div>
@@ -226,7 +285,8 @@ const CreatePekebun = () => {
                   value={values.kecamatan}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.kecamatan && errors.kecamatan}
+                  errors={errors}
+                  touched={touched}
                   showSearchBar={true}
                 />
                 <Select
@@ -239,7 +299,8 @@ const CreatePekebun = () => {
                   value={values.desa}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.desa && errors.desa}
+                  errors={errors}
+                  touched={touched}
                   showSearchBar={true}
                 />
                 <InputText
@@ -251,7 +312,8 @@ const CreatePekebun = () => {
                   value={values.alamat_ktp}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.alamat_ktp && errors.alamat_ktp}
+                  errors={errors}
+                  touched={touched}
                 />
               </div>
               <div className='grid grid-cols-3 gap-6 py-4'>
@@ -265,7 +327,8 @@ const CreatePekebun = () => {
                   value={values.pendidikan_terakhir}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.pendidikan_terakhir && errors.pendidikan_terakhir}
+                  errors={errors}
+                  touched={touched}
                 />
                 <InputText
                   isRequired={true}
@@ -276,7 +339,8 @@ const CreatePekebun = () => {
                   value={values.no_ponsel}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.no_ponsel && errors.no_ponsel}
+                  errors={errors}
+                  touched={touched}
                 />
               </div>
             </>
@@ -284,10 +348,12 @@ const CreatePekebun = () => {
         </>
       </Accordion>
       <div className='mt-4 flex flex-row justify-end gap-2'>
-        <Button type='button' className='bg-red-500'>
+        <Button isLoading={isSubmitting} type='button' className='bg-red-500'>
           Batalkan
         </Button>
-        <Button type='submit'>Simpan</Button>
+        <Button isLoading={isSubmitting} type='submit'>
+          Simpan
+        </Button>
       </div>
     </form>
   );

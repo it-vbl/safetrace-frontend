@@ -6,6 +6,7 @@ import { setDetailPekebun, setListKebun, setOnPendataanPekebuns, setPekebuns } f
 const usePekebuns = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [totalPekebun, setTotalPekebun] = useState(0);
 
   const dispatch = useDispatch();
 
@@ -19,6 +20,7 @@ const usePekebuns = () => {
         setterCallback(response);
       } else {
         const pekebuns = response.data.data.results;
+        setTotalPekebun(response.data.data.count);
         dispatch(setDataCallback(pekebuns));
       }
     } catch (error) {
@@ -31,11 +33,18 @@ const usePekebuns = () => {
 
   return {
     pekebuns,
+    totalPekebun,
     onPendataanPekebuns,
     detailPekebun,
     listKebun,
-    fetchPekebun: () => fetchData(getListPekebun, setPekebuns),
-    fetchPekebunOnPendataan: () => fetchData(getListPekebunOnPendataan, setOnPendataanPekebuns),
+    fetchPekebun: ({ page_size = 10, page = 1, search = '' } = {}) => {
+      const params = `page_size=${page_size}&page=${page}&search=${search}`;
+      return fetchData(() => getListPekebun(params), setPekebuns);
+    },
+    fetchPekebunOnPendataan: ({ page_size = 10, page = 1, search = '' } = {}) => {
+      const params = `page_size=${page_size}&page=${page}&search=${search}`;
+      return fetchData(() => getListPekebunOnPendataan(params), setOnPendataanPekebuns);
+    },
     fetchDetailPekebun: (id) =>
       fetchData(
         () => getDetailPekebun(id),

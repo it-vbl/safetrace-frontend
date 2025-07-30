@@ -47,8 +47,8 @@ const InputText = ({
   };
 
   const errorClassName = {
-    field: touched?.[name] && errors[name] ? '!border-error5' : '',
-    helperText: touched?.[name] && errors[name] ? 'text-error5' : '',
+    field: touched?.[name] && errors?.[name] ? '!border-error5' : '',
+    helperText: touched?.[name] && errors?.[name] ? 'text-error5' : '',
   };
   const inputType = useMemo(() => {
     if (isPassword) {

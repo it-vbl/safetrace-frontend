@@ -3,7 +3,15 @@ import PropTypes from 'prop-types';
 
 import './Checkbox.module.css';
 
-const Checkbox = ({ value = false, onChange = (e) => {}, name = '', disabled = false, size = 18, label = '' }) => {
+const Checkbox = ({
+  value = false,
+  onChange = (e) => {},
+  name = '',
+  disabled = false,
+  size = 18,
+  label = '',
+  labelClassName = '',
+}) => {
   const [isChecked, setIsChecked] = useState(value);
 
   useEffect(() => {
@@ -15,13 +23,16 @@ const Checkbox = ({ value = false, onChange = (e) => {}, name = '', disabled = f
     onChange(e);
   };
 
+  const handleClickLabel = () => {
+    if (!disabled) {
+      setIsChecked(!isChecked);
+      onChange({ target: { checked: !isChecked, name } });
+    }
+  };
+
   return (
     <div className='flex items-center gap-2'>
-      <div
-        className={` ${
-          disabled ? 'cursor-not-allowed border-gray-300 bg-gray-200' : 'cursor-pointer'
-        } flex items-start items-center`}
-      >
+      <div className={` ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} flex items-start items-center`}>
         <input
           type='checkbox'
           checked={isChecked}
@@ -32,11 +43,13 @@ const Checkbox = ({ value = false, onChange = (e) => {}, name = '', disabled = f
             height: size,
           }}
           name={name}
-          data-testd='checkbox'
+          id={name}
+          data-testid='checkbox'
         />
-        <span className='' />
+        <label htmlFor={name} onClick={handleClickLabel} className={` ml-2 cursor-pointer ${labelClassName}`}>
+          {label}
+        </label>
       </div>
-      {label}
     </div>
   );
 };
