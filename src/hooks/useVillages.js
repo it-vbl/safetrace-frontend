@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+
 import { getVillages } from '../services/master';
 
 const useVillages = (districtId) => {

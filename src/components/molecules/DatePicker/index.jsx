@@ -1,8 +1,7 @@
 import { useRef } from 'react';
 import moment from 'moment';
-import { toast } from 'react-toastify';
-
 import { BiCalendar } from 'react-icons/bi';
+import { toast } from 'react-toastify';
 
 const DatePicker = ({
   placeholder = '',

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
-import BorderBottomColData from '../../../molecules/BorderBottomColData';
+
 import Checkbox from '@/components/atoms/Checkbox';
+
+import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
 const DataKomoditas = ({ komoditas = [], mode = 'pendataan', onVerifyChange = (e) => {}, verified = false, data }) => {
   const [activeKomoditasIndex, setActiveKomoditasIndex] = useState(0);

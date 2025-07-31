@@ -1,6 +1,7 @@
 import React from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
+import { ArcElement, Chart as ChartJS, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+
 import Heading from '@/components/atoms/Typography/Heading';
 
 ChartJS.register(ArcElement, Tooltip);

@@ -1,6 +1,7 @@
+import { useState } from 'react';
+
 import Button from '@/components/atoms/Button';
 import Modal from '@/components/molecules/Modal';
-import { useState } from 'react';
 
 const ModalConfirmDeletePekebun = ({ open, setOpen, namaPekebun, jumlahKebun, handleSubmit }) => {
   const handleOnClose = () => setOpen(false);

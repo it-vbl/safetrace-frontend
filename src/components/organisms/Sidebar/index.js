@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { IoHome, IoHomeOutline, IoSettings } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
 
 import { Date } from '@/assets/icons/index';
-
 import size from '@/constants/size';
-import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { IoHome, IoHomeOutline, IoSettings } from 'react-icons/io5';
 import { ChevronDownIcon, ChevronUpIcon, DashboardIcon } from '@radix-ui/react-icons';
 
 const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {

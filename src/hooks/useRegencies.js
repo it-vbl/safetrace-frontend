@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+
 import { getRegencies } from '../services/master';
 
 const useRegencies = (provinceId) => {

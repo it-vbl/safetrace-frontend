@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
-import BorderBottomColData from '../../../molecules/BorderBottomColData';
 import dynamic from 'next/dynamic';
-import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
-import Checkbox from '@/components/atoms/Checkbox';
 import { DownloadCloud } from 'lucide-react';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import { downloadSHPKebun } from '@/services/kebun';
 import { toast } from 'react-toastify';
+
+import Checkbox from '@/components/atoms/Checkbox';
+import Paragraph from '@/components/atoms/Typography/Paragraph';
+import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
+import { downloadSHPKebun } from '@/services/kebun';
+
+import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
 const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChange = (e) => {} }) => {
   const Map = useMemo(

@@ -1,9 +1,10 @@
 'use client';
 
-import { RowsPerPageSelector } from '../../molecules/RowsPerPageSelector';
-import { PageInfo } from '../../molecules/PageInfo';
-import { NavigationControls } from '../../molecules/NavigationControls';
 import { cn } from '@/libs/utils';
+
+import { NavigationControls } from '../../molecules/NavigationControls';
+import { PageInfo } from '../../molecules/PageInfo';
+import { RowsPerPageSelector } from '../../molecules/RowsPerPageSelector';
 
 export default function Pagination({
   currentPage,

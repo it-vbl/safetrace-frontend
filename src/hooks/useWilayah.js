@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { getProvinsi, getDesa, getKota, getKecamatan } from '../services/wilayah';
-import { useSelector, useDispatch } from 'react-redux';
-import { setListProvinsi, setListKota, setListKecamatan, setListDesa } from '@/store/slices/wilayah';
+import { useDispatch,useSelector } from 'react-redux';
+
+import { setListDesa,setListKecamatan, setListKota, setListProvinsi } from '@/store/slices/wilayah';
+
+import { getDesa, getKecamatan,getKota, getProvinsi } from '../services/wilayah';
 
 const useWilayah = () => {
   const [loading, setLoading] = useState(false);

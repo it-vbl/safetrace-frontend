@@ -1,4 +1,5 @@
 import Checkbox from '@/components/atoms/Checkbox';
+
 import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
 const DataLahan = ({ mode = 'pendataan', data, onVerifyChange = (e) => {}, verified = false }) => {

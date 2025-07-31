@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { BiLoaderCircle } from 'react-icons/bi';
 
 import { cn } from '@/utils/cn';
 import theme from '@/utils/tailwindTheme';
-
-import { BiLoaderCircle } from 'react-icons/bi';
 
 const sizeClassName = {
   extraSmall: 'h-[28px] py-2 px-4 text-xs',

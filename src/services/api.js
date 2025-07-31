@@ -2,7 +2,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import querystring from 'qs';
 import { toast } from 'react-toastify';
-import { addAbortController, abortAllRequests } from '@/libs/utils/requestController';
+
+import { abortAllRequests,addAbortController } from '@/libs/utils/requestController';
 
 let controller = new AbortController();
 

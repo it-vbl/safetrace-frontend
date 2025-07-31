@@ -1,28 +1,29 @@
 import { useState } from 'react';
+import { useDispatch,useSelector } from 'react-redux';
+
 import {
-  getPendidikanTerakhir,
-  getStatusLahan,
-  getPolaTanam,
   getAsalBenih,
+  getEksPlasma,
+  getJenisKelamin,
   getJenisLahan,
   getJenisPupuk,
   getKomoditasKelembagaan,
+  getPendidikanTerakhir,
+  getPolaTanam,
+  getStatusLahan,
   getSTDBStatuses,
-  getJenisKelamin,
-  getEksPlasma,
 } from '../services/referensi';
-import { useSelector, useDispatch } from 'react-redux';
 import {
-  setSTDBStatuses,
-  setPendidikanTerakhir,
-  setStatusLahan,
-  setPolaTanam,
   setAsalBenih,
+  setEksPlasma,
+  setJenisKelamin,
   setJenisLahan,
   setJenisPupuk,
   setKomoditasKelembagaan,
-  setJenisKelamin,
-  setEksPlasma,
+  setPendidikanTerakhir,
+  setPolaTanam,
+  setStatusLahan,
+  setSTDBStatuses,
 } from '../store/slices/referensi';
 
 const useReferences = () => {
