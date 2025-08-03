@@ -102,15 +102,6 @@ const DrawControl = ({
       <EditControl
         onMounted={setEditRef}
         position='topleft'
-        onEditVertex={(e) => {
-          console.log('EDITED VERTEXT', e);
-          //   const tempCoords = Object.keys(e?.layers?._layers).map((key) => {
-          //     return {
-          //       lat: e?.layers?._layers?.[key]?._latlng?.lat,
-          //       lng: e?.layers?._layers?.[key]?._latlng?.lng,
-          //     };
-          //   });
-        }}
         draw={{
           polygon: !disableDrawPolygon
             ? {
@@ -128,23 +119,14 @@ const DrawControl = ({
           circle: false,
           marker: false,
           circlemarker: false,
+          polyline:false,
         }}
         onEdited={(e) => {
-          console.log('POLYGON EDITED', e);
           const latLngs = [];
           const layers = e.layers;
           layers.eachLayer((layer) => {
             latLngs.push(layer.getLatLngs());
           });
-
-          console.log('CHECK LAT LNG', layers);
-
-          // onEditPath(
-          //   e?.layers?._layers?.[Object.keys(e?.layers?._layers)?.[0]]?._latlngs?.[0].map((coord) => ({
-          //     lat: coord.lat,
-          //     lng: coord.lng,
-          //   }))
-          // );
           removeAllEditControlLayers();
           onEditPath(latLngs?.[0]?.[0]);
         }}

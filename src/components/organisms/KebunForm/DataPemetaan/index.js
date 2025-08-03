@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { BiTrash } from 'react-icons/bi';
-import ReactSwitch from 'react-switch';
 import { toast } from 'react-toastify';
 import shp from 'shpjs';
 
@@ -10,9 +9,6 @@ import Switch from '@/components/atoms/Switch';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import Upload from '@/components/molecules/Upload';
-import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
-
-import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
 const DataPemetaan = ({ data, formik, mode = 'create' }) => {
   const [drawFromMap, setDrawFromMap] = useState(false);
@@ -258,6 +254,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
             onEditPath={(e) => {
               setCoords(e);
             }}
+            showDrawControls={true}
           />
         </div>
         {/* <BorderBottomColData
