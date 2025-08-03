@@ -1,8 +1,9 @@
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
 import Button from '@/components/atoms/Button';
 import Modal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 
 const optionAlasan = [
   { label: 'Masuk kawasan hutan lindung', value: 'Masuk kawasan hutan lindung' },

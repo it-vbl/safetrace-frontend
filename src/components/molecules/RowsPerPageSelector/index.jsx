@@ -1,7 +1,7 @@
 'use client';
 
-import { SimpleSelect } from '../../ui/select';
 import { PaginationText } from '../../atoms/PaginationText';
+import { SimpleSelect } from '../../ui/select';
 
 export function RowsPerPageSelector({
   value,

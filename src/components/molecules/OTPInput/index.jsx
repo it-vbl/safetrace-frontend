@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef,useState } from 'react';
+
 import { OTPInput as OTPInputField } from '@/components/atoms/OTPInputField';
 
 /**

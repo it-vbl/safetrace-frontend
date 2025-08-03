@@ -1,21 +1,7 @@
 import React from 'react';
 import ReactSwitch from 'react-switch';
 
-const Switch = ({
-  onChange,
-  checked,
-  onColor,
-  onHandleColor,
-  handleDiameter,
-  uncheckedIcon,
-  checkedIcon,
-  boxShadow,
-  activeBoxShadow,
-  height,
-  width,
-  className,
-  id,
-}) => {
+const Switch = ({ onChange, checked, onColor, onHandleColor, boxShadow = 4, activeBoxShadow, className, id }) => {
   const handleChange = (checked) => {
     onChange(checked);
   };
@@ -34,7 +20,6 @@ const Switch = ({
         activeBoxShadow={activeBoxShadow}
         height={16}
         width={32}
-        boxShadow={4}
         className={className}
         id={id}
       />

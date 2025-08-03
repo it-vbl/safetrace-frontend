@@ -1,13 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
-import komoditasReducer from './slices/komoditas';
-import kecamatanSanggauReducer from './slices/kecamatanSanggau';
-import stdbReducer from './slices/stdb';
-import referensiReducer from './slices/referensi';
-import pekebunReducer from './slices/pekebun';
-import wilayah from './slices/wilayah';
+
+import appReducer from './slices/app';
 import createKebunFormReducer from './slices/createKebunForm';
 import kebunReducer from './slices/kebun';
-import appReducer from './slices/app';
+import kecamatanSanggauReducer from './slices/kecamatanSanggau';
+import komoditasReducer from './slices/komoditas';
+import pekebunReducer from './slices/pekebun';
+import referensiReducer from './slices/referensi';
+import stdbReducer from './slices/stdb';
+import wilayah from './slices/wilayah';
 
 const store = configureStore({
   reducer: {

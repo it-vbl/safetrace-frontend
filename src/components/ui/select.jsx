@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+
 import { cn } from '@/libs/utils';
 
 export function Select({ value, onValueChange, children }) {
@@ -59,8 +60,6 @@ export function SelectValue({ placeholder }) {
 }
 
 export function SelectContent({ children, isOpen }) {
-  if (!isOpen) return null;
-
   const contentRef = useRef(null);
 
   useEffect(() => {
@@ -69,6 +68,8 @@ export function SelectContent({ children, isOpen }) {
       contentRef.current.style.top = `-${height + 10}px`;
     }
   }, [isOpen]);
+
+  if (!isOpen) return null;
 
   return (
     <div

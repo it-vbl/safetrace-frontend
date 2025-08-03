@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
-import { getKecamatanSanggau } from '../services/wilayah';
-import { useSelector, useDispatch } from 'react-redux';
+import { useEffect,useState } from 'react';
+import { useDispatch,useSelector } from 'react-redux';
+
 import { setKecamatanSanggau } from '@/store/slices/kecamatanSanggau';
+
+import { getKecamatanSanggau } from '../services/wilayah';
 
 const useKecamatanSanggau = () => {
   const [loading, setLoading] = useState(false);

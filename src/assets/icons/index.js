@@ -1,77 +1,77 @@
-import Date from './date';
-import Plus from './plus';
-import Upload from './upload';
-import Close from './close';
-import Chevron from './chevron';
-import User from './user';
-import Building from './building';
-import Briefcase from './briefcase';
-import Edit from './edit';
-import History from './history';
-import Report from './report';
-import PostAdd from './postAdd';
-import AssignmentAdd from './assignmentAdd';
-import PlusFAQ from './plusFAQ';
-import Minus from './minus';
-import Profile from './profile';
-import Logout from './logout';
 import Access from './access';
-import Pencil from './pencil';
+import AssignmentAdd from './assignmentAdd';
+import Briefcase from './briefcase';
+import Building from './building';
+import Chevron from './chevron';
+import Close from './close';
+import CompanyChart from './company';
+import Date from './date';
+import DeleteIcon from './delete';
 import Document from './document';
 import Download from './download';
-import Message from './message';
-import Play from './play';
-import TriangleUp from './triangleUp';
-import TriangleDown from './triangleDown';
-import HeadDashboard from './head';
-import RowButton from './rowButton';
-import USD from './usd';
-import Globe from './globe';
-import CompanyChart from './company';
-import LineChart from './lineChart';
-import ErrorIcon from './error';
-import Key from './key';
-import DeleteIcon from './delete';
-import InfoIcon from './info';
-import Trash from './trash';
+import Edit from './edit';
 import Email from './email';
+import ErrorIcon from './error';
+import Globe from './globe';
+import HeadDashboard from './head';
+import History from './history';
+import InfoIcon from './info';
+import Key from './key';
+import LineChart from './lineChart';
+import Logout from './logout';
+import Message from './message';
+import Minus from './minus';
+import Pencil from './pencil';
+import Play from './play';
+import Plus from './plus';
+import PlusFAQ from './plusFAQ';
+import PostAdd from './postAdd';
+import Profile from './profile';
+import Report from './report';
+import RowButton from './rowButton';
+import Trash from './trash';
+import TriangleDown from './triangleDown';
+import TriangleUp from './triangleUp';
+import Upload from './upload';
+import USD from './usd';
+import User from './user';
 
 export {
-  Date,
-  Plus,
-  Upload,
-  Close,
-  Chevron,
-  User,
-  Building,
-  Briefcase,
-  Edit,
-  History,
-  Report,
-  PostAdd,
-  AssignmentAdd,
-  PlusFAQ,
-  Minus,
-  Profile,
-  Logout,
   Access,
-  Pencil,
+  AssignmentAdd,
+  Briefcase,
+  Building,
+  Chevron,
+  Close,
+  CompanyChart,
+  Date,
+  DeleteIcon,
   Document,
   Download,
-  Message,
-  Play,
-  TriangleUp,
-  TriangleDown,
-  HeadDashboard,
-  RowButton,
-  USD,
-  Globe,
-  CompanyChart,
-  LineChart,
-  ErrorIcon,
-  Key,
-  DeleteIcon,
-  InfoIcon,
-  Trash,
+  Edit,
   Email,
+  ErrorIcon,
+  Globe,
+  HeadDashboard,
+  History,
+  InfoIcon,
+  Key,
+  LineChart,
+  Logout,
+  Message,
+  Minus,
+  Pencil,
+  Play,
+  Plus,
+  PlusFAQ,
+  PostAdd,
+  Profile,
+  Report,
+  RowButton,
+  Trash,
+  TriangleDown,
+  TriangleUp,
+  Upload,
+  USD,
+  User,
 };

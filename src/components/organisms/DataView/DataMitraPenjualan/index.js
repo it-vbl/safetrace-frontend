@@ -1,4 +1,5 @@
 import Checkbox from '@/components/atoms/Checkbox';
+
 import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
 const DataMitraPenjualan = ({ data, onVerifyChange = (e) => {}, verified = false, mode = 'pendataan' }) => {

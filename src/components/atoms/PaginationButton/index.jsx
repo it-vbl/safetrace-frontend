@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '../../ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { cn } from '../../../libs/utils';
+import { Button } from '../../ui/button';
 
 export function PaginationButton({ direction, onClick, disabled = false, className }) {
   const Icon = direction === 'prev' ? ChevronLeft : ChevronRight;

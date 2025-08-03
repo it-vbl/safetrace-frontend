@@ -1,5 +1,6 @@
-import { MinusIcon, PlusIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
+
+import { MinusIcon, PlusIcon } from '@radix-ui/react-icons';
 
 const Accordion = ({
   title = '',

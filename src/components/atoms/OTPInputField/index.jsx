@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useEffect, useImperativeHandle,useRef } from 'react';
 
 export const OTPInput = forwardRef(function OTPInput({ value, onChange, index, onKeyDown, autoFocus = false }, ref) {
   const inputRef = useRef(null);
