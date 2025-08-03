@@ -15,6 +15,7 @@ import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import RadioButton from '@/components/molecules/RadioButton';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
 import Pagination from '@/components/organisms/Pagination';
@@ -22,8 +23,10 @@ import pekebuns from '@/constants/pekebuns';
 import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
 import useKomoditas from '@/hooks/useKomoditas';
 import useReferences from '@/hooks/useReferences';
+import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
+import { setStaticLayerDetail } from '@/store/slices/staticLayer';
 import { setFilterKecamatan, setFilterKomoditas, setFilterSTDBStatus } from '@/store/slices/stdb';
 import { Button } from '@/stories/Button';
 import getPolygonCenter from '@/utils/getPolygonCenter';
@@ -42,7 +45,6 @@ const layerFilter = [
 const MapDashboard = () => {
   const dispatch = useDispatch();
   const [showTable, setShowTable] = useState(false);
-  const [rowData, setRowData] = useState(pekebuns);
   const [selectedPekebun, setSelectedPekebun] = useState(pekebuns[0]);
   const [activeFilter, setActiveFilter] = useState('');
   const [activeTile, setActiveTile] = useState('osm');
@@ -54,12 +56,19 @@ const MapDashboard = () => {
 
   const { komoditas } = useKomoditas();
   const { kecamatanSanggau } = useKecamatanSanggau();
-  const { stdb, filterKomoditas, filterKecamatan, totalSTDB, filterSTDBStatus } = useSTDB({
+  const { stdb, filterKomoditas, filterKecamatan, totalSTDB, filterSTDBStatus, fetchSTDB } = useSTDB({
     page_size: pageSize,
     page: currentPage,
     search: searchText,
   });
   const { stdbStatuses, fetchSTDBStatuses } = useReferences();
+  const {
+    staticLayerList,
+    staticLayersDetail,
+    fetchStaticLayerList,
+    fetchStaticLayersDetail,
+    loading: loadingDetailStaticLayer,
+  } = useStaticLayer();
 
   const handleOnLihatClicked = (data) => {
     setShowTable(false);
@@ -70,14 +79,14 @@ const MapDashboard = () => {
     (e) => {
       return <Button label='Lihat' size={'small'} onClick={() => handleOnLihatClicked(e.data)} />;
     },
-    [rowData]
+    [stdb]
   );
 
   const STDBStatusCellRenderer = useCallback(
     (e) => {
       return <STDBStatusChip value={e.data?.status_stdb} label={e.data?.status_stdb_label} />;
     },
-    [rowData]
+    [stdb]
   );
 
   const colDefs = [
@@ -148,6 +157,16 @@ const MapDashboard = () => {
     dispatch(setFilterKecamatan(temp));
   };
 
+  const handleStaticLayerChange = (v, data) => {
+    if (v.target.checked == true) {
+      fetchStaticLayersDetail(data?.slug);
+    } else {
+      let tempStaticLayer = { ...staticLayersDetail };
+      tempStaticLayer[data?.value] = null;
+      dispatch(setStaticLayerDetail(tempStaticLayer));
+    }
+  };
+
   const handlePageChange = useCallback((newPage) => {
     setCurrentPage(newPage);
   }, []);
@@ -164,21 +183,41 @@ const MapDashboard = () => {
     []
   );
 
-  // const handleSearch = useCallback(
-  //   async (newText: string) => {
-  //     const newSTDB = await useSTDB({ search: newText, page_size: pageSize, page: currentPage });
-  //     setRowData(newSTDB);
-  //   },
-  //   [currentPage, pageSize]
-  // );
+  const handleFilterKomoditasMultipleSelectChange = useCallback(
+    debounce((e) => {
+      dispatch(setFilterKomoditas(e.target.value));
+    }, 500),
+    []
+  );
 
-  const handleFilterSTDBStatusChange = (e) => {
-    dispatch(setFilterSTDBStatus(e.target.value));
-  };
+  const handleFilterKecamatanMultipleSelectChange = useCallback(
+    debounce((e) => {
+      dispatch(setFilterKomoditas(e.target.value));
+    }, 500),
+    []
+  );
+
+  const handleFilterSTDBStatusChange = useCallback(
+    debounce((e) => {
+      dispatch(setFilterSTDBStatus(e.target.value));
+    }, 500),
+    []
+  );
 
   useEffect(() => {
     fetchSTDBStatuses();
+    fetchStaticLayerList();
+
+    return () => {
+      dispatch(setFilterSTDBStatus(''));
+      dispatch(setFilterKomoditas([]));
+      dispatch(setFilterKecamatan([]));
+    };
   }, []);
+
+  useEffect(() => {
+    fetchSTDB();
+  }, [pageSize, currentPage, searchText, filterKomoditas, filterKecamatan, filterSTDBStatus]);
 
   return (
     <div className=' h-full w-full'>
@@ -193,6 +232,7 @@ const MapDashboard = () => {
           onFilterChange={(filter) => setActiveFilter(activeFilter == filter ? '' : filter)}
           activeFilter={activeFilter}
           tileLayer={activeTile}
+          staticLayers={staticLayersDetail}
         />
         <div className='absolute right-4 top-4 z-[400]'>
           <div
@@ -224,12 +264,14 @@ const MapDashboard = () => {
                   {/* <Select containerClassName='w-[200px]' placeholder='Pilih Komoditas' options={komoditas} /> */}
                   <SelectMultiple
                     value={filterKomoditas}
+                    onChange={handleFilterKomoditasMultipleSelectChange}
                     containerClassName='w-[200px]'
                     placeholder='Pilih Komoditas'
                     options={komoditas}
                   />
                   <SelectMultiple
                     value={filterKecamatan}
+                    onChange={handleFilterKecamatanMultipleSelectChange}
                     containerClassName='w-[200px]'
                     placeholder='Pilih Kecamatan'
                     options={kecamatanSanggau}
@@ -308,6 +350,7 @@ const MapDashboard = () => {
           activeFilter === 'tilelayer' ? 'translate-x-0' : '-translate-x-[200%]'
         }`}
       >
+        <SectionLoading loading={loadingDetailStaticLayer} />
         <div className='flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4'>
           <div>
             <RadioButton
@@ -324,13 +367,13 @@ const MapDashboard = () => {
             />
           </div>
           <div className='w-full border-b' />
-          {layerFilter?.map((data) => {
+          {staticLayerList?.map((data) => {
             return (
               <Checkbox
                 size={14}
                 key={`komoditas-${data?.value}`}
                 value={filterKomoditas?.includes(data?.value)}
-                onChange={(v) => handleFilterKomoditasChange(v, data)}
+                onChange={(v) => handleStaticLayerChange(v, data)}
                 label={data?.label}
               />
             );

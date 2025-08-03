@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { CheckCircle2 } from 'lucide-react';
@@ -116,7 +116,7 @@ const MapDashboard = () => {
       nik,
       tempat_lahir,
       tanggal_lahir,
-      jenis_kelamin,
+      jenis_kelamin_label,
       provinsi_label,
       kabupaten_label,
       kecamatan_label,
@@ -124,8 +124,8 @@ const MapDashboard = () => {
       pendidikan_terakhir_label,
       no_ponsel,
       lembaga_tani,
+      alamat_ktp,
     },
-    detailPekebun,
     listKebun,
     fetchDetailPekebun,
     fetchListKebun,
@@ -181,6 +181,10 @@ const MapDashboard = () => {
     }
   };
 
+  const handleClickUbahDataPekebun = useCallback(() => {
+    router.push(`/stdb/pendataan/${idPekebun}/edit-pekebun`);
+  }, []);
+
   return (
     <div className='flex h-full w-full flex-col'>
       <div className='flex w-full flex-row justify-between border border-gray-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
@@ -189,28 +193,26 @@ const MapDashboard = () => {
         <div>TERAKHIR DIUBAH : {moment(updated_at).format('DD-MM-YYYY hh:mm:ss')}</div>
       </div>
       <div className='mt-4 flex w-full flex-col gap-4 pb-8'>
-        <Accordion title='IDENTITAS PEKEBUN'>
+        <Accordion defaultIsOpen={true} title='IDENTITAS PEKEBUN'>
           <>
             <div className='grid w-full grid-cols-5'>
               <BorderBottomColData label='Nama' value={nama} />
               <BorderBottomColData label='NIK' value={nik} />
               <BorderBottomColData label='Tempat Lahir' value={tempat_lahir} />
               <BorderBottomColData label='Tanggal Lahir' value={tanggal_lahir} />
-              <BorderBottomColData label='Jenis Kelamin' value={jenis_kelamin} />
+              <BorderBottomColData label='Jenis Kelamin' value={jenis_kelamin_label} />
               <BorderBottomColData label='Provinsi' value={provinsi_label} />
               <BorderBottomColData label='Kabupaten/Kota' value={kabupaten_label} />
               <BorderBottomColData label='Kecamatan' value={kecamatan_label} />
               <BorderBottomColData label='Desa/Kelurahan' value={desa_label} />
-              <BorderBottomColData
-                className={'line-clamp-none'}
-                label='Alamat Sesuai KTP'
-                value={'asdkajshdkjahsd asljdhakjshd askjdhaksjhd askjdhasd'}
-              />
+              <BorderBottomColData className={'line-clamp-none'} label='Alamat Sesuai KTP' value={alamat_ktp} />
               <BorderBottomColData label='Pendidikan Terakhir' value={pendidikan_terakhir_label} />
               <BorderBottomColData label='Telepon' value={no_ponsel} />
             </div>
             <div className='mt-4 flex w-full justify-end'>
-              <Button variant='secondary'>Ubah Data</Button>
+              <Button onClick={handleClickUbahDataPekebun} variant='secondary'>
+                Ubah Data
+              </Button>
             </div>
           </>
         </Accordion>
