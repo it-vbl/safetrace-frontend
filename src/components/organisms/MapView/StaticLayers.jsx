@@ -86,9 +86,12 @@ const colorObject = {
 
 export default function IupMap({ data }) {
   const [polygons, setPolygons] = useState([]);
+
   useEffect(() => {
+    console.log('DATA', data);
+    if (typeof data !== 'object' || data == null) return;
     const tempArray = [];
-    Object.keys(data).map((params, idx, array) => {
+    Object?.keys(data).map((params, idx, array) => {
       tempArray.push({
         ...data[params],
       });

@@ -209,7 +209,7 @@ const MapDashboard = () => {
     fetchStaticLayerList();
 
     return () => {
-      dispatch(setFilterSTDBStatus(''));
+      dispatch(setFilterSTDBStatus(null));
       dispatch(setFilterKomoditas([]));
       dispatch(setFilterKecamatan([]));
     };

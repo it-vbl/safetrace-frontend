@@ -1,12 +1,16 @@
 'use client';
 
+import { useState } from 'react';
+import { useEffect } from 'react';
 import Image from 'next/image';
-import { usePathname,useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import Cookies from 'js-cookie';
 import { useDispatch, useSelector } from 'react-redux';
 
 import LogoLembaga from '@/components/atoms/LogoLembaga';
 import SipekebunLogo from '@/components/atoms/SipekebunLogo';
+import ProfilePopup from '@/components/molecules/ProfilePopup';
 import { setSidebarOpen } from '@/store/slices/app';
 import { ChevronDownIcon, HamburgerMenuIcon } from '@radix-ui/react-icons';
 
@@ -18,6 +22,8 @@ const Navbar = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
+  const [name, setName] = useState('')
+
   const { sidebarOpen } = useSelector((state) => state.app);
 
   const handleMenuClick = (menu) => {
@@ -27,6 +33,10 @@ const Navbar = () => {
   const getMenuClassName = (menu) => {
     return pathname === menu ? 'text-primary font-bold' : 'text-black';
   };
+
+  useEffect(() => {
+    setName(Cookies.get('fullName'))
+  },[])
 
   return (
     <div className='flex h-[72px] w-full flex-row items-center border-b border-b-gray-200 bg-white px-4'>
@@ -52,8 +62,15 @@ const Navbar = () => {
         >
           Dashboard
         </div>
-        <div className='flex flex-row items-center gap-2 font-bold'>
-          Fajar Sukmara <ChevronDownIcon />
+        <div
+          id='user'
+          className='flex flex-row items-center gap-2 font-bold cursor-pointer'
+        >
+          <ProfilePopup>
+            <div className="flex flex-row items-center gap-2">
+              {name} <ChevronDownIcon />
+            </div>
+          </ProfilePopup>
         </div>
       </div>
     </div>

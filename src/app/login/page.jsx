@@ -35,6 +35,7 @@ const LoginPage = () => {
         if (res.status == 200) {
           Cookies.set('token', res?.data?.data?.access);
           Cookies.set('refreshToken', res?.data?.data?.refresh);
+          Cookies.set('fullName', res?.data?.data?.full_name);
           router.push('/mapview');
           toast.success('Login berhasil');
         } else {

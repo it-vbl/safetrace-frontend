@@ -25,6 +25,7 @@ export default function Layout({ children }) {
     '/forgot-password/reset-password',
   ];
   const noSidebarRoutes = [
+    '/',
     '/login',
     '/forgot-password',
     '/forgot-password/verify-otp',
