@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   getAsalBenih,
@@ -45,11 +45,6 @@ const useReferences = () => {
     eksPlasma,
   } = useSelector((state) => state.referensi);
 
-  const search = (key, value) => {
-    const find = references.find((data) => data[key] === value);
-    return find;
-  };
-
   const fetchData = async (fetchFunction, setAction) => {
     setLoading(true);
     try {
@@ -86,7 +81,6 @@ const useReferences = () => {
   return {
     loading,
     error,
-    search,
     stdbStatuses,
     pendidikanTerakhir,
     statusLahan,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { setSTDB } from '@/store/slices/stdb';
 
@@ -24,6 +24,7 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
       if (page_size) params.set('page_size', page_size);
       if (page) params.set('page', page);
       filterKomoditas.forEach((komoditas) => params.append('komoditas', komoditas));
+      filterKecamatan.forEach((kecamatan) => params.append('kecamatan', kecamatan));
       if (filterSTDBStatus) params.set('status_stdb', filterSTDBStatus);
       if (search) params.set('search', search);
       const response = await getSTDBList(params);

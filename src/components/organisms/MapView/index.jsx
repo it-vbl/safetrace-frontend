@@ -11,6 +11,8 @@ import STDBStatusChip from '@/components/atoms/STDBStatusChip';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
 
+import IupMap from './StaticLayers';
+
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import '@/styles/globals.css';
@@ -284,7 +286,6 @@ export default function MyMap(props) {
     position = [-0.5, 114.9],
     zoom = 7,
     polygons = [],
-    initialPolygonDraw = [],
     data = [],
     activeDataId,
     highlightedPolygon = null,
@@ -296,18 +297,18 @@ export default function MyMap(props) {
     enableDrawPolygon = false,
     enableEditDeletePath = false,
     showCustomControls = false,
+    showDrawControls = false,
     onFilterChange = (e) => {},
     activeFilter = '',
     tileLayer = 'osm',
+    staticLayers = null,
   } = props;
-  const [openPopupId, setOpenPopupId] = (useState < string) | (null > null);
-
-  console.log('highlightedPolygon', highlightedPolygon);
+  const [openPopupId, setOpenPopupId] = useState(null);
 
   const finalPosition = position ? position : [-0.5, 114.9];
 
   return (
-    <MapContainer /// <reference path="" />
+    <MapContainer
       className={`h-[calc(100dvh-72px)] w-full ${mapClassName}`}
       center={finalPosition}
       zoom={zoom}
@@ -320,14 +321,16 @@ export default function MyMap(props) {
           <CustomButtonControl onFilterChange={onFilterChange} activeFilter={activeFilter} />
         </>
       )}
-      <DrawControl
-        disableDrawPolygon={!enableDrawPolygon}
-        disableEditDeletePath={!enableEditDeletePath}
-        onCreate={onDrawCreate}
-        onEditPath={onEditPath}
-        onDeleted={onDeletePath}
-        polygons={polygons}
-      />
+      {showDrawControls && (
+        <DrawControl
+          disableDrawPolygon={!enableDrawPolygon}
+          disableEditDeletePath={!enableEditDeletePath}
+          onCreate={onDrawCreate}
+          onEditPath={onEditPath}
+          onDeleted={onDeletePath}
+          polygons={polygons}
+        />
+      )}
       <TileLayer attribution={tileLayers[tileLayer].attribution} url={tileLayers[tileLayer].url} />
       <MapCenterUpdater zoom={zoom} position={finalPosition} />
       <ZoomUpdater coordinates={highlightedPolygon} />
@@ -420,6 +423,7 @@ export default function MyMap(props) {
           </Polygon>
         ) : null;
       })}
+      <IupMap data={staticLayers} />
       {/* {polygons &&
         polygons?.map((polygon) => {
           return (

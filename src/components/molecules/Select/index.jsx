@@ -16,6 +16,7 @@ import InputText from '@/components/molecules/InputText';
 import useTouchOutside from '@/hooks/useTouchOutside';
 import { cn } from '@/utils/cn';
 import theme from '@/utils/tailwindTheme';
+import { CrossCircledIcon } from '@radix-ui/react-icons';
 
 const Select = ({
   label = '',
@@ -191,6 +192,15 @@ const Select = ({
           >
             {selectedValue && selectedValue !== '' ? selectedOption?.label : placeholder}
           </Paragraph>
+          {selectedValue && (
+            <CrossCircledIcon
+              onClick={() => handleOptionChange('')}
+              size={20}
+              width={20}
+              height={20}
+              className='mr-2 scale-100 text-red-500 transition-all duration-300 hover:rotate-180 hover:scale-[1.1]'
+            />
+          )}
           <div className='flex flex-row items-center gap-2'>
             {isError && <ErrorOutline data-testid='error-icon' />}
             <ExpandMore

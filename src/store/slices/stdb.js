@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const stdbSlice = createSlice({
   name: 'stdb',
-  initialState: { stdb: [], filterKomoditas: [], filterKecamatan: [], filterSTDBStatus: '' },
+  initialState: { stdb: [], filterKomoditas: [], filterKecamatan: [], filterSTDBStatus: [] },
   reducers: {
     setSTDB: (state, action) => {
       state.stdb = action.payload;

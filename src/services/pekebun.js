@@ -9,6 +9,7 @@ export const getListKebun = (params) => api.get(`/pekebun/kebun/list/?${params}`
 export const getDetailKebun = (idKebun) => api.get(`/pekebun/kebun/detail/${idKebun}/`);
 
 export const createPekebun = (payload) => api.post(`/pekebun/create/`, null, payload);
+export const editPekebun = (idPekebun, payload) => api.post(`/pekebun/edit/${idPekebun}/`, null, payload);
 export const createLembagaTani = (payload) => api.post(`/pekebun/lembaga-tani/create/`, null, payload);
 export const checkNIK = (nik) => api.get(`/pekebun/periksa-nik/${nik}`);
 export const deletePekebun = (payload) => api.post(`/pekebun/delete/`, null, payload);

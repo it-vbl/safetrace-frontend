@@ -85,6 +85,7 @@ const CreatePekebun = () => {
     handleBlur,
     handleChange,
     isSubmitting,
+    setFieldValue,
   } = useFormik({
     initialValues: {
       nama: '',
@@ -256,7 +257,12 @@ const CreatePekebun = () => {
                   placeholder='Pilih Provinsi'
                   options={listProvinsi}
                   value={values.provinsi}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    setFieldValue('kabupaten', '');
+                    setFieldValue('kecamatan', '');
+                    setFieldValue('desa', '');
+                    handleChange(e);
+                  }}
                   onBlur={handleBlur}
                   errors={errors}
                   touched={touched}
@@ -269,7 +275,11 @@ const CreatePekebun = () => {
                   placeholder='Pilih Kabupaten/Kota'
                   options={listKota}
                   value={values.kabupaten}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    setFieldValue('kecamatan', '');
+                    setFieldValue('desa', '');
+                    handleChange(e);
+                  }}
                   onBlur={handleBlur}
                   errors={errors}
                   touched={touched}
@@ -284,7 +294,10 @@ const CreatePekebun = () => {
                   placeholder='Pilih Kecamatan'
                   options={listKecamatan}
                   value={values.kecamatan}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    setFieldValue('desa', '');
+                    handleChange(e);
+                  }}
                   onBlur={handleBlur}
                   errors={errors}
                   touched={touched}
@@ -349,7 +362,7 @@ const CreatePekebun = () => {
         </>
       </Accordion>
       <div className='mt-4 flex flex-row justify-end gap-2'>
-        <Button isLoading={isSubmitting} type='button' className='bg-red-500'>
+        <Button onClick={() => router.back()} isLoading={isSubmitting} type='button' className='bg-red-500'>
           Batalkan
         </Button>
         <Button isLoading={isSubmitting} type='submit'>
