@@ -160,10 +160,12 @@ export default function IupMap({ data }) {
                         <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-4'>
                           <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Titik koordinat</Paragraph>
                           <Paragraph className='!m-0 text-[16px]'>
-                            {convertCoordsToDMS(
-                              data?.peta?.titik_koordinat?.coordinates[0],
-                              data?.peta?.titik_koordinat?.coordinates[1]
-                            )}
+                            {data?.peta?.titik_koordinat?.coordinates?.[0] && data?.peta?.titik_koordinat?.coordinates?.[1]
+                              ? convertCoordsToDMS(
+                                  data.peta.titik_koordinat.coordinates[0],
+                                  data.peta.titik_koordinat.coordinates[1]
+                                )
+                              : 'N/A'}
                           </Paragraph>
                         </div>
                         <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
