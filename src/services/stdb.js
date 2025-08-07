@@ -1,8 +1,15 @@
 import api from './api';
 
+//list STDB
 export const getSTDBList = (params) => api.get(`/pekebun/kebun/list/?${params}`);
-export const pengajuanVerifikasi = (payload) => api.post(`/stdb/pengajuan-verifikasi/`, null, payload);
+export const getPenerbitanList = (params) => api.get(`/stdb/penerbitan/list/?${params}`);
 export const getVerifikasiList = (params) => api.get(`/stdb/verifikasi/list/?${params}`);
+export const getTidakTerbitList = (params) => api.get(`/stdb/tidak-terbit/list/?${params}`);
+export const getDataTerbitList = (params) => api.get(`/stdb/data-terbit/list/?${params}`);
+export const getDataBerakhirList = (params) => api.get(`/stdb/data-berakhir/list/?${params}`);
+
+// proses STDB
+export const pengajuanVerifikasi = (payload) => api.post(`/stdb/pengajuan-verifikasi/`, null, payload);
 export const prosesVerifikasiKebun = (payload) => api.post(`/stdb/verifikasi/kebun/proses/`, null, payload);
 export const getStatusVerifikasiKebun = (pekebunId, kebunId) =>
   api.get(`/stdb/verifikasi/kebun/status/${pekebunId}/${kebunId}/`);
@@ -11,3 +18,6 @@ export const ubahVerifikasiKebunKePendataan = (payload) => api.post(`/stdb/ubah-
 export const tidakTerbitVerifikasiKebun = (payload) => api.post(`/stdb/tidak-terbit/`, null, payload);
 export const rekomendasiTerbit = (payload) => api.post(`/stdb/rekomendasi-terbit/`, null, payload);
 export const getListKebunSTDB = (stdbId) => api.get(`/stdb/kebun/list/${stdbId}/`);
+export const prosesPenerbitanSTDB = (payload) => api.post(`/stdb/penerbitan/proses/`, null, payload);
+export const prosesDataBerakhirSTDB = (payload) => api.post(`/stdb/data-berakhir/proses/`, null, payload);
+export const prosesCetakSTDB = (payload) => api.post(`/stdb/cetak/proses/`, null, payload);

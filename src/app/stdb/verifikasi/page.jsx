@@ -1,39 +1,24 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
-import { useDispatch } from 'react-redux';
 
 import Button from '@/components/atoms/Button';
-import Checkbox from '@/components/atoms/Checkbox';
-import Close from '@/components/atoms/Icons/Close';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
-import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
-import useKomoditas from '@/hooks/useKomoditas';
 import usePekebuns from '@/hooks/usePekebuns';
-import useReferences from '@/hooks/useReferences';
 import useSTDB from '@/hooks/useSTDB';
-import { setFilterKomoditas } from '@/store/slices/stdb';
-import getPolygonCenter from '@/utils/getPolygonCenter';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const ListVerifikasi = () => {
-  const dispatch = useDispatch();
   const router = useRouter();
-  const [showTable, setShowTable] = useState(false);
-
-  const [rowData, setRowData] = useState([]);
-  const [selectedPekebun, setSelectedPekebun] = useState(null);
 
   const [search, setSearch] = useState('');
 
@@ -41,8 +26,8 @@ const ListVerifikasi = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { stdb, filterKomoditas, listVerifikasi, fetchListVerifikasi } = useSTDB();
-  const { pekebuns, totalPekebun, onPendataanPekebuns, fetchPekebunOnPendataan } = usePekebuns();
+  const { listVerifikasi, fetchListVerifikasi } = useSTDB();
+  const { totalPekebun } = usePekebuns();
 
   useEffect(() => {
     fetchListVerifikasi({
@@ -53,10 +38,7 @@ const ListVerifikasi = () => {
   }, [currentPage, pageSize, search]);
 
   const handleOnLihatClicked = (data) => {
-    console.log('CHECK DATA VERIFIKASI', data);
     router.push(`/stdb/verifikasi/${data.stdb_id}/detail?pekebunId=${data.pekebun.id}`);
-    setShowTable(false);
-    setSelectedPekebun(data);
   };
 
   const ActionsCellRenderer = useCallback(
@@ -69,7 +51,7 @@ const ListVerifikasi = () => {
         </div>
       );
     },
-    [rowData]
+    [listVerifikasi]
   );
   const colDefs = [
     {
@@ -87,7 +69,6 @@ const ListVerifikasi = () => {
     { field: 'kecamatan_label', headerName: 'Kecamatan' },
     { field: 'desa_label', headerName: 'Desa' },
     { field: 'updated_at', headerName: 'Terakhir Update' },
-    { field: 'desa_label', headerName: 'Pendata' },
   ];
 
   const autoSizeStrategy = useMemo(() => {
@@ -95,34 +76,6 @@ const ListVerifikasi = () => {
       type: 'fitCellContents',
     };
   }, []);
-
-  const centerMap = useMemo(() => {
-    if (selectedPekebun?.geom?.coordinates) {
-      return getPolygonCenter(selectedPekebun?.geom?.coordinates);
-    }
-    return [-0.5, 114.9];
-  }, [selectedPekebun]);
-
-  const zoomMap = 7;
-
-  const Map = useMemo(
-    () =>
-      dynamic(() => import('@/components/organisms/MapView'), {
-        loading: () => <p>A map is loading</p>,
-        ssr: false,
-      }),
-    []
-  );
-
-  const handleFilterKomoditasChange = (value, komoditas) => {
-    let temp = [...filterKomoditas];
-    if (value.target.checked) {
-      temp.push(komoditas.value);
-    } else {
-      temp = filterKomoditas.filter((fk) => fk !== komoditas.value);
-    }
-    dispatch(setFilterKomoditas(temp));
-  };
 
   const handlePageChange = useCallback((newPage) => {
     setCurrentPage(newPage);

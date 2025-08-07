@@ -326,8 +326,6 @@ const VerificationPekebun = () => {
   const [showModalUbahKePendataan, setShowModalUbahKePendataan] = useState(false);
   const [showModalRekomendasiTerbit, setShowModalRekomendasiTerbit] = useState(false);
 
-  const [openModalCreateLembagaTani, setOpenModalCreateLembagaTani] = useState(false);
-
   const { listKebunSTDB, fetchListKebunSTDB } = useSTDB();
 
   const {
@@ -346,20 +344,11 @@ const VerificationPekebun = () => {
       no_ponsel,
       lembaga_tani,
     },
-    detailPekebun,
     fetchDetailPekebun,
-    fetchListKebun,
   } = usePekebuns();
 
   useEffect(() => {
     fetchDetailPekebun(idPekebun);
-    // const params = new URLSearchParams({
-    // pekebun_id: idPekebun,
-    // page_size: 100,
-    // });
-    // params.append('status_stdb', '2');
-    // params.append('status_stdb', '3');
-    // fetchListKebun(params);
     fetchListKebunSTDB(idSTDB);
   }, []);
 
@@ -372,7 +361,6 @@ const VerificationPekebun = () => {
       const res = await tidakTerbitVerifikasiKebun(payload);
       if (res.status == 200) {
         toast.success('Penolakan STDB berhasil');
-        setOpenModalCreateLembagaTani(false);
         router.push('/stdb/tidak-terbit');
       }
     } catch (error) {
@@ -407,24 +395,11 @@ const VerificationPekebun = () => {
       if (res.status == 200) {
         toast.success('STDB berhasil direkomendasikan terbit');
         setShowModalRekomendasiTerbit(false);
-        router.push('/stdb/terbit');
+        router.push('/stdb/penerbitan');
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || 'STDG gagal direkomendasikan terbit');
       console.log(error);
-    }
-  };
-
-  const handleVerifikasi = async () => {
-    try {
-      const payload = {
-        pekebun_id: idPekebun,
-        kebun_ids: [],
-      };
-      const res = await pengajuanVerifkasi(payload);
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data?.message);
     }
   };
 

@@ -4,11 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import moment from 'moment';
-import { IoCaretBackCircle } from 'react-icons/io5';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
-import Checkbox from '@/components/atoms/Checkbox';
 import Accordion from '@/components/molecules/Accordion';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import DataJenisPupuk from '@/components/organisms/DataView/DataJenisPupuk';
@@ -17,20 +15,11 @@ import DataLahan from '@/components/organisms/DataView/DataLahan';
 import DataMitraPenjualan from '@/components/organisms/DataView/DataMitraPenjualan';
 import DataPemetaan from '@/components/organisms/DataView/DataPemetaan';
 import DataPolaTanam from '@/components/organisms/DataView/DataPolaTanam';
-import ModalKonfirmasiRekomendasiTerbitSTDB from '@/components/organisms/Modal/ModalKonfirmasiRekomendasiTerbitSTDB';
-import ModalKonfirmasiTolakVerifikasiSTDB from '@/components/organisms/Modal/ModalKonfirmasiTolakVerifikasiSTDB';
-import ModalKonfirmasiUbahSTDBKePendataan from '@/components/organisms/Modal/ModalKonfirmasiUbahSTDBKePendataan';
+import ModalKonfirmasiPenerbitanSTDB from '@/components/organisms/Modal/ModalKonfirmasiPenerbitanSTDB';
 import useDetailKebun from '@/hooks/useDetailKebun';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
-import { createLembagaTani } from '@/services/pekebun';
-import {
-  batalkanVerifikasiKebun,
-  prosesVerifikasiKebun,
-  rekomendasiTerbit,
-  tidakTerbitVerifikasiKebun,
-  ubahVerifikasiKebunKePendataan,
-} from '@/services/stdb';
+import { prosesPenerbitanSTDB } from '@/services/stdb';
 import { DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 
@@ -41,85 +30,37 @@ const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange 
   const [activeTab, setActiveTab] = useState('Lahan');
   const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
 
-  const isVerificated = detailKebun?.status_stdb === '3';
-
   const tabs = useMemo(
     () => [
       {
         label: 'Lahan',
         value: 'lahan',
-
-        render: () => (
-          <DataLahan
-            onVerifyChange={(e) => {
-              onVerificationValueChange({ ...verifyCheckList, lahan: e.target.checked });
-            }}
-            verified={verifyCheckList?.lahan}
-            mode={mode}
-            data={detailKebun}
-          />
-        ),
+        render: () => <DataLahan verified={verifyCheckList?.lahan} mode={mode} data={detailKebun} />,
       },
       {
         label: 'Pola Tanam',
         value: 'pola_tanam',
-        render: () => (
-          <DataPolaTanam
-            verified={verifyCheckList?.pola_tanam}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, pola_tanam: e.target.checked })}
-            mode={mode}
-            data={detailKebun}
-          />
-        ),
+        render: () => <DataPolaTanam verified={verifyCheckList?.pola_tanam} mode={mode} data={detailKebun} />,
       },
       {
         label: 'Komoditas',
         value: 'komoditas',
-        render: () => (
-          <DataKomoditas
-            mode={mode}
-            komoditas={detailKebun?.komoditas}
-            data={detailKebun}
-            verified={verifyCheckList?.komoditas}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, komoditas: e.target.checked })}
-          />
-        ),
+        render: () => <DataKomoditas mode={mode} komoditas={detailKebun?.komoditas} data={detailKebun} />,
       },
       {
         label: 'Jenis Pupuk',
         value: 'jenis_pupuk',
-        render: () => (
-          <DataJenisPupuk
-            mode={mode}
-            data={detailKebun}
-            verified={verifyCheckList?.jenis_pupuk}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, jenis_pupuk: e.target.checked })}
-          />
-        ),
+        render: () => <DataJenisPupuk mode={mode} data={detailKebun} />,
       },
       {
         label: 'Mitra Penjualan',
         value: 'mitra_penjualan',
-        render: () => (
-          <DataMitraPenjualan
-            mode={mode}
-            data={detailKebun}
-            verified={verifyCheckList?.mitra_penjualan}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, mitra_penjualan: e.target.checked })}
-          />
-        ),
+        render: () => <DataMitraPenjualan mode={mode} data={detailKebun} />,
       },
       {
         label: 'Pemetaan',
         value: 'peta',
-        render: () => (
-          <DataPemetaan
-            mode={mode}
-            data={detailKebun}
-            verified={verifyCheckList?.peta}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, peta: e.target.checked })}
-          />
-        ),
+        render: () => <DataPemetaan mode={mode} data={detailKebun} />,
       },
     ],
     [detailKebun, verifyCheckList]
@@ -138,16 +79,6 @@ const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange 
             id={`tab-${tab.label}`}
           >
             <div>{tab.label}</div>
-            <Checkbox
-              onChange={(e) => {
-                !isVerificated
-                  ? onVerificationValueChange({ ...verifyCheckList, [tab.value]: e.target.checked })
-                  : null;
-              }}
-              disabled={isVerificated}
-              value={verifyCheckList?.[tab.value]}
-              size={14}
-            />
           </div>
         ))}
       </div>
@@ -159,27 +90,9 @@ const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange 
 };
 
 const KebunDetail = ({ index, item }) => {
-  const { idSTDB } = useParams();
-  const queryParams = useSearchParams();
-  const idPekebun = queryParams.get('pekebunId');
-  const router = useRouter();
-
-  const [isVerificationComplete, setIsVerificationComplete] = useState(false);
-  const [verifiedList, setVerifiedList] = useState([]);
   const [detailKebun, setDetailKebun] = useState(item);
-  const [statusVerifikasiKebun, setStatusVerifikasiKebun] = useState({
-    lahan: false,
-    pola_tanam: false,
-    komoditas: false,
-    jenis_pupuk: false,
-    mitra_penjualan: false,
-    peta: false,
-  });
-
-  const isVerificated = detailKebun?.status_stdb === '3';
 
   const { fetchDetailKebun } = useDetailKebun();
-  const { fetchStatusVerifikasiKebun } = useSTDB();
 
   const getDetailKebun = async () => {
     const response = await fetchDetailKebun(item?.id);
@@ -203,130 +116,25 @@ const KebunDetail = ({ index, item }) => {
     setDetailKebun(tempData);
   };
 
-  const handleFetchStatusVerifikasiKebun = async () => {
-    try {
-      const data = await fetchStatusVerifikasiKebun(idPekebun, item?.id);
-      if (data) {
-        setStatusVerifikasiKebun({
-          lahan: data?.lahan || false,
-          pola_tanam: data?.pola_tanam || false,
-          komoditas: data?.komoditas || false,
-          jenis_pupuk: data?.jenis_pupuk || false,
-          mitra_penjualan: data?.mitra_penjualan || false,
-          peta: data?.peta || false,
-        });
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data?.message);
-    }
-  };
-
   useEffect(() => {
     getDetailKebun();
-    handleFetchStatusVerifikasiKebun();
   }, []);
 
-  const handleOnVerificationChange = (listVerified) => {
-    if (!isVerificated) {
-      setStatusVerifikasiKebun(listVerified);
-      const isComplete = Object.values(listVerified).every((value) => value === true);
-      setIsVerificationComplete(isComplete);
-    }
-  };
-
-  const handleVerifyKebun = async () => {
-    try {
-      const payload = {
-        stdb_id: idSTDB,
-        kebun_id: item?.id,
-        ...statusVerifikasiKebun,
-      };
-      const res = await prosesVerifikasiKebun(payload);
-      if (res.status == 200) {
-        getDetailKebun();
-        toast.success('Kebun berhasil di verifikasi');
-      }
-    } catch (err) {
-      toast.error('Kebun gagal di verifikasi');
-    }
-  };
-
-  const handleCancelVerification = async () => {
-    try {
-      const payload = {
-        stdb_id: idPekebun,
-        kebun_id: item?.id,
-      };
-      const res = await batalkanVerifikasiKebun(payload);
-      if (res.status == 200) {
-        getDetailKebun();
-        toast.success('Pembatalan verifikasi kebun berhasil');
-        setStatusVerifikasiKebun({
-          lahan: false,
-          pola_tanam: false,
-          komoditas: false,
-          jenis_pupuk: false,
-          mitra_penjualan: false,
-          peta: false,
-        });
-      }
-    } catch (err) {
-      toast.error('Pembatalan verifikasi kebun gagal');
-    }
-  };
-
   return (
-    <Accordion
-      key={index}
-      title={`KEBUN KE - ${index + 1}`}
-      prefixTitleComponent={
-        isVerificated ? (
-          <div className='ml-3 rounded-[4px] bg-green-100 px-3 py-1 text-[12px] font-normal text-green-800'>
-            Terverifikasi
-          </div>
-        ) : (
-          <></>
-        )
-      }
-    >
-      <DataKebun
-        verifyCheckList={statusVerifikasiKebun}
-        onVerificationValueChange={handleOnVerificationChange}
-        mode='verifikasi'
-        detailKebun={detailKebun}
-      />
-      <div className='mt-4 flex w-full justify-between'>
-        {isVerificated ? (
-          <Button onClick={handleCancelVerification} variant='danger'>
-            Batalkan Verifikasi
-          </Button>
-        ) : (
-          <div />
-        )}
-
-        <Button
-          isDisabled={isVerificated ? true : !isVerificationComplete}
-          onClick={handleVerifyKebun}
-          variant='secondary'
-        >
-          Verifikasi Data Kebun
-        </Button>
-      </div>
+    <Accordion key={index} title={`KEBUN KE - ${index + 1}`}>
+      <DataKebun detailKebun={detailKebun} />
     </Accordion>
   );
 };
 
 const VerificationPekebun = () => {
+  const router = useRouter();
   const { idSTDB } = useParams();
   const queryParams = useSearchParams();
   const idPekebun = queryParams.get('pekebunId');
-  const router = useRouter();
-  const [showModalTolakVerifikasiSTDB, setShowModalTolakVerifikasiSTDB] = useState(false);
-  const [showModalUbahKePendataan, setShowModalUbahKePendataan] = useState(false);
-  const [showModalRekomendasiTerbit, setShowModalRekomendasiTerbit] = useState(false);
 
-  const [openModalCreateLembagaTani, setOpenModalCreateLembagaTani] = useState(false);
+  const { listKebunSTDB, fetchListKebunSTDB } = useSTDB();
+  const [showModalPencatatanPenerbitanSTDB, setShowModalPencatatanPenerbitanSTDB] = useState(false);
 
   const {
     detailPekebun: {
@@ -344,85 +152,31 @@ const VerificationPekebun = () => {
       no_ponsel,
       lembaga_tani,
     },
-    detailPekebun,
-    listKebun,
     fetchDetailPekebun,
-    fetchListKebun,
   } = usePekebuns();
 
   useEffect(() => {
     fetchDetailPekebun(idPekebun);
-    const params = new URLSearchParams({
-      pekebun_id: idPekebun,
-      page_size: 100,
-    });
-    params.append('status_stdb', '2');
-    params.append('status_stdb', '3');
-    fetchListKebun(params);
+    fetchListKebunSTDB(idSTDB);
   }, []);
 
-  const handleTolakVerifikasiSTDB = async (values) => {
+  const handlePenerbitan = async (values) => {
     try {
       const payload = {
+        stdb_id: idSTDB,
         ...values,
-        stdb_id: idSTDB,
       };
-      const res = await tidakTerbitVerifikasiKebun(payload);
-      if (res.status == 200) {
-        toast.success('Penolakan STDB berhasil');
-        setOpenModalCreateLembagaTani(false);
-        router.push('/stdb/tidak-terbit');
+      const response = await prosesPenerbitanSTDB(payload);
+      if (response.status == 200) {
+        setShowModalPencatatanPenerbitanSTDB(false);
+        toast.success('Penerbitan STDB berhasil');
+        router.push('/stdb/data-terbit');
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || 'Penolakan STDB gagal');
-      console.log(error);
-    }
-  };
-
-  const handleUbahSTDBKePendataan = async (values) => {
-    try {
-      const payload = {
-        stdb_id: idSTDB,
-      };
-      const res = await ubahVerifikasiKebunKePendataan(payload);
-      if (res.status == 200) {
-        toast.success('STDB berhasil diubah ke pendataan');
-        setShowModalUbahKePendataan(false);
-        router.push('/stdb/pendataan');
-      }
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'STDB gagal diubah ke pendataan');
-      console.log(error);
-    }
-  };
-
-  const handleRekomendasiTerbit = async (values) => {
-    try {
-      const payload = {
-        stdb_id: idSTDB?.toString(),
-      };
-      const res = await rekomendasiTerbit(payload);
-      if (res.status == 200) {
-        toast.success('STDB berhasil direkomendasikan terbit');
-        setShowModalRekomendasiTerbit(false);
-        router.push('/stdb/terbit');
-      }
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'STDG gagal direkomendasikan terbit');
-      console.log(error);
-    }
-  };
-
-  const handleVerifikasi = async () => {
-    try {
-      const payload = {
-        pekebun_id: idPekebun,
-        kebun_ids: [],
-      };
-      const res = await pengajuanVerifkasi(payload);
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data?.message);
+      console.error(error);
+      toast.error(error?.response?.data?.message || 'Terjadi kesalahan saat penerbitan STDB');
+    } finally {
+      return true;
     }
   };
 
@@ -434,7 +188,7 @@ const VerificationPekebun = () => {
         <div>TERAKHIR DIUBAH : {moment(updated_at).format('DD-MM-YYYY hh:mm:ss')}</div>
       </div>
       <div className='mt-4 flex w-full flex-col gap-4 pb-8'>
-        <Accordion title='IDENTITAS PEKEBUN'>
+        <Accordion defaultIsOpen={true} title='IDENTITAS PEKEBUN'>
           <>
             <div className='grid w-full grid-cols-5'>
               <BorderBottomColData label='Nama' value={nama} />
@@ -450,9 +204,6 @@ const VerificationPekebun = () => {
               <BorderBottomColData label='Pendidikan Terakhir' value={pendidikan_terakhir_label} />
               <BorderBottomColData label='Telepon' value={no_ponsel} />
             </div>
-            <div className='mt-4 flex w-full justify-end'>
-              <Button variant='secondary'>Ubah Data</Button>
-            </div>
           </>
         </Accordion>
         <Accordion title='LEMBAGA TANI'>
@@ -467,59 +218,30 @@ const VerificationPekebun = () => {
                 value={lembaga_tani?.alamat}
               />
             </div>
-            <div className='mt-4 flex w-full justify-between'>
-              <Button variant='danger'>Hapus Data</Button>
-              <Button variant='secondary'>Ubah Data</Button>
-            </div>
           </>
         </Accordion>
-        {listKebun.length > 0 &&
-          listKebun.map((item, index) => <KebunDetail key={index} idPekebun={idPekebun} index={index} item={item} />)}
+        {listKebunSTDB.length > 0 &&
+          listKebunSTDB.map((item, index) => (
+            <KebunDetail key={index} idPekebun={idPekebun} index={index} item={item} />
+          ))}
         <div>
-          <div className=' flex w-full justify-between'>
-            <Button icon={<CrossCircledIcon />} onClick={() => setShowModalTolakVerifikasiSTDB(true)} variant='danger'>
-              Tidak Terbit
+          <div className=' flex w-full justify-end'>
+            <Button
+              icon={<DocumentCheckIcon width={16} height={16} />}
+              onClick={() => setShowModalPencatatanPenerbitanSTDB(true)}
+            >
+              Terbitkan STDB
             </Button>
-            <div className='flex flex-row gap-4'>
-              <Button
-                onClick={() => setShowModalUbahKePendataan(true)}
-                icon={<IoCaretBackCircle width={20} height={20} />}
-                variant='primary'
-              >
-                Ubah Ke Pendataan
-              </Button>
-              <Button
-                onClick={() => setShowModalRekomendasiTerbit(true)}
-                icon={<DocumentCheckIcon width={16} height={16} />}
-                variant='primary'
-              >
-                Rekomendasi Terbit
-              </Button>
-            </div>
           </div>
         </div>
-        <ModalKonfirmasiTolakVerifikasiSTDB
-          onSubmit={handleTolakVerifikasiSTDB}
-          open={showModalTolakVerifikasiSTDB}
-          setOpen={setShowModalTolakVerifikasiSTDB}
-          namaPekebun={nama}
-          jumlahKebun={listKebun?.length}
-        />
-        <ModalKonfirmasiUbahSTDBKePendataan
-          onSubmit={handleUbahSTDBKePendataan}
-          open={showModalUbahKePendataan}
-          setOpen={setShowModalUbahKePendataan}
-          namaPekebun={nama}
-          jumlahKebun={listKebun?.length}
-        />
-        <ModalKonfirmasiRekomendasiTerbitSTDB
-          onSubmit={handleRekomendasiTerbit}
-          open={showModalRekomendasiTerbit}
-          setOpen={setShowModalRekomendasiTerbit}
-          namaPekebun={nama}
-          jumlahKebun={listKebun?.length}
-        />
       </div>
+      <ModalKonfirmasiPenerbitanSTDB
+        onSubmit={handlePenerbitan}
+        open={showModalPencatatanPenerbitanSTDB}
+        setOpen={setShowModalPencatatanPenerbitanSTDB}
+        namaPekebun={nama}
+        jumlahKebun={listKebunSTDB?.length}
+      />
     </div>
   );
 };

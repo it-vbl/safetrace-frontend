@@ -19,11 +19,11 @@ const ModalKonfirmasiRekomendasiTerbitSTDB = ({ open, setOpen, onSubmit, namaPek
   };
 
   return (
-    <Modal className='!w-[400px]' open={open} onclose={handleOnClose} label='UBAH KE PENDATAAN'>
+    <Modal className='!w-[400px]' open={open} onclose={handleOnClose} label='REKOMENDASI TERBIT'>
       <div className='flex flex-col gap-4 pt-4'>
         <span className='text-[14px]'>
-          Apakah Anda ingin mengubah data <b>{namaPekebun}</b> dengan <b>jumlah kebun {jumlahKebun}</b> kembali ke{' '}
-          <b>Pendataan</b>?
+          Apakah Anda ingin merekomendasikan penerbitan STDB atas nama <b>{namaPekebun}</b> dengan{' '}
+          <b>jumlah kebun {jumlahKebun}</b> kembali ke <b>Pendataan</b>?
         </span>
       </div>
       <div className='mt-4 flex flex-row justify-end gap-2'>
@@ -31,7 +31,7 @@ const ModalKonfirmasiRekomendasiTerbitSTDB = ({ open, setOpen, onSubmit, namaPek
           Batalkan
         </Button>
         <Button isLoading={loading} onClick={handleSubmit}>
-          Ya, Ubah ke Pendataan
+          Ya, Rekomendasikan
         </Button>
       </div>
     </Modal>
