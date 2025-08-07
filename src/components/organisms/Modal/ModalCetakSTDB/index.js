@@ -13,8 +13,8 @@ const ModalKonfirmasiPenerbitanSTDB = ({ open, setOpen, onSubmit, namaPekebun, j
       jabatan: '',
     },
     validationSchema: Yup.object({
-      nama_pejabat: Yup.string().required('Nomor STDB harus diisi'),
-      jabatan: Yup.string().required('Tanggal penerbitan harus diisi'),
+      nama_pejabat: Yup.string().required('Nama pejabat harus diisi'),
+      jabatan: Yup.string().required('Jabatan harus diisi'),
     }),
     onSubmit: async (values) => {
       try {
