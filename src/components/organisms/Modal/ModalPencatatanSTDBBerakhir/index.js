@@ -30,10 +30,10 @@ const ModalPencatatanSTDBBerakhir = ({ open, setOpen, onSubmit, namaPekebun, jum
   const handleOnClose = () => setOpen(false);
 
   return (
-    <Modal className='!w-[400px]' open={open} onclose={handleOnClose} label='PENCATATAN PENERBITAN STDB'>
+    <Modal className='!w-[400px]' open={open} onclose={handleOnClose} label='PENCATATAN STDB BERAKHIR'>
       <div className='flex flex-col gap-4 pt-4'>
         <span className='text-[14px]'>
-          Apakah Anda ingin mencatatkan penerbitan STDB atas nama <b>{namaPekebun}</b> dengan{' '}
+          Apakah Anda ingin mencatatkan STDB berakhir atas nama <b>{namaPekebun}</b> dengan{' '}
           <b>jumlah kebun {jumlahKebun}</b>?
         </span>
         <InputText
