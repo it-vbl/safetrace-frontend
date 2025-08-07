@@ -39,11 +39,11 @@ const DatePicker = ({
 
   return (
     <div className={`w-full ${label ? 'flex flex-col gap-1' : 'block'}`}>
-      <div className='flex flex-row gap-1'>
+      <div className='flex flex-row'>
         <label htmlFor={name} className={`text-[12px] font-bold text-gray-500 ${customStylelabel}`}>
           {label}
         </label>
-        {requiredField && <p className='text-sm text-red-500'>*</p>}
+        {requiredField && <span className='text-sm text-red-500'>*</span>}
       </div>
 
       <div

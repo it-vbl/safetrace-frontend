@@ -119,7 +119,7 @@ const DrawControl = ({
           circle: false,
           marker: false,
           circlemarker: false,
-          polyline:false,
+          polyline: false,
         }}
         onEdited={(e) => {
           const latLngs = [];
@@ -324,12 +324,11 @@ export default function MyMap(props) {
               click: () => setOpenPopupId(data?.id),
             }}
             positions={data?.peta?.geom?.coordinates}
-            pathOptions={{ color: data.id == activeDataId ? 'green' : 'gray', fillOpacity: 0.4 }}
+            pathOptions={{ color: data.id == activeDataId ? 'green' : 'gray', fillOpacity: 0.2, weight: 2 }}
           >
             {showPolygonPopup ? (
               <Popup closeButton={false}>
                 <div className='w-full'>
-                  {/* Header */}
                   <div className='flex h-[32px] items-center justify-between '>
                     <Paragraph className='font-bold ' level={2}>
                       DETAIL
@@ -406,20 +405,6 @@ export default function MyMap(props) {
         ) : null;
       })}
       <IupMap data={staticLayers} />
-      {/* {polygons &&
-        polygons?.map((polygon) => {
-          return (
-            polygon?.coordinates?.length > 0 && (
-              <Polygon
-                key={`polygon-${polygon?.id}`}
-                positions={polygon?.coordinates}
-                pathOptions={{
-                  color: 'blue',
-                }}
-              />
-            )
-          );
-        })} */}
     </MapContainer>
   );
 }

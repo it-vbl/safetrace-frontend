@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -10,67 +9,57 @@ import { DownloadCloudIcon } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 
 import Button from '@/components/atoms/Button';
-import Checkbox from '@/components/atoms/Checkbox';
-import Close from '@/components/atoms/Icons/Close';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
-import useKomoditas from '@/hooks/useKomoditas';
-import usePekebuns from '@/hooks/usePekebuns';
 import useReferences from '@/hooks/useReferences';
 import useSTDB from '@/hooks/useSTDB';
 import { setFilterKomoditas } from '@/store/slices/stdb';
-import getPolygonCenter from '@/utils/getPolygonCenter';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const ListVerifikasi = () => {
-  const dispatch = useDispatch();
   const router = useRouter();
-  const [showTable, setShowTable] = useState(false);
-
-  const [rowData, setRowData] = useState([]);
-  const [selectedPekebun, setSelectedPekebun] = useState(null);
+  const dispatch = useDispatch();
 
   const [search, setSearch] = useState('');
+  const [selectedKomoditas, setSelectedKomoditas] = useState(null);
 
   //pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { stdb, filterKomoditas, listVerifikasi, fetchListVerifikasi } = useSTDB();
-  const { pekebuns, totalPekebun, onPendataanPekebuns, fetchPekebunOnPendataan } = usePekebuns();
+  const { listPenerbitan: stdbList, fetchPenerbitan, totalSTDB, loading } = useSTDB();
+  const { komoditasKelembagaan, fetchKomoditasKelembagaan } = useReferences();
 
   useEffect(() => {
-    fetchListVerifikasi({
-      page: currentPage,
-      page_size: pageSize,
-      search: search,
-    });
-  }, [currentPage, pageSize, search]);
+    fetchKomoditasKelembagaan();
+  }, []);
+
+  useEffect(() => {
+    fetchPenerbitan(
+      `search=${search}&page=${currentPage}&page_size=${pageSize}${
+        selectedKomoditas ? `&komoditas=${selectedKomoditas}` : ''
+      }`
+    );
+  }, [currentPage, pageSize, search, selectedKomoditas]);
 
   const handleOnLihatClicked = (data) => {
-    console.log('CHECK DATA VERIFIKASI', data);
-    router.push(`/stdb/verifikasi/${data.stdb_id}/detail?pekebunId=${data.pekebun.id}`);
-    setShowTable(false);
-    setSelectedPekebun(data);
+    router.push(`/stdb/penerbitan/${data.stdb_id}/detail?pekebunId=${data.pekebun.id}`);
   };
 
-  const ActionsCellRenderer = useCallback(
-    (e) => {
-      return (
-        <div className='flex h-full w-full flex-row items-center justify-center gap-2'>
-          <Button size={'extraSmall'} onClick={() => handleOnLihatClicked(e.data)}>
-            Lihat
-          </Button>
-        </div>
-      );
-    },
-    [rowData]
-  );
+  const ActionsCellRenderer = useCallback((e) => {
+    return (
+      <div className='flex h-full w-full flex-row items-center justify-center gap-2'>
+        <Button size={'extraSmall'} onClick={() => handleOnLihatClicked(e.data)}>
+          Lihat
+        </Button>
+      </div>
+    );
+  }, []);
   const colDefs = [
     {
       field: 'actions',
@@ -87,7 +76,6 @@ const ListVerifikasi = () => {
     { field: 'kecamatan_label', headerName: 'Kecamatan' },
     { field: 'desa_label', headerName: 'Desa' },
     { field: 'updated_at', headerName: 'Terakhir Update' },
-    { field: 'desa_label', headerName: 'Pendata' },
   ];
 
   const autoSizeStrategy = useMemo(() => {
@@ -95,34 +83,6 @@ const ListVerifikasi = () => {
       type: 'fitCellContents',
     };
   }, []);
-
-  const centerMap = useMemo(() => {
-    if (selectedPekebun?.geom?.coordinates) {
-      return getPolygonCenter(selectedPekebun?.geom?.coordinates);
-    }
-    return [-0.5, 114.9];
-  }, [selectedPekebun]);
-
-  const zoomMap = 7;
-
-  const Map = useMemo(
-    () =>
-      dynamic(() => import('@/components/organisms/MapView'), {
-        loading: () => <p>A map is loading</p>,
-        ssr: false,
-      }),
-    []
-  );
-
-  const handleFilterKomoditasChange = (value, komoditas) => {
-    let temp = [...filterKomoditas];
-    if (value.target.checked) {
-      temp.push(komoditas.value);
-    } else {
-      temp = filterKomoditas.filter((fk) => fk !== komoditas.value);
-    }
-    dispatch(setFilterKomoditas(temp));
-  };
 
   const handlePageChange = useCallback((newPage) => {
     setCurrentPage(newPage);
@@ -140,25 +100,49 @@ const ListVerifikasi = () => {
     []
   );
 
+  const handleKomoditasChange = useCallback((e) => {
+    dispatch(setFilterKomoditas(e.target.value));
+    setSelectedKomoditas(e.target.value);
+  }, []);
+
   return (
     <div className='relative max-h-[calc(100vh-72px)] w-full'>
       <div className='flex h-full flex-col gap-4'>
         <div className='flex flex-row items-center justify-between'>
-          <Heading level={2}>Verifikasi</Heading>
+          <Heading className='uppercase tracking-[2px]' level={4}>
+            Penerbitan
+          </Heading>
           <div className='flex flex-row items-center gap-8'>
             <div className='flex flex-row items-center gap-2'>
-              <SearchBar onChange={handleSearchTextChange} placeholder='Cari Pekebun' />
+              <SearchBar className='w-full' onChange={handleSearchTextChange} placeholder='Cari Pekebun' />
+              <Select
+                value={selectedKomoditas}
+                onChange={handleKomoditasChange}
+                options={komoditasKelembagaan.map((item) => ({
+                  label: item.label,
+                  value: item.value,
+                }))}
+                placeholder='Semua Komoditas'
+              />
               <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />
             </div>
           </div>
         </div>
-        <div className='w-full flex-1'>
-          <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={listVerifikasi} columnDefs={colDefs} />
+        <div className='relative w-full flex-1'>
+          <SectionLoading loading={loading} />
+          <AgGridReact
+            loadingOverlayComponent={null}
+            overlayLoadingTemplate='.'
+            loading={loading}
+            autoSizeStrategy={autoSizeStrategy}
+            rowData={stdbList}
+            columnDefs={colDefs}
+          />
         </div>
         <Pagination
           currentPage={currentPage}
           pageSize={pageSize}
-          totalItems={totalPekebun}
+          totalItems={totalSTDB}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
           showRowsPerPage={true}

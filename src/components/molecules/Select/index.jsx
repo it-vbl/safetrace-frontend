@@ -194,7 +194,10 @@ const Select = ({
           </Paragraph>
           {selectedValue && (
             <CrossCircledIcon
-              onClick={() => handleOptionChange('')}
+              onClick={(e) => {
+                handleOptionChange('');
+                e.stopPropagation();
+              }}
               size={20}
               width={20}
               height={20}
