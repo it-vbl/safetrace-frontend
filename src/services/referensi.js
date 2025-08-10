@@ -10,3 +10,4 @@ export const getKomoditasKelembagaan = () => api.get(`/referensi/komoditas-kelem
 export const getSTDBStatuses = () => api.get(`/referensi/status-stdb/`);
 export const getJenisKelamin = () => api.get(`/referensi/jenis-kelamin/`);
 export const getEksPlasma = () => api.get(`/referensi/eks-plasma/`);
+export const getUserRoles = () => api.get(`/referensi/user-roles/`);

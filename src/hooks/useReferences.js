@@ -12,6 +12,7 @@ import {
   getPolaTanam,
   getStatusLahan,
   getSTDBStatuses,
+  getUserRoles,
 } from '../services/referensi';
 import {
   setAsalBenih,
@@ -24,6 +25,7 @@ import {
   setPolaTanam,
   setStatusLahan,
   setSTDBStatuses,
+  setUserRoles,
 } from '../store/slices/referensi';
 
 const useReferences = () => {
@@ -43,6 +45,7 @@ const useReferences = () => {
     komoditasKelembagaan,
     jenisKelamin,
     eksPlasma,
+    userRoles,
   } = useSelector((state) => state.referensi);
 
   const fetchData = async (fetchFunction, setAction) => {
@@ -77,6 +80,7 @@ const useReferences = () => {
   const fetchKomoditasKelembagaan = () => fetchData(getKomoditasKelembagaan, setKomoditasKelembagaan);
   const fetchJenisKelamin = () => fetchData(getJenisKelamin, setJenisKelamin);
   const fetchEksPlasma = () => fetchData(getEksPlasma, setEksPlasma);
+  const fetchUserRoles = () => fetchData(getUserRoles, setUserRoles);
 
   return {
     loading,
@@ -91,6 +95,7 @@ const useReferences = () => {
     komoditasKelembagaan,
     jenisKelamin,
     eksPlasma,
+    userRoles,
     fetchSTDBStatuses,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
@@ -101,6 +106,7 @@ const useReferences = () => {
     fetchKomoditasKelembagaan,
     fetchJenisKelamin,
     fetchEksPlasma,
+    fetchUserRoles,
   };
 };
 

@@ -74,7 +74,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         {
           label: 'Pengguna',
           //   icon: IoPersonCircleOutline, // Make sure to import or define this icon
-          path: '/settings/pengguna',
+          path: '/settings/users',
         },
         {
           label: 'Hak Akses',

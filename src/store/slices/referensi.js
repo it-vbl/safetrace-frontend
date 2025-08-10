@@ -13,6 +13,7 @@ export const referensiSlice = createSlice({
     komoditasKelembagaan: [],
     jenisKelamin: [],
     eksPlasma: [],
+    userRoles: [],
   },
   reducers: {
     setSTDBStatuses: (state, action) => {
@@ -45,6 +46,9 @@ export const referensiSlice = createSlice({
     setEksPlasma: (state, action) => {
       state.eksPlasma = action.payload;
     },
+    setUserRoles: (state, action) => {
+      state.userRoles = action.payload;
+    },
   },
 });
 
@@ -59,5 +63,6 @@ export const {
   setKomoditasKelembagaan,
   setJenisKelamin,
   setEksPlasma,
+  setUserRoles,
 } = referensiSlice.actions;
 export default referensiSlice.reducer;

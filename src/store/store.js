@@ -7,6 +7,7 @@ import kecamatanSanggauReducer from './slices/kecamatanSanggau';
 import komoditasReducer from './slices/komoditas';
 import pekebunReducer from './slices/pekebun';
 import referensiReducer from './slices/referensi';
+import selectedUser from './slices/selectedUser';
 import staticLayerReducer from './slices/staticLayer';
 import stdbReducer from './slices/stdb';
 import wilayah from './slices/wilayah';
@@ -23,6 +24,7 @@ const store = configureStore({
     kebun: kebunReducer,
     app: appReducer,
     staticLayer: staticLayerReducer,
+    selectedUser: selectedUser,
   },
 });
 

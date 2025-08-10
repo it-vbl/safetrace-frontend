@@ -26,6 +26,7 @@ const SelectMultiple = ({
   chipClassName = '',
   selectAll = '',
   withCheckbox = false,
+  selectClassName = '',
 }) => {
   const [selectedValues, setSelectedValues] = useState(value);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -101,7 +102,7 @@ const SelectMultiple = ({
   return (
     <div className={cn(' relative flex flex-col gap-1', block && 'w-full', containerClassName)}>
       {label && (
-        <Label isRequired={isRequired} className='font-bold text-neutral11'>
+        <Label data-testid='label-container' className=' text-[12px] font-bold text-gray-500' isRequired={isRequired}>
           {label}
         </Label>
       )}
@@ -116,28 +117,34 @@ const SelectMultiple = ({
             'border-neutral5 hover:border-blue6': selectedValues.length === 0 && !disabled && !isError,
             'focus:border-blue6 focus:outline-none': !disabled && !isError,
             'border-error5': isError,
-          })}
+          }, selectClassName)}
         >
-          <div className=' hide-scrollbar flex h-auto w-full flex-row items-end gap-1 overflow-x-auto '>
+          <div className='hide-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto'>
             {selectedValues.length > 0 ? (
-              selectedOptions.map((option) => (
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOptionChange(option.value);
-                  }}
-                  key={option.value}
-                  className={`flex items-center justify-between gap-1.5 self-center rounded-full border border-[#DEDEDE] px-3 py-1 ${chipClassName}`}
-                >
-                  <Paragraph level={4}>{option.label}</Paragraph>
-                  <button className='flex size-2 items-center justify-center rounded-full bg-blue8 hover:text-blue9'>
-                    <Close size={14} color='white' />
-                  </button>
-                </div>
-              ))
+              <div className='flex flex-row flex-nowrap overflow-x-auto gap-1 hide-scrollbar'>
+                {selectedOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    className='flex items-center gap-1 bg-neutral2 rounded-[4px] bg-gray-100 px-2 py-1'
+                  >
+                    <Paragraph level={4} className='text-xs truncate max-w-[100px]'>
+                      {option.label}
+                    </Paragraph>
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOptionChange(option.value);
+                      }}
+                      className='cursor-pointer hover:bg-neutral3 rounded p-0.5'
+                    >
+                      <Close size={12} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <Paragraph
-                className={cn('w-full', {
+                className={cn('w-full truncate', {
                   'text-neutral6': !disabled,
                   'text-neutral7': disabled,
                 })}
