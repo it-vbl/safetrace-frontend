@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useEffect } from 'react';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import Cookies from 'js-cookie';
@@ -22,7 +21,7 @@ const Navbar = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
-  const [name, setName] = useState('')
+  const [name, setName] = useState('');
 
   const { sidebarOpen } = useSelector((state) => state.app);
 
@@ -35,8 +34,8 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    setName(Cookies.get('fullName'))
-  },[])
+    setName(Cookies.get('fullName'));
+  }, []);
 
   return (
     <div className='flex h-[72px] w-full flex-row items-center border-b border-b-gray-200 bg-white px-4'>
@@ -62,12 +61,9 @@ const Navbar = () => {
         >
           Dashboard
         </div>
-        <div
-          id='user'
-          className='flex flex-row items-center gap-2 font-bold cursor-pointer'
-        >
+        <div id='user' className='flex cursor-pointer flex-row items-center gap-2 font-bold'>
           <ProfilePopup>
-            <div className="flex flex-row items-center gap-2">
+            <div className='flex flex-row items-center gap-2'>
               {name} <ChevronDownIcon />
             </div>
           </ProfilePopup>

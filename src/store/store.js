@@ -10,6 +10,7 @@ import referensiReducer from './slices/referensi';
 import staticLayerReducer from './slices/staticLayer';
 import stdbReducer from './slices/stdb';
 import wilayah from './slices/wilayah';
+import selectedUser from './slices/selectedUser';
 
 const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ const store = configureStore({
     kebun: kebunReducer,
     app: appReducer,
     staticLayer: staticLayerReducer,
+    selectedUser: selectedUser,
   },
 });
 
