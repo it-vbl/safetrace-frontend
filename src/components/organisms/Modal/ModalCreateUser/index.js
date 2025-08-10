@@ -3,8 +3,8 @@ import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
-import Select from '@/components/molecules/Select';
 import Modal from '@/components/molecules/Modal';
+import Select from '@/components/molecules/Select';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
 
 const rolesOptions = [

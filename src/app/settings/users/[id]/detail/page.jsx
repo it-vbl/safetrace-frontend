@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDispatch,useSelector } from 'react-redux';
+
 import Button from '@/components/atoms/Button';
 import Accordion from '@/components/molecules/Accordion';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
@@ -10,7 +12,6 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import ModalUpdateUser from '@/components/organisms/Modal/ModalUpdateUser';
 import { useUserManagement } from '@/hooks/useUsers';
 import { setSelectedUser } from '@/store/slices/selectedUser';
-import { useEffect } from 'react';
 
   const UserDetailPage = () => {
   const router = useRouter();

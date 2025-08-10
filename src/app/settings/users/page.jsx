@@ -2,22 +2,21 @@
 
 
 import { useCallback, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
-import Pagination from '@/components/organisms/Pagination';
-import { useUserManagement } from '@/hooks/useUsers';
 import ModalCreateUser from '@/components/organisms/Modal/ModalCreateUser';
-import { useEffect } from 'react';
+import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
-
-import { useDispatch } from 'react-redux';
+import { useUserManagement } from '@/hooks/useUsers';
 import { setSelectedUser } from '@/store/slices/selectedUser';
 
 // Register all Community features

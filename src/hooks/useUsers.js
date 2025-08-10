@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getUsers } from '@/services/user';
+import { useCallback,useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+
+import { getUsers } from '@/services/user';
 
 /**
  * Custom hook to fetch and manage user list

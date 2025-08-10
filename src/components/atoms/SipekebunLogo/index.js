@@ -1,4 +1,5 @@
 import Image from 'next/image';
+
 import LogoSipekebun from '../../../../public/logo_sipekebun.png';
 
 export default function SipekebunLogo({ className }) {
