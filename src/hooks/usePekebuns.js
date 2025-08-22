@@ -43,8 +43,10 @@ const usePekebuns = () => {
       const params = `page_size=${page_size}&page=${page}&search=${search}`;
       return fetchData(() => getListPekebun(params), setPekebuns);
     },
-    fetchPekebunOnPendataan: ({ page_size = 10, page = 1, search = '' } = {}) => {
-      const params = `page_size=${page_size}&page=${page}&search=${search}`;
+    fetchPekebunOnPendataan: ({ page_size = 10, page = 1, search = '', komoditas = '', kecamatan = '' } = {}) => {
+      let params = `page_size=${page_size}&page=${page}&search=${search}`;
+      if (komoditas) params += `&komoditas=${komoditas}`;
+      if (kecamatan) params += `&kecamatan=${kecamatan}`;
       return fetchData(() => getListPekebunOnPendataan(params), setOnPendataanPekebuns);
     },
     fetchDetailPekebun: (id) =>

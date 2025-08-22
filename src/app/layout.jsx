@@ -7,6 +7,7 @@ import { ToastContainer } from 'react-toastify';
 
 import Navbar from '@/components/organisms/Navbar';
 import Sidebar from '@/components/organisms/Sidebar';
+import { MobileScreenProvider } from '@/components/providers/MobileScreenProvider';
 import { ReduxProvider } from '@/libs/redux/provider';
 
 import '@/styles/globals.css';
@@ -33,7 +34,7 @@ export default function Layout({ children }) {
     '/register',
     '/mapview',
   ];
-  const noPaddingRoutes = [...noSidebarRoutes];
+  const noPaddingRoutes = [...noSidebarRoutes, '/stdb/ringkasan'];
 
   const hideNavbar = useMemo(() => noNavbarRoutes.some((route) => pathname === route), [pathname]);
   const hideSidebar = useMemo(() => noSidebarRoutes.some((route) => pathname === route), [pathname]);
@@ -48,19 +49,21 @@ export default function Layout({ children }) {
       </head>
       <body>
         <ReduxProvider>
-          {!hideNavbar && <Navbar />}
-          <div className={`flex ${hideNavbar ? 'h-full' : 'h-[calc(100vh-72px)]'} flex-row`}>
-            {!hideSidebar ? (
-              <div className='h-full'>
-                <Sidebar />
+          <MobileScreenProvider>
+            {!hideNavbar && <Navbar />}
+            <div className={`flex ${hideNavbar ? 'h-full' : 'h-[calc(100vh-72px)]'} flex-row`}>
+              {!hideSidebar ? (
+                <div className='h-full'>
+                  <Sidebar />
+                </div>
+              ) : null}
+              <div className='flex flex-1 flex-col'>
+                <div className={`flex flex-1 overflow-y-auto ${noPadding ? 'p-0' : 'p-4 md:p-8'}`}>{children}</div>
+                <div id='action-button' />
               </div>
-            ) : null}
-            <div className='flex flex-1 flex-col'>
-              <div className={`flex flex-1 overflow-y-auto ${noPadding ? 'p-0' : 'p-8'}`}>{children}</div>
-              <div id='action-button' />
             </div>
-          </div>
-          <ToastContainer />
+            <ToastContainer />
+          </MobileScreenProvider>
         </ReduxProvider>
       </body>
     </html>

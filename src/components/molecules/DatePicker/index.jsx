@@ -47,12 +47,12 @@ const DatePicker = ({
       </div>
 
       <div
-        className={`flex h-[30px] w-full items-center justify-between rounded-[4px] border border-neutral5 px-3 ${
+        className={`flex h-[32px] w-full items-center justify-between rounded-[4px] border border-neutral5 px-3 ${
           disabled ? 'cursor-not-allowed bg-neutral4 text-neutral8' : 'cursor-pointer bg-white'
         } ${inputContainerClassName}`}
         onClick={disabled ? () => {} : handleOnClick}
       >
-        <p className={`text-md ${!value ? 'text-neutral5' : disabled ? 'text-neutral8' : 'text-black'}`}>
+        <p className={`text-[14px] ${!value ? 'text-neutral6' : disabled ? 'text-neutral8' : 'text-black'}`}>
           {value ? value : placeholder}
         </p>
         <input

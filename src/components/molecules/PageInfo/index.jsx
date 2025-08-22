@@ -1,3 +1,5 @@
+import { useSelector } from 'react-redux';
+
 import { PaginationText } from '../../atoms/PaginationText';
 
 export function PageInfo({
@@ -8,6 +10,7 @@ export function PageInfo({
   ofText = 'dari',
   loading = false,
 }) {
+  const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
   if (loading) {
     return <PaginationText variant='loading'>Loading...</PaginationText>;
   }
@@ -17,7 +20,7 @@ export function PageInfo({
 
   return (
     <PaginationText>
-      {showingText} {startItem} - {endItem} {ofText} {totalItems}
+      { isMobileScreen ? '' : showingText} {startItem} - {endItem} {ofText} {totalItems}
     </PaginationText>
   );
 }

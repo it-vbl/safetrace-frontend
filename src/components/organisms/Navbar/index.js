@@ -24,6 +24,7 @@ const Navbar = () => {
   const [name, setName] = useState('');
 
   const { sidebarOpen } = useSelector((state) => state.app);
+  const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
 
   const handleMenuClick = (menu) => {
     router.push(`${menu}`);
@@ -38,20 +39,28 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className='flex h-[72px] w-full flex-row items-center border-b border-b-gray-200 bg-white px-4'>
+    <div className='flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4'>
       {/* logo */}
-      <HamburgerMenuIcon
-        onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
-        className='mr-4 cursor-pointer '
-        width={24}
-        height={24}
-      />
-      <SipekebunLogo />
-      <LogoLembaga />
-      <div className='ml-auto flex flex-1 flex-row items-center justify-end gap-4 uppercase'>
+      
+      {/* Desktop: Show both logos */}
+      <div className='flex flex-1 items-center'>
+        <HamburgerMenuIcon
+          onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
+          className='mr-4 cursor-pointer'
+          width={isMobileScreen ? 16 : 24}
+          height={isMobileScreen ? 16 : 24}
+        />
+        <SipekebunLogo />
+      </div>
+      <div className="hidden md:!flex">
+        <LogoLembaga />
+      </div>
+
+      {/* Desktop menu items */}
+      <div className='ml-auto hidden md:!flex  flex-1 flex-row items-center justify-end gap-4 uppercase'>
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName('/mapview')}`}
-          onClick={() => handleMenuClick('/mapview')}
+          onClick={() => handleMenuClick('/')}
         >
           Map
         </div>
@@ -64,6 +73,17 @@ const Navbar = () => {
         <div id='user' className='flex cursor-pointer flex-row items-center gap-2 font-bold'>
           <ProfilePopup>
             <div className='flex flex-row items-center gap-2'>
+              {name} <ChevronDownIcon />
+            </div>
+          </ProfilePopup>
+        </div>
+      </div>
+
+      {/* Mobile: Only show user profile */}
+      <div className='ml-auto flex md:hidden flex-1 flex-row items-center justify-end gap-4'>
+        <div id='user' className='flex cursor-pointer flex-row items-center gap-2 font-bold'>
+          <ProfilePopup>
+            <div className='flex text-[12px] sm:text-[16px] flex-row items-center text-right gap-2'>
               {name} <ChevronDownIcon />
             </div>
           </ProfilePopup>

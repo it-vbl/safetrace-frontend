@@ -27,7 +27,11 @@ import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
 import { setStaticLayerDetail } from '@/store/slices/staticLayer';
-import { setFilterKecamatan, setFilterKomoditas, setFilterSTDBStatus } from '@/store/slices/stdb';
+import {
+  setFilterKecamatan,
+  setFilterKomoditas,
+  setFilterSTDBStatus,
+} from '@/store/slices/stdb';
 import { Button } from '@/stories/Button';
 import getPolygonCenter from '@/utils/getPolygonCenter';
 import theme from '@/utils/tailwindTheme';
@@ -56,7 +60,15 @@ const MapDashboard = () => {
 
   const { komoditas } = useKomoditas();
   const { kecamatanSanggau } = useKecamatanSanggau();
-  const { stdb, filterKomoditas, filterKecamatan, totalSTDB, filterSTDBStatus, fetchSTDB } = useSTDB({
+  const {
+    stdb,
+    loading,
+    filterKomoditas,
+    filterKecamatan,
+    totalSTDB,
+    filterSTDBStatus,
+    fetchSTDB,
+  } = useSTDB({
     page_size: pageSize,
     page: currentPage,
     search: searchText,
@@ -77,14 +89,41 @@ const MapDashboard = () => {
 
   const ActionsCellRenderer = useCallback(
     (e) => {
-      return <Button label='Lihat' size={'small'} onClick={() => handleOnLihatClicked(e.data)} />;
+      return (
+        <Button
+          label="Lihat"
+          size={'small'}
+          onClick={() => handleOnLihatClicked(e.data)}
+        />
+      );
     },
     [stdb]
   );
 
   const STDBStatusCellRenderer = useCallback(
     (e) => {
-      return <STDBStatusChip value={e.data?.status_stdb} label={e.data?.status_stdb_label} />;
+      return (
+        <STDBStatusChip
+          value={e.data?.status_stdb}
+          label={e.data?.status_stdb_label}
+        />
+      );
+    },
+    [stdb]
+  );
+
+  const PetaAvailabilityCellRenderer = useCallback(
+    (e) => {
+      console.log('Check ', e);
+      return (
+        <div
+          className={` font-bold ${
+            e.data?.peta?.geom?.coordinates ? 'text-green-400' : 'text-red-400'
+          }`}
+        >
+          {e.data?.peta?.geom?.coordinates ? 'Ada' : 'Belum Ada'}
+        </div>
+      );
     },
     [stdb]
   );
@@ -108,9 +147,17 @@ const MapDashboard = () => {
     { field: 'lahan.luas_lahan', headerName: 'Luas Lahan(m2)' },
     { field: 'lahan.kecamatan_label', headerName: 'Kecamatan' },
     { field: 'lahan.desa_label', headerName: 'Kelurahan' },
-    { field: 'lahan.data_peta', headerName: 'Data Peta' },
-    { field: 'pekebun.name', headerName: 'Pekebun' },
-    { field: 'status_stdb_label', headerName: 'STDB', cellRenderer: STDBStatusCellRenderer },
+    {
+      field: 'peta.geom',
+      headerName: 'Data Peta',
+      cellRenderer: PetaAvailabilityCellRenderer,
+    },
+    { field: 'pekebun.nama', headerName: 'Pekebun' },
+    {
+      field: 'status_stdb_label',
+      headerName: 'STDB',
+      cellRenderer: STDBStatusCellRenderer,
+    },
   ];
 
   const autoSizeStrategy = useMemo(() => {
@@ -192,7 +239,7 @@ const MapDashboard = () => {
 
   const handleFilterKecamatanMultipleSelectChange = useCallback(
     debounce((e) => {
-      dispatch(setFilterKomoditas(e.target.value));
+      dispatch(setFilterKecamatan(e.target.value));
     }, 500),
     []
   );
@@ -217,11 +264,18 @@ const MapDashboard = () => {
 
   useEffect(() => {
     fetchSTDB();
-  }, [pageSize, currentPage, searchText, filterKomoditas, filterKecamatan, filterSTDBStatus]);
+  }, [
+    pageSize,
+    currentPage,
+    searchText,
+    filterKomoditas,
+    filterKecamatan,
+    filterSTDBStatus,
+  ]);
 
   return (
-    <div className=' h-full w-full'>
-      <div className='relative max-h-[calc(100vh-72px)]'>
+    <div className="relative max-w-full overflow-x-hidden h-full w-full">
+      <div className="relative max-h-[calc(100vh-72px)]">
         <Map
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
           zoom={zoomMap}
@@ -229,18 +283,20 @@ const MapDashboard = () => {
           data={stdb}
           activeDataId={selectedPekebun?.id}
           showCustomControls={true}
-          onFilterChange={(filter) => setActiveFilter(activeFilter == filter ? '' : filter)}
+          onFilterChange={(filter) =>
+            setActiveFilter(activeFilter == filter ? '' : filter)
+          }
           activeFilter={activeFilter}
           tileLayer={activeTile}
           staticLayers={staticLayersDetail}
         />
-        <div className='absolute right-4 top-4 z-[400]'>
+        <div className="absolute right-4 top-4 z-[400]">
           <div
             onClick={() => setShowTable(!showTable)}
-            className='flex flex-row items-center gap-2 rounded-[4px] border border-primary bg-white px-[10px] py-[10px] py-[10px] py-[10px]'
+            className="flex flex-row items-center gap-2 rounded-[4px] border border-primary bg-white px-[10px] py-[10px] py-[10px] py-[10px]"
           >
             <Statistic color={theme.colors?.primary} />
-            <Paragraph level={3} className='font-bold text-primary'>
+            <Paragraph level={3} className="font-bold text-primary">
               Data Pekebun
             </Paragraph>
           </div>
@@ -248,15 +304,15 @@ const MapDashboard = () => {
         <div
           className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-scroll rounded-xl border bg-white p-4 duration-500 ease-in-out ${
             showTable ? 'translate-x-0' : 'left-[200px] translate-x-full'
-          }`}
+          } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
         >
-          <div className='flex h-full flex-col gap-4'>
-            <div className='flex flex-row items-center justify-between'>
+          <div className="flex h-full flex-col gap-4">
+            <div className="flex flex-row items-center justify-between">
               <Heading level={2}>Data Pekebun</Heading>
-              <div className='flex flex-row items-center gap-8'>
-                <div className='flex flex-row items-center gap-2'>
+              <div className="flex flex-row items-center gap-8">
+                <div className="flex flex-row items-center gap-2">
                   <SearchBar
-                    placeholder='Cari Pekebun'
+                    placeholder="Cari Pekebun"
                     value={searchText}
                     onChange={handleSearchTextChange}
                     // onSearch={handleSearch}
@@ -265,30 +321,36 @@ const MapDashboard = () => {
                   <SelectMultiple
                     value={filterKomoditas}
                     onChange={handleFilterKomoditasMultipleSelectChange}
-                    containerClassName='w-[200px]'
-                    placeholder='Pilih Komoditas'
+                    containerClassName="w-[200px]"
+                    placeholder="Pilih Komoditas"
                     options={komoditas}
                   />
                   <SelectMultiple
                     value={filterKecamatan}
                     onChange={handleFilterKecamatanMultipleSelectChange}
-                    containerClassName='w-[200px]'
-                    placeholder='Pilih Kecamatan'
+                    containerClassName="w-[200px]"
+                    placeholder="Pilih Kecamatan"
                     options={kecamatanSanggau}
                   />
                   <Select
                     value={filterSTDBStatus}
                     onChange={handleFilterSTDBStatusChange}
-                    containerClassName='w-[200px]'
-                    placeholder='Pilih STDB'
+                    containerClassName="w-[200px]"
+                    placeholder="Pilih STDB"
                     options={stdbStatuses}
                   />
                 </div>
                 <Close onClick={() => setShowTable(false)} />
               </div>
             </div>
-            <div className='w-full flex-1'>
-              <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={stdb} columnDefs={colDefs} />
+            <div className="w-full flex-1">
+              <SectionLoading loading={loading} />
+              <AgGridReact
+                loading={loading}
+                autoSizeStrategy={autoSizeStrategy}
+                rowData={stdb}
+                columnDefs={colDefs}
+              />
             </div>
             <Pagination
               currentPage={currentPage}
@@ -312,7 +374,7 @@ const MapDashboard = () => {
           activeFilter === 'komoditas' ? 'translate-x-0' : '-translate-x-[200%]'
         }`}
       >
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-2">
           {komoditas?.map((data) => {
             return (
               <Checkbox
@@ -331,7 +393,7 @@ const MapDashboard = () => {
           activeFilter === 'kecamatan' ? 'translate-x-0' : '-translate-x-[200%]'
         }`}
       >
-        <div className='flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4'>
+        <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4">
           {kecamatanSanggau?.map((data) => {
             return (
               <Checkbox
@@ -351,11 +413,11 @@ const MapDashboard = () => {
         }`}
       >
         <SectionLoading loading={loadingDetailStaticLayer} />
-        <div className='flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4'>
+        <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4">
           <div>
             <RadioButton
-              labelClassName='text-[16px]'
-              containerClassName='gap-2'
+              labelClassName="text-[16px]"
+              containerClassName="gap-2"
               value={activeTile}
               onChangeValue={(e) => setActiveTile(e)}
               options={[
@@ -366,7 +428,7 @@ const MapDashboard = () => {
               ]}
             />
           </div>
-          <div className='w-full border-b' />
+          <div className="w-full border-b" />
           {staticLayerList?.map((data) => {
             return (
               <Checkbox

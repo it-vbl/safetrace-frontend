@@ -36,7 +36,7 @@ const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
       username: Yup.string().required('Username harus diisi'),
       email: Yup.string().email('Email tidak valid').required('Email harus diisi'),
       roles: Yup.array().min(1, 'Pilih minimal satu peran'),
-      password: Yup.string().required('Kata sandi harus diisi'),
+      password: Yup.string().min(8, 'Kata sandi minimal 8 karakter').required('Kata sandi harus diisi'),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Kata sandi tidak sesuai')
         .required('Ulangi kata sandi harus diisi'),

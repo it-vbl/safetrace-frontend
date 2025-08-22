@@ -54,12 +54,16 @@ const ListVerifikasi = () => {
   const ActionsCellRenderer = useCallback((e) => {
     return (
       <div className='flex h-full w-full flex-row items-center justify-center gap-2'>
-        <Button size={'extraSmall'} onClick={() => handleOnLihatClicked(e.data)}>
-          Lihat
-        </Button>
+        <div 
+            className='uppercase underline text-primary font-bold text-[12px] cursor-pointer' 
+            onClick={() => handleOnLihatClicked(e.data)}
+          >
+            Lihat
+          </div>
       </div>
     );
   }, []);
+
   const colDefs = [
     {
       field: 'actions',

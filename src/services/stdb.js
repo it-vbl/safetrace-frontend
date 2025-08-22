@@ -21,3 +21,5 @@ export const getListKebunSTDB = (stdbId) => api.get(`/stdb/kebun/list/${stdbId}/
 export const prosesPenerbitanSTDB = (payload) => api.post(`/stdb/penerbitan/proses/`, null, payload);
 export const prosesDataBerakhirSTDB = (payload) => api.post(`/stdb/data-berakhir/proses/`, null, payload);
 export const prosesCetakSTDB = (payload) => api.post(`/stdb/cetak/proses/`, null, payload);
+
+export const getRingkasanList = (params) => api.get(`/stdb/ringkasan/?${params}`);
