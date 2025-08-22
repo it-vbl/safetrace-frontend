@@ -12,12 +12,12 @@ import { toast } from 'react-toastify';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import ModalCreateUser from '@/components/organisms/Modal/ModalCreateUser';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import { useUserManagement } from '@/hooks/useUsers';
 import { setSelectedUser } from '@/store/slices/selectedUser';
-import SectionLoading from '@/components/molecules/SectionLoading';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

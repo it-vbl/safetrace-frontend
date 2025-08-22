@@ -10,10 +10,10 @@ import { DownloadCloudIcon } from 'lucide-react';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
-import SectionLoading from '@/components/molecules/SectionLoading';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

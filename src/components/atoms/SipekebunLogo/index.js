@@ -1,7 +1,7 @@
 import Image from 'next/image';
+import { useSelector } from 'react-redux';
 
 import LogoSipekebun from '../../../../public/logo_sipekebun.png';
-import { useSelector } from 'react-redux';
 
 export default function SipekebunLogo({ className }) {
   const isMobileScreen = useSelector((state) => state.app.isMobileScreen);

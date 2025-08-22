@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import ModalConfirmDeletePekebun from '@/components/organisms/Modal/ModalConfirmDeletePekebun';
 import Pagination from '@/components/organisms/Pagination';
@@ -21,7 +22,6 @@ import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
 import { deletePekebun } from '@/services/pekebun';
 import { setFilterKomoditas } from '@/store/slices/stdb';
-import SectionLoading from '@/components/molecules/SectionLoading';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

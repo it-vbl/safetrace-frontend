@@ -1,7 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import Button from '@/components/atoms/Button';
 import { DownloadIcon } from 'lucide-react';
+import PropTypes from 'prop-types';
+
+import Button from '@/components/atoms/Button';
 
 const RingkasanCard = ({
   labelText,

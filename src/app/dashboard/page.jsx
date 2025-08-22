@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+
+import DashboardCard2 from '@/components/atoms/DashboardCard2';
 import Heading from '@/components/atoms/Typography/Heading';
 import Select from '@/components/molecules/Select';
 import JumlahSTDBStatusCard from '@/components/organisms/JumlahSTDBStatusCard';
 import LahanTanamPerKomoditasCard from '@/components/organisms/LahanTanamPerKomoditasCard';
-import numberFormat from '@/libs/utils/numberFormat';
 import useAnalisis from '@/hooks/useAnalisis';
 import useReferences from '@/hooks/useReferences';
-import DashboardCard2 from '@/components/atoms/DashboardCard2';
+import numberFormat from '@/libs/utils/numberFormat';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

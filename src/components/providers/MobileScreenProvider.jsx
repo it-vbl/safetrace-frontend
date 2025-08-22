@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+
 import { setIsMobileScreen } from '@/store/slices/app';
 
 export const MobileScreenProvider = ({ children }) => {

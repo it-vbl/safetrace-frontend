@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 import {
-  getStdbStatistik,
+  getEksPlasmaStatistik,
   getJenisPupukStatistik,
   getPolaTanamStatistik,
-  getEksPlasmaStatistik,
+  getStdbStatistik,
 } from '../services/analisis';
 
 const useAnalisis = () => {

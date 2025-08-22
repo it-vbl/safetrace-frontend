@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { getRingkasanList } from '../services/stdb';
 
 const useRingkasan = () => {

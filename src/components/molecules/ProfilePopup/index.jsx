@@ -1,25 +1,29 @@
-import React, { useEffect,useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { createPortal } from 'react-dom';
-
-import LogoutIcon from '@/assets/icons/logout';
-import ProfileIcon from '@/assets/icons/profile';
-import useTouchOutside from '@/hooks/useTouchOutside';
-import { PersonIcon } from '@radix-ui/react-icons';
 import { LogOutIcon } from 'lucide-react';
 import { LockIcon } from 'lucide-react';
 import { UserIcon } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { toast } from 'react-toastify';
+
+import LogoutIcon from '@/assets/icons/logout';
+import ProfileIcon from '@/assets/icons/profile';
+import ModalGantiKataSandi from '@/components/organisms/Modal/ModalGantiKataSandi';
+import useTouchOutside from '@/hooks/useTouchOutside';
+import { changePassword } from '@/services/user';
+import { PersonIcon } from '@radix-ui/react-icons';
 
 const ProfilePopup = ({ children }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const popupRef = useRef(null);
   const triggerRef = useRef(null);
-  
+
   // Close popup when clicking outside
   useTouchOutside(popupRef, () => setIsOpen(false));
-  
+
   // Close popup on Escape key press
   useEffect(() => {
     const handleEscape = (e) => {
@@ -27,88 +31,111 @@ const ProfilePopup = ({ children }) => {
         setIsOpen(false);
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen]);
-  
+
   // Handle click on trigger element
   const handleTriggerClick = () => {
     setIsOpen(!isOpen);
   };
-  
+
   const handleProfileClick = () => {
     setIsOpen(false);
     // For now, using a dummy route
     router.push('/profile');
   };
-  
+
+  const handleGantiKataSandiClick = () => {
+    setIsOpen(false);
+    setIsPasswordModalOpen(true);
+  };
+
   const handleLogoutClick = () => {
-    try{
+    try {
       Cookies.remove('token');
-      router.replace('/login')
-    } catch(err) {
+      router.replace('/login');
+    } catch (err) {
       console.log(err);
     }
   };
-  
+
+  const handlePasswordSubmit = async (values) => {
+    try {
+      await changePassword(values);
+      setIsPasswordModalOpen(false);
+      toast.success('Kata sandi berhasil diubah');
+    } catch (error) {
+      throw error?.response;
+    }
+  };
+
   // Calculate position for the popup
   const [popupPosition, setPopupPosition] = useState({ top: 0, right: 0 });
-  
+
   useEffect(() => {
     if (isOpen && triggerRef.current) {
       const triggerRect = triggerRef.current.getBoundingClientRect();
       setPopupPosition({
         top: triggerRect.bottom,
-        right: window.innerWidth - triggerRect.right
+        right: window.innerWidth - triggerRect.right,
       });
     }
   }, [isOpen]);
-  
+
   return (
-    <div className="relative" ref={triggerRef} onClick={handleTriggerClick}>
-      {children}
-      {isOpen && createPortal(
-        <div 
-          className="fixed z-[1000] w-48 rounded-md bg-white shadow-lg z-50 border border-gray-200"
-          ref={popupRef}
-          style={{
-            top: `${popupPosition.top + 8}px`,
-            right: `${popupPosition.right}px`
-          }}
-        >
-          <div className="py-1">
-            <button
-              onClick={handleProfileClick}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+    <>
+      <div className="relative" ref={triggerRef} onClick={handleTriggerClick}>
+        {children}
+        {isOpen &&
+          createPortal(
+            <div
+              className="fixed z-[1000] w-48 rounded-md bg-white shadow-lg z-50 border border-gray-200"
+              ref={popupRef}
+              style={{
+                top: `${popupPosition.top + 8}px`,
+                right: `${popupPosition.right}px`,
+              }}
             >
-              <UserIcon size={18} className="mr-2" />
-              <span>Profile</span>
-            </button>
-            <button
-              onClick={handleProfileClick}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <LockIcon size={18} className="mr-2" />
-              <span>Ganti Kata Sandi</span>
-            </button>
-            <button
-              onClick={handleLogoutClick}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <LogOutIcon size={18} className="mr-2" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
-    </div>
+              <div className="py-1">
+                <button
+                  onClick={handleProfileClick}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <UserIcon size={18} className="mr-2" />
+                  <span>Profile</span>
+                </button>
+                <button
+                  onClick={handleGantiKataSandiClick}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <LockIcon size={18} className="mr-2" />
+                  <span>Ganti Kata Sandi</span>
+                </button>
+                <button
+                  onClick={handleLogoutClick}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <LogOutIcon size={18} className="mr-2" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>,
+            document.body
+          )}
+      </div>
+      <ModalGantiKataSandi
+        open={isPasswordModalOpen}
+        setOpen={setIsPasswordModalOpen}
+        onSubmit={handlePasswordSubmit}
+      />
+    </>
   );
 };
 

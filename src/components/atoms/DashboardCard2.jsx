@@ -1,4 +1,5 @@
 import React from 'react';
+
 import numberFormat from '@/libs/utils/numberFormat';
 
 const DashboardCard2 = ({ title, data, tagBg }) => {
