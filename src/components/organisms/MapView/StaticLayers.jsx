@@ -131,7 +131,6 @@ export default function IupMap({ data }) {
         id: staticLayer.id,
       });
     });
-    console.log('TEMP POLYGON', tempPolygons);
     setPolygons(tempPolygons);
   }, [data]);
 
@@ -139,7 +138,6 @@ export default function IupMap({ data }) {
     <>
       {polygons.map((staticLayer, idx) =>
         staticLayer?.polygons?.map((polygon) => {
-          console.log('POLYGON', polygon);
           return polygon?.coordinates?.map((ring, ringIdx) => {
             return (
               <Polygon
@@ -157,67 +155,26 @@ export default function IupMap({ data }) {
                     </div>
                     <div className='w-[500px]'>
                       <div className='grid grid-cols-3'>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-4'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Titik koordinat</Paragraph>
-                          <Paragraph className='!m-0 text-[16px]'>
-                            {data?.peta?.titik_koordinat?.coordinates?.[0] && data?.peta?.titik_koordinat?.coordinates?.[1]
-                              ? convertCoordsToDMS(
-                                  data.peta.titik_koordinat.coordinates[0],
-                                  data.peta.titik_koordinat.coordinates[1]
-                                )
-                              : 'N/A'}
-                          </Paragraph>
+                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
+                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Nama</Paragraph>
+                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.nama || "-"}</Paragraph>
                         </div>
                         <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>ID Kebun</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.nama}</Paragraph>
-                        </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Status Lahan</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{ring?.lahan?.status_lahan_label}</Paragraph>
+                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Nomor SK</Paragraph>
+                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.NOMORSK || "-"}</Paragraph>
                         </div>
                         <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
                           <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Komoditas</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{ring?.komoditas_info}</Paragraph>
+                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.KOMODITAS || "-"}</Paragraph>
                         </div>
                         <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
                           <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Luas Lahan (m2)</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{ring?.lahan?.luas_lahan}</Paragraph>
+                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.ha || "-"}</Paragraph>
                         </div>
                         <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
                           <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kecamatan</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{ring?.lahan?.kecamatan_label}</Paragraph>
+                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.disctrict_id || "-"}</Paragraph>
                         </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kelurahan</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{ring?.lahan?.desa_label}</Paragraph>
-                        </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>ring Peta</Paragraph>
-                          <Paragraph
-                            className={`!m-0 text-[14px] font-bold ${
-                              ring?.peta?.geom?.coordinates?.length > 0 ? 'text-primary' : ' text-red-900'
-                            }`}
-                          >
-                            {ring?.peta?.geom?.coordinates?.length > 0 ? 'Ada' : 'Tidak Ada'}
-                          </Paragraph>
-                        </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Pekebun</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{ring?.pekebun?.nama}</Paragraph>
-                        </div>
-                        <div className='border-b-1 flex flex-col items-start gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>STDB Terbit</Paragraph>
-                          <STDBStatusChip value={ring?.status_stdb} label={ring?.status_stdb_label} />
-                        </div>
-                      </div>
-                      <div className='absolute bottom-6 right-6'>
-                        <Link href={`/mapview`}>
-                          <div className='flex flex-row items-center gap-2 self-end text-primary'>
-                            Lihat selengkapnya
-                            <ArrowRightIcon size={12} />
-                          </div>
-                        </Link>
                       </div>
                     </div>
                   </div>

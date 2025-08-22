@@ -1,135 +1,155 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
-
-import Logo1 from '@/assets/images/logo1.png';
-import Logo2 from '@/assets/images/logo2.png';
-import Logo3 from '@/assets/images/logo3.png';
-import Checkbox from '@/components/atoms/Checkbox';
-import Close from '@/components/atoms/Icons/Close';
-import Statistic from '@/components/atoms/Icons/Statistic';
 import Heading from '@/components/atoms/Typography/Heading';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import JumlahSTDBStatusCard from '@/components/organisms/JumlahSTDBStatusCard';
-import JumlahSTDBTahapCard from '@/components/organisms/JumlahSTDBTahapCard';
 import LahanTanamPerKomoditasCard from '@/components/organisms/LahanTanamPerKomoditasCard';
-import Sidebar from '@/components/organisms/Sidebar';
-import komoditas from '@/constants/komoditas';
-import pekebuns from '@/constants/pekebuns';
 import numberFormat from '@/libs/utils/numberFormat';
-import { Button } from '@/stories/Button';
-import getPolygonCenter from '@/utils/getPolygonCenter';
-import theme from '@/utils/tailwindTheme';
-import { ChevronDownIcon } from '@radix-ui/react-icons';
+import useAnalisis from '@/hooks/useAnalisis';
+import useReferences from '@/hooks/useReferences';
+import DashboardCard2 from '@/components/atoms/DashboardCard2';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
+const periodeOptions = [
+  { value: '1week', label: '1 Minggu' },
+  { value: '1month', label: '1 Bulan' },
+  { value: '3month', label: '3 Bulan' },
+  { value: '1year', label: '1 Tahun' },
+];
+
 const MapDashboard = () => {
-  const [showTable, setShowTable] = useState(false);
-  const [rowData, setRowData] = useState(pekebuns);
-  const [selectedPekebun, setSelectedPekebun] = useState(pekebuns[0]);
+  const [komoditas, setKomoditas] = useState('');
+  const [periode, setPeriode] = useState('1month');
+  
+  const { 
+    loading, 
+    stdbStatistik,
+    jenisPupukStatistik,
+    polaTanamStatistik,
+    eksPlasmaStatistik,
+    fetchStdbStatistik,
+    fetchJenisPupukStatistik,
+    fetchPolaTanamStatistik,
+    fetchEksPlasmaStatistik,
+  } = useAnalisis();
+  const { komoditasKelembagaan, fetchKomoditasKelembagaan } = useReferences();
 
-  const handleOnLihatClicked = (data) => {
-    setShowTable(false);
-    setSelectedPekebun(data);
-  };
-
-  const ActionsCellRenderer = useCallback(
-    (e) => {
-      return <Button label='Lihat' size={'small'} onClick={() => handleOnLihatClicked(e.data)} />;
-    },
-    [rowData]
-  );
-  const colDefs = [
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      cellRenderer: ActionsCellRenderer,
-    },
-    { field: 'id_kebun', headerName: 'ID Kebun' },
-    { field: 'coordinate', headerName: 'Titik Koordinat' },
-    { field: 'status_lahan', headerName: 'Nama Pemilik' },
-    { field: 'komoditas', headerName: 'Komoditas' },
-    { field: 'luas_lahan', headerName: 'Luas Lahan(m2) ' },
-    { field: 'kecamatan', headerName: 'Kecamatan' },
-    { field: 'kelurahan', headerName: 'Kelurahan' },
-    { field: 'data_peta', headerName: 'Data Peta' },
-    { field: 'pekebun', headerName: 'Pekebun' },
-    { field: 'stdb', headerName: 'STDB' },
-  ];
-
-  const autoSizeStrategy = useMemo(() => {
-    return {
-      type: 'fitCellContents',
-    };
+  useEffect(() => {
+    fetchKomoditasKelembagaan();
+    fetchInitialData();
   }, []);
 
-  const centerMap = useMemo(() => {
-    if (selectedPekebun) {
-      return getPolygonCenter(selectedPekebun?.polygonCoords);
+  const fetchInitialData = async () => {
+    const dateRange = getDateRangeFromPeriod(periode);
+    const params = {
+      start_date: dateRange.startDate,
+      end_date: dateRange.endDate,
+    };
+    
+    await Promise.all([
+      fetchStdbStatistik(params),
+      fetchJenisPupukStatistik(params),
+      fetchPolaTanamStatistik(params),
+      fetchEksPlasmaStatistik(params),
+    ]);
+  };
+
+  const getDateRangeFromPeriod = (period) => {
+    const endDate = new Date();
+    const startDate = new Date();
+    
+    switch (period) {
+      case '1week':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case '1month':
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case '3month':
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case '1year':
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate.setMonth(startDate.getMonth() - 1);
     }
-    return [-0.5, 114.9];
-  }, [selectedPekebun]);
+    
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+    };
+  };
 
-  const Map = useMemo(
-    () =>
-      dynamic(() => import('@/components/organisms/MapView'), {
-        loading: () => <p>A map is loading</p>,
-        ssr: false,
-      }),
-    []
-  );
+  useEffect(() => {
+   handleFilterChange() 
+  }, [periode, komoditas]);
 
-  const dashboardCard = [
-    {
-      tag: 'Data STDB',
-      value: 10000,
-    },
-    {
-      tag: 'STDB Telah Terbit',
-      value: 10000,
-      tagBg: '#D0FAED',
-    },
-    {
-      tag: 'STDB Tidak Terbit',
-      value: 10000,
-      tagBg: '#FDD0CE',
-    },
-    {
-      tag: 'Total Luas Kebun Polygon (ha)',
-      value: 10000,
-    },
-    {
-      tag: 'Total Luas Kebun Sertifikat (ha)',
-      value: 10000,
-    },
-    {
-      tag: 'Pekebun',
-      value: 10000,
-    },
-    {
-      tag: 'Kebun',
-      value: 10000,
-    },
-    {
-      tag: 'Kecamatan',
-      value: 10000,
-    },
-  ];
+  const handleFilterChange = async () => {
+    const dateRange = getDateRangeFromPeriod(periode);
+    const params = {
+      komoditas: komoditas || '',
+      start_date: dateRange.startDate,
+      end_date: dateRange.endDate,
+    };
+    
+    await Promise.all([
+      fetchStdbStatistik(params),
+      fetchJenisPupukStatistik(params),
+      fetchPolaTanamStatistik(params),
+      fetchEksPlasmaStatistik(params),
+    ]);
+  };
+
+  const dashboardCard = useMemo(() => {
+
+    return [
+      {
+        tag: 'Data STDB',
+        value: stdbStatistik.total_stdb || 0,
+      },
+      {
+        tag: 'STDB Telah Terbit',
+        value: stdbStatistik.total_stdb_telah_terbit || 0,
+        tagBg: '#D0FAED',
+      },
+      {
+        tag: 'STDB Tidak Terbit',
+        value: stdbStatistik.total_stdb_tidak_terbit || 0,
+        tagBg: '#FDD0CE',
+      },
+      {
+        tag: 'Total Luas Kebun (ha)',
+        value: stdbStatistik.total_luas_kebun_polygon || 0,
+      },
+      {
+        tag: 'Total Luas Kebun Sertifikat (ha)',
+        value: stdbStatistik.total_luas_kebun_sertifikat || 0,
+      },
+      {
+        tag: 'Pekebun',
+        value: stdbStatistik.total_pekebun || 0,
+      },
+      {
+        tag: 'Kebun',
+        value: stdbStatistik.total_kebun || 0,
+      },
+      {
+        tag: 'Kecamatan',
+        value: stdbStatistik.total_kecamatan || 0,
+      },
+    ];
+  }, [stdbStatistik, loading]);
 
   const DashboardCard = ({ value, tagBg, tag }) => {
     return (
-      <div className='flex flex-col items-start rounded-[2px] border border-gray-300 p-4'>
-        <span className='text-[40px]'>{numberFormat(value)}</span>
-        <div style={{ background: tagBg || '#00000033' }} className={`rounded-[4px] p-4 px-3 py-1`}>
+      <div className='flex flex-col items-start rounded-[2px] border border-gray-300 p-3 sm:p-4'>
+        <span className='text-2xl sm:text-3xl lg:text-4xl font-bold'>{numberFormat(value)}</span>
+        <div style={{ background: tagBg || '#00000033' }} className={`rounded-[4px] text-xs sm:text-sm p-2 px-2 sm:px-3 py-1 mt-2`}>
           {tag}
         </div>
       </div>
@@ -137,30 +157,79 @@ const MapDashboard = () => {
   };
 
   return (
-    <div className='h-full w-full'>
+    <div className='h-full w-full !pb-4'>
       <div className='flex w-full flex-col gap-4'>
-        <Heading level={1}>DATA ANALISIS SEPANJANG WAKTU</Heading>
-        <div className='grid grid-cols-4 gap-4'>
+        <div className='flex flex-col lg:flex-row lg:justify-between lg:items-center mb-4 sm:mb-6'>
+          <Heading level={1} className="text-xl sm:text-2xl lg:text-3xl mb-4 lg:mb-0">
+            DATA ANALISIS SEPANJANG WAKTU
+          </Heading>
+          <div className='flex sm:flex-row sm:items-end sm:justify-end gap-3 sm:gap-4 w-full lg:w-auto'>
+              <Select
+                options={komoditasKelembagaan}
+                value={komoditas}
+                onChange={(e) => setKomoditas(e.target.value)}
+                placeholder="Pilih Komoditas"
+                className="w-full sm:w-48"
+              />
+              <Select
+                options={periodeOptions}
+                value={periode}
+                onChange={(e) => setPeriode(e.target.value)}
+                placeholder="Pilih Periode"
+                className="w-full sm:w-40"
+              />
+          </div>
+        </div>
+        
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4'>
           {dashboardCard?.map((data) => {
             return <DashboardCard key={data?.tag} value={data?.value} tag={data?.tag} tagBg={data?.tagBg} />;
           })}
-          <div className={'col-span-3 row-span-3'}>
+        </div>
+
+        <div className='grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4'>
+          <div className='lg:col-span-3'>
             <LahanTanamPerKomoditasCard />
           </div>
-          <div className={'col-span-1'}>
-            <DashboardCard value={10000} tag={'Data Lahan'} />
-          </div>
-          <div className={'col-span-1'}>
-            <DashboardCard value={5000} tag={'Data Kebun'} tagBg={'#FDD0CE'} />
-          </div>
-          <div className={'col-span-1'}>
-            <DashboardCard value={2000} tag={'Data Pekebun'} tagBg={'#D0FAED'} />
-          </div>
-          <div className={'col-span-2'}>
-            <JumlahSTDBTahapCard />
-          </div>
-          <div className={'col-span-2'}>
-            <JumlahSTDBStatusCard />
+          
+          <div className='flex flex-col gap-4'>
+            <DashboardCard2 
+              title={'Jenis Pupuk'} 
+              data={jenisPupukStatistik ? [
+                { label: 'Organik', value: jenisPupukStatistik.organik || 0 },
+                { label: 'Anorganik', value: jenisPupukStatistik.anorganik || 0 },
+                { label: 'Kombinasi', value: jenisPupukStatistik.kombinasi || 0 },
+              ] : [
+                { label: 'Organik', value: 0 },
+                { label: 'Anorganik', value: 0 },
+                { label: 'Kombinasi', value: 0 },
+              ]}
+              tagBg={'#FDD0CE'} 
+            />
+            
+            <DashboardCard2 
+              title={'Pola Tanam'} 
+              data={polaTanamStatistik ? [
+                { label: 'Monokultur', value: polaTanamStatistik.monokultur || 0 },
+                { label: 'Polikultur', value: polaTanamStatistik.polikultur || 0 },
+              ] : [
+                { label: 'Monokultur', value: 0 },
+                { label: 'Polikultur', value: 0 },
+              ]}
+              tagBg={'#FDD0CE'} 
+            />
+            
+            <DashboardCard2 
+              title={'Eks Plasma'} 
+              data={eksPlasmaStatistik ? [
+                { label: 'Ya Plasma', value: eksPlasmaStatistik.ya || 0 },
+                { label: 'Tidak Plasma', value: eksPlasmaStatistik.tidak || 0 },
+              ] : [
+                { label: 'Ya Plasma', value: 0 },
+                { label: 'Tidak Plasma', value: 0 },
+              ]}
+              tagBg={'#D0FAED'} 
+            />
           </div>
         </div>
       </div>

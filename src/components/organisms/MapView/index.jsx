@@ -143,20 +143,6 @@ const DrawControl = ({
           remove: !disableEditDeletePath,
         }}
       />
-      {/* {polygons &&
-        polygons?.map((polygon) => {
-          return (
-            polygon?.coordinates?.length > 0 && (
-              <Polygon
-                key={`polygon-${polygon?.id}`}
-                positions={polygon?.coordinates}
-                pathOptions={{
-                  color: 'blue',
-                }}
-              />
-            )
-          );
-        })} */}
     </FeatureGroup>
   );
 };

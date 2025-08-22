@@ -13,6 +13,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import Pagination from '@/components/organisms/Pagination';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
+import SectionLoading from '@/components/molecules/SectionLoading';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -26,7 +27,7 @@ const ListVerifikasi = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { listVerifikasi, fetchListVerifikasi } = useSTDB();
+  const { listVerifikasi, fetchListVerifikasi, loading } = useSTDB();
   const { totalPekebun } = usePekebuns();
 
   useEffect(() => {
@@ -45,9 +46,12 @@ const ListVerifikasi = () => {
     (e) => {
       return (
         <div className='flex h-full w-full flex-row items-center justify-center gap-2'>
-          <Button size={'extraSmall'} onClick={() => handleOnLihatClicked(e.data)}>
+          <div 
+            className='uppercase underline text-primary font-bold text-[12px] cursor-pointer' 
+            onClick={() => handleOnLihatClicked(e.data)}
+          >
             Lihat
-          </Button>
+          </div>
         </div>
       );
     },
@@ -105,8 +109,15 @@ const ListVerifikasi = () => {
             </div>
           </div>
         </div>
-        <div className='w-full flex-1'>
-          <AgGridReact autoSizeStrategy={autoSizeStrategy} rowData={listVerifikasi} columnDefs={colDefs} />
+        <div className='relative w-full flex-1'>
+          <SectionLoading loading={loading} />
+          <AgGridReact 
+            loading={loading} 
+            overlayLoadingTemplate='.' 
+            autoSizeStrategy={autoSizeStrategy} 
+            rowData={listVerifikasi} 
+            columnDefs={colDefs} 
+          />
         </div>
         <Pagination
           currentPage={currentPage}

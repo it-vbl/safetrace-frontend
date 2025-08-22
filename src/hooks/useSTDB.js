@@ -8,6 +8,7 @@ import {
   getDataTerbitList,
   getListKebunSTDB,
   getPenerbitanList,
+  getRingkasanList,
   getStatusVerifikasiKebun,
   getSTDBList,
   getTidakTerbitList,
@@ -81,6 +82,7 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
   };
 
   const fetchListVerifikasi = async ({ page_size, page, search }) => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (page_size) params.set('page_size', page_size);
@@ -92,7 +94,8 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
       }
     } catch (error) {
       console.error(error);
-      return false;
+    } finally {
+      setLoading(false);
     }
   };
 

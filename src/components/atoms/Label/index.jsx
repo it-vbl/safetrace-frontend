@@ -6,13 +6,8 @@ const Label = ({ children, isRequired = false, className = '', ...props }) => {
   return (
     <div className='flex flex-row'>
       <Paragraph level={3} className={`font-medium text-neutral11 ${className}`} {...props}>
-        {children}
+        {children} {isRequired && <span className='text-red-500'>*</span>}
       </Paragraph>
-      {isRequired ? (
-        <Paragraph level={3} className='font-medium text-[red]'>
-          *
-        </Paragraph>
-      ) : null}
     </div>
   );
 };

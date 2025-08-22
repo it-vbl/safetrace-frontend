@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { IoHome, IoHomeOutline, IoSettings } from 'react-icons/io5';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
+import LogoLembaga from '@/components/atoms/LogoLembaga';
+import SipekebunLogo from '@/components/atoms/SipekebunLogo';
 import { Date } from '@/assets/icons/index';
 import size from '@/constants/size';
 import { ChevronDownIcon, ChevronUpIcon, DashboardIcon } from '@radix-ui/react-icons';
+import { setSidebarOpen } from '@/store/slices/app';
+import { useMobileScreen } from '@/hooks/useMobileScreen';
 
 const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const storedValue = Cookies.get('storeProfile');
@@ -17,15 +21,19 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const [openSubMenu, setOpenSubMenu] = useState(null);
   const [isSubMenuOpened, setIsSubMenuOpened] = useState(false);
   const { sidebarOpen } = useSelector((state) => state.app);
+  const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
+  const dispatch = useDispatch();
 
   const router = useRouter();
-  const isMobileScreen = false;
-  //   const { isMobileScreen = false } = useSelector((state) => state.screen);
   const pathname = usePathname();
-  const isSuperAdmin = profile?.roles === 'superadmin';
-  const isAdminLocal = profile?.roles === 'admin-local';
 
   const menuItems = [
+    {
+      label: 'Mapview',
+      icon: DashboardIcon,
+      path: '/mapview',
+      mobileOnly: true,
+    },
     {
       label: 'Analisis',
       icon: DashboardIcon,
@@ -106,67 +114,92 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
     if (path) {
       router.push(path);
       setIsSubMenuOpened(false);
+      if(isMobileScreen) {
+        dispatch(setSidebarOpen(false));
+      }
     }
   };
 
   return (
-    <div
-      style={{ width: (isMobile && !isSidebarOpen) || !sidebarOpen ? 0 : `${size.SIDEBAR_WIDTH}px` }}
-      className={`h-full overflow-x-hidden transition-all duration-300 ${
-        isMobile ? 'inset-0 z-[100] bg-opacity-50' : 'bg-opacity-100'
-      } ${(isMobile && !isSidebarOpen) || !sidebarOpen ? 'opacity-0' : 'opacity-100'}`}
-    >
+    <>
+      {/* Mobile overlay */}
+      {isMobileScreen && sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300"
+          onClick={() => dispatch(setSidebarOpen(false))}
+        />
+      )}
+      
       <div
-        className='bg-primary700 flex h-full flex-col border-r border-r-gray-200 px-4 pt-8 text-white'
-        style={{
-          width: isCollapsed ? size.SIDEBAR_WIDTH_COLLAPSED : size.SIDEBAR_WIDTH,
+        style={{ 
+          width: (isMobileScreen && !sidebarOpen) || !sidebarOpen ? 0 : `${size.SIDEBAR_WIDTH}px`,
+          transform: isMobileScreen && !sidebarOpen ? 'translateX(-100%)' : 'translateX(0)'
         }}
-        id='sidebar'
+        className={`fixed left-0 top-0 h-full overflow-x-hidden transition-all duration-300 bg-white z-50 ${
+          isMobileScreen ? 'shadow-lg' : 'relative'
+        } ${(isMobileScreen && !sidebarOpen) || !sidebarOpen ? 'opacity-0' : 'opacity-100'}`}
       >
-        {menuItems.map((item, index) => {
-          const isActive =
-            pathname === item?.path ||
-            (item?.subMenu && item?.subMenu?.some((sub) => pathname?.includes(sub?.path))) ||
-            pathname?.includes(item?.label?.replaceAll(' ', '-')?.toLowerCase());
-          return (
-            <div key={index}>
-              <div
-                className={`mb-2 flex cursor-pointer items-center p-2 ${
-                  isActive ? 'bg-primary text-white' : 'text-gray-900'
-                } w-full rounded font-medium ${isCollapsed ? 'justify-center' : 'justify-normal'} relative`}
-                onClick={() => (item.subMenu ? handleSubMenuToggle(item.label) : handleMenuItemClick(item.path))}
-              >
-                <item.icon alt={item.label} className='h-[20px] w-[20px]' />
-                {!isCollapsed && <span className='ml-4 text-[14px] uppercase leading-[18px]'>{item.label}</span>}
-                {!isCollapsed &&
-                  item.subMenu &&
-                  (openSubMenu === item.label ? (
-                    <ChevronUpIcon className='ml-auto' />
-                  ) : (
-                    <ChevronDownIcon className='ml-auto' />
-                  ))}
-              </div>
-              {!isCollapsed && item.subMenu && openSubMenu === item.label && (
-                <div className='pl-8'>
-                  {item?.subMenu?.map(
-                    (subItem, subIndex) =>
-                      subItem && (
-                        <div
-                          key={subIndex}
-                          className={`mb-2 ml-1 flex cursor-pointer items-center p-2 ${
-                            pathname?.includes(subItem?.path) ? 'text-primary' : 'text-gray-400'
-                          } hover:bg-primary500 rounded font-medium`}
-                          onClick={() => handleMenuItemClick(subItem?.path)}
-                        >
-                          <span className='text-[14px] leading-[18px]'>{subItem?.label}</span>
-                        </div>
-                      )
-                  )}
+        <div
+          className='bg-primary700 flex h-full flex-col border-r border-r-gray-200 px-4 pt-8 text-white'
+          style={{
+            width: isCollapsed ? size.SIDEBAR_WIDTH_COLLAPSED : size.SIDEBAR_WIDTH,
+          }}
+          id='sidebar'
+        >
+        
+        {/* Mobile: Show LogoLembaga and SipekebunLogo at the top */}
+        {isMobileScreen && (
+          <div className="mb-6 flex flex-col self-center">
+            <LogoLembaga />
+          </div>
+        )}
+
+        {menuItems
+          .filter(item => !item.mobileOnly || isMobileScreen)
+          .map((item, index) => {
+            const isActive =
+              pathname === item?.path ||
+              (item?.subMenu && item?.subMenu?.some((sub) => pathname?.includes(sub?.path))) ||
+              pathname?.includes(item?.label?.replaceAll(' ', '-')?.toLowerCase());
+            return (
+              <div key={index}>
+                <div
+                  className={`mb-2 flex cursor-pointer items-center p-2 ${
+                    isActive ? 'bg-primary text-white' : 'text-gray-900'
+                  } w-full rounded font-medium ${isCollapsed ? 'justify-center' : 'justify-normal'} relative`}
+                  onClick={() => (item.subMenu ? handleSubMenuToggle(item.label) : handleMenuItemClick(item.path))}
+                >
+                  <item.icon alt={item.label} className='h-[20px] w-[20px]' />
+                  {!isCollapsed && <span className='ml-4 text-[14px] uppercase leading-[18px]'>{item.label}</span>}
+                  {!isCollapsed &&
+                    item.subMenu &&
+                    (openSubMenu === item.label ? (
+                      <ChevronUpIcon className='ml-auto' />
+                    ) : (
+                      <ChevronDownIcon className='ml-auto' />
+                    ))}
                 </div>
-              )}
-            </div>
-          );
-        })}
+                {!isCollapsed && item.subMenu && openSubMenu === item.label && (
+                  <div className='pl-8'>
+                    {item?.subMenu?.map(
+                      (subItem, subIndex) =>
+                        subItem && (
+                          <div
+                            key={subIndex}
+                            className={`mb-2 ml-1 flex cursor-pointer items-center p-2 ${
+                              pathname?.includes(subItem?.path) ? 'text-primary' : 'text-gray-400'
+                            } hover:bg-primary500 rounded font-medium`}
+                            onClick={() => handleMenuItemClick(subItem?.path)}
+                          >
+                            <span className='text-[14px] leading-[18px]'>{subItem?.label}</span>
+                          </div>
+                        )
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         {menuItems
           .filter((item) => item.subMenu)
           .map((item) => {
@@ -205,6 +238,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

@@ -6,6 +6,10 @@ import { createPortal } from 'react-dom';
 import LogoutIcon from '@/assets/icons/logout';
 import ProfileIcon from '@/assets/icons/profile';
 import useTouchOutside from '@/hooks/useTouchOutside';
+import { PersonIcon } from '@radix-ui/react-icons';
+import { LogOutIcon } from 'lucide-react';
+import { LockIcon } from 'lucide-react';
+import { UserIcon } from 'lucide-react';
 
 const ProfilePopup = ({ children }) => {
   const router = useRouter();
@@ -83,14 +87,21 @@ const ProfilePopup = ({ children }) => {
               onClick={handleProfileClick}
               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
-              <ProfileIcon size={18} className="mr-2" />
+              <UserIcon size={18} className="mr-2" />
               <span>Profile</span>
+            </button>
+            <button
+              onClick={handleProfileClick}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <LockIcon size={18} className="mr-2" />
+              <span>Ganti Kata Sandi</span>
             </button>
             <button
               onClick={handleLogoutClick}
               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
-              <LogoutIcon size={18} className="mr-2" />
+              <LogOutIcon size={18} className="mr-2" />
               <span>Logout</span>
             </button>
           </div>
