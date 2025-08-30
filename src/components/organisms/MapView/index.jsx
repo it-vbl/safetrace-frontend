@@ -3,7 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import L from 'leaflet';
 import { ArrowRightIcon } from 'lucide-react';
-import { FeatureGroup, MapContainer, Polygon, Popup, TileLayer, useMap } from 'react-leaflet';
+import {
+  FeatureGroup,
+  MapContainer,
+  Polygon,
+  Popup,
+  TileLayer,
+  useMap,
+} from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 
 import Close from '@/components/atoms/Icons/Close';
@@ -27,7 +34,8 @@ const tileLayers = {
     name: 'OpenStreetMap',
     type: 'base',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   },
   light: {
     name: 'Light',
@@ -101,7 +109,7 @@ const DrawControl = ({
     <FeatureGroup onMounted={(a) => {}} ref={featureGroupRef}>
       <EditControl
         onMounted={setEditRef}
-        position='topleft'
+        position="topleft"
         draw={{
           polygon: !disableDrawPolygon
             ? {
@@ -131,11 +139,21 @@ const DrawControl = ({
           onEditPath(latLngs?.[0]?.[0]);
         }}
         onCreated={(e) => {
-          onCreate(e?.layer?._latlngs?.[0].map((coord) => ({ lat: coord.lat, lng: coord.lng })));
+          onCreate(
+            e?.layer?._latlngs?.[0].map((coord) => ({
+              lat: coord.lat,
+              lng: coord.lng,
+            }))
+          );
         }}
         onDeleted={(e) => {
           if (Object.keys(e?.layers?._layers)?.length > 0) {
-            onDeleted(e?.layer?._latlngs?.[0].map((coord) => ({ lat: coord.lat, lng: coord.lng })));
+            onDeleted(
+              e?.layer?._latlngs?.[0].map((coord) => ({
+                lat: coord.lat,
+                lng: coord.lng,
+              }))
+            );
           }
         }}
         edit={{
@@ -147,14 +165,20 @@ const DrawControl = ({
   );
 };
 
-function CustomButtonControl({ onFilterChange = (e) => {}, activeFilter = '' }) {
+function CustomButtonControl({
+  onFilterChange = (e) => {},
+  activeFilter = '',
+}) {
   const map = useMap();
 
   useEffect(() => {
     const createControl = (title, innerHTML, position, onClick) => {
       const Control = L.Control.extend({
         onAdd: function () {
-          const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+          const container = L.DomUtil.create(
+            'div',
+            'leaflet-bar leaflet-control leaflet-control-custom'
+          );
           container.style.backgroundColor = 'white';
           container.style.width = '34px';
           container.style.height = '34px';
@@ -181,9 +205,15 @@ function CustomButtonControl({ onFilterChange = (e) => {}, activeFilter = '' }) 
     };
 
     const controls = [
-      createControl('Filter Komoditas', '🥬', 'topleft', () => onFilterChange('komoditas')),
-      createControl('Filter Kecamatan', '📍', 'topleft', () => onFilterChange('kecamatan')),
-      createControl('Tile Layer', '🗺️', 'topleft', () => onFilterChange('tilelayer')),
+      createControl('Filter Komoditas', '🥬', 'topleft', () =>
+        onFilterChange('komoditas')
+      ),
+      createControl('Filter Kecamatan', '📍', 'topleft', () =>
+        onFilterChange('kecamatan')
+      ),
+      createControl('Tile Layer', '🗺️', 'topleft', () =>
+        onFilterChange('tilelayer')
+      ),
     ];
 
     return () => controls.forEach((control) => control());
@@ -286,7 +316,10 @@ export default function MyMap(props) {
       {showCustomControls && (
         <>
           <EnableRulerTool />
-          <CustomButtonControl onFilterChange={onFilterChange} activeFilter={activeFilter} />
+          <CustomButtonControl
+            onFilterChange={onFilterChange}
+            activeFilter={activeFilter}
+          />
         </>
       )}
       {showDrawControls && (
@@ -299,7 +332,10 @@ export default function MyMap(props) {
           polygons={polygons}
         />
       )}
-      <TileLayer attribution={tileLayers[tileLayer].attribution} url={tileLayers[tileLayer].url} />
+      <TileLayer
+        attribution={tileLayers[tileLayer].attribution}
+        url={tileLayers[tileLayer].url}
+      />
       <MapCenterUpdater zoom={zoom} position={finalPosition} />
       <ZoomUpdater coordinates={highlightedPolygon} />
       {data?.map((data) => {
@@ -310,74 +346,119 @@ export default function MyMap(props) {
               click: () => setOpenPopupId(data?.id),
             }}
             positions={data?.peta?.geom?.coordinates}
-            pathOptions={{ color: data.id == activeDataId ? 'green' : 'gray', fillOpacity: 0.2, weight: 2 }}
+            pathOptions={{
+              color: data.id == activeDataId ? 'green' : 'gray',
+              fillOpacity: 0.2,
+              weight: 2,
+            }}
           >
             {showPolygonPopup ? (
               <Popup closeButton={false}>
-                <div className='w-full'>
-                  <div className='flex h-[32px] items-center justify-between '>
-                    <Paragraph className='font-bold ' level={2}>
+                <div className="w-full">
+                  <div className="flex h-[32px] items-center justify-between ">
+                    <Paragraph className="font-bold " level={2}>
                       DETAIL
                     </Paragraph>
                     <ClosePopupButton />
                   </div>
-                  <div className='w-[500px]'>
-                    <div className='grid grid-cols-3'>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-4'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Titik koordinat</Paragraph>
-                        <Paragraph className='!m-0 text-[16px]'>
+                  <div className="w-[500px]">
+                    <div className="grid grid-cols-3">
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-4">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Titik koordinat
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[16px]">
                           {convertCoordsToDMS(
                             data?.peta?.titik_koordinat?.coordinates[0],
                             data?.peta?.titik_koordinat?.coordinates[1]
                           )}
                         </Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>ID Kebun</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.id}</Paragraph>
-                      </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Status Lahan</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.status_lahan_label}</Paragraph>
-                      </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Komoditas</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.komoditas_info}</Paragraph>
-                      </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Luas Lahan (m2)</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.luas_lahan}</Paragraph>
-                      </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kecamatan</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.kecamatan_label}</Paragraph>
-                      </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kelurahan</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.lahan?.desa_label}</Paragraph>
-                      </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Data Peta</Paragraph>
-                        <Paragraph
-                          className={`!m-0 text-[14px] font-bold ${
-                            data?.peta?.geom?.coordinates?.length > 0 ? 'text-primary' : ' text-red-900'
-                          }`}
-                        >
-                          {data?.peta?.geom?.coordinates?.length > 0 ? 'Ada' : 'Tidak Ada'}
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          ID Kebun
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.id}
                         </Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Pekebun</Paragraph>
-                        <Paragraph className='!m-0 text-[14px]'>{data?.pekebun?.nama}</Paragraph>
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Status Lahan
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.lahan?.status_lahan_label}
+                        </Paragraph>
                       </div>
-                      <div className='border-b-1 flex flex-col items-start gap-1 border-b border-dashed py-4 pr-8'>
-                        <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>STDB Terbit</Paragraph>
-                        <STDBStatusChip value={data?.status_stdb} label={data?.status_stdb_label} />
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Komoditas
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.komoditas_info}
+                        </Paragraph>
+                      </div>
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Luas Lahan (m2)
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.lahan?.luas_lahan}
+                        </Paragraph>
+                      </div>
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Kecamatan
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.lahan?.kecamatan_label}
+                        </Paragraph>
+                      </div>
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Kelurahan
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.lahan?.desa_label}
+                        </Paragraph>
+                      </div>
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Data Peta
+                        </Paragraph>
+                        <Paragraph
+                          className={`!m-0 text-[14px] font-bold ${
+                            data?.peta?.geom?.coordinates?.length > 0
+                              ? 'text-primary'
+                              : ' text-red-900'
+                          }`}
+                        >
+                          {data?.peta?.geom?.coordinates?.length > 0
+                            ? 'Ada'
+                            : 'Tidak Ada'}
+                        </Paragraph>
+                      </div>
+                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          Pekebun
+                        </Paragraph>
+                        <Paragraph className="!m-0 text-[14px]">
+                          {data?.pekebun?.nama}
+                        </Paragraph>
+                      </div>
+                      <div className="border-b-1 flex flex-col items-start gap-1 border-b border-dashed py-4 pr-8">
+                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                          STDB Terbit
+                        </Paragraph>
+                        <STDBStatusChip
+                          value={data?.status_stdb}
+                          label={data?.status_stdb_label}
+                        />
                       </div>
                     </div>
-                    <div className='absolute bottom-6 right-6'>
-                      <Link href={`/mapview`}>
-                        <div className='flex flex-row items-center gap-2 self-end text-primary'>
+                    <div className="absolute bottom-6 right-6">
+                      <Link href={`/`}>
+                        <div className="flex flex-row items-center gap-2 self-end text-primary">
                           Lihat selengkapnya
                           <ArrowRightIcon size={12} />
                         </div>

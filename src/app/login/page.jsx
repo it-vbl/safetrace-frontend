@@ -19,10 +19,20 @@ import { login } from '@/services/auth';
 const LoginPage = () => {
   const router = useRouter();
   const schemaValidation = Yup.object().shape({
-    email: Yup.string().email('Email tidak valid').required('Email harus diisi'),
+    email: Yup.string()
+      .email('Email tidak valid')
+      .required('Email harus diisi'),
     password: Yup.string().required('Password harus diisi'),
   });
-  const { handleSubmit, values, touched, errors, handleBlur, handleChange, isSubmitting } = useFormik({
+  const {
+    handleSubmit,
+    values,
+    touched,
+    errors,
+    handleBlur,
+    handleChange,
+    isSubmitting,
+  } = useFormik({
     initialValues: {
       email: '',
       password: '',
@@ -31,12 +41,16 @@ const LoginPage = () => {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
-        const res = await login({ username: values.email, password: values.password });
+        const res = await login({
+          username: values.email,
+          password: values.password,
+        });
         if (res.status == 200) {
           Cookies.set('token', res?.data?.data?.access);
           Cookies.set('refreshToken', res?.data?.data?.refresh);
           Cookies.set('fullName', res?.data?.data?.full_name);
-          router.push('/mapview');
+          Cookies.set('userId', res?.data?.data?.id);
+          router.push('/');
           toast.success('Login berhasil');
         } else {
           router;
@@ -49,21 +63,25 @@ const LoginPage = () => {
   });
 
   return (
-    <div className='flex h-screen w-screen items-center justify-center '>
-      <div className='flex hidden h-full w-2/3 flex-1 md:block'>
-        <Image src={bannerLogin} alt='banner-login' className='h-full w-full object-cover' />
+    <div className="flex h-screen w-screen items-center justify-center ">
+      <div className="flex hidden h-full w-2/3 flex-1 md:block">
+        <Image
+          src={bannerLogin}
+          alt="banner-login"
+          className="h-full w-full object-cover"
+        />
       </div>
-      <div className='flex h-full w-[40vw] flex-col justify-center bg-bgColor p-12'>
-        <div className='flex flex-row justify-between'>
+      <div className="flex h-full w-[40vw] flex-col justify-center bg-bgColor p-12">
+        <div className="flex flex-row justify-between">
           <SipekebunLogo className={'text-[20px]'} />
           <LogoLembaga size={42} />
         </div>
-        <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <InputText
             label={'Email'}
-            type='email'
-            name='email'
-            placeholder='Masukan email'
+            type="email"
+            name="email"
+            placeholder="Masukan email"
             value={values.email}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -71,21 +89,29 @@ const LoginPage = () => {
             touched={touched}
           />
           <InputText
-            label='Password'
-            type='password'
-            name='password'
-            placeholder='Masukan kata sandi'
+            label="Password"
+            type="password"
+            name="password"
+            placeholder="Masukan kata sandi"
             value={values.password}
             onChange={handleChange}
             onBlur={handleBlur}
             errors={errors}
             touched={touched}
           />
-          <Button isLoading={isSubmitting} type='submit' className='w-full' disabled={isSubmitting}>
+          <Button
+            isLoading={isSubmitting}
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting}
+          >
             Login
           </Button>
-          <div className='mt-6'>
-            <Link href='/forgot-password' className=' text-sm font-bold text-primary underline'>
+          <div className="mt-6">
+            <Link
+              href="/forgot-password"
+              className=" text-sm font-bold text-primary underline"
+            >
               Lupa kata sandi?
             </Link>
           </div>

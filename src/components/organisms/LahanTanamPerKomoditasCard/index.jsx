@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BarElement,
   CategoryScale,
@@ -11,6 +11,7 @@ import { Bar } from 'react-chartjs-2';
 
 import Heading from '@/components/atoms/Typography/Heading';
 import theme from '@/utils/tailwindTheme';
+import { getLuasKebunKomoditasChartBar } from '@/services/stdb';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
@@ -35,29 +36,49 @@ export const options = {
   },
 };
 
-const komoditasLabels = ['Sawit', 'Kakao', 'Kopi', 'Lada', 'Karet', 'Lainnya'];
+export default function App({ komoditas, startDate, endDate }) {
+  const [chartData, setChartData] = useState({ labels: [], datasets: [] });
 
-// Realistic plantation area data in hectares for each komoditas
-const komoditasData = [12500, 8500, 4200, 1800, 3200, 1500];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const params = {};
+        if (komoditas) params.komoditas = komoditas;
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
+        const res = await getLuasKebunKomoditasChartBar(params);
+        if (res.status === 200) {
+          const arr = Array.isArray(res.data?.data) ? res.data.data : [];
+          const labels = arr.map((item) => item?.komoditas_nama ?? '-');
+          const data = arr.map((item) =>
+            typeof item?.luas_lahan === 'number'
+              ? item.luas_lahan
+              : Number(item?.luas_lahan) || 0
+          );
+          setChartData({
+            labels,
+            datasets: [
+              {
+                label: 'Luas Lahan (Hektar)',
+                data,
+                backgroundColor: theme.colors.primary,
+                borderColor: theme.colors.primary,
+                borderWidth: 1,
+              },
+            ],
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load chart data:', err);
+      }
+    };
+    fetchData();
+  }, [komoditas, startDate, endDate]);
 
-export const data = {
-  labels: komoditasLabels,
-  datasets: [
-    {
-      label: 'Luas Lahan (Hektar)',
-      data: komoditasData,
-      backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.primary,
-      borderWidth: 1,
-    },
-  ],
-};
-
-export default function App() {
   return (
     <div className="flex flex-col items-start border border-gray-300 p-8">
       <Heading>Jumlah Lahan Tanam Per Komoditas</Heading>
-      <Bar options={options} data={data} />
+      <Bar options={options} data={chartData} />
     </div>
   );
 }

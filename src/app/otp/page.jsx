@@ -22,7 +22,15 @@ const LoginPage = () => {
     username: Yup.string().required('Username harus diisi'),
     password: Yup.string().required('Password harus diisi'),
   });
-  const { handleSubmit, values, touched, errors, handleBlur, handleChange, isSubmitting } = useFormik({
+  const {
+    handleSubmit,
+    values,
+    touched,
+    errors,
+    handleBlur,
+    handleChange,
+    isSubmitting,
+  } = useFormik({
     initialValues: {
       username: '',
       password: '',
@@ -35,7 +43,7 @@ const LoginPage = () => {
         if (res.status == 200) {
           Cookies.set('token', res?.data?.data?.access);
           Cookies.set('refreshToken', res?.data?.data?.refresh);
-          router.push('/mapview');
+          router.push('/');
           toast.success('Login berhasil');
         } else {
           router;
@@ -48,20 +56,24 @@ const LoginPage = () => {
   });
 
   return (
-    <div className='flex h-screen items-center justify-center'>
-      <div className='flex hidden h-full w-2/3 flex-1 md:block'>
-        <Image src={bannerLogin} alt='banner-login' className='h-full w-full object-cover' />
+    <div className="flex h-screen items-center justify-center">
+      <div className="flex hidden h-full w-2/3 flex-1 md:block">
+        <Image
+          src={bannerLogin}
+          alt="banner-login"
+          className="h-full w-full object-cover"
+        />
       </div>
-      <div className='flex h-full w-[40vw] flex-col justify-center p-12'>
-        <div className='flex flex-row justify-between'>
+      <div className="flex h-full w-[40vw] flex-col justify-center p-12">
+        <div className="flex flex-row justify-between">
           <SipekebunLogo className={'text-[20px]'} />
           <LogoLembaga size={42} />
         </div>
-        <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <InputText
             label={'Username'}
-            type='email'
-            name='username'
+            type="email"
+            name="username"
             value={values.username}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -69,20 +81,25 @@ const LoginPage = () => {
             touched={touched}
           />
           <InputText
-            label='Password'
-            type='password'
-            name='password'
+            label="Password"
+            type="password"
+            name="password"
             value={values.password}
             onChange={handleChange}
             onBlur={handleBlur}
             errors={errors}
             touched={touched}
           />
-          <Button isLoading={isSubmitting} type='submit' className='w-full' disabled={isSubmitting}>
+          <Button
+            isLoading={isSubmitting}
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting}
+          >
             Login
           </Button>
-          <div className='flex items-center justify-center'>
-            <Link href='/register'>Register</Link>
+          <div className="flex items-center justify-center">
+            <Link href="/register">Register</Link>
           </div>
         </form>
       </div>
