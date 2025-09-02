@@ -7,3 +7,9 @@ export const updateUser = (userData) =>
   api.post('/accounts/user/update/', null, userData);
 export const changePassword = (passwordData) =>
   api.post('/accounts/change-password/', null, passwordData);
+
+export const getUserDetail = (userId) =>
+  api.get(`/accounts/user/detail/${userId}/`);
+
+export const updateUserProfile = (payload) =>
+  api.post('/accounts/user/profile/update/', null, payload);

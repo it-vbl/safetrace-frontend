@@ -1,14 +1,14 @@
 'use client'; // if using App Router
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRightIcon } from 'lucide-react';
 import { Polygon, Popup, useMap } from 'react-leaflet';
 
 import Close from '@/components/atoms/Icons/Close';
-import STDBStatusChip from '@/components/atoms/STDBStatusChip';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
+
+import { getColorOptions, registerPatterns } from './colorConfig';
+
+import 'leaflet.pattern';
 
 function cleanCoordinates(multiPolygon) {
   if (!Array.isArray(multiPolygon)) return [];
@@ -35,60 +35,6 @@ function cleanCoordinates(multiPolygon) {
     .filter((polygon) => polygon.length > 0); // valid polygon
 }
 
-const colorObject = {
-  1: {
-    key: 'sipekebun-desa',
-    pathOptions: {
-      fill: '#C0C0C0',
-      fillOpacity: 0,
-      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-      weight: 1,
-    },
-  },
-  2: {
-    key: 'sipekebun-desa',
-    pathOptions: {
-      color: `#7A7A7A`,
-      dashArray: '2 6',
-      dashOffset: '1',
-      lineCap: 'square',
-      weight: 1,
-      fillOpacity: 0,
-    },
-  },
-  3: {
-    key: 'sipekebun-kecamatan',
-    pathOptions: {
-      color: `#7A7A7A`,
-      fillOpacity: 0,
-      lineCap: 'square',
-      lineJoin: 'square',
-      dashArray: '2 4 2 4 10 4',
-      dashOffset: '1',
-      weight: 1,
-    },
-  },
-  4: {
-    key: 'sipekebun-kecamatan',
-    pathOptions: {
-      fillColor: '#9B4E23',
-      stroke: true,
-      fillOpacity: 1,
-      color: `#654230`,
-      weight: 1,
-    },
-  },
-  5: {
-    key: 'sipekebun-kecamatan',
-    pathOptions: {
-      fillColor: '#C93D80',
-      fillOpacity: 1,
-      border: false,
-      weight: 0,
-    },
-  },
-};
-
 function ClosePopupButton() {
   const map = useMap();
 
@@ -101,6 +47,11 @@ function ClosePopupButton() {
 
 export default function IupMap({ data }) {
   const [polygons, setPolygons] = useState([]);
+  const map = useMap();
+
+  useEffect(() => {
+    registerPatterns(map); // ✅ ensure patterns are added once
+  }, [map]);
 
   useEffect(() => {
     if (typeof data !== 'object' || data == null) return;
@@ -119,9 +70,17 @@ export default function IupMap({ data }) {
         .filter((feature) => feature?.geometry)
         .flatMap((feature) => {
           const geometry = feature.geometry;
-          if (geometry?.type === 'MultiPolygon' && Array.isArray(geometry.coordinates)) {
-            const filteredCoordinates = geometry.coordinates.filter((coord) => Array.isArray(coord));
-            return { coordinates: cleanCoordinates(filteredCoordinates), properties: feature.properties };
+          if (
+            geometry?.type === 'MultiPolygon' &&
+            Array.isArray(geometry.coordinates)
+          ) {
+            const filteredCoordinates = geometry.coordinates.filter((coord) =>
+              Array.isArray(coord)
+            );
+            return {
+              coordinates: cleanCoordinates(filteredCoordinates),
+              properties: feature.properties,
+            };
           }
           return [];
         });
@@ -142,38 +101,58 @@ export default function IupMap({ data }) {
             return (
               <Polygon
                 key={`${idx}-${ringIdx}`}
-                pathOptions={colorObject[staticLayer.id].pathOptions}
+                pathOptions={getColorOptions(staticLayer.id).pathOptions}
                 positions={ring?.[0]?.map((coords) => [coords[1], [coords[0]]])}
               >
                 <Popup closeButton={false}>
-                  <div className='w-full'>
-                    <div className='flex h-[32px] items-center justify-between '>
-                      <Paragraph className='font-bold ' level={2}>
+                  <div className="w-full">
+                    <div className="flex h-[32px] items-center justify-between ">
+                      <Paragraph className="font-bold " level={2}>
                         DETAIL
                       </Paragraph>
                       <ClosePopupButton />
                     </div>
-                    <div className='w-[500px]'>
-                      <div className='grid grid-cols-3'>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Nama</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.nama || "-"}</Paragraph>
+                    <div className="w-[500px]">
+                      <div className="grid grid-cols-3">
+                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            Nama
+                          </Paragraph>
+                          <Paragraph className="!m-0 text-[14px]">
+                            {polygon?.properties?.nama || '-'}
+                          </Paragraph>
                         </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Nomor SK</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.NOMORSK || "-"}</Paragraph>
+                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            Nomor SK
+                          </Paragraph>
+                          <Paragraph className="!m-0 text-[14px]">
+                            {polygon?.properties?.NOMORSK || '-'}
+                          </Paragraph>
                         </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Komoditas</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.KOMODITAS || "-"}</Paragraph>
+                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            Komoditas
+                          </Paragraph>
+                          <Paragraph className="!m-0 text-[14px]">
+                            {polygon?.properties?.KOMODITAS || '-'}
+                          </Paragraph>
                         </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Luas Lahan (m2)</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.ha || "-"}</Paragraph>
+                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            Luas Lahan (m2)
+                          </Paragraph>
+                          <Paragraph className="!m-0 text-[14px]">
+                            {polygon?.properties?.ha || '-'}
+                          </Paragraph>
                         </div>
-                        <div className='border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8'>
-                          <Paragraph className='!m-0 text-[12px] font-bold text-gray-400'>Kecamatan</Paragraph>
-                          <Paragraph className='!m-0 text-[14px]'>{polygon?.properties?.disctrict_id || "-"}</Paragraph>
+                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
+                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            Kecamatan
+                          </Paragraph>
+                          <Paragraph className="!m-0 text-[14px]">
+                            {polygon?.properties?.disctrict_id || '-'}
+                          </Paragraph>
                         </div>
                       </div>
                     </div>
