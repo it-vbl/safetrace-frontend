@@ -6,12 +6,11 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import DashboardCard2 from '@/components/atoms/DashboardCard2';
 import Heading from '@/components/atoms/Typography/Heading';
 import Select from '@/components/molecules/Select';
-import JumlahSTDBStatusCard from '@/components/organisms/JumlahSTDBStatusCard';
-import LahanTanamPerKomoditasCard from '@/components/organisms/LahanTanamPerKomoditasCard';
-import useAnalisis from '@/hooks/useAnalisis';
-import STDBProcessStepChart from '@/components/organisms/STDBProcessStepChart'; // Importing the chart component
-import useReferences from '@/hooks/useReferences';
 import JumlahSTDBBerdasarkanKomoditasPieChart from '@/components/organisms/JumlahSTDBBerdasarkanKomoditasPieChart'; // Importing the Pie Chart component
+import LahanTanamPerKomoditasCard from '@/components/organisms/LahanTanamPerKomoditasCard';
+import STDBProcessStepChart from '@/components/organisms/STDBProcessStepChart'; // Importing the chart component
+import useAnalisis from '@/hooks/useAnalisis';
+import useReferences from '@/hooks/useReferences';
 import numberFormat from '@/libs/utils/numberFormat';
 
 // Register all Community features

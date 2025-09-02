@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pie } from 'react-chartjs-2';
-import { ArcElement, Chart as ChartJS, Tooltip, Legend } from 'chart.js';
-import Heading from '../atoms/Typography/Heading';
-import theme from '@/utils/tailwindTheme';
-import numberFormat from '@/libs/utils/numberFormat';
-import { getJumlahStdbTerbitKomoditasPie } from '@/services/stdb';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { ArcElement, Chart as ChartJS, Legend,Tooltip } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+
+import numberFormat from '@/libs/utils/numberFormat';
+import { getJumlahStdbTerbitKomoditasPie } from '@/services/stdb';
+import theme from '@/utils/tailwindTheme';
+
+import Heading from '../atoms/Typography/Heading';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

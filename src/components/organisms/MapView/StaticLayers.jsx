@@ -1,15 +1,14 @@
 'use client'; // if using App Router
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRightIcon } from 'lucide-react';
 import { Polygon, Popup, useMap } from 'react-leaflet';
 
 import Close from '@/components/atoms/Icons/Close';
-import STDBStatusChip from '@/components/atoms/STDBStatusChip';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
-import { getColorOptions } from './colorConfig';
+
+import { getColorOptions, registerPatterns } from './colorConfig';
+
+import 'leaflet.pattern';
 
 function cleanCoordinates(multiPolygon) {
   if (!Array.isArray(multiPolygon)) return [];
@@ -48,6 +47,11 @@ function ClosePopupButton() {
 
 export default function IupMap({ data }) {
   const [polygons, setPolygons] = useState([]);
+  const map = useMap();
+
+  useEffect(() => {
+    registerPatterns(map); // ✅ ensure patterns are added once
+  }, [map]);
 
   useEffect(() => {
     if (typeof data !== 'object' || data == null) return;

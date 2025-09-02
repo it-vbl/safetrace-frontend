@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import ModalUbahDataPengguna from '@/components/organisms/Modal/ModalUbahDataPengguna'; // Importing the new modal
-import Button from '@/components/atoms/Button';
-import BorderBottomColData from '@/components/molecules/BorderBottomColData'; // Importing the new component
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+
+import Button from '@/components/atoms/Button';
+import BorderBottomColData from '@/components/molecules/BorderBottomColData'; // Importing the new component
+import ModalUbahDataPengguna from '@/components/organisms/Modal/ModalUbahDataPengguna'; // Importing the new modal
 import { getUserDetail, updateUserProfile } from '@/services/user';
 
 const ProfilePage = () => {

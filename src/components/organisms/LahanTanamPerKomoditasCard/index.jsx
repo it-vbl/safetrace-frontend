@@ -10,8 +10,8 @@ import {
 import { Bar } from 'react-chartjs-2';
 
 import Heading from '@/components/atoms/Typography/Heading';
-import theme from '@/utils/tailwindTheme';
 import { getLuasKebunKomoditasChartBar } from '@/services/stdb';
+import theme from '@/utils/tailwindTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 

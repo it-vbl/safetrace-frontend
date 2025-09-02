@@ -18,6 +18,7 @@ import STDBStatusChip from '@/components/atoms/STDBStatusChip';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
 
+import EnableRulerTool from './EnableRulerTool';
 import IupMap from './StaticLayers';
 
 import 'leaflet/dist/leaflet.css';
@@ -218,29 +219,6 @@ function CustomButtonControl({
 
     return () => controls.forEach((control) => control());
   }, [map, onFilterChange, activeFilter]);
-
-  return null;
-}
-
-function EnableRulerTool() {
-  const map = useMap();
-
-  useEffect(() => {
-    // Enable PM controls
-    map.pm.addControls({
-      position: 'topleft',
-      drawMarker: false,
-      drawPolygon: false,
-      drawPolyline: true, // use this for measuring
-      drawCircle: false,
-      drawCircleMarker: false,
-      drawRectangle: false,
-      editMode: false,
-      dragMode: false,
-      cutPolygon: false,
-      removalMode: true,
-    });
-  }, [map]);
 
   return null;
 }

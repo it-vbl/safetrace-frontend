@@ -1,3 +1,20 @@
+import L from 'leaflet';
+
+import 'leaflet.pattern';
+
+const stripePattern = new L.StripePattern({
+  weight: 1, // thickness of stripe
+  spaceWeight: 6, // spacing between stripes
+  color: '#2394C6', // stripe color
+  fillOpacity: 1,
+  angle: 135, // diagonal angle
+});
+
+// 👇 Call this once after you have map instance
+export function registerPatterns(map) {
+  stripePattern.addTo(map);
+}
+
 const colorObject = {
   1: {
     key: 'sipekebun-desa',
@@ -48,6 +65,26 @@ const colorObject = {
       fillOpacity: 1,
       border: false,
       weight: 0,
+    },
+  },
+  6: {
+    key: 'sipekebun_hgu',
+    pathOptions: {
+      fillColor: '#2394C6',
+      fillOpacity: 1,
+      border: false,
+      weight: 0,
+    },
+  },
+
+  // ✅ NEW: Polygon with diagonal stripe pattern
+  7: {
+    key: 'sipekebun-stripe',
+    pathOptions: {
+      fillPattern: stripePattern, // use the pattern
+      color: '#2394C6', // border color
+      weight: 1,
+      fillOpacity: 1,
     },
   },
 };

@@ -3,15 +3,17 @@ import {
   BarElement,
   CategoryScale,
   Chart as ChartJS,
+  Legend,
   LinearScale,
   Title,
   Tooltip,
-  Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import Heading from '../atoms/Typography/Heading';
-import theme from '@/utils/tailwindTheme';
+
 import { getJumlahStdbChartBar } from '@/services/stdb';
+import theme from '@/utils/tailwindTheme';
+
+import Heading from '../atoms/Typography/Heading';
 
 ChartJS.register(
   CategoryScale,
