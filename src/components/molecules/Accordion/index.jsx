@@ -11,15 +11,18 @@ const Accordion = ({
 }) => {
   const [isOpen, setIsOpen] = useState(defaultIsOpen);
   return (
-    <div className='w-full border border-gray-300'>
-      <div className='flex w-full cursor-pointer flex-row items-center p-4' onClick={() => setIsOpen(!isOpen)}>
+    <div className="w-full border border-gray-300 bg-white">
+      <div
+        className="flex w-full cursor-pointer flex-row items-center p-4"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <div onClick={(e) => e.stopPropagation()}>{prefixComponent}</div>
-        <div className='flex flex-1 items-center uppercase text-[14px] font-bold tracking-[1px]'>
+        <div className="flex flex-1 items-center text-[14px] font-bold uppercase tracking-[1px]">
           {title} {prefixTitleComponent}
         </div>
         {isOpen ? <MinusIcon width={16} /> : <PlusIcon width={16} />}
       </div>
-      {isOpen ? <div className=' px-4 pb-4'>{children}</div> : null}
+      {isOpen ? <div className=" px-4 pb-4">{children}</div> : null}
     </div>
   );
 };
