@@ -77,7 +77,7 @@ export default function Layout({ children }) {
               ) : null}
               <div className="flex flex-1 flex-col">
                 <div
-                  className={`flex flex-1 overflow-y-auto ${
+                  className={`flex flex-1 overflow-y-auto bg-[#F7F9FD] ${
                     noPadding ? 'p-0' : 'p-4 md:p-8'
                   }`}
                 >

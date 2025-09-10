@@ -1,5 +1,5 @@
 {
-  "name": "sipekebun-v2",
+  "name": "safe-tracibility-system-fe",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -35,8 +35,6 @@
     "@react-email/components": "^0.0.32",
     "@reduxjs/toolkit": "^2.8.2",
     "@stripe/stripe-js": "^2.4.0",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.47.12",
     "@turf/turf": "^7.2.0",
     "@vercel/analytics": "^1.4.1",
     "ag-grid-community": "^33.2.1",

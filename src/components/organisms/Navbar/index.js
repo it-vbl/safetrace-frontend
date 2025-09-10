@@ -39,51 +39,68 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className='flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4'>
+    <div className="flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4">
       {/* logo */}
-      
+
       {/* Desktop: Show both logos */}
-      <div className='flex flex-1 items-center'>
+      <div className="flex flex-1 items-center">
         <HamburgerMenuIcon
           onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
-          className='mr-4 cursor-pointer'
+          className="mr-4 cursor-pointer"
           width={isMobileScreen ? 16 : 24}
           height={isMobileScreen ? 16 : 24}
         />
         <SipekebunLogo />
       </div>
-      <div className="hidden md:!flex">
-        <LogoLembaga />
+      <div className="ml-auto hidden md:!flex  flex-1 flex-row items-center justify-center gap-4 uppercase">
+        <div
+          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+            '/traceability'
+          )}`}
+          onClick={() => handleMenuClick('/traceability')}
+        >
+          Traceability
+        </div>
+        <div
+          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+            '/kabar-tani'
+          )}`}
+          onClick={() => handleMenuClick('/kabar-tani')}
+        >
+          Kabar Tani
+        </div>
+        <div
+          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+            '/koperasi'
+          )}`}
+          onClick={() => handleMenuClick('/koperasi')}
+        >
+          Koperasi
+        </div>
       </div>
 
       {/* Desktop menu items */}
-      <div className='ml-auto hidden md:!flex  flex-1 flex-row items-center justify-end gap-4 uppercase'>
+      <div className="ml-auto hidden md:!flex  flex-1 flex-row items-center justify-end gap-4 uppercase">
         <div
-          className={`cursor-pointer tracking-[1px] ${getMenuClassName('/mapview')}`}
-          onClick={() => handleMenuClick('/')}
+          id="user"
+          className="flex cursor-pointer flex-row items-center gap-2 font-bold"
         >
-          Map
-        </div>
-        <div
-          className={`cursor-pointer tracking-[1px] ${getMenuClassName('/dashboard')}`}
-          onClick={() => handleMenuClick('/dashboard')}
-        >
-          Dashboard
-        </div>
-        <div id='user' className='flex cursor-pointer flex-row items-center gap-2 font-bold'>
           <ProfilePopup>
-            <div className='flex flex-row items-center gap-2'>
-              {name} <ChevronDownIcon />
+            <div className="flex flex-row items-center gap-2">
+              {name || 'user'} <ChevronDownIcon />
             </div>
           </ProfilePopup>
         </div>
       </div>
 
       {/* Mobile: Only show user profile */}
-      <div className='ml-auto flex md:hidden flex-1 flex-row items-center justify-end gap-4'>
-        <div id='user' className='flex cursor-pointer flex-row items-center gap-2 font-bold'>
+      <div className="ml-auto flex md:hidden flex-1 flex-row items-center justify-end gap-4">
+        <div
+          id="user"
+          className="flex cursor-pointer flex-row items-center gap-2 font-bold"
+        >
           <ProfilePopup>
-            <div className='flex text-[12px] sm:text-[16px] flex-row items-center text-right gap-2'>
+            <div className="flex text-[12px] sm:text-[16px] flex-row items-center text-right gap-2">
               {name} <ChevronDownIcon />
             </div>
           </ProfilePopup>

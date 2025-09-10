@@ -3,6 +3,20 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
+import {
+  BadgeIcon,
+  ContactIcon,
+  FlagIcon,
+  FolderIcon,
+  MapIcon,
+  MedalIcon,
+  MegaphoneIcon,
+  MessageSquareIcon,
+  PieChart,
+  Smartphone,
+  UserCircle2Icon,
+  UserIcon,
+} from 'lucide-react';
 import { IoHome, IoHomeOutline, IoSettings } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -31,76 +45,94 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const menuItems = [
-    {
-      label: 'Mapview',
-      icon: DashboardIcon,
-      path: '/',
-      mobileOnly: true,
-    },
-    {
-      label: 'Analisis',
-      icon: DashboardIcon,
-      path: '/dashboard',
-    },
-    {
-      label: 'Database',
-      icon: IoHomeOutline,
-      path: '/database',
-      subMenu: [
-        {
-          label: 'Ringkasan',
-          path: '/stdb/ringkasan',
-        },
-        {
-          label: 'Pendataan',
-          path: '/stdb/pendataan',
-        },
-        {
-          label: 'Verifikasi',
-          path: '/stdb/verifikasi',
-        },
-        {
-          label: 'Tidak Terbit',
-          path: '/stdb/tidak-terbit',
-        },
-        {
-          label: 'Penerbitan',
-          path: '/stdb/penerbitan',
-        },
-        {
-          label: 'Data Terbit',
-          path: '/stdb/data-terbit',
-        },
-        {
-          label: 'Data Berakhir',
-          path: '/stdb/data-berakhir',
-        },
-      ],
-    },
-    {
-      label: 'Pengaturan',
-      icon: IoSettings, // Make sure to import or define this icon
-      path: '/settings',
-      subMenu: [
-        {
-          label: 'Pengguna',
-          //   icon: IoPersonCircleOutline, // Make sure to import or define this icon
-          path: '/settings/users',
-        },
-        {
-          label: 'Hak Akses',
-          //   icon: IoKeyOutline, // Make sure to import or define this icon
-          path: '/settings/hak-akses',
-        },
-        {
-          label: 'Peta Overlay',
-          //   icon: IoMapOutline, // Make sure to import or define this icon
-          path: '/settings/peta-overlay',
-        },
-      ],
-    },
-  ];
+  const menuConfig = {
+    traceability: [
+      {
+        label: 'Statistik',
+        icon: PieChart,
+        subMenu: [
+          { label: 'Anggota', path: '/traceability/statistik/anggota' },
+          {
+            label: 'Traceability',
+            path: '/traceability/statistik/traceability',
+          },
+        ],
+      },
+      {
+        label: 'Petani',
+        icon: UserCircle2Icon,
+        path: '/traceability/petani',
+      },
+      {
+        label: 'Kebun',
+        icon: MapIcon,
+        path: '/traceability/kebun',
+      },
+      {
+        label: 'Produksi',
+        icon: FlagIcon,
+        path: '/traceability/produksi',
+      },
+      {
+        label: 'Diklat',
+        icon: MedalIcon,
+        path: '/traceability/diklat',
+      },
+    ],
+    'kabar-tani': [
+      {
+        label: 'Kontak',
+        icon: ContactIcon,
+        path: '/kabar-tani/kontak',
+      },
+      {
+        label: 'Grup',
+        icon: FolderIcon,
+        path: '/kabar-tani/grup',
+      },
+      {
+        label: 'Blast Pesan',
+        icon: MegaphoneIcon,
+        path: '/kabar-tani/blast-pesan',
+      },
+      {
+        label: 'Kirim Pesan',
+        icon: MessageSquareIcon,
+        path: '/kabar-tani/kirim-pesan',
+      },
+      {
+        label: 'Device',
+        icon: Smartphone,
+        path: '/kabar-tani/device',
+      },
+    ],
+    koperasi: [
+      {
+        label: 'Dummy Menu 1',
+        icon: DashboardIcon,
+        path: '/koperasi/dummy1',
+      },
+      {
+        label: 'Dummy Menu 2',
+        icon: IoHomeOutline,
+        path: '/koperasi/dummy2',
+      },
+      {
+        label: 'Dummy Menu 3',
+        icon: IoHomeOutline,
+        path: '/koperasi/dummy3',
+      },
+    ],
+  };
+
+  const currentMainMenu = useMemo(() => {
+    if (pathname.startsWith('/traceability')) return 'traceability';
+    if (pathname.startsWith('/kabar-tani')) return 'kabar-tani';
+    if (pathname.startsWith('/koperasi')) return 'koperasi';
+    return 'traceability';
+  }, [pathname]);
+
+  const menuItems = menuConfig[currentMainMenu] || [];
 
   const handleCollapse = () => {
     setIsCollapsed(!isCollapsed);
