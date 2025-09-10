@@ -8,8 +8,8 @@ import debounce from 'lodash/debounce';
 
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
-import Pagination from '@/components/organisms/Pagination';
 import SectionLoading from '@/components/molecules/SectionLoading';
+import Pagination from '@/components/organisms/Pagination';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

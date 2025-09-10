@@ -12,8 +12,8 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
-import Pagination from '@/components/organisms/Pagination';
 import ModalConfirmDeletePekebun from '@/components/organisms/Modal/ModalConfirmDeletePekebun';
+import Pagination from '@/components/organisms/Pagination';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);

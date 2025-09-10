@@ -1,8 +1,9 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+
+import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import Breadcrumb from '@/components/molecules/Breadcrumbs';
 
 const mockPetaniData = {
