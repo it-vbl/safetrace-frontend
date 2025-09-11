@@ -14,7 +14,7 @@ import Pagination from '@/components/organisms/Pagination';
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const KabarTaniPage = () => {
+const KontakPage = () => {
   const router = useRouter();
 
   const [search, setSearch] = useState('');
@@ -104,7 +104,7 @@ const KabarTaniPage = () => {
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
             Kontak
           </Heading>
@@ -152,4 +152,4 @@ const KabarTaniPage = () => {
   );
 };
 
-export default KabarTaniPage;
+export default KontakPage;
