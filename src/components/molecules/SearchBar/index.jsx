@@ -40,7 +40,10 @@ const SearchBar = ({
   const handleOnChange = (e) => {
     console.log('CHHHH', e.target.value);
     const inputValue = e.target.value;
-    if ((validationRegex ? validationRegex?.test(inputValue) : true) || inputValue === '') {
+    if (
+      (validationRegex ? validationRegex?.test(inputValue) : true) ||
+      inputValue === ''
+    ) {
       setSearchValue(inputValue);
       onChange(e);
     }
@@ -50,32 +53,42 @@ const SearchBar = ({
 
   return (
     <div
-      className={cn('relative flex h-[42px] w-[300px] rounded-[6px] border border-neutral6 py-2.5 pl-4', className, {
-        'cursor-not-allowed bg-neutral4': disabled,
-      })}
+      className={cn(
+        'relative flex h-[42px] w-[300px] rounded-[6px] border border-neutral6 bg-white px-4 py-2.5',
+        className,
+        {
+          'cursor-not-allowed bg-neutral4': disabled,
+        }
+      )}
     >
+      {searchValue ? (
+        <div
+          onClick={handleOnClear}
+          className={cn('pr-2', customClassNameIcon)}
+        >
+          <CloseIcon data-testid="icon-close" size={20} />
+        </div>
+      ) : (
+        <div
+          onClick={() => onSearch(searchValue)}
+          className={cn('pr-2', customClassNameIcon)}
+        >
+          <SearchIcon data-testid="icon-search" size={20} />
+        </div>
+      )}
       <input
-        data-testid='input-search'
-        type='text'
+        data-testid="input-search"
+        type="text"
         value={searchValue}
         onChange={handleOnChange}
         placeholder={placeholder}
-        className='size-full focus:outline-none'
+        className="size-full bg-transparent text-sm italic focus:outline-none"
         disabled={disabled}
       />
-      {searchValue ? (
-        <div onClick={handleOnClear} className={cn('px-3', customClassNameIcon)}>
-          <CloseIcon data-testid='icon-close' size={20} />
-        </div>
-      ) : (
-        <div onClick={() => onSearch(searchValue)} className={cn('px-3', customClassNameIcon)}>
-          <SearchIcon data-testid='icon-search' size={20} />
-        </div>
-      )}
 
       {showSuffix && (
         <>
-          <div className='mr-3 h-full w-[2px] bg-neutral4' />
+          <div className="mr-3 h-full w-[2px] bg-neutral4" />
           {suffixComponent()}
         </>
       )}
@@ -83,14 +96,14 @@ const SearchBar = ({
       {showSearchRecomendation && (
         <div
           ref={recomendationRef}
-          className='absolute left-0 top-12 z-10 max-h-[200px] w-full overflow-y-auto rounded-md border-[#F2F2F2] bg-white p-2 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]'
+          className="absolute left-0 top-12 z-10 max-h-[200px] w-full overflow-y-auto rounded-md border-[#F2F2F2] bg-white p-2 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]"
         >
           {searchReomendations.length > 0 ? (
             <div>
               {searchReomendations.map((item, index) => (
                 <Paragraph
                   level={3}
-                  className='cursor-pointer px-3 py-2 text-left font-normal text-[#323437]'
+                  className="cursor-pointer px-3 py-2 text-left font-normal text-[#323437]"
                   key={index}
                   onClick={() => onClickRecomendation(item)}
                 >
@@ -99,7 +112,10 @@ const SearchBar = ({
               ))}
             </div>
           ) : (
-            <Paragraph level={3} className='cursor-pointer px-3 py-2 text-center'>
+            <Paragraph
+              level={3}
+              className="cursor-pointer px-3 py-2 text-center"
+            >
               Data tidak ditemukan
             </Paragraph>
           )}
