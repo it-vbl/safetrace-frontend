@@ -31,7 +31,7 @@ const Navbar = () => {
   };
 
   const getMenuClassName = (menu) => {
-    return pathname === menu ? 'text-primary font-bold' : 'text-black';
+    return pathname.startsWith(menu) ? 'text-primary font-bold' : 'text-black';
   };
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const Navbar = () => {
         />
         <SipekebunLogo />
       </div>
-      <div className="ml-auto hidden md:!flex  flex-1 flex-row items-center justify-center gap-4 uppercase">
+      <div className="ml-auto hidden flex-1  flex-row items-center justify-center gap-4 uppercase md:!flex">
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/traceability'
@@ -63,9 +63,9 @@ const Navbar = () => {
         </div>
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-            '/kabar-tani'
+            '/kabar-tani/'
           )}`}
-          onClick={() => handleMenuClick('/kabar-tani')}
+          onClick={() => handleMenuClick('/kabar-tani/kontak')}
         >
           Kabar Tani
         </div>
@@ -80,7 +80,7 @@ const Navbar = () => {
       </div>
 
       {/* Desktop menu items */}
-      <div className="ml-auto hidden md:!flex  flex-1 flex-row items-center justify-end gap-4 uppercase">
+      <div className="ml-auto hidden flex-1  flex-row items-center justify-end gap-4 uppercase md:!flex">
         <div
           id="user"
           className="flex cursor-pointer flex-row items-center gap-2 font-bold"
@@ -94,13 +94,13 @@ const Navbar = () => {
       </div>
 
       {/* Mobile: Only show user profile */}
-      <div className="ml-auto flex md:hidden flex-1 flex-row items-center justify-end gap-4">
+      <div className="ml-auto flex flex-1 flex-row items-center justify-end gap-4 md:hidden">
         <div
           id="user"
           className="flex cursor-pointer flex-row items-center gap-2 font-bold"
         >
           <ProfilePopup>
-            <div className="flex text-[12px] sm:text-[16px] flex-row items-center text-right gap-2">
+            <div className="flex flex-row items-center gap-2 text-right text-[12px] sm:text-[16px]">
               {name} <ChevronDownIcon />
             </div>
           </ProfilePopup>
