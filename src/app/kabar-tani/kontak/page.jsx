@@ -103,16 +103,16 @@ const KontakPage = () => {
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
-      <div className="flex h-full flex-col gap-4 p-4">
+      <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
-            Kontak
+          <Heading level={3} className="text-lg font-bold">
+            KONTAK
           </Heading>
           <div className="w-full sm:w-auto">
             <SearchBar
               onChange={handleSearchTextChange}
               placeholder="Cari kontak"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-[300px]"
             />
           </div>
         </div>
@@ -144,7 +144,7 @@ const KontakPage = () => {
               showing: 'Menampilkan',
               of: 'dari',
             }}
-            className="text-xs sm:text-sm"
+            className="mb-4 text-xs sm:text-sm"
           />
         </div>
       </div>
