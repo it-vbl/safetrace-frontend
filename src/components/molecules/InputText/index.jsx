@@ -42,8 +42,12 @@ const InputText = ({
     field: inputValue !== '' ? 'border-neutral6' : '', // Use inputValue instead of value
   };
   const disabledClassName = {
-    field: disabled ? 'bg-neutral4 border-neutral6' : 'focus-within:border-blue6 hover:border-blue6',
-    input: disabled ? 'cursor-not-allowed bg-neutral4 text-neutral7 placeholder:text-neutral7' : 'cursor-auto',
+    field: disabled
+      ? 'bg-neutral4 border-neutral6'
+      : 'focus-within:border-blue6 hover:border-blue6',
+    input: disabled
+      ? 'cursor-not-allowed bg-neutral4 text-neutral7 placeholder:text-neutral7'
+      : 'cursor-auto',
   };
 
   const errorClassName = {
@@ -62,7 +66,8 @@ const InputText = ({
     return emojiRegex.test(value);
   };
 
-  const validateNumberRange = (value, minNumber, maxNumber) => maxNumber && (value < minNumber || value > maxNumber);
+  const validateNumberRange = (value, minNumber, maxNumber) =>
+    maxNumber && (value < minNumber || value > maxNumber);
 
   const validateTwoSpaces = (value) => {
     const notAllowingTwoSpace = / {2}/;
@@ -130,13 +135,17 @@ const InputText = ({
   return (
     <div className={cn('flex w-full flex-col gap-1', containerClassName)}>
       {label && (
-        <Label isRequired={isRequired} className=' text-[12px] font-bold text-gray-500' disabled={disabled}>
+        <Label
+          isRequired={isRequired}
+          className="text-[12px] font-bold text-gray-500"
+          disabled={disabled}
+        >
           {label}
         </Label>
       )}
       <div
         className={cn(
-          'group relative flex h-[32px] w-full items-center gap-[10px] rounded-[4px] border border-neutral5 bg-white',
+          'group relative flex h-[42px] w-full items-center gap-[10px] rounded-[4px] border border-neutral5 bg-white',
           filledClassName.field,
           disabledClassName.field,
           errorClassName.field,
@@ -144,7 +153,7 @@ const InputText = ({
         )}
       >
         {prefix && (
-          <div className='shrink-0 pl-3 text-neutral8'>
+          <div className="shrink-0 pl-3 text-neutral8">
             <Paragraph level={3}>{prefix}</Paragraph>
           </div>
         )}
@@ -167,21 +176,30 @@ const InputText = ({
           {...props}
         />
         {(isError || isPassword || suffix) && (
-          <div className='flex items-center gap-3 pr-3'>
+          <div className="flex items-center gap-3 pr-3">
             {isError && <ErrorOutline />}
             {isPassword && (
               <button
-                type='button'
+                type="button"
                 onClick={handleTogglePassword}
-                className={cn('shrink-0 cursor-pointer', disabled && 'cursor-not-allowed text-neutral6')}
+                className={cn(
+                  'shrink-0 cursor-pointer',
+                  disabled && 'cursor-not-allowed text-neutral6'
+                )}
                 disabled={disabled}
-                aria-label='Toggle password visibility'
+                aria-label="Toggle password visibility"
               >
                 {isShowPassword ? <RemoveRedEye /> : <RemoveRedEyeCross />}
               </button>
             )}
             {suffix && (
-              <Paragraph level={2} className={cn('w-auto text-neutral8', disabled && 'text-neutral6')}>
+              <Paragraph
+                level={2}
+                className={cn(
+                  'w-auto text-neutral8',
+                  disabled && 'text-neutral6'
+                )}
+              >
                 {suffix}
               </Paragraph>
             )}
@@ -189,12 +207,15 @@ const InputText = ({
         )}
       </div>
       {helperText && (
-        <Paragraph level={4} className={cn('mt-1 text-neutral7', errorClassName.helperText)}>
+        <Paragraph
+          level={4}
+          className={cn('mt-1 text-neutral7', errorClassName.helperText)}
+        >
           {helperText}
         </Paragraph>
       )}
       {errors?.[name] && touched?.[name] && (
-        <Paragraph level={4} className='text-error mt-1 text-red-500'>
+        <Paragraph level={4} className="text-error mt-1 text-red-500">
           {errors?.[name]}
         </Paragraph>
       )}

@@ -63,7 +63,7 @@ const Navbar = () => {
         </div>
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-            '/kabar-tani/kontak'
+            '/kabar-tani/'
           )}`}
           onClick={() => handleMenuClick('/kabar-tani/kontak')}
         >
