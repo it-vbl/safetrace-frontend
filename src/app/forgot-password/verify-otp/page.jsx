@@ -1,21 +1,20 @@
 'use client';
 
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
-import * as Yup from 'yup';
 
 import bannerLogin from '@/assets/images/login-bg.png';
-import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import OTPInput from '@/components/molecules/OTPInput';
 import { forgotPassword, forgotPasswordVerifyOTP } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import LogoSipekebun from '../../../../public/keling-kumang-logo.png';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -41,14 +40,24 @@ const LoginPage = () => {
     return () => clearInterval(timer);
   }, [isResendDisabled]);
 
-  const { handleSubmit, values, errors, handleBlur, handleChange, isSubmitting } = useFormik({
+  const {
+    handleSubmit,
+    values,
+    errors,
+    handleBlur,
+    handleChange,
+    isSubmitting,
+  } = useFormik({
     initialValues: {
       otp: '',
     },
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
-        const res = await forgotPasswordVerifyOTP({ otp: values.otp, otp_token: otpToken });
+        const res = await forgotPasswordVerifyOTP({
+          otp: values.otp,
+          otp_token: otpToken,
+        });
         if (res.status === 200) {
           Cookies.set('otp', values.otp);
           router.push('/forgot-password/reset-password');
@@ -84,50 +93,65 @@ const LoginPage = () => {
   }, [values.otp, handleSubmit]);
 
   return (
-    <div className='flex h-screen w-full items-center justify-center'>
-      <div className='flex hidden h-full w-2/3 flex-1 md:block'>
-        <Image src={bannerLogin} alt='banner-login' className='h-full w-full object-cover' />
+    <div className="flex h-screen w-screen bg-white">
+      <div className="relative hidden py-8 pl-8 lg:flex lg:w-[60vw]">
+        <Image
+          src={bannerLogin}
+          alt="banner-login"
+          className="h-full w-full rounded-xl object-cover"
+        />
       </div>
-      <div className='flex h-full w-[40vw] flex-col justify-center bg-bgColor p-12'>
-        <form className='mt-8 space-y-[40px]'>
-          <Link href={'/login'}>
-            <div className='flex flex-row items-center gap-3 font-bold'>
-              <ArrowLeftIcon width={20} height={20} />
-              <Paragraph level={3}>Kembali</Paragraph>
-            </div>
-          </Link>
-          <div>
-            <Heading level={3}>OTP</Heading>
-            <Paragraph level={3}>Masukan kode OTP yang telah kami kirimkan ke email Anda.</Paragraph>
+
+      <div className="flex w-full items-center justify-center px-8 lg:w-1/2">
+        <div className="w-full max-w-xl">
+          <div className="mb-8 flex items-center justify-center">
+            <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
           </div>
-          <OTPInput
-            length={6}
-            value={values.otp}
-            onChange={(e) => {
-              handleChange({
-                target: {
-                  name: 'otp',
-                  value: e,
-                },
-              });
-            }}
-            onBlur={handleBlur}
-            name='otp'
-          />
-          <div>
-            <Paragraph level={3}>
-              Tidak dapat kode OTP?{' '}
-              <button
-                type='button'
-                onClick={handleResendOTP}
-                className='font-bold text-primary underline'
-                disabled={isResendDisabled}
-              >
-                Kirim Ulang OTP {isResendDisabled && `(${resendTimer}s)`}
-              </button>
-            </Paragraph>
+
+          <div className="mb-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+            <form className="space-y-6">
+              <Link href={'/login'}>
+                <div className="flex flex-row items-center gap-3 font-bold">
+                  <ArrowLeftIcon width={20} height={20} />
+                  <Paragraph level={3}>Kembali</Paragraph>
+                </div>
+              </Link>
+              <div>
+                <Heading level={3}>OTP</Heading>
+                <Paragraph level={3}>
+                  Masukan kode OTP yang telah kami kirimkan ke email Anda.
+                </Paragraph>
+              </div>
+              <OTPInput
+                length={6}
+                value={values.otp}
+                onChange={(e) => {
+                  handleChange({
+                    target: {
+                      name: 'otp',
+                      value: e,
+                    },
+                  });
+                }}
+                onBlur={handleBlur}
+                name="otp"
+              />
+              <div>
+                <Paragraph level={3}>
+                  Tidak dapat kode OTP?{' '}
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
+                    className="font-bold text-primary underline"
+                    disabled={isResendDisabled}
+                  >
+                    Kirim Ulang OTP {isResendDisabled && `(${resendTimer}s)`}
+                  </button>
+                </Paragraph>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 'use client';
-
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
@@ -7,93 +6,102 @@ import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
-
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
-import ModalConfirmDeletePekebun from '@/components/organisms/Modal/ModalConfirmDeletePekebun';
 import Pagination from '@/components/organisms/Pagination';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const kelompokOptions = [
+  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
   { label: 'Kelompok A', value: 'kelompok_a' },
   { label: 'Kelompok B', value: 'kelompok_b' },
-  { label: 'Kelompok C', value: 'kelompok_c' },
 ];
 
-const keanggotaanOptions = [
-  { label: 'Aktif', value: 'aktif' },
-  { label: 'Tidak Aktif', value: 'tidak_aktif' },
+const rspoOptions = [
+  { label: 'Sudah', value: 'sudah' },
+  { label: 'Belum', value: 'belum' },
 ];
 
-const PetaniPage = () => {
+const ispoOptions = [
+  { label: 'Sudah', value: 'sudah' },
+  { label: 'Belum', value: 'belum' },
+];
+
+const KebunPage = () => {
   const router = useRouter();
-
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
-  const [selectedKeanggotaan, setSelectedKeanggotaan] = useState(null);
-
+  const [selectedRSPO, setSelectedRSPO] = useState(null);
+  const [selectedISPO, setSelectedISPO] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
   const [loading, setLoading] = useState(false);
-  const [petaniData, setPetaniData] = useState([]);
-  const [totalPetani, setTotalPetani] = useState(0);
+  const [kebunData, setKebunData] = useState([]);
+  const [totalKebun, setTotalKebun] = useState(0);
 
-  const [showModalConfirmDeletePetani, setShowModalConfirmDeletePetani] =
-    useState(false);
-  const [selectedPetaniToDelete, setSelectedPetaniToDelete] = useState(null);
-
-  // Placeholder fetch function - replace with real API call
-  const fetchPetaniData = async ({
+  // Fetch kebun data function
+  const fetchKebunData = async ({
     page,
     page_size,
     search,
     kelompok,
-    keanggotaan,
+    rspo,
+    ispo,
   }) => {
     setLoading(true);
     try {
       // TODO: Replace with real API call
-      // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Mock data
       const mockData = Array.from({ length: page_size }, (_, i) => {
-        const id = `001-PTN-001-${(page - 1) * page_size + i + 1}`;
+        const id = `001-APKS-001-${String(
+          (page - 1) * page_size + i + 1
+        ).padStart(3, '0')}`;
+        const rspoStatus = Math.random() > 0.5 ? 'Sudah' : 'Belum';
+        const ispoStatus = Math.random() > 0.5 ? 'Sudah' : 'Belum';
+
         return {
-          id_petani: id,
+          id_kebun: id,
           nama_petani: 'Agustinus Nery',
-          jenis_kelamin: 'Laki - Laki',
           kelompok: 'Bepekaek Besamo',
-          no_ktp: '6109010805890003',
-          no_kk: '610901171110021',
-          status_pernikahan: 'Kawin',
-          no_nib: '2910210022444',
+          lokasi: 'Dusun Gonis Rabu',
+          luas_kebun: '0,75',
+          waktu_tanam: 'September, 2014',
+          rspo: rspoStatus,
+          ispo: ispoStatus,
         };
       });
 
-      setPetaniData(mockData);
-      setTotalPetani(500); // Mock total count
+      setKebunData(mockData);
+      setTotalKebun(50);
     } catch (error) {
-      toast.error('Gagal memuat data petani');
+      toast.error('Gagal memuat data kebun');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPetaniData({
+    fetchKebunData({
       page: currentPage,
       page_size: pageSize,
       search,
       kelompok: selectedKelompok,
-      keanggotaan: selectedKeanggotaan,
+      rspo: selectedRSPO,
+      ispo: selectedISPO,
     });
-  }, [currentPage, pageSize, search, selectedKelompok, selectedKeanggotaan]);
+  }, [
+    currentPage,
+    pageSize,
+    search,
+    selectedKelompok,
+    selectedRSPO,
+    selectedISPO,
+  ]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -108,8 +116,13 @@ const PetaniPage = () => {
     setCurrentPage(1);
   };
 
-  const handleKeanggotaanChange = (e) => {
-    setSelectedKeanggotaan(e.target.value);
+  const handleRSPOChange = (e) => {
+    setSelectedRSPO(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleISPOChange = (e) => {
+    setSelectedISPO(e.target.value);
     setCurrentPage(1);
   };
 
@@ -123,12 +136,7 @@ const PetaniPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/petani/${data.id_petani}`);
-  };
-
-  const handleDeleteClicked = (data) => {
-    setSelectedPetaniToDelete(data);
-    setShowModalConfirmDeletePetani(true);
+    router.push(`/traceability/kebun/${data?.id_kebun}`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -140,13 +148,22 @@ const PetaniPage = () => {
         >
           LIHAT
         </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
-        </div>
       </div>
+    );
+  }, []);
+
+  const StatusCellRenderer = useCallback((params) => {
+    const status = params.value;
+    const isSuccess = status === 'Sudah';
+
+    return (
+      <span
+        className={`text-xs font-medium ${
+          isSuccess ? 'text-green-600' : 'text-red-600'
+        }`}
+      >
+        {status}
+      </span>
     );
   }, []);
 
@@ -156,53 +173,66 @@ const PetaniPage = () => {
         field: 'actions',
         headerName: '',
         cellRenderer: ActionsCellRenderer,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 150,
+        width: 80,
+        minWidth: 70,
+        maxWidth: 100,
         suppressSizeToFit: false,
       },
       {
-        field: 'id_petani',
-        headerName: 'Id Petani',
+        field: 'id_kebun',
+        headerName: 'Id Kebun',
         flex: 1,
+        minWidth: 140,
       },
       {
         field: 'nama_petani',
         headerName: 'Nama Petani',
         flex: 1,
-      },
-      {
-        field: 'jenis_kelamin',
-        headerName: 'Jenis Kelamin',
-        flex: 1,
+        minWidth: 140,
       },
       {
         field: 'kelompok',
         headerName: 'Kelompok',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'no_ktp',
-        headerName: 'No. KTP',
+        field: 'lokasi',
+        headerName: 'Lokasi',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'no_kk',
-        headerName: 'No. KK',
+        field: 'luas_kebun',
+        headerName: 'Luas Kebun (Ha)',
         flex: 1,
+        minWidth: 120,
+        cellRenderer: (params) => {
+          return `${params.value}`;
+        },
       },
       {
-        field: 'status_pernikahan',
-        headerName: 'Status Pernikahan',
+        field: 'waktu_tanam',
+        headerName: 'Waktu Tanam',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'no_nib',
-        headerName: 'No. NIB',
-        flex: 1,
+        field: 'rspo',
+        headerName: 'RSPO',
+        flex: 0.8,
+        minWidth: 100,
+        cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'ispo',
+        headerName: 'ISPO',
+        flex: 0.8,
+        minWidth: 100,
+        cellRenderer: StatusCellRenderer,
       },
     ],
-    [ActionsCellRenderer]
+    [ActionsCellRenderer, StatusCellRenderer]
   );
 
   const autoSizeStrategy = useMemo(() => {
@@ -211,47 +241,27 @@ const PetaniPage = () => {
     };
   }, []);
 
-  const handleDeletePetani = async () => {
-    try {
-      // TODO: Replace with real delete API call
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setShowModalConfirmDeletePetani(false);
-      toast.success('Data petani berhasil dihapus');
-      fetchPetaniData({
-        page: currentPage,
-        page_size: pageSize,
-        search,
-        kelompok: selectedKelompok,
-        keanggotaan: selectedKeanggotaan,
-      });
-    } catch (error) {
-      toast.error('Data petani gagal dihapus');
-    }
-  };
-
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
-          {/* Header Section */}
+          {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
-              DATA PETANI
+              DATA KEBUN
             </Heading>
 
-            {/* Controls Container */}
             <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-              {/* Search and Filters - Responsive Grid */}
+              {/* === SEARCH FILTER === */}
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
-                  placeholder="Cari petani"
+                  placeholder="Cari..."
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
+                  containerClassName="w-full sm:w-auto lg:w-[150px]"
                   placeholder="Kelompok"
                   options={kelompokOptions}
                   value={selectedKelompok}
@@ -259,15 +269,23 @@ const PetaniPage = () => {
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
-                  placeholder="Keanggotaan"
-                  options={keanggotaanOptions}
-                  value={selectedKeanggotaan}
-                  onChange={handleKeanggotaanChange}
+                  containerClassName="w-full sm:w-auto lg:w-[120px]"
+                  placeholder="RSPO"
+                  options={rspoOptions}
+                  value={selectedRSPO}
+                  onChange={handleRSPOChange}
+                />
+
+                <Select
+                  containerClassName="w-full sm:w-auto lg:w-[120px]"
+                  placeholder="ISPO"
+                  options={ispoOptions}
+                  value={selectedISPO}
+                  onChange={handleISPOChange}
                 />
               </div>
 
-              {/* Action Buttons - Responsive */}
+              {/* === ACTION BUTTON === */}
               <div className="flex flex-row items-center justify-end gap-2">
                 <Button
                   className="!px-2 sm:!px-3"
@@ -276,31 +294,32 @@ const PetaniPage = () => {
                   onClick={() => toast.info('Export Excel clicked')}
                 />
                 <Button
-                  onClick={() => router.push('/petani/tambah-petani')}
+                  onClick={() => router.push('/traceability/kebun/tambah')}
                   className="whitespace-nowrap text-xs sm:text-sm"
                 >
-                  Tambah Petani
+                  Tambah Kebun
                 </Button>
               </div>
             </div>
           </div>
-
-          {/* Table Container - Responsive Height */}
         </div>
-        <div className="relative w-full flex-1 ">
+
+        {/* === TABLE CONTAINER === */}
+        <div className="relative w-full flex-1">
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
-            rowData={petaniData}
+            rowData={kebunData}
             columnDefs={colDefs}
           />
         </div>
+
         <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}
-            totalItems={totalPetani}
+            totalItems={totalKebun}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
             showRowsPerPage={true}
@@ -313,16 +332,8 @@ const PetaniPage = () => {
           />
         </div>
       </div>
-
-      <ModalConfirmDeletePekebun
-        open={showModalConfirmDeletePetani}
-        setOpen={setShowModalConfirmDeletePetani}
-        namaPekebun={selectedPetaniToDelete?.nama_petani}
-        jumlahKebun={null}
-        handleSubmit={handleDeletePetani}
-      />
     </div>
   );
 };
 
-export default PetaniPage;
+export default KebunPage;

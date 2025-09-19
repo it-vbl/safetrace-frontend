@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,8 +11,6 @@ import LogoSipekebun from '../../../public/keling-kumang-logo.png';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import Button from '@/components/atoms/Button';
-import LogoLembaga from '@/components/atoms/LogoLembaga';
-import SipekebunLogo from '@/components/atoms/SipekebunLogo';
 import InputText from '@/components/molecules/InputText';
 import { login } from '@/services/auth';
 
@@ -85,14 +82,11 @@ const LoginPage = () => {
 
           {/* Welcome Card */}
           <div className="mb-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-            <div className="flex flex-col gap-4">
-              <Heading level={2} className="text-center text-lg font-normal">
+            <div className="flex flex-col gap-4 text-center">
+              <Heading level={1} className="font-normal">
                 Selamat Datang
               </Heading>
-              <Paragraph
-                level={3}
-                className="text-center text-sm font-medium text-gray-600"
-              >
+              <Paragraph level={2} className="font-normal">
                 Masukan email dan kata sandi untuk mulai menggunakan dashboard
                 CU Keling Kumang.
               </Paragraph>

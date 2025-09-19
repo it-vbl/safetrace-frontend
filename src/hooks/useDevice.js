@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import WhatsAppService from '@/service/whatsapp';
+import WhatsAppService from '../services/whatsapp';
 import {
   getErrorMessage,
   saveDeviceToLocal,
