@@ -14,6 +14,7 @@ import Paragraph from '@/components/atoms/Typography/Paragraph';
 import OTPInput from '@/components/molecules/OTPInput';
 import { forgotPassword, forgotPasswordVerifyOTP } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
+
 import LogoSipekebun from '../../../../public/keling-kumang-logo.png';
 
 const LoginPage = () => {

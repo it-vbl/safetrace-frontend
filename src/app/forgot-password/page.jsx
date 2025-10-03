@@ -15,6 +15,7 @@ import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import { forgotPassword } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
+
 import LogoSipekebun from '../../../public/keling-kumang-logo.png';
 
 const LoginPage = () => {

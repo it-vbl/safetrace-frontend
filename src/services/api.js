@@ -21,7 +21,16 @@ const api = axios.create({
     Accept: 'application/json',
     'Content-Type': 'application/json',
   },
-  paramsSerializer: (params) => querystring.stringify(params),
+  paramsSerializer: (params) => {
+    if (params instanceof URLSearchParams) {
+      return params.toString();
+    }
+    try {
+      return querystring.stringify(params);
+    } catch (e) {
+      return new URLSearchParams(params || {}).toString();
+    }
+  },
   // withCredentials: true,
 });
 
@@ -86,16 +95,25 @@ const APIResponseValidation = async (
         logout();
       }
 
+      const newAccessToken =
+        refreshTokenResponse?.data?.data?.access ||
+        refreshTokenResponse?.data?.access ||
+        refreshTokenResponse?.data?.access_token;
+
+      if (newAccessToken) {
+        Cookies.set('token', newAccessToken);
+      }
+
       return axios
         .request({
           ...response.config,
           headers: {
             ...response.config.headers,
-            Authorization: `Bearer ${refreshTokenResponse.data.access_token}`,
+            Authorization: `Bearer ${newAccessToken}`,
           },
         })
         .then((response) => {
-          return Promise.resolve(response.data);
+          return Promise.resolve(response);
         })
         .catch((err) => {
           // APIResponseValidation(err.response);

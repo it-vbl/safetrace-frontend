@@ -1,15 +1,16 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo,useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
+
+import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
-import Button from '@/components/atoms/Button';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -196,9 +197,11 @@ const GrupPage = () => {
     },
   ];
 
-  const autoSizeStrategy = {
-    type: 'fitCellContents',
-  };
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitCellContents',
+    };
+  }, []);
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -214,7 +217,7 @@ const GrupPage = () => {
       <div className="flex h-full flex-col gap-4">
         {/* Header section */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <Heading level={3} className="text-lg font-bold">
+          <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
             GRUP KONTAK
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
@@ -238,18 +241,15 @@ const GrupPage = () => {
           <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
-            columnDefs={colDefs}
-            pagination={false}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             rowData={kontakData}
-            domLayout="autoHeight"
-            suppressCellFocus={true}
+            columnDefs={colDefs}
           />
         </div>
 
         {/* Pagination section */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}
@@ -262,7 +262,7 @@ const GrupPage = () => {
               showing: 'Menampilkan',
               of: 'dari',
             }}
-            className="mb-4 text-xs sm:text-sm"
+            className="text-xs sm:text-sm"
           />
         </div>
       </div>

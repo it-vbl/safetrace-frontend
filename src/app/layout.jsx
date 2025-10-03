@@ -1,13 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { DM_Sans } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 
 import Navbar from '@/components/organisms/Navbar';
 import Sidebar from '@/components/organisms/Sidebar';
 import { MobileScreenProvider } from '@/components/providers/MobileScreenProvider';
+import size from '@/constants/size';
 import { ReduxProvider } from '@/libs/redux/provider';
 
 import '@/styles/globals.css';
@@ -17,8 +20,43 @@ const DMSans = DM_Sans({
   subsets: ['latin'],
 });
 
+// Inner component that can access Redux state
+function LayoutContent({ children, hideNavbar, hideSidebar, noPadding }) {
+  const { sidebarCollapsed, isMobileScreen } = useSelector((state) => state.app);
+  
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
+      <div
+        className={`flex ${
+          hideNavbar ? 'h-full' : 'h-[calc(100vh-72px)]'
+        } flex-row`}
+      >
+        {!hideSidebar ? (
+          <div className="h-full">
+            <Sidebar />
+          </div>
+        ) : null}
+        <div 
+          className="flex flex-1 flex-col transition-all duration-300"
+        >
+          <div
+            className={`flex flex-1 overflow-y-auto bg-[#F7F9FD] ${
+              noPadding ? 'p-0' : 'p-4 md:p-8'
+            }`}
+          >
+            {children}
+          </div>
+          <div id="action-button" />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function Layout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const noNavbarRoutes = [
     '/login',
     '/forgot-password',
@@ -35,6 +73,14 @@ export default function Layout({ children }) {
   ];
   const noPaddingRoutes = [...noSidebarRoutes, '/stdb/ringkasan'];
 
+  const publicRoutes = [
+    '/login',
+    '/forgot-password',
+    '/forgot-password/verify-otp',
+    '/forgot-password/reset-password',
+    '/register',
+  ];
+
   const hideNavbar = useMemo(
     () => noNavbarRoutes.some((route) => pathname === route),
     [pathname]
@@ -47,6 +93,15 @@ export default function Layout({ children }) {
     () => noPaddingRoutes.some((route) => pathname === route),
     [pathname]
   );
+
+  // Simple client-side auth guard
+  useEffect(() => {
+    const isPublic = publicRoutes.some((route) => pathname === route);
+    const token = Cookies.get('token');
+    if (!isPublic && !token) {
+      router.replace('/login');
+    }
+  }, [pathname, router]);
 
   return (
     <html lang="en" className={DMSans.className}>
@@ -64,28 +119,13 @@ export default function Layout({ children }) {
       <body>
         <ReduxProvider>
           <MobileScreenProvider>
-            {!hideNavbar && <Navbar />}
-            <div
-              className={`flex ${
-                hideNavbar ? 'h-full' : 'h-[calc(100vh-72px)]'
-              } flex-row`}
+            <LayoutContent 
+              hideNavbar={hideNavbar}
+              hideSidebar={hideSidebar}
+              noPadding={noPadding}
             >
-              {!hideSidebar ? (
-                <div className="h-full">
-                  <Sidebar />
-                </div>
-              ) : null}
-              <div className="flex flex-1 flex-col">
-                <div
-                  className={`flex flex-1 overflow-y-auto bg-[#F7F9FD] ${
-                    noPadding ? 'p-0' : 'p-4 md:p-8'
-                  }`}
-                >
-                  {children}
-                </div>
-                <div id="action-button" />
-              </div>
-            </div>
+              {children}
+            </LayoutContent>
             <ToastContainer />
           </MobileScreenProvider>
         </ReduxProvider>

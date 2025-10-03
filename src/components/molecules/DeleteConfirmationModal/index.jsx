@@ -1,7 +1,8 @@
 import React from 'react';
-import BaseModal from '@/components/molecules/Modal';
-import Heading from '@/components/atoms/Typography/Heading';
+
 import Button from '@/components/atoms/Button';
+import Heading from '@/components/atoms/Typography/Heading';
+import BaseModal from '@/components/molecules/Modal';
 
 const DeleteConfirmationModal = ({
   isOpen,
@@ -22,8 +23,11 @@ const DeleteConfirmationModal = ({
     onClose();
   };
 
-  const displayMessage =
-    message || `Apakah Anda ingin menghapus data ${itemName}?`;
+  const displayMessage = message || (
+    <>
+      Apakah Anda ingin menghapus data <strong>{itemName}</strong>?
+    </>
+  );
 
   return (
     <BaseModal

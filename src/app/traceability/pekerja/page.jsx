@@ -13,13 +13,9 @@ import { toast } from 'react-toastify';
 // 3. Internal components (alias @/)
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-
-// 4. Relative imports (services)
-import { deletePetani, getListPetani } from '../../../services/petani';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -30,82 +26,108 @@ const kelompokOptions = [
   { label: 'Kelompok C', value: 'kelompok_c' },
 ];
 
-const keanggotaanOptions = [
-  { label: 'Aktif', value: 'aktif' },
-  { label: 'Tidak Aktif', value: 'tidak_aktif' },
-];
-
-const PetaniPage = () => {
+const PekerjaPage = () => {
   const router = useRouter();
 
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
-  const [selectedKeanggotaan, setSelectedKeanggotaan] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const [loading, setLoading] = useState(false);
-  const [petaniData, setPetaniData] = useState([]);
-  const [totalPetani, setTotalPetani] = useState(0);
+  const [pekerjaData, setPekerjaData] = useState([]);
+  const [totalPekerja, setTotalPekerja] = useState(0);
 
-  const [showModalConfirmDeletePetani, setShowModalConfirmDeletePetani] =
-    useState(false);
-  const [selectedPetaniToDelete, setSelectedPetaniToDelete] = useState(null);
+  // Sample data - replace with actual API call
+  const samplePekerjaData = [
+    {
+      id: '001-APKS-001-001',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '0.75',
+      jumlahPekerja: 3,
+    },
+    {
+      id: '001-APKS-001-002',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '1.25',
+      jumlahPekerja: 4,
+    },
+    {
+      id: '001-APKS-001-003',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '2.00',
+      jumlahPekerja: 4,
+    },
+    {
+      id: '001-APKS-001-004',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '1.50',
+      jumlahPekerja: 2,
+    },
+    {
+      id: '001-APKS-001-005',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '0.90',
+      jumlahPekerja: 1,
+    },
+    {
+      id: '001-APKS-001-006',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '1.80',
+      jumlahPekerja: 3,
+    },
+    {
+      id: '001-APKS-001-007',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '2.25',
+      jumlahPekerja: 4,
+    },
+    {
+      id: '001-APKS-001-008',
+      namaPetani: 'Agustinus Nery',
+      jenisKelamin: 'Laki - Laki',
+      kelompok: 'Bepekaek Besamo',
+      noKTP: '6109010805890003',
+      noKK: '6109011711110021',
+      luasKebun: '3.00',
+      jumlahPekerja: 5,
+    },
+  ];
 
-  const fetchPetaniData = async ({ page, page_size, search }) => {
-    setLoading(true);
-    try {
-      const response = await getListPetani({ page, page_size, search });
-
-      if (response?.status === 200) {
-        const data = response?.data?.data;
-        const results = data?.results || [];
-
-        const mapped = results.map((item) => ({
-          id: item?.id,
-          id_petani: item?.id_petani,
-          nama_petani: item?.nama,
-          jenis_kelamin:
-            item?.jns_kelamin === '1'
-              ? 'Laki - Laki'
-              : item?.jns_kelamin === '2'
-              ? 'Perempuan'
-              : '-',
-          kelompok: item?.nama_kelompok ?? '-',
-          no_ktp: item?.no_ktp ?? '-',
-          no_kk: item?.no_kk ?? '-',
-          status_pernikahan:
-            item?.status_perkawinan === '1'
-              ? 'Belum Kawin'
-              : item?.status_perkawinan === '2'
-              ? 'Kawin'
-              : '-',
-          no_nib: item?.no_nib ?? '-',
-        }));
-
-        setPetaniData(mapped);
-        setTotalPetani(Number(data?.count || 0));
-      } else {
-        setPetaniData([]);
-        setTotalPetani(0);
-      }
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Gagal memuat data petani');
-      setPetaniData([]);
-      setTotalPetani(0);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Initialize pekerjaData with sample data
   useEffect(() => {
-    fetchPetaniData({
-      page: currentPage,
-      page_size: pageSize,
-      search,
-    });
-  }, [currentPage, pageSize, search]);
+    setPekerjaData(samplePekerjaData);
+    setTotalPekerja(samplePekerjaData.length);
+  }, []);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -120,11 +142,6 @@ const PetaniPage = () => {
     setCurrentPage(1);
   };
 
-  const handleKeanggotaanChange = (e) => {
-    setSelectedKeanggotaan(e.target.value);
-    setCurrentPage(1);
-  };
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -135,12 +152,7 @@ const PetaniPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/petani/${data.id}`);
-  };
-
-  const handleDeleteClicked = (data) => {
-    setSelectedPetaniToDelete(data);
-    setShowModalConfirmDeletePetani(true);
+    router.push(`/traceability/pekerja/${data.id}`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -151,12 +163,6 @@ const PetaniPage = () => {
           onClick={() => handleLihatClicked(e.data)}
         >
           LIHAT
-        </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
         </div>
       </div>
     );
@@ -174,17 +180,17 @@ const PetaniPage = () => {
         suppressSizeToFit: false,
       },
       {
-        field: 'id_petani',
+        field: 'id',
         headerName: 'Id Petani',
         flex: 1,
       },
       {
-        field: 'nama_petani',
+        field: 'namaPetani',
         headerName: 'Nama Petani',
         flex: 1,
       },
       {
-        field: 'jenis_kelamin',
+        field: 'jenisKelamin',
         headerName: 'Jenis Kelamin',
         flex: 1,
       },
@@ -194,23 +200,23 @@ const PetaniPage = () => {
         flex: 1,
       },
       {
-        field: 'no_ktp',
+        field: 'noKTP',
         headerName: 'No. KTP',
         flex: 1,
       },
       {
-        field: 'no_kk',
+        field: 'noKK',
         headerName: 'No. KK',
         flex: 1,
       },
       {
-        field: 'status_pernikahan',
-        headerName: 'Status Pernikahan',
+        field: 'luasKebun',
+        headerName: 'Luas Kebun (Ha)',
         flex: 1,
       },
       {
-        field: 'no_nib',
-        headerName: 'No. NIB',
+        field: 'jumlahPekerja',
+        headerName: 'Jumlah Pekerja',
         flex: 1,
       },
     ],
@@ -223,40 +229,38 @@ const PetaniPage = () => {
     };
   }, []);
 
-  const handleDeletePetani = async () => {
-    if (!selectedPetaniToDelete?.id) {
-      toast.error('ID petani tidak ditemukan');
-      return;
-    }
+  // Filter data based on search and kelompok
+  const filteredData = useMemo(() => {
+    let filtered = pekerjaData;
 
-    try {
-      const res = await deletePetani(selectedPetaniToDelete.id);
-      if (
-        res?.data?.status === 'success' ||
-        res?.status === 200 ||
-        res?.status === 204
-      ) {
-        toast.success('Data petani berhasil dihapus');
-        setShowModalConfirmDeletePetani(false);
-        fetchPetaniData({
-          page: currentPage,
-          page_size: pageSize,
-          search,
-        });
-      } else {
-        toast.error(res?.data?.message || 'Data petani gagal dihapus');
-      }
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message || 'Data petani gagal dihapus'
+    if (search) {
+      filtered = filtered.filter(
+        (item) =>
+          item.namaPetani.toLowerCase().includes(search.toLowerCase()) ||
+          item.id.toLowerCase().includes(search.toLowerCase()) ||
+          item.kelompok.toLowerCase().includes(search.toLowerCase())
       );
     }
-  };
 
-  const handleDeleteCancel = () => {
-    setShowModalConfirmDeletePetani(false);
-    setSelectedPetaniToDelete(null);
-  };
+    if (selectedKelompok) {
+      filtered = filtered.filter((item) =>
+        item.kelompok.toLowerCase().includes(selectedKelompok.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [pekerjaData, search, selectedKelompok]);
+
+  // Paginated data
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, currentPage, pageSize]);
+
+  useEffect(() => {
+    setTotalPekerja(filteredData.length);
+  }, [filteredData]);
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -265,7 +269,7 @@ const PetaniPage = () => {
           {/* Header Section */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
-              DATA PETANI
+              PEKERJA
             </Heading>
 
             {/* Controls Container */}
@@ -274,7 +278,7 @@ const PetaniPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
-                  placeholder="Cari petani"
+                  placeholder="Cari..."
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 
@@ -284,14 +288,6 @@ const PetaniPage = () => {
                   options={kelompokOptions}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
-                />
-
-                <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
-                  placeholder="Keanggotaan"
-                  options={keanggotaanOptions}
-                  value={selectedKeanggotaan}
-                  onChange={handleKeanggotaanChange}
                 />
               </div>
 
@@ -303,12 +299,6 @@ const PetaniPage = () => {
                   title="Export Excel"
                   onClick={() => toast.info('Export Excel clicked')}
                 />
-                <Button
-                  onClick={() => router.push('/traceability/petani/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm"
-                >
-                  Tambah Petani
-                </Button>
               </div>
             </div>
           </div>
@@ -320,7 +310,7 @@ const PetaniPage = () => {
             loading={loading}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
-            rowData={petaniData}
+            rowData={paginatedData}
             columnDefs={colDefs}
           />
         </div>
@@ -328,7 +318,7 @@ const PetaniPage = () => {
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}
-            totalItems={totalPetani}
+            totalItems={totalPekerja}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
             showRowsPerPage={true}
@@ -341,16 +331,8 @@ const PetaniPage = () => {
           />
         </div>
       </div>
-
-      <DeleteConfirmationModal
-        isOpen={showModalConfirmDeletePetani}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeletePetani}
-        itemName={`petani dengan nama ${selectedPetaniToDelete?.nama_petani}`}
-        isLoading={loading}
-      />
     </div>
   );
 };
 
-export default PetaniPage;
+export default PekerjaPage;
