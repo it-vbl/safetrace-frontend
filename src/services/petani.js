@@ -17,7 +17,7 @@ export const getDetailLampiranPetani = (id) =>
 export const createPetani = (payload) =>
   api.post(`/petani/create/`, null, payload);
 
-export const updatePetani = (payload, id) =>
+export const updatePetani = (id, payload) =>
   api.post(`/petani/update/${id}/`, null, payload);
 
 // *** POST MULTIPART ***
@@ -25,6 +25,5 @@ export const updatePetani = (payload, id) =>
 export const createLampiranPetani = (payload) =>
   api.postData(`/petani/lampiran/create/`, payload);
 
-export const updateLampiranPetani = (payload, id) => {
+export const updateLampiranPetani = (id, payload) =>
   api.postData(`/petani/lampiran/update/${id}/`, payload);
-};

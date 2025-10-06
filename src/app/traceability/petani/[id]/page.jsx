@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
 
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import EditLampiranPetaniModal from '@/components/molecules/EditLampiranPetaniModal';
+import EditPetaniModal from '@/components/molecules/EditPetaniModal';
+import useReferences from '@/hooks/useReferences';
 
 import {
   getDetailLampiranPetani,
   getDetailPetani,
+  updateLampiranPetani,
+  updatePetani,
 } from '../../../../services/petani';
 
 const formatJenisKelamin = (val) => {
@@ -31,6 +35,15 @@ const formatDate = (dateStr) => {
 const TraceabilityPetaniDetail = () => {
   const { id } = useParams();
   const router = useRouter();
+  const {
+    jenisKelamin,
+    statusPerkawinan,
+    kelompokTani,
+    fetchJenisKelamin,
+    fetchStatusPerkawinan,
+    fetchKelompokTani,
+    loading: referencesLoading,
+  } = useReferences();
 
   const [petani, setPetani] = useState(null);
   const [lampiran, setLampiran] = useState(null);
@@ -38,12 +51,27 @@ const TraceabilityPetaniDetail = () => {
   const [lampiranLoading, setLampiranLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lampiranError, setLampiranError] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditLampiranModalOpen, setIsEditLampiranModalOpen] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateLampiranLoading, setUpdateLampiranLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: '',
+    message: '',
+  });
 
   const crumbs = [
     { label: 'HOME', href: '/' },
     { label: 'PETANI', href: '/traceability/petani' },
     { label: 'DETAIL PETANI' },
   ];
+
+  useEffect(() => {
+    fetchJenisKelamin();
+    fetchStatusPerkawinan();
+    fetchKelompokTani();
+  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani]);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -80,6 +108,107 @@ const TraceabilityPetaniDetail = () => {
     }
   }, [id]);
 
+  const handleUpdateLampiran = async (formData) => {
+    setUpdateLampiranLoading(true);
+    setNotification({ show: false, type: '', message: '' });
+    try {
+      await updateLampiranPetani(id, formData);
+      const res = await getDetailLampiranPetani(id);
+      const data = res?.data?.data || res?.data;
+      setLampiran(data);
+
+      setIsEditLampiranModalOpen(false);
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Lampiran berhasil diperbarui!',
+      });
+
+      // Auto hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 3000);
+    } catch (error) {
+      console.error('Error updating lampiran:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message:
+          'Gagal memperbarui lampiran: ' +
+          (error?.response?.data?.message || error.message),
+      });
+
+      // Auto hide error notification after 5 seconds
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 5000);
+    } finally {
+      setUpdateLampiranLoading(false);
+    }
+  };
+
+  const handleUpdatePetani = async (formData) => {
+    setUpdateLoading(true);
+    setNotification({ show: false, type: '', message: '' });
+
+    try {
+      // Map form data to API format
+      const updateData = {
+        id_petani: formData.id,
+        nama: formData.nama,
+        nama_kelompok: formData.kelompok_tani,
+        jns_kelamin: formData.jenis_kelamin,
+        no_ktp: formData.no_ktp,
+        tempat: formData.tempat_lahir,
+        tanggal_lahir: formData.tanggal_lahir,
+        alamat: formData.alamat,
+        no_kk: formData.no_kk,
+        status_perkawinan: formData.status_pernikahan,
+        no_nib: formData.no_nib,
+        tgl_terbit_sppl: formData.tanggal_terbit_sppl,
+        no_wa: formData.no_whatsapp,
+        keanggotaan: formData.keanggotaan === 'true',
+        tanggal_bergabung: formData.tanggal_bergabung,
+        tanggal_keluar: formData.tanggal_keluar || null,
+      };
+
+      await updatePetani(id, updateData);
+
+      // Refresh data after successful update
+      const res = await getDetailPetani(id);
+      const data = res?.data?.data || res?.data;
+      setPetani(data);
+
+      setIsEditModalOpen(false);
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Data petani berhasil diperbarui!',
+      });
+
+      // Auto hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 3000);
+    } catch (error) {
+      console.error('Error updating petani:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message:
+          'Gagal memperbarui data petani: ' +
+          (error?.response?.data?.message || error.message),
+      });
+
+      // Auto hide error notification after 5 seconds
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 5000);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   const renderLampiranItem = (label, fileUrl) => {
     if (!fileUrl) return null;
 
@@ -94,17 +223,14 @@ const TraceabilityPetaniDetail = () => {
     const isPDF = fileExtension === 'pdf';
 
     return (
-      <div key={label} className="flex-1 rounded-lg border border-gray-200 p-4">
+      <div
+        key={label}
+        className="min-w-0 flex-1 rounded-lg border border-gray-200 p-3 sm:p-4"
+      >
         <div className="mb-3 flex items-center justify-between">
-          <h4 className="text-sm font-medium text-gray-700">{label}</h4>
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-blue-600 underline hover:text-blue-800"
-          >
-            Ubah Data
-          </a>
+          <h4 className="truncate text-sm font-medium text-gray-700">
+            {label}
+          </h4>
         </div>
 
         <div className="w-full">
@@ -115,7 +241,7 @@ const TraceabilityPetaniDetail = () => {
                 alt={label}
                 width={400}
                 height={300}
-                className="h-auto w-full max-w-md rounded border border-gray-300"
+                className="h-auto w-full max-w-full rounded border border-gray-300 sm:max-w-md"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   e.target.parentNode.querySelector(
@@ -128,7 +254,7 @@ const TraceabilityPetaniDetail = () => {
             <div className="relative">
               <iframe
                 src={fileUrl}
-                className="h-96 w-full rounded border border-gray-300"
+                className="h-64 w-full rounded border border-gray-300 sm:h-96"
                 title={label}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -140,15 +266,15 @@ const TraceabilityPetaniDetail = () => {
             </div>
           ) : (
             <div className="flex h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50">
-              <div className="text-center">
-                <p className="mb-2 text-sm text-gray-600">
+              <div className="px-2 text-center">
+                <p className="mb-2 text-xs text-gray-600 sm:text-sm">
                   File tidak dapat ditampilkan
                 </p>
                 <a
                   href={fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 underline hover:text-blue-800"
+                  className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
                 >
                   Unduh File
                 </a>
@@ -161,18 +287,44 @@ const TraceabilityPetaniDetail = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed right-2 top-4 z-50 max-w-xs rounded-lg p-3 shadow-lg sm:right-4 sm:max-w-sm sm:p-4 ${
+            notification.type === 'success'
+              ? 'border border-green-400 bg-green-100 text-green-700'
+              : 'border border-red-400 bg-red-100 text-red-700'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="pr-2 text-xs font-medium sm:text-sm">
+              {notification.message}
+            </span>
+            <button
+              onClick={() =>
+                setNotification({ show: false, type: '', message: '' })
+              }
+              className="ml-2 flex-shrink-0 text-lg font-bold hover:opacity-70"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <BreadcrumbDetail items={crumbs} />
-      <div className=" flex flex-col gap-6">
-        <section className="rounded border border-gray-300 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">IDENTITAS</h3>
-            <Link
-              href={`/traceability/petani/${id}/edit`}
-              className="text-blue-600 underline"
+            <button
+              onClick={() => setIsEditLampiranModalOpen(true)}
+              className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+              disabled={updateLampiranLoading}
             >
               Ubah Data
-            </Link>
+            </button>
           </div>
 
           {loading && (
@@ -188,7 +340,7 @@ const TraceabilityPetaniDetail = () => {
           )}
 
           {!loading && !error && petani && (
-            <div className="grid grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-1 gap-x-3 gap-y-4 text-sm text-gray-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
               <BorderBottomColData
                 label="Id Petani"
                 value={petani?.id_petani || petani?.id || '-'}
@@ -256,17 +408,16 @@ const TraceabilityPetaniDetail = () => {
                 value={
                   <span
                     className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
-                      petani?.status_keanggotaan === 'Keluar' ||
-                      petani?.status_keanggotaan === '0'
-                        ? 'bg-red-200 text-red-800'
-                        : 'bg-green-200 text-green-800'
+                      petani?.keanggotaan === true
+                        ? 'bg-green-200 text-green-800'
+                        : 'bg-red-200 text-red-800'
                     }`}
                   >
-                    {petani?.status_keanggotaan === '0'
-                      ? 'Keluar'
-                      : petani?.status_keanggotaan === '1'
+                    {petani?.keanggotaan === true
                       ? 'Aktif'
-                      : petani?.status_keanggotaan || 'Tidak Diketahui'}
+                      : petani?.keanggotaan === false
+                      ? 'Tidak Aktif'
+                      : petani?.keanggotaan || 'Tidak Diketahui'}
                   </span>
                 }
               />
@@ -274,8 +425,17 @@ const TraceabilityPetaniDetail = () => {
           )}
         </section>
 
-        <section className="rounded border border-gray-300 bg-white p-6">
-          <h3 className="mb-4 font-semibold">LAMPIRAN IDENTITAS</h3>
+        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN IDENTITAS</h3>
+            <button
+              onClick={() => setIsEditLampiranModalOpen(true)}
+              className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+              disabled={updateLampiranLoading}
+            >
+              Ubah Data
+            </button>
+          </div>
 
           {lampiranLoading && <LoadingSpinner />}
 
@@ -287,7 +447,7 @@ const TraceabilityPetaniDetail = () => {
           )}
 
           {!lampiranLoading && !lampiranError && lampiran && (
-            <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 md:gap-6">
               {renderLampiranItem('KTP ', lampiran.file_ktp)}
               {renderLampiranItem('KK', lampiran.file_kk)}
               {renderLampiranItem('NIB ', lampiran.file_nib)}
@@ -309,6 +469,51 @@ const TraceabilityPetaniDetail = () => {
           )}
         </section>
       </div>
+
+      {/* Edit Petani Modal */}
+      {petani && (
+        <EditPetaniModal
+          open={isEditModalOpen}
+          setOpen={setIsEditModalOpen}
+          jenisKelamin={jenisKelamin}
+          statusPerkawinan={statusPerkawinan}
+          kelompokTani={kelompokTani}
+          initialValues={{
+            id: petani?.id_petani || petani?.id || '',
+            nama: petani?.nama || '',
+            jenis_kelamin: petani?.jns_kelamin || '',
+            kelompok_tani: petani?.nama_kelompok || '',
+            alamat: petani?.alamat || '',
+            no_ktp: petani?.no_ktp || '',
+            tempat_lahir: petani?.tempat || '',
+            tanggal_lahir: petani?.tanggal_lahir || '',
+            no_kk: petani?.no_kk || '',
+            status_pernikahan: petani?.status_perkawinan || '',
+            no_nib: petani?.no_nib || '',
+            tanggal_terbit_sppl: petani?.tgl_terbit_sppl || '',
+            no_whatsapp: petani?.no_wa || '',
+            tanggal_bergabung: petani?.tanggal_bergabung || '',
+            tanggal_keluar: petani?.tanggal_keluar || null,
+            keanggotaan: petani?.keanggotaan ? 'true' : 'false',
+          }}
+          onSave={handleUpdatePetani}
+        />
+      )}
+
+      {/* Edit Lampiran Petani Modal */}
+      {lampiran && (
+        <EditLampiranPetaniModal
+          open={isEditLampiranModalOpen}
+          setOpen={setIsEditLampiranModalOpen}
+          initialValues={{
+            file_ktp: lampiran?.file_ktp || null,
+            file_kk: lampiran?.file_kk || null,
+            file_nib: lampiran?.file_nib || null,
+          }}
+          onSave={handleUpdateLampiran}
+          loading={updateLampiranLoading}
+        />
+      )}
     </div>
   );
 };

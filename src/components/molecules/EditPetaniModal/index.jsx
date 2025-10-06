@@ -3,9 +3,9 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
-import BaseModal from '@/components/molecules/Modal';
-import InputText from '@/components/molecules/InputText';
 import DatePicker from '@/components/molecules/DatePicker';
+import InputText from '@/components/molecules/InputText';
+import BaseModal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import TextArea from '@/components/molecules/TextArea';
 
@@ -23,12 +23,19 @@ const validationSchema = Yup.object({
   no_nib: Yup.string().required('No. NIB is required'),
   tanggal_terbit_sppl: Yup.string().required('Tanggal Terbit SPPL is required'),
   tanggal_bergabung: Yup.string().required('Tanggal Bergabung is required'),
-  tanggal_keluar: Yup.string(),
   no_whatsapp: Yup.string().required('No. Whatsapp is required'),
-  status_keanggotaan: Yup.string().required('Status Keanggotaan is required'),
+  keanggotaan: Yup.string().required('Status Keanggotaan is required'),
 });
 
-const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
+const EditPetaniModal = ({
+  open,
+  setOpen,
+  initialValues,
+  onSave,
+  jenisKelamin = [],
+  statusPerkawinan = [],
+  kelompokTani = [],
+}) => {
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema,
@@ -39,18 +46,9 @@ const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
     enableReinitialize: true,
   });
 
-  const genderOptions = [
-    { value: 'Laki - Laki', label: 'Laki - Laki' },
-    { value: 'Perempuan', label: 'Perempuan' },
-  ];
-  const statusPernikahanOptions = [
-    { value: 'Kawin', label: 'Kawin' },
-    { value: 'Belum Kawin', label: 'Belum Kawin' },
-    { value: 'Cerai', label: 'Cerai' },
-  ];
   const statusKeanggotaanOptions = [
-    { value: 'Aktif', label: 'Aktif' },
-    { value: 'Keluar', label: 'Keluar' },
+    { value: 'true', label: 'Aktif' },
+    { value: 'false', label: 'Tidak Aktif' },
   ];
 
   return (
@@ -92,28 +90,31 @@ const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
           value={formik.values.jenis_kelamin}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          options={genderOptions}
+          options={jenisKelamin}
           isError={formik.touched.jenis_kelamin && formik.errors.jenis_kelamin}
           errors={formik.errors}
           touched={formik.touched}
           isRequired
         />
-        <InputText
+        <Select
           label="Kelompok Tani"
           name="kelompok_tani"
           value={formik.values.kelompok_tani}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
+          options={kelompokTani}
           isError={formik.touched.kelompok_tani && formik.errors.kelompok_tani}
           errors={formik.errors}
           touched={formik.touched}
           isRequired
         />
-        <div className="row-span-2">
+        <div className="col-span-2">
           <TextArea
             label="Alamat"
+            name="alamat"
             value={formik.values.alamat}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             hasError={formik.touched.alamat && formik.errors.alamat}
             helperText={
               formik.touched.alamat && formik.errors.alamat
@@ -122,6 +123,7 @@ const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
             }
             isRequired
             maxChar={500}
+            isFullWidth={true}
           />
         </div>
         <InputText
@@ -175,7 +177,7 @@ const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
           value={formik.values.status_pernikahan}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          options={statusPernikahanOptions}
+          options={statusPerkawinan}
           isError={
             formik.touched.status_pernikahan && formik.errors.status_pernikahan
           }
@@ -194,16 +196,14 @@ const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
           touched={formik.touched}
           isRequired
         />
-        <InputText
+        <DatePicker
           label="Tanggal Terbit SPPL"
           name="tanggal_terbit_sppl"
           value={formik.values.tanggal_terbit_sppl}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          isError={
-            formik.touched.tanggal_terbit_sppl &&
-            formik.errors.tanggal_terbit_sppl
+          onChange={(e) =>
+            formik.setFieldValue('tanggal_terbit_sppl', e.target.value)
           }
+          onBlur={formik.handleBlur}
           errors={formik.errors}
           touched={formik.touched}
           isRequired
@@ -242,17 +242,15 @@ const EditPetaniModal = ({ open, setOpen, initialValues, onSave }) => {
           touched={formik.touched}
           isRequired
         />
+
         <Select
           label="Status Keanggotaan"
-          name="status_keanggotaan"
-          value={formik.values.status_keanggotaan}
+          name="keanggotaan"
+          value={formik.values.keanggotaan}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           options={statusKeanggotaanOptions}
-          isError={
-            formik.touched.status_keanggotaan &&
-            formik.errors.status_keanggotaan
-          }
+          isError={formik.touched.keanggotaan && formik.errors.keanggotaan}
           errors={formik.errors}
           touched={formik.touched}
           isRequired

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import moment from 'moment';
@@ -14,36 +14,29 @@ import DatePicker from '@/components/molecules/DatePicker';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import Upload from '@/components/molecules/Upload';
+import useReferences from '@/hooks/useReferences';
 
 import {
   createLampiranPetani,
   createPetani,
 } from '../../../../services/petani';
 
-// Dummy options - replace with actual data or hooks if available
-const jenisKelaminOptions = [
-  { label: 'Laki - Laki', value: 'L' },
-  { label: 'Perempuan', value: 'P' },
-];
-
-const kelompokTaniOptions = [
-  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
-  { label: 'Kelompok Tani 2', value: 'kelompok_2' },
-];
-
 const statusKeanggotaanOptions = [
-  { label: 'Aktif', value: 'aktif' },
-  { label: 'Tidak Aktif', value: 'tidak_aktif' },
-];
-
-const statusPernikahanOptions = [
-  { label: 'Kawin', value: 'kawin' },
-  { label: 'Belum Kawin', value: 'belum_kawin' },
-  { label: 'Cerai', value: 'cerai' },
+  { label: 'Aktif', value: true },
+  { label: 'Tidak Aktif', value: false },
 ];
 
 const CreatePetaniTraceability = () => {
   const router = useRouter();
+  const {
+    jenisKelamin,
+    statusPerkawinan,
+    kelompokTani,
+    fetchJenisKelamin,
+    fetchStatusPerkawinan,
+    fetchKelompokTani,
+    loading: referencesLoading,
+  } = useReferences();
 
   const crumbs = [
     { label: 'HOME', href: '/' },
@@ -55,7 +48,15 @@ const CreatePetaniTraceability = () => {
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
 
+  // Fetch reference data on component mount
+  useEffect(() => {
+    fetchJenisKelamin();
+    fetchStatusPerkawinan();
+    fetchKelompokTani();
+  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani]);
+
   const schemaValidation = Yup.object().shape({
+    id_petani: Yup.string().required('Id Petani harus diisi'),
     nama_petani: Yup.string().required('Nama Petani harus diisi'),
     jenis_kelamin: Yup.string().required('Jenis Kelamin harus diisi'),
     kelompok_tani: Yup.string().required('Kelompok Tani harus diisi'),
@@ -75,6 +76,7 @@ const CreatePetaniTraceability = () => {
 
   const formik = useFormik({
     initialValues: {
+      id_petani: '',
       nama_petani: '',
       jenis_kelamin: '',
       kelompok_tani: '',
@@ -94,42 +96,27 @@ const CreatePetaniTraceability = () => {
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
       const formatDate = (val) => (val ? moment(val).format('YYYY-MM-DD') : '');
-      const mapJenisKelamin = (val) =>
-        val === 'L' ? '1' : val === 'P' ? '2' : val || '';
-      const mapStatusPerkawinan = (val) => {
-        switch (val) {
-          case 'belum_kawin':
-            return '1';
-          case 'kawin':
-            return '2';
-          case 'cerai':
-            return '3';
-          default:
-            return val || '';
-        }
-      };
-      const getKelompokLabel = (value) => {
-        const opt = kelompokTaniOptions.find(
-          (o) => o.value === value || o.label === value
-        );
-        return opt?.label || value || '';
-      };
 
       try {
         const payload = {
-          id_petani: 'P0018', // still hardcoded wait for backend
+          id_petani: values.id_petani,
           nama: values.nama_petani,
-          nama_kelompok: getKelompokLabel(values.kelompok_tani),
-          jns_kelamin: mapJenisKelamin(values.jenis_kelamin),
+          nama_kelompok: values.kelompok_tani,
+          jns_kelamin: values.jenis_kelamin,
           no_ktp: values.no_ktp,
           tempat: values.tempat_lahir,
           tanggal_lahir: formatDate(values.tanggal_lahir),
           alamat: values.alamat,
           no_kk: values.no_kk,
-          status_perkawinan: mapStatusPerkawinan(values.status_pernikahan),
+          status_perkawinan: values.status_pernikahan,
           no_nib: values.no_nib,
           tgl_terbit_sppl: formatDate(values.tanggal_terbit_sppl),
           no_wa: values.no_whatsapp,
+          keanggotaan: values.status_keanggotaan,
+          tanggal_bergabung: formatDate(values.tanggal_bergabung),
+          tanggal_keluar: values.tanggal_keluar
+            ? formatDate(values.tanggal_keluar)
+            : null,
         };
 
         const res = await createPetani(payload);
@@ -191,12 +178,23 @@ const CreatePetaniTraceability = () => {
   });
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-col gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
-      <form onSubmit={formik.handleSubmit} className="space-y-6">
+      <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+              <InputText
+                label="Id Petani"
+                name="id_petani"
+                placeholder="Masukan Id Petani"
+                value={formik.values.id_petani}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
               <InputText
                 label="Nama Petani"
                 name="nama_petani"
@@ -212,7 +210,7 @@ const CreatePetaniTraceability = () => {
                 label="Jenis Kelamin"
                 name="jenis_kelamin"
                 placeholder="Pilih Jenis Kelamin"
-                options={jenisKelaminOptions}
+                options={jenisKelamin}
                 value={formik.values.jenis_kelamin}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -220,10 +218,13 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-              <InputText
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+              <Select
                 label="Kelompok Tani"
                 name="kelompok_tani"
                 placeholder="Pilih Kelompok Tani"
+                options={kelompokTani}
                 value={formik.values.kelompok_tani}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -231,8 +232,6 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="Alamat"
                 name="alamat"
@@ -255,6 +254,8 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="Tempat Lahir"
                 name="tempat_lahir"
@@ -266,8 +267,6 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <DatePicker
                 label="Tanggal Lahir"
                 name="tanggal_lahir"
@@ -296,11 +295,13 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
               <Select
                 label="Status Pernikahan"
                 name="status_pernikahan"
                 placeholder="Pilih Status Pernikahan"
-                options={statusPernikahanOptions}
+                options={statusPerkawinan}
                 value={formik.values.status_pernikahan}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -308,8 +309,6 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="No. NIB"
                 name="no_nib"
@@ -339,6 +338,8 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
               <DatePicker
                 label="Tanggal Bergabung"
                 name="tanggal_bergabung"
@@ -357,8 +358,6 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 py-4">
               <DatePicker
                 label="Tanggal Keluar"
                 name="tanggal_keluar"
@@ -386,6 +385,8 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-3 gap-6 py-4">
               <Select
                 label="Status Keanggotaan"
                 name="status_keanggotaan"
@@ -404,7 +405,7 @@ const CreatePetaniTraceability = () => {
 
         <Accordion defaultIsOpen title="LAMPIRAN IDENTITAS">
           <>
-            <div className="grid grid-cols-3 gap-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
               <Upload
                 label="KTP"
                 file={
@@ -468,16 +469,20 @@ const CreatePetaniTraceability = () => {
           </>
         </Accordion>
 
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 px-4 sm:px-0">
           <Button
             type="button"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             onClick={() => router.back()}
             isLoading={formik.isSubmitting}
           >
             Batalkan
           </Button>
-          <Button type="submit" isLoading={formik.isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto"
+            isLoading={formik.isSubmitting || referencesLoading}
+          >
             Simpan
           </Button>
         </div>

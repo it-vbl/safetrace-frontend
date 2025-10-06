@@ -50,7 +50,9 @@ const Upload = ({
       '.geojson',
     ];
 
-    const selectedFileType = validTypes.filter((item) => allowedFiles?.some((subString) => item?.includes(subString)));
+    const selectedFileType = validTypes.filter((item) =>
+      allowedFiles?.some((subString) => item?.includes(subString))
+    );
     const _maxSize = maxSize * 1024 * 1024; // MB
 
     if (!selectedFileType?.includes(file?.type)) {
@@ -66,7 +68,7 @@ const Upload = ({
   const handleOnFileChange = (e) => {
     const value = e.target.files?.[0];
     const name = value?.name;
-    const size = ((value?.size ?? 0) / 1048576).toFixed(1);
+    const size = value?.size ?? 0; // Simpan sebagai number
     const today = new Date(Date.now());
     const day = today.getDate();
     const month = today.getMonth() + 1;
@@ -87,11 +89,15 @@ const Upload = ({
   };
 
   useEffect(() => {
-    if (!valueFile && file) {
-      setValueFile(file || null);
+    // Update state lokal jika prop file berubah dari parent
+    if (file && file !== valueFile) {
+      setValueFile(file);
     }
-    if (!valueFile) setValueFile(null);
-  }, [file]);
+    // Reset ke null jika tidak ada file
+    if (!file && valueFile) {
+      setValueFile(null);
+    }
+  }, [file, valueFile]);
 
   const handleOnSeeClick = () => {
     if (url) {
@@ -99,16 +105,20 @@ const Upload = ({
       return;
     }
 
-    const type = file.value.type;
+    // Gunakan valueFile (state lokal) daripada file prop
+    const type = valueFile.type;
     const reader = new FileReader();
     reader.onload = function (e) {
       const fileData = e.target?.result;
       if (
-        ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(type)
+        [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel',
+        ].includes(type)
       ) {
         const link = document.createElement('a');
         link.href = fileData;
-        link.download = file.name;
+        link.download = valueFile.name;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -118,65 +128,86 @@ const Upload = ({
         URL.revokeObjectURL(fileUrl);
       }
     };
-    reader.readAsDataURL(file.value);
+    reader.readAsDataURL(valueFile);
   };
 
   const formatting = useMemo(() => {
-    const excelFiles = allowedFiles?.filter((file) => file.includes('excel') || file.includes('spreadsheetml'));
-    const otherFiles = allowedFiles?.filter((file) => !file.includes('excel') && !file.includes('spreadsheetml'));
+    const excelFiles = allowedFiles?.filter(
+      (file) => file.includes('excel') || file.includes('spreadsheetml')
+    );
+    const otherFiles = allowedFiles?.filter(
+      (file) => !file.includes('excel') && !file.includes('spreadsheetml')
+    );
 
     if (excelFiles.length > 1) {
-      const format = ['Excel', ...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase())];
+      const format = [
+        'Excel',
+        ...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase()),
+      ];
 
       return format;
     } else {
-      const format = [...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase())];
+      const format = [
+        ...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase()),
+      ];
 
       return format;
     }
   }, []);
 
   return (
-    <div className='flex flex-col gap-1' data-testid='upload'>
+    <div className="flex flex-col gap-1" data-testid="upload">
       {label && <Label isRequired={isRequired}>{label}</Label>}
       <div
         className={`flex items-center justify-between rounded-md border-2 px-6 py-[21px] ${
           error ? 'border-error5' : 'border-[#b7b7b7]'
         } gap-x-2 border-dashed ${disabled ? 'bg-gray-200' : ''}`}
-        data-testid='upload-container'
+        data-testid="upload-container"
       >
-        <div className='flex flex-col'>
-          {file && <Document />}
-          <div className='flex flex-col gap-y-[2px]'>
-            <div className='flex gap-x-2 break-all'>
-              <Paragraph level={3} data-testid='upload-file-name' className='leading-4'>
-                {file ? file.name : file?.value?.split('/')?.at(-1) || `Format File: ${formatting}`}
+        <div className="flex flex-col">
+          {valueFile && <Document />}
+          <div className="flex flex-col gap-y-[2px]">
+            <div className="flex gap-x-2 break-all">
+              <Paragraph
+                level={3}
+                data-testid="upload-file-name"
+                className="leading-4"
+              >
+                {valueFile ? valueFile.name : `Format File: ${formatting}`}
               </Paragraph>
-              {file && (
+              {valueFile && (
                 <UploadAction
                   onChange={handleOnFileChange}
-                  className='text-secondary10 min-w-max cursor-pointer text-[12px] leading-[14px] underline'
+                  className="text-secondary10 min-w-max cursor-pointer text-[12px] leading-[14px] underline"
                   id={`upload-file-${keyField}`}
-                  label='Ubah File'
+                  label="Ubah File"
                   allowedFiles={allowedFiles}
                   name={nameField}
                   keyField={keyField}
                 />
               )}
             </div>
-            <Paragraph level={4} className='leading-[10px] opacity-40' data-testid='upload-file-size'>
-              {file
-                ? `Ukuran ${file.size} MB • Diunggah ${moment(file.uploadDate).format('DD/MM/YYYY')}`
+            <Paragraph
+              level={4}
+              className="leading-[10px] opacity-40"
+              data-testid="upload-file-size"
+            >
+              {valueFile
+                ? `Ukuran ${((valueFile.size || 0) / 1048576).toFixed(
+                    1
+                  )} MB • Diunggah ${moment(
+                    file?.uploadDate || new Date()
+                  ).format('DD/MM/YYYY')}`
                 : `Maksimal ukuran ${maxSize}MB`}
             </Paragraph>
           </div>
         </div>
-        {file ? (
+        {valueFile ? (
           <Button
-            className='!bg-blue5 hover:!bg-opacity-50'
-            size='extraSmall'
+            className="!bg-blue5 hover:!bg-opacity-50"
+            size="extraSmall"
             onClick={handleOnSeeClick}
-            data-testid='lihat-button'
+            data-testid="lihat-button"
           >
             Lihat
           </Button>
@@ -185,24 +216,26 @@ const Upload = ({
             disabled={disabled}
             onChange={handleOnFileChange}
             className={`h-auto cursor-pointer rounded-md border border-primary px-4 py-[7px] text-[12px] font-bold leading-[14px] text-primary ${
-              !disabled ? 'hover:bg-primaryLight1' : '!border-gray-400 text-gray-400'
+              !disabled
+                ? 'hover:bg-primaryLight1'
+                : '!border-gray-400 text-gray-400'
             } md:h-7`}
             id={`upload-file-${keyField}`}
-            label='Unggah File'
+            label="Unggah File"
             allowedFiles={allowedFiles}
             name={nameField}
             keyField={keyField}
           />
         )}
       </div>
-      {errorState && <p className='mt-2 text-sm text-red-500'>{errorState}</p>}
+      {errorState && <p className="mt-2 text-sm text-red-500">{errorState}</p>}
 
       {isToastShowed && (
         <Toast
           show={showSuccessToast}
           toastId={`upload-file-component-${label?.trim('')}`}
-          message='Gambar Berhasil Ditambahkan!'
-          type='success'
+          message="Gambar Berhasil Ditambahkan!"
+          type="success"
           setToast={() => setShowSuccessToast(false)}
         />
       )}

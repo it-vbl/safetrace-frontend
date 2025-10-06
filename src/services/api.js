@@ -294,33 +294,51 @@ const APIInstance = {
    * @param {Sring} url '/path/to/endpoint'
    * @param {Object} data
    */
-  postData: (
+  postData: async (
     url,
     data = {},
     customConfig = {},
     auth = true,
     showErrorPage = false
   ) => {
-    api.defaults.headers['Content-Type'] = 'multipart/form-data';
-    api.defaults.timeout = TIMEOUT;
-    const formData = new FormData();
-    const keys = Object.keys(data);
-    keys.map((key) => {
-      data[key] instanceof File
-        ? formData.append(key, data[key], data[key].name)
-        : formData.append(key, data[key]);
-    });
-    return api
-      .post(url, formData, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      api.defaults.headers['Content-Type'] = 'multipart/form-data';
+      api.defaults.timeout = TIMEOUT;
+      const formData = new FormData();
+
+      if (data instanceof FormData) {
+        const response = await api.post(url, data, {
+          baseURL: BASE_URL,
+          ...customConfig,
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return APIResponseValidation(response, Promise.resolve(response));
+      } else {
+        // Konversi object ke FormData
+        const keys = Object.keys(data);
+        keys.map((key) => {
+          data[key] instanceof File
+            ? formData.append(key, data[key], data[key].name)
+            : formData.append(key, data[key]);
+        });
+      }
+
+      const response = await api.post(url, formData, {
         baseURL: BASE_URL,
         ...customConfig,
-      })
-      .then((response) => {
-        return APIResponseValidation(response, Promise.resolve(response));
-      })
-      .catch((err) => {
-        return APIResponseValidation(err.response, Promise.reject(err));
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+      return APIResponseValidation(response, Promise.resolve(response));
+    } catch (err) {
+      clearTimeout(timeoutId);
+      return APIResponseValidation(err.response, Promise.reject(err));
+    }
   },
 
   /**
