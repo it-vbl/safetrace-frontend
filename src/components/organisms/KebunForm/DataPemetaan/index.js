@@ -14,6 +14,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
   const [drawFromMap, setDrawFromMap] = useState(false);
   const [isManual, setIsManual] = useState(true);
   const [newCoord, setNewCoord] = useState(null);
+  
   const initialPolygon = data?.peta?.geom?.coordinates?.[0]?.map((coord) => ({ lat: coord[1], lng: coord[0] }));
   const [coords, setCoords] = useState(
     data?.peta?.geom?.coordinates?.[0]?.map((coord) => ({ lat: coord[1], lng: coord[0] })) || []
@@ -106,7 +107,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
               Gambar langsung pada peta atau masukkan titik-titik koordinat dalam format Long, Lat. Contoh: 100.664613,
               1.239685
             </Paragraph>
-            {mode === 'create' && (
+            {mode === 'create' && !data?.peta?.geom?.coordinates?.[0] && (
               <div className='flex flex-row items-center gap-2 rounded-[8px] bg-primary/10 p-2'>
                 <Switch checked={drawFromMap} onChange={handleSwitchChange} />
                 <Paragraph level={3}>Gambar langsung pada peta</Paragraph>

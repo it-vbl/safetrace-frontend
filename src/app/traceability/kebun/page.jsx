@@ -6,7 +6,7 @@ import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
-
+import { getListKebun } from '@/services/pekebun';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
@@ -55,32 +55,47 @@ const KebunPage = () => {
   }) => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const mockData = Array.from({ length: page_size }, (_, i) => {
-        const id = `001-APKS-001-${String(
-          (page - 1) * page_size + i + 1
-        ).padStart(3, '0')}`;
-        const rspoStatus = Math.random() > 0.5 ? 'Sudah' : 'Belum';
-        const ispoStatus = Math.random() > 0.5 ? 'Sudah' : 'Belum';
-
-        return {
-          id_kebun: id,
-          nama_petani: 'Agustinus Nery',
-          kelompok: 'Bepekaek Besamo',
-          lokasi: 'Dusun Gonis Rabu',
-          luas_kebun: '0,75',
-          waktu_tanam: 'September, 2014',
-          rspo: rspoStatus,
-          ispo: ispoStatus,
-        };
+      // Build query parameters
+      const params = new URLSearchParams({
+        page,
+        page_size,
       });
 
-      setKebunData(mockData);
-      setTotalKebun(50);
+      if (search) params.append('search', search);
+      if (kelompok) params.append('kelompok', kelompok);
+      if (rspo) params.append('is_rspo', rspo === 'sudah' ? 'true' : 'false');
+      if (ispo) params.append('is_ispo', ispo === 'sudah' ? 'true' : 'false');
+
+      const response = await getListKebun(params.toString());
+
+      if (response?.data?.status === 'success') {
+        // Map API response to table format
+        const mappedData = response.data.data.results.map((kebun) => ({
+          id: kebun.id,
+          id_kebun: kebun.id_kebun,
+          nama_petani: '-', // Petani name not included in this endpoint
+          kelompok: '-', // Kelompok not included in this endpoint
+          lokasi: kebun.lokasi_kebun,
+          luas_kebun: kebun.luas,
+          waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
+          ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
+        }));
+
+        setKebunData(mappedData);
+        setTotalKebun(response.data.data.count);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
+      console.error('Error fetching kebun data:', error);
       toast.error('Gagal memuat data kebun');
+      setKebunData([]);
+      setTotalKebun(0);
     } finally {
       setLoading(false);
     }
@@ -137,7 +152,7 @@ const KebunPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/kebun/${data?.id_kebun}`);
+    router.push(`/traceability/kebun/${data?.id}`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {

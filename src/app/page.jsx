@@ -128,35 +128,172 @@ const MapDashboard = () => {
     [stdb]
   );
 
+  const PetaDetailCellRenderer = (params) => {
+    const handlePetaClick = () => {
+      // Implement the logic to show the map or navigate to map view
+      alert('PETA clicked for ID: ' + params.data.id);
+    };
+
+    const handleDetailClick = () => {
+      // Implement the logic to show detail or navigate to detail page
+      alert('DETAIL clicked for ID: ' + params.data.id);
+    };
+
+    return (
+      <div className="flex gap-2">
+        <button
+          onClick={handlePetaClick}
+          className="font-bold text-orange-600 underline"
+        >
+          PETA
+        </button>
+        <button
+          onClick={handleDetailClick}
+          className="font-bold text-blue-600 underline"
+        >
+          DETAIL
+        </button>
+      </div>
+    );
+  };
+
+  const StatusCellRenderer = (params) => {
+    const value = params.value;
+    const isSudah = value?.toLowerCase() === 'sudah';
+    return (
+      <span
+        className={
+          isSudah
+            ? 'font-semibold text-green-600'
+            : 'font-semibold text-red-600'
+        }
+      >
+        {value}
+      </span>
+    );
+  };
+
+  // Dummy data array to replace real data source for table display
+  const dummyData = [
+    {
+      id: 'GR-001-002-001',
+      pekebun: { nama: 'Akeng Rupinus' },
+      kelompok: 'Bepekaek Besamo',
+      lahan: {
+        kecamatan_label: 'Dusun Gonis',
+        desa_label: 'Rabu',
+        luas_lahan: 7500,
+      },
+      peta: {
+        titik_koordinat: { coordinates: [3.8717, 103.2533] },
+      },
+      waktu_tanam: 'September, 2014',
+      rspo: 'Sudah',
+      ispo: 'Sudah',
+      legalitas: 'SHM',
+    },
+    {
+      id: 'GR-001-002-002',
+      pekebun: { nama: 'Budi Santoso' },
+      kelompok: 'Bepekaek Besamo',
+      lahan: {
+        kecamatan_label: 'Dusun Gonis',
+        desa_label: 'Rabu',
+        luas_lahan: 8500,
+      },
+      peta: {
+        titik_koordinat: { coordinates: [3.8718, 103.2534] },
+      },
+      waktu_tanam: 'October, 2015',
+      rspo: 'Belum',
+      ispo: 'Sudah',
+      legalitas: 'SHM',
+    },
+    {
+      id: 'GR-001-002-003',
+      pekebun: { nama: 'Sari Dewi' },
+      kelompok: 'Bepekaek Besamo',
+      lahan: {
+        kecamatan_label: 'Dusun Gonis',
+        desa_label: 'Rabu',
+        luas_lahan: 6500,
+      },
+      peta: {
+        titik_koordinat: { coordinates: [3.8719, 103.2535] },
+      },
+      waktu_tanam: 'August, 2013',
+      rspo: 'Sudah',
+      ispo: 'Belum',
+      legalitas: 'SHM',
+    },
+  ];
+
   const colDefs = [
     {
+      headerName: '',
       field: 'actions',
-      headerName: 'Actions',
-      cellRenderer: ActionsCellRenderer,
+      cellRenderer: PetaDetailCellRenderer,
+      width: 120,
+      pinned: 'left',
+      suppressMenu: true,
+      sortable: false,
+      filter: false,
     },
-    { field: 'id', headerName: 'ID Kebun' },
     {
       field: 'peta.titik_koordinat.coordinates',
       headerName: 'Titik Koordinat',
       valueFormatter: (params) => {
         return convertCoordToDMS(params?.value?.[0], params?.value?.[1]);
       },
+      width: 160,
     },
-    { field: 'pekebun.user.username', headerName: 'Nama Pemilik' },
-    { field: 'komoditas_info', headerName: 'Komoditas' },
-    { field: 'lahan.luas_lahan', headerName: 'Luas Lahan(m2)' },
-    { field: 'lahan.kecamatan_label', headerName: 'Kecamatan' },
-    { field: 'lahan.desa_label', headerName: 'Kelurahan' },
+    { field: 'id', headerName: 'Id Kebun', width: 140 },
+    { field: 'pekebun.nama', headerName: 'Petani', width: 160 },
     {
-      field: 'peta.geom',
-      headerName: 'Data Peta',
-      cellRenderer: PetaAvailabilityCellRenderer,
+      headerName: 'Kelompok',
+      field: 'kelompok',
+      width: 160,
     },
-    { field: 'pekebun.nama', headerName: 'Pekebun' },
     {
-      field: 'status_stdb_label',
-      headerName: 'STDB',
-      cellRenderer: STDBStatusCellRenderer,
+      headerName: 'Lokasi',
+      field: 'lokasi',
+      width: 200,
+      valueGetter: (params) =>
+        `${params.data?.lahan?.kecamatan_label || ''} ${
+          params.data?.lahan?.desa_label || ''
+        }`,
+    },
+    {
+      headerName: 'Luas Kebun (Ha)',
+      field: 'lahan.luas_lahan',
+      width: 140,
+      valueFormatter: (params) => {
+        if (params.value == null) return '';
+        const hectares = params.value / 10000;
+        return hectares.toFixed(2);
+      },
+    },
+    {
+      headerName: 'Waktu Tanam',
+      field: 'waktu_tanam',
+      width: 140,
+    },
+    {
+      headerName: 'RSPO',
+      field: 'rspo',
+      width: 100,
+      cellRenderer: StatusCellRenderer,
+    },
+    {
+      headerName: 'ISPO',
+      field: 'ispo',
+      width: 100,
+      cellRenderer: StatusCellRenderer,
+    },
+    {
+      headerName: 'Legalitas',
+      field: 'legalitas',
+      width: 100,
     },
   ];
 
@@ -274,7 +411,7 @@ const MapDashboard = () => {
   ]);
 
   return (
-    <div className="relative max-w-full overflow-x-hidden h-full w-full">
+    <div className="relative h-full w-full max-w-full overflow-x-hidden">
       <div className="relative max-h-[calc(100vh-72px)]">
         <Map
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
@@ -297,7 +434,7 @@ const MapDashboard = () => {
           >
             <Statistic color={theme.colors?.primary} />
             <Paragraph level={3} className="font-bold text-primary">
-              Data Pekebun
+              Data Kebun
             </Paragraph>
           </div>
         </div>
@@ -348,7 +485,7 @@ const MapDashboard = () => {
               <AgGridReact
                 loading={loading}
                 autoSizeStrategy={autoSizeStrategy}
-                rowData={stdb}
+                rowData={dummyData}
                 columnDefs={colDefs}
               />
             </div>
