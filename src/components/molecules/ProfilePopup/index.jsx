@@ -11,6 +11,7 @@ import LogoutIcon from '@/assets/icons/logout';
 import ProfileIcon from '@/assets/icons/profile';
 import ModalGantiKataSandi from '@/components/organisms/Modal/ModalGantiKataSandi';
 import useTouchOutside from '@/hooks/useTouchOutside';
+import { logout as logoutService } from '@/services/auth';
 import { changePassword } from '@/services/user';
 import { PersonIcon } from '@radix-ui/react-icons';
 
@@ -57,12 +58,21 @@ const ProfilePopup = ({ children }) => {
     setIsPasswordModalOpen(true);
   };
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = async () => {
     try {
+      const refresh = Cookies.get('refreshToken');
+      if (refresh) {
+        await logoutService({ refresh });
+      }
       Cookies.remove('token');
+      Cookies.remove('refreshToken');
+      toast.success('Anda telah logout');
       router.replace('/login');
     } catch (err) {
-      console.log(err);
+      // Even if API fails, ensure local logout
+      Cookies.remove('token');
+      Cookies.remove('refreshToken');
+      router.replace('/login');
     }
   };
 
@@ -96,7 +106,7 @@ const ProfilePopup = ({ children }) => {
         {isOpen &&
           createPortal(
             <div
-              className="fixed z-[1000] w-48 rounded-md bg-white shadow-lg z-50 border border-gray-200"
+              className="fixed z-[1000] w-48 rounded-md border border-gray-200 bg-white shadow-lg"
               ref={popupRef}
               style={{
                 top: `${popupPosition.top + 8}px`,
@@ -106,21 +116,21 @@ const ProfilePopup = ({ children }) => {
               <div className="py-1">
                 <button
                   onClick={handleProfileClick}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <UserIcon size={18} className="mr-2" />
                   <span>Profile</span>
                 </button>
                 <button
                   onClick={handleGantiKataSandiClick}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <LockIcon size={18} className="mr-2" />
                   <span>Ganti Kata Sandi</span>
                 </button>
                 <button
                   onClick={handleLogoutClick}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <LogOutIcon size={18} className="mr-2" />
                   <span>Logout</span>

@@ -1,47 +1,38 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Button from '@/components/atoms/Button';
 import { useFormik } from 'formik';
-import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
-import InputText from '@/components/molecules/InputText';
-import MemberSelector from '@/components/molecules/MemberSelector';
-import Select from '@/components/molecules/Select';
-import Heading from '@/components/atoms/Typography/Heading';
-import RadioButton from '@/components/molecules/RadioButton';
-import Label from '../../../../components/atoms/Label';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
+import Button from '@/components/atoms/Button';
+import Heading from '@/components/atoms/Typography/Heading';
+import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import InputText from '@/components/molecules/InputText';
+import MemberSelector from '@/components/molecules/MemberSelector';
+import RadioButton from '@/components/molecules/RadioButton';
+import Select from '@/components/molecules/Select';
+
+import Label from '../../../../components/atoms/Label';
+import WhatsAppService from '../../../../services/whatsapp';
+
 const dummySenderOption = [
-  { value: '082211591642', label: 'Fajar Sukmara - 082211591642' },
-  { value: '082242394222', label: 'Ahmad Sahroji - 082242394222' },
-  { value: '082211035232', label: 'Fiky Prasetcio - 082211035232' },
-  { value: '085604545453', label: 'Teguh Suhandi - 085604545453' },
+  { value: 'device_1', label: 'Fajar Sukmara - 082211591642' },
+  { value: 'device_2', label: 'Ahmad Sahroji - 082242394222' },
+  { value: 'device_3', label: 'Fiky Prasetcio - 082211035232' },
+  { value: 'device_4', label: 'Teguh Suhandi - 085604545453' },
 ];
 
 const PesanBaruPage = () => {
   const router = useRouter();
 
-  const [noPengirim, setNoPengirim] = useState('082211591642');
+  const [noPengirim, setNoPengirim] = useState('device_1');
   const [activeTile, setActiveTile] = useState('personal');
   const [selectedMembers, setSelectedMembers] = useState([
     {
       id: 1,
       name: 'Adam',
-      phone: '082211578729',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: 2,
-      name: 'Rudi',
-      phone: '082211578729',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: 3,
-      name: 'Ridho',
-      phone: '082211578729',
+      phone: '0895423764628', // Target phone number
       gender: 'Laki - Laki',
     },
   ]);
@@ -49,8 +40,8 @@ const PesanBaruPage = () => {
   const [availableMembers] = useState([
     {
       id: '001-APKS-001-001',
-      name: 'Agustinus Nery',
-      phone: '082211591642',
+      name: 'Target User',
+      phone: '0895423764628',
       gender: 'Laki - Laki',
     },
     {
@@ -92,6 +83,46 @@ const PesanBaruPage = () => {
     router.back();
   };
 
+  // Function to send individual message via WhatsCenter
+  const sendWhatsAppMessage = async (deviceId, phoneNumber, message) => {
+    try {
+      const messageData = {
+        phone: phoneNumber,
+        message: message,
+        type: 'text', // or 'media' if sending media
+      };
+
+      const response = await WhatsAppService.sendMessage(deviceId, messageData);
+      return response;
+    } catch (error) {
+      console.error('Error sending WhatsApp message:', error);
+      throw error;
+    }
+  };
+
+  // Function to send bulk message via WhatsCenter
+  const sendBulkWhatsAppMessage = async (deviceId, recipients, message) => {
+    try {
+      const bulkMessageData = {
+        recipients: recipients.map((member) => ({
+          phone: member.phone,
+          name: member.name,
+        })),
+        message: message,
+        type: 'text',
+      };
+
+      const response = await WhatsAppService.sendBulkMessage(
+        deviceId,
+        bulkMessageData
+      );
+      return response;
+    } catch (error) {
+      console.error('Error sending bulk WhatsApp message:', error);
+      throw error;
+    }
+  };
+
   const schemaValidation = Yup.object().shape({
     no_pengirim: Yup.string().required('No pengirim harus diisi'),
     nama_pesan: Yup.string().required('Nama pesan harus diisi'),
@@ -108,46 +139,127 @@ const PesanBaruPage = () => {
     isSubmitting,
   } = useFormik({
     initialValues: {
-      no_pengirim: '',
+      no_pengirim: 'device_1',
       nama_pesan: '',
-      isi_pesan: '',
+      isi_pesan: 'Lorem Ipsum Dolor Sit Amet', // Default message
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
 
-        const messageData = {
-          no_pengirim: values.no_pengirim,
-          nama_pesan: values.nama_pesan,
-          isi_pesan: values.isi_pesan,
-          penerima_type: activeTile,
-          members: selectedMembers,
-          totalMembers: selectedMembers.length,
-        };
-
-        console.log('Sending message:', messageData);
-
-        // Uncomment and modify this when you have the actual API
-        // const res = await sendMessage(messageData);
-        // if (res.status === 200) {
-        //   router.push('/kabar-tani/blast-pesan');
-        //   toast.success('Berhasil mengirim pesan');
-        // }
-
-        // For now, simulate success
-        setTimeout(() => {
-          router.push('/kabar-tani/blast-pesan');
-          toast.success('Berhasil mengirim pesan');
+        // Validate device and members
+        if (!values.no_pengirim) {
+          toast.error('Pilih device pengirim terlebih dahulu');
           setSubmitting(false);
-        }, 1000);
+          return;
+        }
+
+        if (selectedMembers.length === 0) {
+          toast.error('Pilih penerima pesan terlebih dahulu');
+          setSubmitting(false);
+          return;
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+        const errors = [];
+
+        // Send messages based on selection type
+        if (activeTile === 'personal' && selectedMembers.length === 1) {
+          // Send single message
+          try {
+            await sendWhatsAppMessage(
+              values.no_pengirim,
+              selectedMembers[0].phone,
+              values.isi_pesan
+            );
+            successCount++;
+            toast.success(
+              'Pesan berhasil dikirim ke ' + selectedMembers[0].name
+            );
+          } catch (error) {
+            errorCount++;
+            errors.push(
+              `Gagal kirim ke ${selectedMembers[0].name}: ${error.message}`
+            );
+          }
+        } else {
+          // Send bulk message or multiple individual messages
+          if (selectedMembers.length <= 5) {
+            // Send individual messages for small groups
+            for (const member of selectedMembers) {
+              try {
+                await sendWhatsAppMessage(
+                  values.no_pengirim,
+                  member.phone,
+                  values.isi_pesan
+                );
+                successCount++;
+                console.log(`Message sent to ${member.name} (${member.phone})`);
+              } catch (error) {
+                errorCount++;
+                errors.push(`Gagal kirim ke ${member.name}: ${error.message}`);
+                console.error(`Failed to send to ${member.name}:`, error);
+              }
+
+              // Add delay between messages to avoid rate limiting
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+          } else {
+            // Use bulk message for larger groups
+            try {
+              await sendBulkWhatsAppMessage(
+                values.no_pengirim,
+                selectedMembers,
+                values.isi_pesan
+              );
+              successCount = selectedMembers.length;
+              toast.success(
+                `Bulk message berhasil dikirim ke ${selectedMembers.length} penerima`
+              );
+            } catch (error) {
+              errorCount = selectedMembers.length;
+              errors.push(`Gagal mengirim bulk message: ${error.message}`);
+            }
+          }
+        }
+
+        // Show results
+        if (successCount > 0 && errorCount === 0) {
+          toast.success(`Berhasil mengirim ${successCount} pesan`);
+          setTimeout(() => {
+            router.push('/kabar-tani/blast-pesan');
+          }, 1500);
+        } else if (successCount > 0 && errorCount > 0) {
+          toast.warn(`Berhasil: ${successCount}, Gagal: ${errorCount}`);
+          console.log('Errors:', errors);
+        } else {
+          toast.error('Semua pesan gagal dikirim');
+          console.log('All errors:', errors);
+        }
       } catch (error) {
-        toast.error(error?.response?.data?.message || 'Terjadi kesalahan');
-        console.error(error);
+        toast.error(
+          error?.response?.data?.message || 'Terjadi kesalahan sistem'
+        );
+        console.error('System error:', error);
+      } finally {
         setSubmitting(false);
       }
     },
   });
+
+  // Function to test connection to specific device
+  const testDeviceConnection = async (deviceId) => {
+    try {
+      const response = await WhatsAppService.getDeviceStatus(deviceId);
+      console.log('Device status:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Device connection error:', error);
+      return null;
+    }
+  };
 
   return (
     <div className="relative w-full bg-gray-50">
@@ -167,25 +279,33 @@ const PesanBaruPage = () => {
             </Heading>
 
             <div className="mb-6 space-y-4 px-6">
-              {/* Nama Grup Section */}
+              {/* Device Selector */}
               <div className="flex gap-6">
                 <div className="flex w-full flex-col gap-1">
-                  <Label className=" text-[12px] font-bold text-gray-500">
-                    No.Pengirim
+                  <Label className="text-[12px] font-bold text-gray-500">
+                    Device Pengirim
                   </Label>
                   <Select
                     options={dummySenderOption}
                     value={noPengirim}
-                    onChange={(e) => setNoPengirim(e.target.value)}
-                    placeholder="No. Pengirim"
+                    onChange={(e) => {
+                      setNoPengirim(e.target.value);
+                      // Test device connection when selected
+                      testDeviceConnection(e.target.value);
+                    }}
+                    placeholder="Pilih Device"
                     className="w-full sm:w-48"
                   />
+                  <span className="text-xs text-gray-400">
+                    Pilih device WhatsApp yang akan digunakan untuk mengirim
+                    pesan
+                  </span>
                 </div>
 
                 <InputText
-                  label={'Nama Pesan'}
+                  label={'Nama Campaign'}
                   name="nama_pesan"
-                  placeholder="Masukan nama pesan"
+                  placeholder="Masukan nama campaign"
                   value={values.nama_pesan}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -212,8 +332,14 @@ const PesanBaruPage = () => {
                 selectedMembers={selectedMembers}
                 availableMembers={availableMembers}
                 onMembersChange={handleMembersChange}
-                label="Anggota"
+                label="Penerima Pesan"
               />
+
+              {selectedMembers.length > 0 && (
+                <div className="text-sm text-blue-600">
+                  Total penerima: {selectedMembers.length} kontak
+                </div>
+              )}
             </div>
           </div>
 
@@ -289,8 +415,16 @@ const PesanBaruPage = () => {
             <Button
               type="submit"
               disabled={isSubmitting || selectedMembers.length === 0}
+              className={isSubmitting ? 'opacity-75' : ''}
             >
-              {isSubmitting ? 'Mengirim...' : 'Kirim Pesan'}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  Mengirim...
+                </div>
+              ) : (
+                `Kirim Pesan (${selectedMembers.length})`
+              )}
             </Button>
           </div>
         </form>

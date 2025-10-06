@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback,useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import WhatsAppService from '../services/whatsapp';
+
 import {
-  getErrorMessage,
-  saveDeviceToLocal,
   getDevicesFromLocal,
+  getErrorMessage,
   removeDeviceFromLocal,
+  saveDeviceToLocal,
 } from '@/utils/whatsapp';
+
+import WhatsAppService from '../services/whatsapp';
 
 const useDevices = () => {
   const [devices, setDevices] = useState([]);

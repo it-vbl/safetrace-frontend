@@ -21,7 +21,16 @@ const api = axios.create({
     Accept: 'application/json',
     'Content-Type': 'application/json',
   },
-  paramsSerializer: (params) => querystring.stringify(params),
+  paramsSerializer: (params) => {
+    if (params instanceof URLSearchParams) {
+      return params.toString();
+    }
+    try {
+      return querystring.stringify(params);
+    } catch (e) {
+      return new URLSearchParams(params || {}).toString();
+    }
+  },
   // withCredentials: true,
 });
 
@@ -86,16 +95,25 @@ const APIResponseValidation = async (
         logout();
       }
 
+      const newAccessToken =
+        refreshTokenResponse?.data?.data?.access ||
+        refreshTokenResponse?.data?.access ||
+        refreshTokenResponse?.data?.access_token;
+
+      if (newAccessToken) {
+        Cookies.set('token', newAccessToken);
+      }
+
       return axios
         .request({
           ...response.config,
           headers: {
             ...response.config.headers,
-            Authorization: `Bearer ${refreshTokenResponse.data.access_token}`,
+            Authorization: `Bearer ${newAccessToken}`,
           },
         })
         .then((response) => {
-          return Promise.resolve(response.data);
+          return Promise.resolve(response);
         })
         .catch((err) => {
           // APIResponseValidation(err.response);
@@ -276,33 +294,51 @@ const APIInstance = {
    * @param {Sring} url '/path/to/endpoint'
    * @param {Object} data
    */
-  postData: (
+  postData: async (
     url,
     data = {},
     customConfig = {},
     auth = true,
     showErrorPage = false
   ) => {
-    api.defaults.headers['Content-Type'] = 'multipart/form-data';
-    api.defaults.timeout = TIMEOUT;
-    const formData = new FormData();
-    const keys = Object.keys(data);
-    keys.map((key) => {
-      data[key] instanceof File
-        ? formData.append(key, data[key], data[key].name)
-        : formData.append(key, data[key]);
-    });
-    return api
-      .post(url, formData, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      api.defaults.headers['Content-Type'] = 'multipart/form-data';
+      api.defaults.timeout = TIMEOUT;
+      const formData = new FormData();
+
+      if (data instanceof FormData) {
+        const response = await api.post(url, data, {
+          baseURL: BASE_URL,
+          ...customConfig,
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return APIResponseValidation(response, Promise.resolve(response));
+      } else {
+        // Konversi object ke FormData
+        const keys = Object.keys(data);
+        keys.map((key) => {
+          data[key] instanceof File
+            ? formData.append(key, data[key], data[key].name)
+            : formData.append(key, data[key]);
+        });
+      }
+
+      const response = await api.post(url, formData, {
         baseURL: BASE_URL,
         ...customConfig,
-      })
-      .then((response) => {
-        return APIResponseValidation(response, Promise.resolve(response));
-      })
-      .catch((err) => {
-        return APIResponseValidation(err.response, Promise.reject(err));
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+      return APIResponseValidation(response, Promise.resolve(response));
+    } catch (err) {
+      clearTimeout(timeoutId);
+      return APIResponseValidation(err.response, Promise.reject(err));
+    }
   },
 
   /**

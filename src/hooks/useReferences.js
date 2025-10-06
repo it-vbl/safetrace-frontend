@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -7,10 +7,12 @@ import {
   getJenisKelamin,
   getJenisLahan,
   getJenisPupuk,
+  getKelompokTani,
   getKomoditasKelembagaan,
   getPendidikanTerakhir,
   getPolaTanam,
   getStatusLahan,
+  getStatusPerkawinan,
   getSTDBStatuses,
   getUserRoles,
 } from '../services/referensi';
@@ -20,10 +22,12 @@ import {
   setJenisKelamin,
   setJenisLahan,
   setJenisPupuk,
+  setKelompokTani,
   setKomoditasKelembagaan,
   setPendidikanTerakhir,
   setPolaTanam,
   setStatusLahan,
+  setStatusPerkawinan,
   setSTDBStatuses,
   setUserRoles,
 } from '../store/slices/referensi';
@@ -46,6 +50,8 @@ const useReferences = () => {
     jenisKelamin,
     eksPlasma,
     userRoles,
+    statusPerkawinan,
+    kelompokTani,
   } = useSelector((state) => state.referensi);
 
   const fetchData = async (fetchFunction, setAction) => {
@@ -70,17 +76,19 @@ const useReferences = () => {
     }
   };
 
-  const fetchSTDBStatuses = () => fetchData(getSTDBStatuses, setSTDBStatuses);
-  const fetchPendidikanTerakhir = () => fetchData(getPendidikanTerakhir, setPendidikanTerakhir);
-  const fetchStatusLahan = () => fetchData(getStatusLahan, setStatusLahan);
-  const fetchPolaTanam = () => fetchData(getPolaTanam, setPolaTanam);
-  const fetchAsalBenih = () => fetchData(getAsalBenih, setAsalBenih);
-  const fetchJenisLahan = () => fetchData(getJenisLahan, setJenisLahan);
-  const fetchJenisPupuk = () => fetchData(getJenisPupuk, setJenisPupuk);
-  const fetchKomoditasKelembagaan = () => fetchData(getKomoditasKelembagaan, setKomoditasKelembagaan);
-  const fetchJenisKelamin = () => fetchData(getJenisKelamin, setJenisKelamin);
-  const fetchEksPlasma = () => fetchData(getEksPlasma, setEksPlasma);
-  const fetchUserRoles = () => fetchData(getUserRoles, setUserRoles);
+  const fetchSTDBStatuses = useCallback(() => fetchData(getSTDBStatuses, setSTDBStatuses), []);
+  const fetchPendidikanTerakhir = useCallback(() => fetchData(getPendidikanTerakhir, setPendidikanTerakhir), []);
+  const fetchStatusLahan = useCallback(() => fetchData(getStatusLahan, setStatusLahan), []);
+  const fetchPolaTanam = useCallback(() => fetchData(getPolaTanam, setPolaTanam), []);
+  const fetchAsalBenih = useCallback(() => fetchData(getAsalBenih, setAsalBenih), []);
+  const fetchJenisLahan = useCallback(() => fetchData(getJenisLahan, setJenisLahan), []);
+  const fetchJenisPupuk = useCallback(() => fetchData(getJenisPupuk, setJenisPupuk), []);
+  const fetchKomoditasKelembagaan = useCallback(() => fetchData(getKomoditasKelembagaan, setKomoditasKelembagaan), []);
+  const fetchJenisKelamin = useCallback(() => fetchData(getJenisKelamin, setJenisKelamin), []);
+  const fetchEksPlasma = useCallback(() => fetchData(getEksPlasma, setEksPlasma), []);
+  const fetchUserRoles = useCallback(() => fetchData(getUserRoles, setUserRoles), []);
+  const fetchStatusPerkawinan = useCallback(() => fetchData(getStatusPerkawinan, setStatusPerkawinan), []);
+  const fetchKelompokTani = useCallback(() => fetchData(getKelompokTani, setKelompokTani), []);
 
   return {
     loading,
@@ -96,6 +104,8 @@ const useReferences = () => {
     jenisKelamin,
     eksPlasma,
     userRoles,
+    statusPerkawinan,
+    kelompokTani,
     fetchSTDBStatuses,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
@@ -107,6 +117,8 @@ const useReferences = () => {
     fetchJenisKelamin,
     fetchEksPlasma,
     fetchUserRoles,
+    fetchStatusPerkawinan,
+    fetchKelompokTani,
   };
 };
 

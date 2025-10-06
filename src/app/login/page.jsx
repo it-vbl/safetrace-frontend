@@ -6,21 +6,21 @@ import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
+
 import bannerLogin from '@/assets/images/login-bg.png';
-import LogoSipekebun from '../../../public/keling-kumang-logo.png';
+import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
 import { login } from '@/services/auth';
+
+import LogoSipekebun from '../../../public/keling-kumang-logo.png';
 
 const LoginPage = () => {
   const router = useRouter();
 
   const schemaValidation = Yup.object().shape({
-    email: Yup.string()
-      .email('Email tidak valid')
-      .required('Email harus diisi'),
+    username: Yup.string().required('Username harus diisi'),
     password: Yup.string().required('Password harus diisi'),
   });
 
@@ -34,30 +34,38 @@ const LoginPage = () => {
     isSubmitting,
   } = useFormik({
     initialValues: {
-      email: '',
+      username: '',
       password: '',
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        setSubmitting(true);
         const res = await login({
-          username: values.email,
+          username: values.username,
           password: values.password,
         });
-        if (res.status == 200) {
+
+        if (res.status === 200 && res?.data?.status === 'success') {
           Cookies.set('token', res?.data?.data?.access);
           Cookies.set('refreshToken', res?.data?.data?.refresh);
           Cookies.set('fullName', res?.data?.data?.full_name);
-          Cookies.set('userId', res?.data?.data?.id);
-          router.push('/');
+          Cookies.set('userId', res?.data?.data?.id.toString());
+          Cookies.set('username', res?.data?.data?.username);
+          Cookies.set('email', res?.data?.data?.email);
+          Cookies.set('roles', JSON.stringify(res?.data?.data?.roles));
+
           toast.success('Login berhasil');
+          router.push('/');
         } else {
-          router;
+          toast.error('Login gagal, silakan coba lagi');
         }
       } catch (error) {
-        toast.error(error?.response?.data?.message);
-        console.error(error);
+        const errorMessage =
+          error?.response?.data?.message || 'Terjadi kesalahan saat login';
+        toast.error(errorMessage);
+        console.error('Login error:', error);
+      } finally {
+        setSubmitting(false);
       }
     },
   });
@@ -94,11 +102,10 @@ const LoginPage = () => {
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">
               <InputText
-                label={'Email'}
-                type="email"
-                name="email"
-                placeholder="Masukan email"
-                value={values.email}
+                label={'Username'}
+                name="username"
+                placeholder="Masukan username"
+                value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 errors={errors}

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 

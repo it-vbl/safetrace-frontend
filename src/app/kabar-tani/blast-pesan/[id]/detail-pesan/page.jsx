@@ -1,7 +1,8 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+
 import Heading from '@/components/atoms/Typography/Heading';
+import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 
 const DetailPesanPage = () => {
   const router = useRouter();

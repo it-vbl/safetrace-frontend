@@ -1,20 +1,21 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo,useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import BaseModal from '@/components/molecules/Modal';
-import Heading from '@/components/atoms/Typography/Heading';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Button from '@/components/atoms/Button';
-import SectionLoading from '@/components/molecules/SectionLoading';
-import Pagination from '@/components/organisms/Pagination';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
-import InputText from '@/components/molecules/InputText';
 import { useFormik } from 'formik';
+import QRCode from 'qrcode';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
-import QRCode from 'qrcode';
+
+import Button from '@/components/atoms/Button';
+import Heading from '@/components/atoms/Typography/Heading';
+import Paragraph from '@/components/atoms/Typography/Paragraph';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import InputText from '@/components/molecules/InputText';
+import BaseModal from '@/components/molecules/Modal';
+import SectionLoading from '@/components/molecules/SectionLoading';
+import Pagination from '@/components/organisms/Pagination';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -260,9 +261,11 @@ const DevicePage = () => {
     },
   ];
 
-  const autoSizeStrategy = {
-    type: 'fitCellContents',
-  };
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitCellContents',
+    };
+  }, []);
 
   const schemaValidation = Yup.object().shape({
     nama_device: Yup.string().required('Nama device harus diisi'),
@@ -428,7 +431,7 @@ const DevicePage = () => {
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="flex flex-col gap-1">
-            <Heading level={3} className="text-lg font-bold">
+            <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
               DEVICE
             </Heading>
             <Paragraph level={3}>
@@ -453,17 +456,14 @@ const DevicePage = () => {
           <AgGridReact
             loading={loading}
             columnDefs={colDefs}
-            pagination={false}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             rowData={deviceData}
-            domLayout="autoHeight"
-            suppressCellFocus={true}
           />
         </div>
 
         {/* Pagination section */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}
