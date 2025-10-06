@@ -5,7 +5,7 @@ export const handleStep1 = async (values, idKebun) => {
   if (idKebun) {
     // Update existing kebun
     const kebunData = {
-      id_kebun: idKebun,
+      id_kebun: values.id_kebun,
       petani_id: parseInt(values.petani_id),
       lokasi_kebun: values.lokasi_kebun,
       luas: values.luas,
@@ -26,7 +26,7 @@ export const handleStep1 = async (values, idKebun) => {
   } else {
     // Create new kebun
     const kebunData = {
-      id_kebun: `KBN${Date.now()}`,
+      id_kebun: values.id_kebun,
       petani_id: parseInt(values.petani_id),
       lokasi_kebun: values.lokasi_kebun,
       luas: values.luas,

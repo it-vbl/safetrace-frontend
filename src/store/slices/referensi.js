@@ -17,6 +17,7 @@ export const referensiSlice = createSlice({
     statusPerkawinan: [],
     kelompokTani: [],
     sumberKontak: [],
+    jenisLegalitas: [],
   },
   reducers: {
     setSTDBStatuses: (state, action) => {
@@ -61,6 +62,9 @@ export const referensiSlice = createSlice({
     setSumberKontak: (state, action) => {
       state.sumberKontak = action.payload;
     },
+    setJenisLegalitas: (state, action) => {
+      state.jenisLegalitas = action.payload;
+    },
   },
 });
 
@@ -79,5 +83,6 @@ export const {
   setStatusPerkawinan,
   setKelompokTani,
   setSumberKontak,
+  setJenisLegalitas,
 } = referensiSlice.actions;
 export default referensiSlice.reducer;

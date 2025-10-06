@@ -12,6 +12,7 @@ import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import moment from 'moment/moment';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -73,17 +74,27 @@ const KebunPage = () => {
         const mappedData = response.data.data.results.map((kebun) => ({
           id: kebun.id,
           id_kebun: kebun.id_kebun,
-          nama_petani: '-', // Petani name not included in this endpoint
-          kelompok: '-', // Kelompok not included in this endpoint
+          nama_petani: kebun.nama_petani || '-', // Use API data or default
+          kelompok: kebun.kelompok || '-', // Use API data or default
           lokasi: kebun.lokasi_kebun,
           luas_kebun: kebun.luas,
-          waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
+          waktu_tanam: moment(kebun.waktu_tanam).format('DD-MM-YYYY'),
           rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
           ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
+          legalitas: kebun.legalitas || '-', // Use API data or default
+          no_legalitas: kebun.nomor_legalitas || '-', // Use API data or default
+          pemilik_legalitas: kebun.pemilik_legalitas || kebun.nama_petani || '-', // Use API data or default
+          stdb: kebun.nomor_stdb || '-', // Use API data or default
+          terakhir_diubah: kebun.updated_at ? new Date(kebun.updated_at).toLocaleString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }) : '-', // Use API data or default
+          coordinates: kebun.titik_koordinat?.coordinates ? 
+            `${kebun.titik_koordinat.coordinates[1].toFixed(6)}°N, ${kebun.titik_koordinat.coordinates[0].toFixed(6)}°E` : 
+            '-', // Format coordinates from titik_koordinat object
         }));
 
         setKebunData(mappedData);
@@ -168,6 +179,15 @@ const KebunPage = () => {
     );
   }, []);
 
+  const CoordinateCellRenderer = useCallback((e) => {
+    const coordinates = e.data?.coordinates || '-'; // Coordinates are already formatted in data mapping
+    return (
+      <span className="text-[10px] text-gray-600 sm:text-[12px]">
+        {coordinates}
+      </span>
+    );
+  }, []);
+
   const StatusCellRenderer = useCallback((params) => {
     const status = params.value;
     const isSuccess = status === 'Sudah';
@@ -195,6 +215,15 @@ const KebunPage = () => {
         suppressSizeToFit: false,
       },
       {
+        field: 'coordinates',
+        headerName: 'Titik Koordinat',
+        cellRenderer: CoordinateCellRenderer,
+        width: 200,
+        minWidth: 180,
+        maxWidth: 220,
+        suppressSizeToFit: false,
+      },
+      {
         field: 'id_kebun',
         headerName: 'Id Kebun',
         flex: 1,
@@ -202,7 +231,7 @@ const KebunPage = () => {
       },
       {
         field: 'nama_petani',
-        headerName: 'Nama Petani',
+        headerName: 'Petani',
         flex: 1,
         minWidth: 140,
       },
@@ -247,8 +276,38 @@ const KebunPage = () => {
         minWidth: 100,
         cellRenderer: StatusCellRenderer,
       },
+      {
+        field: 'legalitas',
+        headerName: 'Legalitas',
+        flex: 1,
+        minWidth: 120,
+      },
+      {
+        field: 'no_legalitas',
+        headerName: 'No Legalitas',
+        flex: 1,
+        minWidth: 140,
+      },
+      {
+        field: 'pemilik_legalitas',
+        headerName: 'Pemilik Legalitas',
+        flex: 1,
+        minWidth: 140,
+      },
+      {
+        field: 'stdb',
+        headerName: 'STDB',
+        flex: 1,
+        minWidth: 120,
+      },
+      {
+        field: 'terakhir_diubah',
+        headerName: 'Terakhir Diubah',
+        flex: 1,
+        minWidth: 140,
+      },
     ],
-    [ActionsCellRenderer, StatusCellRenderer]
+    [ActionsCellRenderer, CoordinateCellRenderer, StatusCellRenderer]
   );
 
   const autoSizeStrategy = useMemo(() => {

@@ -27,3 +27,4 @@ export const deleteKebun = (payload) =>
   api.post(`/pekebun/kebun/delete/`, null, payload);
 export const downloadSHPKebun = (idKebun) =>
   api.get(`/pekebun/kebun/peta/download/${idKebun}`);
+export const createKebunLampiran = (payload) => api.postData(`/kebun/lampiran/create/`, payload);

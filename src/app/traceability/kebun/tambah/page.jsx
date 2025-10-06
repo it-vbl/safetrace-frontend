@@ -75,6 +75,7 @@ const CreateKebunTraceability = () => {
 
   // Function to proceed to next step
   const handleNextStep = async (stepData) => {
+    console.log("CHECK BEFORE ON NEXT", stepData);
     setIsSubmitting(true);
     
     try {

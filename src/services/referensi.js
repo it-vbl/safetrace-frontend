@@ -17,3 +17,4 @@ export const getKelompokTani = () => api.get(`/petani/kelompok-tani/list/`);
 export const getStatusPerkawinan = () =>
   api.get(`/referensi/status-perkawinan/`);
 export const getSumberKontak = () => api.get(`/referensi/sumber-kontak/`);
+export const getJenisLegalitas = () => api.get(`/referensi/jenis-legalitas/`);
