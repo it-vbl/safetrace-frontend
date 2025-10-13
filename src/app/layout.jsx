@@ -22,8 +22,10 @@ const DMSans = DM_Sans({
 
 // Inner component that can access Redux state
 function LayoutContent({ children, hideNavbar, hideSidebar, noPadding }) {
-  const { sidebarCollapsed, isMobileScreen } = useSelector((state) => state.app);
-  
+  const { sidebarCollapsed, isMobileScreen } = useSelector(
+    (state) => state.app
+  );
+
   return (
     <>
       {!hideNavbar && <Navbar />}
@@ -37,9 +39,7 @@ function LayoutContent({ children, hideNavbar, hideSidebar, noPadding }) {
             <Sidebar />
           </div>
         ) : null}
-        <div 
-          className="flex flex-1 flex-col transition-all duration-300"
-        >
+        <div className="flex flex-1 flex-col transition-all duration-300">
           <div
             className={`flex flex-1 overflow-y-auto bg-[#F7F9FD] ${
               noPadding ? 'p-0' : 'p-4 md:p-8'
@@ -119,7 +119,7 @@ export default function Layout({ children }) {
       <body>
         <ReduxProvider>
           <MobileScreenProvider>
-            <LayoutContent 
+            <LayoutContent
               hideNavbar={hideNavbar}
               hideSidebar={hideSidebar}
               noPadding={noPadding}

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
@@ -10,63 +10,15 @@ import Heading from '@/components/atoms/Typography/Heading';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import MemberSelector from '@/components/molecules/MemberSelector';
+import TextArea from '@/components/molecules/TextArea';
+import { createGrupKontak } from '@/services/grup';
+import { getKontakList } from '@/services/kontak';
 
 const TambahGrupPage = () => {
   const router = useRouter();
 
-  const [selectedMembers, setSelectedMembers] = useState([
-    {
-      id: 1,
-      name: 'Adam',
-      phone: '082211578729',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: 2,
-      name: 'Rudi',
-      phone: '082211578729',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: 3,
-      name: 'Ridho',
-      phone: '082211578729',
-      gender: 'Laki - Laki',
-    },
-  ]);
-
-  const [availableMembers] = useState([
-    {
-      id: '001-APKS-001-001',
-      name: 'Agustinus Nery',
-      phone: '082211591642',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: '001-APKS-001-002',
-      name: 'Maria Sari',
-      phone: '082211591643',
-      gender: 'Perempuan',
-    },
-    {
-      id: '001-APKS-001-003',
-      name: 'Budi Santoso',
-      phone: '082211591644',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: '001-APKS-001-004',
-      name: 'Siti Aminah',
-      phone: '082211591645',
-      gender: 'Perempuan',
-    },
-    {
-      id: '001-APKS-001-005',
-      name: 'Andi Wijaya',
-      phone: '082211591646',
-      gender: 'Laki - Laki',
-    },
-  ]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [availableMembers, setAvailableMembers] = useState([]);
 
   const handleMembersChange = (newMembers) => {
     setSelectedMembers(newMembers);
@@ -80,6 +32,30 @@ const TambahGrupPage = () => {
   const handleCancel = () => {
     router.back();
   };
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchContacts = async () => {
+      try {
+        const response = await getKontakList({});
+        const data = response?.data?.data;
+        const list = Array.isArray(data?.results)
+          ? data.results
+          : Array.isArray(response?.data?.results)
+          ? response?.data?.results
+          : Array.isArray(response?.data)
+          ? response?.data
+          : [];
+        if (mounted) setAvailableMembers(list);
+      } catch (err) {
+        if (mounted) setAvailableMembers([]);
+      }
+    };
+    fetchContacts();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const schemaValidation = Yup.object().shape({
     group_name: Yup.string().required('Nama grup harus diisi'),
@@ -96,36 +72,31 @@ const TambahGrupPage = () => {
   } = useFormik({
     initialValues: {
       group_name: '',
+      group_description: '',
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
 
-        const groupData = {
-          group_name: values.group_name,
-          members: selectedMembers,
-          totalMembers: selectedMembers.length,
+        const payload = {
+          nama: values.group_name,
+          deskripsi: values.group_description,
+          anggota: selectedMembers.map((m) => m.id),
         };
 
-        console.log('Saving group:', groupData);
+        const response = await createGrupKontak(payload);
 
-        // Uncomment and modify this when you have the actual API
-        // const res = await createGroup(groupData);
-        // if (res.status === 200) {
-        //   router.push('/kabar-tani/grup');
-        //   toast.success('Berhasil menambahkan grup');
-        // }
-
-        // For now, simulate success
-        setTimeout(() => {
+        if (response.status === 200 || response.status === 201) {
           router.push('/kabar-tani/grup');
           toast.success('Berhasil menambahkan grup');
-          setSubmitting(false);
-        }, 1000);
+        } else {
+          toast.error('Gagal menambahkan grup');
+        }
       } catch (error) {
+        console.error('Error creating group:', error);
         toast.error(error?.response?.data?.message || 'Terjadi kesalahan');
-        console.error(error);
+      } finally {
         setSubmitting(false);
       }
     },
@@ -161,12 +132,31 @@ const TambahGrupPage = () => {
                 touched={touched}
               />
 
+              {/* Deskripsi Grup Section */}
+              <TextArea
+                label="Deskripsi Grup"
+                name="group_description"
+                placeholder="Masukkan deskripsi grup"
+                value={values.group_description}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                isFullWidth={true}
+                maxChar={null}
+                hasError={touched?.group_description && !!errors?.group_description}
+                helperText={
+                  touched?.group_description && errors?.group_description
+                    ? errors.group_description
+                    : ''
+                }
+              />
+
               {/* Member Selector Component */}
               <MemberSelector
                 selectedMembers={selectedMembers}
                 availableMembers={availableMembers}
                 onMembersChange={handleMembersChange}
                 label="Anggota"
+                loading={isSubmitting}
               />
             </div>
           </div>

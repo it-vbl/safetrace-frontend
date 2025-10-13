@@ -16,6 +16,7 @@ export const referensiSlice = createSlice({
     userRoles: [],
     statusPerkawinan: [],
     kelompokTani: [],
+    sumberKontak: [],
   },
   reducers: {
     setSTDBStatuses: (state, action) => {
@@ -57,6 +58,9 @@ export const referensiSlice = createSlice({
     setKelompokTani: (state, action) => {
       state.kelompokTani = action.payload;
     },
+    setSumberKontak: (state, action) => {
+      state.sumberKontak = action.payload;
+    },
   },
 });
 
@@ -74,5 +78,6 @@ export const {
   setUserRoles,
   setStatusPerkawinan,
   setKelompokTani,
+  setSumberKontak,
 } = referensiSlice.actions;
 export default referensiSlice.reducer;

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
@@ -12,63 +12,23 @@ import InputText from '@/components/molecules/InputText';
 import MemberSelector from '@/components/molecules/MemberSelector';
 import RadioButton from '@/components/molecules/RadioButton';
 import Select from '@/components/molecules/Select';
+import { createBroadcast } from '@/services/broadcast';
+import { getDeviceList } from '@/services/device';
+import { getKontakList } from '@/services/kontak';
 
 import Label from '../../../../components/atoms/Label';
 import WhatsAppService from '../../../../services/whatsapp';
-
-const dummySenderOption = [
-  { value: 'device_1', label: 'Fajar Sukmara - 082211591642' },
-  { value: 'device_2', label: 'Ahmad Sahroji - 082242394222' },
-  { value: 'device_3', label: 'Fiky Prasetcio - 082211035232' },
-  { value: 'device_4', label: 'Teguh Suhandi - 085604545453' },
-];
+import { formatPhoneNumber } from '../../../../utils/whatsapp';
 
 const PesanBaruPage = () => {
   const router = useRouter();
 
-  const [noPengirim, setNoPengirim] = useState('device_1');
+  const [noPengirim, setNoPengirim] = useState('');
   const [activeTile, setActiveTile] = useState('personal');
-  const [selectedMembers, setSelectedMembers] = useState([
-    {
-      id: 1,
-      name: 'Adam',
-      phone: '0895423764628', // Target phone number
-      gender: 'Laki - Laki',
-    },
-  ]);
-
-  const [availableMembers] = useState([
-    {
-      id: '001-APKS-001-001',
-      name: 'Target User',
-      phone: '0895423764628',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: '001-APKS-001-002',
-      name: 'Maria Sari',
-      phone: '082211591643',
-      gender: 'Perempuan',
-    },
-    {
-      id: '001-APKS-001-003',
-      name: 'Budi Santoso',
-      phone: '082211591644',
-      gender: 'Laki - Laki',
-    },
-    {
-      id: '001-APKS-001-004',
-      name: 'Siti Aminah',
-      phone: '082211591645',
-      gender: 'Perempuan',
-    },
-    {
-      id: '001-APKS-001-005',
-      name: 'Andi Wijaya',
-      phone: '082211591646',
-      gender: 'Laki - Laki',
-    },
-  ]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [availableMembers, setAvailableMembers] = useState([]);
+  const [deviceOptions, setDeviceOptions] = useState([]);
+  const [deviceData, setDeviceData] = useState([]);
 
   const handleMembersChange = (newMembers) => {
     setSelectedMembers(newMembers);
@@ -83,16 +43,14 @@ const PesanBaruPage = () => {
     router.back();
   };
 
-  // Function to send individual message via WhatsCenter
   const sendWhatsAppMessage = async (deviceId, phoneNumber, message) => {
     try {
-      const messageData = {
-        phone: phoneNumber,
-        message: message,
-        type: 'text', // or 'media' if sending media
-      };
-
-      const response = await WhatsAppService.sendMessage(deviceId, messageData);
+      const number = formatPhoneNumber(phoneNumber);
+      const response = await WhatsAppService.sendPrivateMessage({
+        deviceId,
+        number,
+        message,
+      });
       return response;
     } catch (error) {
       console.error('Error sending WhatsApp message:', error);
@@ -100,23 +58,18 @@ const PesanBaruPage = () => {
     }
   };
 
-  // Function to send bulk message via WhatsCenter
   const sendBulkWhatsAppMessage = async (deviceId, recipients, message) => {
     try {
-      const bulkMessageData = {
-        recipients: recipients.map((member) => ({
-          phone: member.phone,
-          name: member.name,
-        })),
-        message: message,
-        type: 'text',
-      };
-
-      const response = await WhatsAppService.sendBulkMessage(
-        deviceId,
-        bulkMessageData
-      );
-      return response;
+      const results = [];
+      for (const member of recipients) {
+        const phone =
+          member?.phone || member?.no_wa || member?.no_hp || member?.telepon;
+        const name = member?.name || member?.nama || '';
+        if (!phone) continue;
+        const res = await sendWhatsAppMessage(deviceId, phone, message);
+        results.push({ name, phone, status: res?.data?.status || 'sent', res });
+      }
+      return { data: { results } };
     } catch (error) {
       console.error('Error sending bulk WhatsApp message:', error);
       throw error;
@@ -137,9 +90,10 @@ const PesanBaruPage = () => {
     handleBlur,
     handleChange,
     isSubmitting,
+    setFieldValue,
   } = useFormik({
     initialValues: {
-      no_pengirim: 'device_1',
+      no_pengirim: '',
       nama_pesan: '',
       isi_pesan: 'Lorem Ipsum Dolor Sit Amet', // Default message
     },
@@ -147,8 +101,6 @@ const PesanBaruPage = () => {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
-
-        // Validate device and members
         if (!values.no_pengirim) {
           toast.error('Pilih device pengirim terlebih dahulu');
           setSubmitting(false);
@@ -161,82 +113,38 @@ const PesanBaruPage = () => {
           return;
         }
 
-        let successCount = 0;
-        let errorCount = 0;
-        const errors = [];
+        const selectedDevice = deviceData.find(
+          (d) => d.id_device === values.no_pengirim
+        );
 
-        // Send messages based on selection type
-        if (activeTile === 'personal' && selectedMembers.length === 1) {
-          // Send single message
-          try {
-            await sendWhatsAppMessage(
-              values.no_pengirim,
-              selectedMembers[0].phone,
-              values.isi_pesan
-            );
-            successCount++;
-            toast.success(
-              'Pesan berhasil dikirim ke ' + selectedMembers[0].name
-            );
-          } catch (error) {
-            errorCount++;
-            errors.push(
-              `Gagal kirim ke ${selectedMembers[0].name}: ${error.message}`
-            );
-          }
+        const jenisPenerima =
+          activeTile === 'group'
+            ? 'grup'
+            : activeTile === 'csv'
+            ? 'csv'
+            : 'personal';
+
+        const payload = {
+          nama_pesan: values.nama_pesan,
+          isi_pesan: values.isi_pesan,
+          jenis_penerima: jenisPenerima,
+          kontak_ids: selectedMembers.map((m) => m.id),
+          id_device: values.no_pengirim,
+          no_pengirim: selectedDevice?.no_wa,
+        };
+
+        const response = await createBroadcast(payload);
+        if (
+          response?.status === 200 ||
+          response?.status === 201 ||
+          response?.data?.status === 'success'
+        ) {
+          toast.success(
+            'Berhasil membuat campaign dan menjadwalkan pengiriman'
+          );
+          router.push('/kabar-tani/blast-pesan');
         } else {
-          // Send bulk message or multiple individual messages
-          if (selectedMembers.length <= 5) {
-            // Send individual messages for small groups
-            for (const member of selectedMembers) {
-              try {
-                await sendWhatsAppMessage(
-                  values.no_pengirim,
-                  member.phone,
-                  values.isi_pesan
-                );
-                successCount++;
-                console.log(`Message sent to ${member.name} (${member.phone})`);
-              } catch (error) {
-                errorCount++;
-                errors.push(`Gagal kirim ke ${member.name}: ${error.message}`);
-                console.error(`Failed to send to ${member.name}:`, error);
-              }
-
-              // Add delay between messages to avoid rate limiting
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-          } else {
-            // Use bulk message for larger groups
-            try {
-              await sendBulkWhatsAppMessage(
-                values.no_pengirim,
-                selectedMembers,
-                values.isi_pesan
-              );
-              successCount = selectedMembers.length;
-              toast.success(
-                `Bulk message berhasil dikirim ke ${selectedMembers.length} penerima`
-              );
-            } catch (error) {
-              errorCount = selectedMembers.length;
-              errors.push(`Gagal mengirim bulk message: ${error.message}`);
-            }
-          }
-        }
-
-        // Show results
-        if (successCount > 0 && errorCount === 0) {
-          toast.success(`Berhasil mengirim ${successCount} pesan`);
-          setTimeout(() => {
-            router.push('/kabar-tani/blast-pesan');
-          }, 1500);
-        } else if (successCount > 0 && errorCount > 0) {
-          toast.warn(`Berhasil: ${successCount}, Gagal: ${errorCount}`);
-          console.log('Errors:', errors);
-        } else {
-          toast.error('Semua pesan gagal dikirim');
-          console.log('All errors:', errors);
+          toast.error(response?.data?.message || 'Gagal membuat campaign');
         }
       } catch (error) {
         toast.error(
@@ -249,17 +157,90 @@ const PesanBaruPage = () => {
     },
   });
 
-  // Function to test connection to specific device
   const testDeviceConnection = async (deviceId) => {
     try {
-      const response = await WhatsAppService.getDeviceStatus(deviceId);
-      console.log('Device status:', response.data);
-      return response.data;
+      const response = await WhatsAppService.getWhacenterDeviceStatus(deviceId);
+      const data = response?.data || response;
+      const isOnline =
+        typeof data?.status === 'string'
+          ? ['online', 'connected', 'true'].includes(data.status.toLowerCase())
+          : data?.status ?? data?.connected ?? false;
+      toast[isOnline ? 'success' : 'info'](
+        isOnline
+          ? 'Device Whacenter online'
+          : 'Device Whacenter belum terhubung'
+      );
+      return data;
     } catch (error) {
       console.error('Device connection error:', error);
+      toast.error('Gagal cek status device');
       return null;
     }
   };
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchDevices = async () => {
+      try {
+        const params = new URLSearchParams({ page: '1', page_size: '100' });
+        const res = await getDeviceList(params);
+        const data = res?.data?.data || res?.data || {};
+        const results = data?.results || [];
+        const mappedDevices = results.map((item) => ({
+          id: item.id,
+          id_device: item.id_device,
+          nama: item.nama,
+          no_wa: item.no_wa,
+          terhubung: !!item.terhubung,
+        }));
+        const options = mappedDevices.map((d) => ({
+          value: d.id_device,
+          label: `${d.nama ?? '-'} - ${d.no_wa ?? '-'}`,
+        }));
+        if (mounted) {
+          setDeviceData(mappedDevices);
+          setDeviceOptions(options);
+          if (options.length > 0) {
+            setNoPengirim(options[0].value);
+            setFieldValue('no_pengirim', options[0].value);
+          }
+        }
+      } catch (err) {
+        if (mounted) {
+          setDeviceData([]);
+          setDeviceOptions([]);
+        }
+      }
+    };
+    fetchDevices();
+    return () => {
+      mounted = false;
+    };
+  }, [setFieldValue]);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchContacts = async () => {
+      try {
+        const response = await getKontakList({});
+        const data = response?.data?.data;
+        const list = Array.isArray(data?.results)
+          ? data.results
+          : Array.isArray(response?.data?.results)
+          ? response?.data?.results
+          : Array.isArray(response?.data)
+          ? response?.data
+          : [];
+        if (mounted) setAvailableMembers(list);
+      } catch (err) {
+        if (mounted) setAvailableMembers([]);
+      }
+    };
+    fetchContacts();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="relative w-full bg-gray-50">
@@ -286,11 +267,11 @@ const PesanBaruPage = () => {
                     Device Pengirim
                   </Label>
                   <Select
-                    options={dummySenderOption}
+                    options={deviceOptions}
                     value={noPengirim}
                     onChange={(e) => {
                       setNoPengirim(e.target.value);
-                      // Test device connection when selected
+                      setFieldValue('no_pengirim', e.target.value);
                       testDeviceConnection(e.target.value);
                     }}
                     placeholder="Pilih Device"

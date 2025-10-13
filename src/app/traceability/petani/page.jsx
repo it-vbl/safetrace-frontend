@@ -1,43 +1,35 @@
 'use client';
 
-// 1. React & Next.js (built-in)
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-// 2. External packages
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-// 3. Internal components (alias @/)
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 
-// 4. Relative imports (services)
+import useReferences from '../../../hooks/useReferences';
 import { deletePetani, getListPetani } from '../../../services/petani';
 
-// Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-  { label: 'Kelompok C', value: 'kelompok_c' },
-];
-
 const keanggotaanOptions = [
-  { label: 'Aktif', value: 'aktif' },
-  { label: 'Tidak Aktif', value: 'tidak_aktif' },
+  { label: 'Aktif', value: true },
+  { label: 'Tidak Aktif', value: false },
 ];
 
 const PetaniPage = () => {
   const router = useRouter();
 
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
   const [selectedKeanggotaan, setSelectedKeanggotaan] = useState(null);
@@ -53,10 +45,38 @@ const PetaniPage = () => {
     useState(false);
   const [selectedPetaniToDelete, setSelectedPetaniToDelete] = useState(null);
 
-  const fetchPetaniData = async ({ page, page_size, search }) => {
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+
+  const kelompokOptions = useMemo(() => {
+    return (
+      kelompokTani?.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })) || []
+    );
+  }, [kelompokTani]);
+
+  const fetchPetaniData = async ({
+    page,
+    page_size,
+    search,
+    keanggotaan,
+    kelompok_tani,
+  }) => {
     setLoading(true);
     try {
-      const response = await getListPetani({ page, page_size, search });
+      const params = {
+        page,
+        page_size,
+        ...(search && { search }),
+        ...(keanggotaan !== null &&
+          keanggotaan !== undefined && { keanggotaan }),
+        ...(kelompok_tani && { kelompok_tani }),
+      };
+
+      const response = await getListPetani(params);
 
       if (response?.status === 200) {
         const data = response?.data?.data;
@@ -104,8 +124,10 @@ const PetaniPage = () => {
       page: currentPage,
       page_size: pageSize,
       search,
+      keanggotaan: selectedKeanggotaan,
+      kelompok_tani: selectedKelompok,
     });
-  }, [currentPage, pageSize, search]);
+  }, [currentPage, pageSize, search, selectedKeanggotaan, selectedKelompok]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -301,7 +323,6 @@ const PetaniPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
                 />
                 <Button
                   onClick={() => router.push('/traceability/petani/tambah')}
@@ -316,6 +337,7 @@ const PetaniPage = () => {
           {/* Table Container - Responsive Height */}
         </div>
         <div className="relative w-full flex-1 ">
+          <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."
