@@ -7,7 +7,6 @@ import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
-import * as XLSX from 'xlsx';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
@@ -281,83 +280,6 @@ const PetaniPage = () => {
     setSelectedPetaniToDelete(null);
   };
 
-  const handleExportExcel = async () => {
-    try {
-      const loadingToast = toast.loading('Mengekspor data ke Excel...');
-      const exportParams = {
-        page: 1,
-        page_size: totalPetani || 1000,
-        ...(search && { search }),
-        ...(selectedKeanggotaan !== null &&
-          selectedKeanggotaan !== undefined && {
-            keanggotaan: selectedKeanggotaan,
-          }),
-        ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
-      };
-
-      const response = await getListPetani(exportParams);
-
-      if (response?.status === 200) {
-        const data = response?.data?.data;
-        const results = data?.results || [];
-
-        const excelData = results.map((item, index) => ({
-          No: index + 1,
-          'ID Petani': item?.id_petani || '-',
-          'Nama Petani': item?.nama || '-',
-          'Jenis Kelamin':
-            item?.jns_kelamin === '1'
-              ? 'Laki-Laki'
-              : item?.jns_kelamin === '2'
-              ? 'Perempuan'
-              : '-',
-          Kelompok: item?.nama_kelompok || '-',
-          'No. KTP': item?.no_ktp || '-',
-          'No. KK': item?.no_kk || '-',
-          'Status Pernikahan':
-            item?.status_perkawinan === '1'
-              ? 'Belum Kawin'
-              : item?.status_perkawinan === '2'
-              ? 'Kawin'
-              : '-',
-          'No. NIB': item?.no_nib || '-',
-        }));
-
-        const workbook = XLSX.utils.book_new();
-        const worksheet = XLSX.utils.json_to_sheet(excelData);
-
-        const columnWidths = [
-          { wch: 5 }, // No
-          { wch: 15 }, // ID Petani
-          { wch: 25 }, // Nama Petani
-          { wch: 15 }, // Jenis Kelamin
-          { wch: 20 }, // Kelompok
-          { wch: 20 }, // No. KTP
-          { wch: 20 }, // No. KK
-          { wch: 18 }, // Status Pernikahan
-          { wch: 15 }, // No. NIB
-        ];
-        worksheet['!cols'] = columnWidths;
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Petani');
-
-        const currentDate = new Date().toISOString().split('T')[0];
-        const filename = `Data_Petani_${currentDate}.xlsx`;
-        XLSX.writeFile(workbook, filename);
-
-        toast.dismiss(loadingToast);
-        toast.success(`Data berhasil diekspor ke ${filename}`);
-      } else {
-        toast.dismiss(loadingToast);
-        toast.error('Gagal mengambil data untuk ekspor');
-      }
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error(
-        error?.response?.data?.message || 'Gagal mengekspor data ke Excel'
-      );
-    }
-  };
-
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4">
@@ -401,7 +323,6 @@ const PetaniPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={handleExportExcel}
                 />
                 <Button
                   onClick={() => router.push('/traceability/petani/tambah')}
