@@ -38,7 +38,6 @@ const SearchBar = ({
   };
 
   const handleOnChange = (e) => {
-    console.log('CHHHH', e.target.value);
     const inputValue = e.target.value;
     if (
       (validationRegex ? validationRegex?.test(inputValue) : true) ||

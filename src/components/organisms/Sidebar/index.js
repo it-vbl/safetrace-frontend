@@ -5,7 +5,9 @@ import Cookies from 'js-cookie';
 import {
   ChevronRight,
   ContactIcon,
+  Flag,
   FlagIcon,
+  FlagOffIcon,
   FolderIcon,
   MapIcon,
   MedalIcon,
@@ -66,9 +68,23 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         path: '/traceability/kebun',
       },
       {
-        label: 'Produksi',
-        icon: FlagIcon,
-        path: '/traceability/produksi',
+        label: 'GAP',
+        icon: Flag,
+        subMenu: [
+          { label: 'PRODUKSI', path: '/traceability/gap/produksi' },
+          {
+            label: 'PESTISIDA',
+            path: '/traceability/gap/pestisida',
+          },
+          {
+            label: 'PUPUK',
+            path: '/traceability/gap/pupuk',
+          },
+          {
+            label: 'LB3',
+            path: '/traceability/gap/lb3',
+          },
+        ],
       },
       {
         label: 'Diklat',

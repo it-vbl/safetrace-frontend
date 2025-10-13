@@ -1,6 +1,54 @@
 import api from './api';
+import wa from './wa';
 
 const WhatsAppService = {
+  // Whacenter: Device Status & QR
+  getWhacenterDeviceStatus: (deviceId) => {
+    return wa.get('/statusDevice', { params: { device_id: deviceId } }, false);
+  },
+  // Whacenter: Relog device to generate new QR
+  relogWhacenterDevice: (deviceId) => {
+    // Whacenter relog endpoint uses GET with device_id
+    // After relog, the QR image becomes available at /qr?device_id=...
+    return wa.get('/relog', { params: { device_id: deviceId } }, false);
+  },
+
+  // Returns direct image URL to QR code (Whacenter serves image)
+  getWhacenterQRCodeUrl: (deviceId) => {
+    let base =
+      process.env.NEXT_PUBLIC_WHATSAPP_API_URL ||
+      'https://app.whacenter.com/api/';
+    if (!base.endsWith('/')) base = `${base}/`;
+    return `${base}qr?device_id=${deviceId}`;
+  },
+
+  // Whacenter: Webhook management
+  getWhacenterWebhook: (deviceId) => {
+    return wa.get('/getWebhook', { params: { device_id: deviceId } }, false);
+  },
+
+  setWhacenterWebhook: (deviceId, webhookUrl) => {
+    // Whacenter uses GET with query params for setting webhook
+    return wa.get(
+      '/setWebhook',
+      {
+        params: { device_id: deviceId, webhook: webhookUrl },
+      },
+      false
+    );
+  },
+
+  // Whacenter: Send private and group messages
+  sendPrivateMessage: ({ deviceId, number, message }) => {
+    const form = { device_id: deviceId, number, message };
+    return wa.post('/send', form, null, {}, null, false);
+  },
+
+  sendGroupMessage: ({ deviceId, group, message }) => {
+    // Whacenter uses '/sendGroup' endpoint for group messages
+    const form = { device_id: deviceId, group, message };
+    return wa.post('/sendGroup', form, null, {}, null, false);
+  },
   // Device Management
   getDevices: (params = {}) => {
     const queryParams = {

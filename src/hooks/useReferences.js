@@ -14,6 +14,7 @@ import {
   getStatusLahan,
   getStatusPerkawinan,
   getSTDBStatuses,
+  getSumberKontak,
   getUserRoles,
 } from '../services/referensi';
 import {
@@ -29,6 +30,7 @@ import {
   setStatusLahan,
   setStatusPerkawinan,
   setSTDBStatuses,
+  setSumberKontak,
   setUserRoles,
 } from '../store/slices/referensi';
 
@@ -52,6 +54,7 @@ const useReferences = () => {
     userRoles,
     statusPerkawinan,
     kelompokTani,
+    sumberKontak,
   } = useSelector((state) => state.referensi);
 
   const fetchData = async (fetchFunction, setAction) => {
@@ -76,19 +79,62 @@ const useReferences = () => {
     }
   };
 
-  const fetchSTDBStatuses = useCallback(() => fetchData(getSTDBStatuses, setSTDBStatuses), []);
-  const fetchPendidikanTerakhir = useCallback(() => fetchData(getPendidikanTerakhir, setPendidikanTerakhir), []);
-  const fetchStatusLahan = useCallback(() => fetchData(getStatusLahan, setStatusLahan), []);
-  const fetchPolaTanam = useCallback(() => fetchData(getPolaTanam, setPolaTanam), []);
-  const fetchAsalBenih = useCallback(() => fetchData(getAsalBenih, setAsalBenih), []);
-  const fetchJenisLahan = useCallback(() => fetchData(getJenisLahan, setJenisLahan), []);
-  const fetchJenisPupuk = useCallback(() => fetchData(getJenisPupuk, setJenisPupuk), []);
-  const fetchKomoditasKelembagaan = useCallback(() => fetchData(getKomoditasKelembagaan, setKomoditasKelembagaan), []);
-  const fetchJenisKelamin = useCallback(() => fetchData(getJenisKelamin, setJenisKelamin), []);
-  const fetchEksPlasma = useCallback(() => fetchData(getEksPlasma, setEksPlasma), []);
-  const fetchUserRoles = useCallback(() => fetchData(getUserRoles, setUserRoles), []);
-  const fetchStatusPerkawinan = useCallback(() => fetchData(getStatusPerkawinan, setStatusPerkawinan), []);
-  const fetchKelompokTani = useCallback(() => fetchData(getKelompokTani, setKelompokTani), []);
+  const fetchSTDBStatuses = useCallback(
+    () => fetchData(getSTDBStatuses, setSTDBStatuses),
+    []
+  );
+  const fetchPendidikanTerakhir = useCallback(
+    () => fetchData(getPendidikanTerakhir, setPendidikanTerakhir),
+    []
+  );
+  const fetchStatusLahan = useCallback(
+    () => fetchData(getStatusLahan, setStatusLahan),
+    []
+  );
+  const fetchPolaTanam = useCallback(
+    () => fetchData(getPolaTanam, setPolaTanam),
+    []
+  );
+  const fetchAsalBenih = useCallback(
+    () => fetchData(getAsalBenih, setAsalBenih),
+    []
+  );
+  const fetchJenisLahan = useCallback(
+    () => fetchData(getJenisLahan, setJenisLahan),
+    []
+  );
+  const fetchJenisPupuk = useCallback(
+    () => fetchData(getJenisPupuk, setJenisPupuk),
+    []
+  );
+  const fetchKomoditasKelembagaan = useCallback(
+    () => fetchData(getKomoditasKelembagaan, setKomoditasKelembagaan),
+    []
+  );
+  const fetchJenisKelamin = useCallback(
+    () => fetchData(getJenisKelamin, setJenisKelamin),
+    []
+  );
+  const fetchEksPlasma = useCallback(
+    () => fetchData(getEksPlasma, setEksPlasma),
+    []
+  );
+  const fetchUserRoles = useCallback(
+    () => fetchData(getUserRoles, setUserRoles),
+    []
+  );
+  const fetchStatusPerkawinan = useCallback(
+    () => fetchData(getStatusPerkawinan, setStatusPerkawinan),
+    []
+  );
+  const fetchKelompokTani = useCallback(
+    () => fetchData(getKelompokTani, setKelompokTani),
+    []
+  );
+  const fetchSumberKontak = useCallback(
+    () => fetchData(getSumberKontak, setSumberKontak),
+    []
+  );
 
   return {
     loading,
@@ -106,6 +152,7 @@ const useReferences = () => {
     userRoles,
     statusPerkawinan,
     kelompokTani,
+    sumberKontak,
     fetchSTDBStatuses,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
@@ -119,6 +166,7 @@ const useReferences = () => {
     fetchUserRoles,
     fetchStatusPerkawinan,
     fetchKelompokTani,
+    fetchSumberKontak,
   };
 };
 

@@ -46,14 +46,33 @@ const Upload = ({
       'application/octet-stream',
       'application/geo+json',
       'application/x-esri-shapefile',
+      'text/csv',
+      'application/vnd.ms-excel',
+      'text/plain',
       '.shp',
       '.geojson',
+      '.csv',
     ];
 
     const selectedFileType = validTypes.filter((item) =>
       allowedFiles?.some((subString) => item?.includes(subString))
     );
     const _maxSize = maxSize * 1024 * 1024; // MB
+    const isCSVFile = file.name.toLowerCase().endsWith('.csv') || 
+                      file.type === 'text/csv' || 
+                      file.type === 'application/vnd.ms-excel' ||
+                      file.type === 'text/plain';
+    
+    const isCSVAllowed = allowedFiles?.some(allowed => 
+      allowed.includes('csv') || allowed.includes('text/csv') || allowed.includes('application/vnd.ms-excel')
+    );
+
+    if (isCSVAllowed && isCSVFile) {
+      if (file.size > _maxSize) {
+        return `Batas maksimal file yang dapat diunggah yaitu ${maxSize}mb`;
+      }
+      return '';
+    }
 
     if (!selectedFileType?.includes(file?.type)) {
       return 'File gagal ditambahkan, format tidak sesuai';
@@ -68,7 +87,7 @@ const Upload = ({
   const handleOnFileChange = (e) => {
     const value = e.target.files?.[0];
     const name = value?.name;
-    const size = value?.size ?? 0; // Simpan sebagai number
+    const size = value?.size ?? 0; 
     const today = new Date(Date.now());
     const day = today.getDate();
     const month = today.getMonth() + 1;

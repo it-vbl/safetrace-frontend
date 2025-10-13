@@ -2,8 +2,24 @@ import api from './api';
 
 // *** GET ***
 
-export const getListPetani = (params = {}) =>
-  api.get(`/petani/list/`, { params });
+export const getListPetani = (params = {}) => {
+  const formattedParams = {
+    ...params,
+    ...(params.keanggotaan !== undefined && {
+      keanggotaan: params.keanggotaan.toString()
+    }),
+
+    ...(params.kelompok_tani && {
+      kelompok_tani: params.kelompok_tani
+    }),
+    
+    ...(params.search && {
+      search: params.search
+    })
+  };
+  
+  return api.get(`/petani/list/`, { params: formattedParams });
+};
 
 export const getDetailPetani = (id) => api.get(`/petani/detail/${id}/`);
 
