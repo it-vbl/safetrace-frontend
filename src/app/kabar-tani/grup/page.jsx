@@ -1,15 +1,18 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
+import { toast } from 'react-toastify';
+
+import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
-import Button from '@/components/atoms/Button';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import { deleteGrupKontak, getGrupKontakList } from '@/services/grup';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -28,49 +31,43 @@ const GrupPage = () => {
   const fetchKontakData = async ({ page, page_size, search }) => {
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const params = {
+        page,
+        page_size,
+        search: search || undefined,
+      };
 
-      const allData = [
-        {
-          id: 1,
-          id_group: 'GK-0001',
-          nama_grup: 'Anggota APKS',
-          jumlah_penerima: 1200,
-          terakhir_diubah: '07:00 25-08-2025',
-          status: 'active',
-        },
-        {
-          id: 2,
-          id_group: 'GK-0002',
-          nama_grup: 'Ketua Kelompok',
-          jumlah_penerima: 100,
-          terakhir_diubah: '07:00 25-08-2025',
-          status: 'active',
-        },
-        ...Array(48)
-          .fill(null)
-          .map((_, index) => ({
-            id: index + 3,
-            id_group: `GK-${String(index + 3).padStart(4, '0')}`,
-            nama_grup: index % 2 === 0 ? 'Anggota APKS' : 'Ketua Kelompok',
-            jumlah_penerima: index % 2 === 0 ? 1200 : 100,
-            terakhir_diubah: '07:00 25-08-2025',
-            status: 'active',
-          })),
-      ];
+      const response = await getGrupKontakList(params);
 
-      const filteredData = allData.filter((item) =>
-        item.nama_grup.toLowerCase().includes(search.toLowerCase())
-      );
+      if (response.data && response.data.data) {
+        const mappedData = response.data.data.results.map((item) => ({
+          id: item.id,
+          id_group: `GK-${String(item.id).padStart(4, '0')}`,
+          nama_grup: item.nama,
+          jumlah_penerima: item.total_anggota,
+          terakhir_diubah: new Date(item.updated_at).toLocaleString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }),
+          deskripsi: item.deskripsi,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        }));
 
-      const startIndex = (page - 1) * page_size;
-      const pagedData = filteredData.slice(startIndex, startIndex + page_size);
-
-      setKontakData(pagedData);
-      setTotalKontak(filteredData.length);
+        setKontakData(mappedData);
+        setTotalKontak(response.data.data.count || 0);
+      } else {
+        setKontakData([]);
+        setTotalKontak(0);
+      }
     } catch (error) {
+      console.error('Error fetching grup kontak data:', error);
       setKontakData([]);
       setTotalKontak(0);
+      toast.error('Gagal memuat data grup kontak');
     } finally {
       setLoading(false);
     }
@@ -107,27 +104,23 @@ const GrupPage = () => {
 
     setIsDeleting(true);
     try {
-      // Simulate API call to delete data
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await deleteGrupKontak(selectedItem.id);
 
-      // Remove item from local state
-      setKontakData((prev) =>
-        prev.filter((item) => item.id !== selectedItem.id)
-      );
-      setTotalKontak((prev) => prev - 1);
+      if (response.status === 200 || response.status === 204) {
+        setKontakData((prev) =>
+          prev.filter((item) => item.id !== selectedItem.id)
+        );
+        setTotalKontak((prev) => prev - 1);
+        toast.success('Data berhasil dihapus');
 
-      console.log('Data berhasil dihapus:', selectedItem);
+        setIsDeleteModalOpen(false);
+        setSelectedItem(null);
 
-      // Close modal and reset selected item
-      setIsDeleteModalOpen(false);
-      setSelectedItem(null);
-
-      // Optionally show success message
-      // toast.success('Data berhasil dihapus');
+        fetchKontakData({ page: currentPage, page_size: pageSize, search });
+      }
     } catch (error) {
       console.error('Error deleting data:', error);
-      // Optionally show error message
-      // toast.error('Gagal menghapus data');
+      toast.error('Gagal menghapus data');
     } finally {
       setIsDeleting(false);
     }
@@ -144,8 +137,7 @@ const GrupPage = () => {
         <button
           className="py-1 text-xs font-bold text-primaryDark1 underline"
           onClick={() => {
-            console.log('View', params.data);
-            // router.push(`/kabar-tani/grup/${params.data.id}`);
+            router.push(`/kabar-tani/grup/${params.data.id}`);
           }}
         >
           LIHAT
@@ -196,9 +188,11 @@ const GrupPage = () => {
     },
   ];
 
-  const autoSizeStrategy = {
-    type: 'fitCellContents',
-  };
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitCellContents',
+    };
+  }, []);
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -207,14 +201,14 @@ const GrupPage = () => {
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
-        itemName={`grup dengan nama "${selectedItem?.nama_grup}"`}
+        itemName={`grup dengan nama ${selectedItem?.nama_grup}`}
         isLoading={isDeleting}
       />
 
       <div className="flex h-full flex-col gap-4">
         {/* Header section */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <Heading level={3} className="text-lg font-bold">
+          <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
             GRUP KONTAK
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
@@ -225,7 +219,7 @@ const GrupPage = () => {
             />
             <Button
               onClick={() => {
-                router.push('/kabar-tani/grup/tambah-grup');
+                router.push('/kabar-tani/grup/tambah');
               }}
             >
               Grup Baru
@@ -238,18 +232,15 @@ const GrupPage = () => {
           <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
-            columnDefs={colDefs}
-            pagination={false}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             rowData={kontakData}
-            domLayout="autoHeight"
-            suppressCellFocus={true}
+            columnDefs={colDefs}
           />
         </div>
 
         {/* Pagination section */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}
@@ -262,7 +253,7 @@ const GrupPage = () => {
               showing: 'Menampilkan',
               of: 'dari',
             }}
-            className="mb-4 text-xs sm:text-sm"
+            className="text-xs sm:text-sm"
           />
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import moment from 'moment';
@@ -9,48 +9,54 @@ import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import Accordion from '@/components/molecules/Accordion';
-import Breadcrumb from '@/components/molecules/Breadcrumbs';
+import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DatePicker from '@/components/molecules/DatePicker';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import Upload from '@/components/molecules/Upload';
+import useReferences from '@/hooks/useReferences';
 
-// Dummy options - replace with actual data or hooks if available
-const jenisKelaminOptions = [
-  { label: 'Laki - Laki', value: 'L' },
-  { label: 'Perempuan', value: 'P' },
-];
-
-const kelompokTaniOptions = [
-  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
-  { label: 'Kelompok Tani 2', value: 'kelompok_2' },
-];
+import {
+  createLampiranPetani,
+  createPetani,
+} from '../../../../services/petani';
 
 const statusKeanggotaanOptions = [
-  { label: 'Aktif', value: 'aktif' },
-  { label: 'Tidak Aktif', value: 'tidak_aktif' },
-];
-
-const statusPernikahanOptions = [
-  { label: 'Kawin', value: 'kawin' },
-  { label: 'Belum Kawin', value: 'belum_kawin' },
-  { label: 'Cerai', value: 'cerai' },
+  { label: 'Aktif', value: true },
+  { label: 'Tidak Aktif', value: false },
 ];
 
 const CreatePetaniTraceability = () => {
   const router = useRouter();
+  const {
+    jenisKelamin,
+    statusPerkawinan,
+    kelompokTani,
+    fetchJenisKelamin,
+    fetchStatusPerkawinan,
+    fetchKelompokTani,
+    loading: referencesLoading,
+  } = useReferences();
 
   const crumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Petani', url: '/traceability/petani' },
-    { name: 'Tambah Petani' },
+    { label: 'HOME', href: '/' },
+    { label: 'PETANI', href: '/traceability/petani' },
+    { label: 'TAMBAH PETANI' },
   ];
 
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
 
+  // Fetch reference data on component mount
+  useEffect(() => {
+    fetchJenisKelamin();
+    fetchStatusPerkawinan();
+    fetchKelompokTani();
+  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani]);
+
   const schemaValidation = Yup.object().shape({
+    id_petani: Yup.string().required('Id Petani harus diisi'),
     nama_petani: Yup.string().required('Nama Petani harus diisi'),
     jenis_kelamin: Yup.string().required('Jenis Kelamin harus diisi'),
     kelompok_tani: Yup.string().required('Kelompok Tani harus diisi'),
@@ -66,11 +72,11 @@ const CreatePetaniTraceability = () => {
     tanggal_keluar: Yup.date().nullable(),
     no_whatsapp: Yup.string().required('No. Whatsapp harus diisi'),
     status_keanggotaan: Yup.string().required('Status Keanggotaan harus diisi'),
-    // File validations can be added if needed
   });
 
   const formik = useFormik({
     initialValues: {
+      id_petani: '',
       nama_petani: '',
       jenis_kelamin: '',
       kelompok_tani: '',
@@ -89,28 +95,82 @@ const CreatePetaniTraceability = () => {
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
+      const formatDate = (val) => (val ? moment(val).format('YYYY-MM-DD') : '');
+
       try {
-        // Prepare form data for submission including files
-        const formData = new FormData();
-        Object.entries(values).forEach(([key, value]) => {
-          if (value instanceof Date) {
-            formData.append(key, moment(value).format('YYYY-MM-DD'));
-          } else {
-            formData.append(key, value);
+        const payload = {
+          id_petani: values.id_petani,
+          nama: values.nama_petani,
+          nama_kelompok: values.kelompok_tani,
+          jns_kelamin: values.jenis_kelamin,
+          no_ktp: values.no_ktp,
+          tempat: values.tempat_lahir,
+          tanggal_lahir: formatDate(values.tanggal_lahir),
+          alamat: values.alamat,
+          no_kk: values.no_kk,
+          status_perkawinan: values.status_pernikahan,
+          no_nib: values.no_nib,
+          tgl_terbit_sppl: formatDate(values.tanggal_terbit_sppl),
+          no_wa: values.no_whatsapp,
+          keanggotaan: values.status_keanggotaan,
+          tanggal_bergabung: formatDate(values.tanggal_bergabung),
+          tanggal_keluar: values.tanggal_keluar
+            ? formatDate(values.tanggal_keluar)
+            : null,
+        };
+
+        const res = await createPetani(payload);
+        const isCreateSuccess =
+          res?.status === 200 || res?.data?.status === 'success';
+
+        if (isCreateSuccess) {
+          const petaniId = res?.data?.data?.id;
+          toast.success(
+            res?.data?.message || 'Data petani berhasil ditambahkan'
+          );
+
+          try {
+            const hasFiles = ktpFile || kkFile || nibFile;
+            if (hasFiles && petaniId) {
+              const lampiranPayload = {
+                petani_id: petaniId,
+                ...(ktpFile && { file_ktp: ktpFile }),
+                ...(kkFile && { file_kk: kkFile }),
+                ...(nibFile && { file_nib: nibFile }),
+              };
+
+              const uploadRes = await createLampiranPetani(lampiranPayload);
+              const isUploadSuccess =
+                uploadRes?.status === 200 ||
+                uploadRes?.data?.status === 'success';
+
+              if (isUploadSuccess) {
+                toast.success('Lampiran berhasil diunggah');
+              } else {
+                toast.error(
+                  uploadRes?.data?.message || 'Gagal mengunggah lampiran'
+                );
+                return;
+              }
+            }
+          } catch (errUpload) {
+            console.error(errUpload);
+            toast.error(
+              errUpload?.response?.data?.message ||
+                'Terjadi kesalahan saat mengunggah lampiran'
+            );
+            return;
           }
-        });
-        if (ktpFile) formData.append('file_ktp', ktpFile);
-        if (kkFile) formData.append('file_kk', kkFile);
-        if (nibFile) formData.append('file_nib', nibFile);
 
-        // TODO: Replace with actual API call
-        // Example: await createPetani(formData);
-
-        toast.success('Data petani berhasil ditambahkan');
-        router.push('/traceability/petani');
+          router.push('/traceability/petani');
+        } else {
+          toast.error(res?.data?.message || 'Gagal menyimpan data petani');
+        }
       } catch (error) {
         console.error(error);
-        toast.error('Gagal menyimpan data petani');
+        toast.error(
+          error?.response?.data?.message || 'Gagal menyimpan data petani'
+        );
       } finally {
         setSubmitting(false);
       }
@@ -118,12 +178,23 @@ const CreatePetaniTraceability = () => {
   });
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <Breadcrumb crumbs={crumbs} />
-      <form onSubmit={formik.handleSubmit} className="space-y-6">
+    <div className="flex w-full flex-col gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0">
+      <BreadcrumbDetail items={crumbs} />
+      <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+              <InputText
+                label="Id Petani"
+                name="id_petani"
+                placeholder="Masukan Id Petani"
+                value={formik.values.id_petani}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
               <InputText
                 label="Nama Petani"
                 name="nama_petani"
@@ -139,7 +210,7 @@ const CreatePetaniTraceability = () => {
                 label="Jenis Kelamin"
                 name="jenis_kelamin"
                 placeholder="Pilih Jenis Kelamin"
-                options={jenisKelaminOptions}
+                options={jenisKelamin}
                 value={formik.values.jenis_kelamin}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -147,11 +218,13 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
               <Select
                 label="Kelompok Tani"
                 name="kelompok_tani"
                 placeholder="Pilih Kelompok Tani"
-                options={kelompokTaniOptions}
+                options={kelompokTani}
                 value={formik.values.kelompok_tani}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -159,8 +232,6 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="Alamat"
                 name="alamat"
@@ -183,6 +254,8 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="Tempat Lahir"
                 name="tempat_lahir"
@@ -194,18 +267,18 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <DatePicker
                 label="Tanggal Lahir"
                 name="tanggal_lahir"
                 placeholder="Masukan Tanggal Lahir"
                 value={
                   formik.values.tanggal_lahir
-                    ? moment(formik.values.tanggal_lahir).format('DD/MM/YYYY')
+                    ? moment(formik.values.tanggal_lahir, 'YYYY-MM-DD').format(
+                        'DD-MM-YYYY'
+                      )
                     : ''
                 }
-                onChange={(e) => formik.setFieldValue('tanggal_lahir', e)}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
@@ -222,11 +295,13 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
               <Select
                 label="Status Pernikahan"
                 name="status_pernikahan"
                 placeholder="Pilih Status Pernikahan"
-                options={statusPernikahanOptions}
+                options={statusPerkawinan}
                 value={formik.values.status_pernikahan}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -234,8 +309,6 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
-            </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="No. NIB"
                 name="no_nib"
@@ -253,46 +326,50 @@ const CreatePetaniTraceability = () => {
                 placeholder="Masukan Tanggal Terbit SPPL"
                 value={
                   formik.values.tanggal_terbit_sppl
-                    ? moment(formik.values.tanggal_terbit_sppl).format(
-                        'DD/MM/YYYY'
-                      )
+                    ? moment(
+                        formik.values.tanggal_terbit_sppl,
+                        'YYYY-MM-DD'
+                      ).format('DD-MM-YYYY')
                     : ''
                 }
-                onChange={(e) => formik.setFieldValue('tanggal_terbit_sppl', e)}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-              />
-              <DatePicker
-                label="Tanggal Bergabung"
-                name="tanggal_bergabung"
-                placeholder="Masukan Tanggal Bergabung"
-                value={
-                  formik.values.tanggal_bergabung
-                    ? moment(formik.values.tanggal_bergabung).format(
-                        'DD/MM/YYYY'
-                      )
-                    : ''
-                }
-                onChange={(e) => formik.setFieldValue('tanggal_bergabung', e)}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-3 gap-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
+              <DatePicker
+                label="Tanggal Bergabung"
+                name="tanggal_bergabung"
+                placeholder="Masukan Tanggal Bergabung"
+                value={
+                  formik.values.tanggal_bergabung
+                    ? moment(
+                        formik.values.tanggal_bergabung,
+                        'YYYY-MM-DD'
+                      ).format('DD-MM-YYYY')
+                    : ''
+                }
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
               <DatePicker
                 label="Tanggal Keluar"
                 name="tanggal_keluar"
                 placeholder="Masukan Tanggal Keluar"
                 value={
                   formik.values.tanggal_keluar
-                    ? moment(formik.values.tanggal_keluar).format('DD/MM/YYYY')
+                    ? moment(formik.values.tanggal_keluar, 'YYYY-MM-DD').format(
+                        'DD-MM-YYYY'
+                      )
                     : ''
                 }
-                onChange={(e) => formik.setFieldValue('tanggal_keluar', e)}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
@@ -308,6 +385,8 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-3 gap-6 py-4">
               <Select
                 label="Status Keanggotaan"
                 name="status_keanggotaan"
@@ -326,7 +405,7 @@ const CreatePetaniTraceability = () => {
 
         <Accordion defaultIsOpen title="LAMPIRAN IDENTITAS">
           <>
-            <div className="grid grid-cols-3 gap-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
               <Upload
                 label="KTP"
                 file={
@@ -390,16 +469,20 @@ const CreatePetaniTraceability = () => {
           </>
         </Accordion>
 
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 px-4 sm:px-0">
           <Button
             type="button"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             onClick={() => router.back()}
             isLoading={formik.isSubmitting}
           >
             Batalkan
           </Button>
-          <Button type="submit" isLoading={formik.isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto"
+            isLoading={formik.isSubmitting || referencesLoading}
+          >
             Simpan
           </Button>
         </div>

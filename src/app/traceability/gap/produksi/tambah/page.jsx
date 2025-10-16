@@ -1,0 +1,170 @@
+"use client";
+
+import { useMemo,useState } from "react";
+import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
+
+import Button from "@/components/atoms/Button";
+import Heading from "@/components/atoms/Typography/Heading";
+import BreadcrumbDetail from "@/components/molecules/BreadcrumbDetail";
+import InputText from "@/components/molecules/InputText";
+import Select from "@/components/molecules/Select";
+import useYearOptions from "@/hooks/useYearOptions";
+
+const MONTHS = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
+const parseKgInput = (v) => {
+  const num = Number(String(v ?? "").replace(/\D/g, ""));
+  return Number.isNaN(num) ? 0 : num;
+};
+
+const formatKgInput = (v) => {
+  const num = Number(String(v ?? "").replace(/\D/g, ""));
+  return num.toLocaleString("id-ID");
+};
+
+const validationSchema = Yup.object({
+  tahun: Yup.number()
+    .typeError("Tahun wajib dipilih")
+    .required("Tahun wajib dipilih"),
+  bulan: Yup.object(
+    MONTHS.reduce((acc, m) => {
+      acc[m] = Yup.string()
+        .required("Wajib diisi")
+        .test("is-number", "Harus angka", (val) => {
+          const n = parseKgInput(val);
+          return !Number.isNaN(n) && n >= 0;
+        });
+      return acc;
+    }, {})
+  ),
+});
+
+export default function TambahProduksiPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const crumbs = [
+    { label: "HOME", href: "/" },
+    { label: "PRODUKSI", href: "/traceability/gap/produksi" },
+    { label: "TAMBAH TAHUN PRODUKSI" },
+  ];
+
+  const yearOptions = useYearOptions();
+
+  const initialMonths = useMemo(
+    () =>
+      MONTHS.reduce((acc, m) => {
+        acc[m] = "";
+        return acc;
+      }, {}),
+    []
+  );
+
+  const formik = useFormik({
+    initialValues: {
+      tahun: "",
+      bulan: initialMonths,
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      try {
+        const payload = {
+          tahun: values.tahun,
+          bulan: Object.fromEntries(
+            MONTHS.map((m) => [m, parseKgInput(values?.bulan?.[m])])
+          ),
+        };
+        console.log("Payload:", payload);
+        toast.success("Data produksi berhasil disimpan");
+        router.push("/traceability/gap/produksi");
+      } catch (error) {
+        toast.error("Gagal menyimpan data produksi");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+  });
+
+  const handleCancel = () => {
+    router.push("/traceability/gap/produksi");
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0">
+      <BreadcrumbDetail items={crumbs} />
+
+      <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="rounded-[4px] border border-gray-300 bg-white">
+          <div className="border-b border-gray-200 p-4">
+            <Heading level={3} className="text-sm sm:text-base text-gray-600">
+              HASIL PRODUKSI
+            </Heading>
+          </div>
+
+          <div className="p-4 sm:p-6">
+            <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <Select
+                label="Tahun"
+                name="tahun"
+                placeholder="Pilih Tahun"
+                options={yearOptions}
+                value={formik.values.tahun}
+                onChange={(value) => formik.setFieldValue("tahun", value)}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+                selectClassName="!min-h-[30px] !h-[30px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-3">
+              {MONTHS.map((m) => (
+                <InputText
+                  key={`bulan-${m}`}
+                  label={m}
+                  name={`bulan.${m}`}
+                  placeholder="0"
+                  value={formik.values.bulan[m]}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  errors={formik.errors}
+                  touched={formik.touched}
+                  type="string"
+                  formatter={formatKgInput}
+                  suffix="Kg"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="danger" onClick={handleCancel} disabled={isLoading}>
+            Batalkan
+          </Button>
+          <Button type="submit" isLoading={isLoading}>
+            Simpan
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

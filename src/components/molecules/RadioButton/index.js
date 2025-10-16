@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
+
 import Label from '@/components/atoms/Label';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
+
 import styles from './RadioButton.module.css';
 
 const RadioButton = ({

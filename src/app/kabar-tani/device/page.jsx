@@ -1,20 +1,29 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import BaseModal from '@/components/molecules/Modal';
-import Heading from '@/components/atoms/Typography/Heading';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import Button from '@/components/atoms/Button';
-import SectionLoading from '@/components/molecules/SectionLoading';
-import Pagination from '@/components/organisms/Pagination';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
-import InputText from '@/components/molecules/InputText';
 import { useFormik } from 'formik';
+import QRCode from 'qrcode';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
-import QRCode from 'qrcode';
+
+import Button from '@/components/atoms/Button';
+import Heading from '@/components/atoms/Typography/Heading';
+import Paragraph from '@/components/atoms/Typography/Paragraph';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import InputText from '@/components/molecules/InputText';
+import BaseModal from '@/components/molecules/Modal';
+import SectionLoading from '@/components/molecules/SectionLoading';
+import Pagination from '@/components/organisms/Pagination';
+import {
+  createDevice as createDeviceService,
+  deleteDevice as deleteDeviceService,
+  getDeviceDetail,
+  getDeviceList,
+  updateDevice as updateDeviceService,
+} from '@/services/device';
+import WhatsAppService from '@/services/whatsapp';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -30,49 +39,41 @@ const DevicePage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // QR Code Modal States
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailData, setDetailData] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
   const fetchDeviceData = async ({ page, page_size, search }) => {
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const allData = [
-        {
-          id: 1,
-          id_device: 'DV-0001',
-          nama_device: 'Fajar Sukmara Device',
-          no_handphone: '081234567890',
-          status: 'Terhubung',
-        },
-        {
-          id: 2,
-          id_device: 'DV-0002',
-          nama_device: 'Fajar Sukmara Device',
-          no_handphone: '081234567890',
-          status: 'Tidak Terhubung',
-        },
-        ...Array(48)
-          .fill(null)
-          .map((_, index) => ({
-            id: index + 3,
-            id_device: `DV-${String(index + 3).padStart(4, '0')}`,
-            nama_device: 'Fajar Sukmara Device',
-            no_handphone: '081234567890',
-            status: 'Terhubung',
-          })),
-      ];
-      const filteredData = allData.filter((item) =>
-        item.nama_device.toLowerCase().includes(search.toLowerCase())
-      );
-      const startIndex = (page - 1) * page_size;
-      const pagedData = filteredData.slice(startIndex, startIndex + page_size);
-      setDeviceData(pagedData);
-      setTotalDevice(filteredData.length);
+      const params = new URLSearchParams({
+        page: String(page),
+        page_size: String(page_size),
+        ...(search ? { search } : {}),
+      });
+
+      const res = await getDeviceList(params);
+      const data = res?.data?.data || res?.data;
+      const results = data?.results || [];
+
+      const mapped = results.map((item) => ({
+        id: item.id,
+        id_device: item.id_device,
+        nama_device: item.nama,
+        no_handphone: item.no_wa,
+        status: item.terhubung ? 'Terhubung' : 'Tidak Terhubung',
+      }));
+
+      setDeviceData(mapped);
+      setTotalDevice(data?.count ?? mapped.length);
     } catch (error) {
+      console.error('Error fetching devices:', error);
+      toast.error(error?.response?.data?.message || 'Gagal memuat data device');
       setDeviceData([]);
       setTotalDevice(0);
     } finally {
@@ -102,12 +103,8 @@ const DevicePage = () => {
     if (!selectedItem) return;
     setIsDeleting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setDeviceData((prev) =>
-        prev.filter((item) => item.id !== selectedItem.id)
-      );
-      setTotalDevice((prev) => prev - 1);
-      console.log('Data berhasil dihapus:', selectedItem);
+      await deleteDeviceService(selectedItem.id);
+      await fetchDeviceData({ page: currentPage, page_size: pageSize, search });
       setIsDeleteModalOpen(false);
       setSelectedItem(null);
       toast.success('Data berhasil dihapus');
@@ -124,38 +121,68 @@ const DevicePage = () => {
     setSelectedItem(null);
   };
 
-  // QR Code Functions
   const generateQRCode = async (deviceData) => {
     setIsGeneratingQR(true);
     try {
-      // Create QR code data (you can customize this based on your needs)
-      const qrData = {
-        device_id: deviceData.id_device,
-        nama_device: deviceData.nama_device,
-        no_handphone: deviceData.no_handphone,
-        timestamp: new Date().toISOString(),
-        // Add any other data needed for device connection
-        connection_url: `https://yourapp.com/connect/${deviceData.id_device}`,
-      };
-
-      const qrString = JSON.stringify(qrData);
-
-      // Generate QR code
-      const qrDataUrl = await QRCode.toDataURL(qrString, {
-        width: 300,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
-      });
-
-      setQrCodeDataUrl(qrDataUrl);
+      // Use Whacenter QR endpoint which returns an image
+      const qrUrl = WhatsAppService.getWhacenterQRCodeUrl(deviceData.id_device);
+      setQrCodeDataUrl(qrUrl);
       setSelectedItem(deviceData);
       setIsQRModalOpen(true);
     } catch (error) {
-      console.error('Error generating QR code:', error);
-      toast.error('Gagal generate QR code');
+      console.error('Error opening QR code:', error);
+      toast.error('Gagal membuka QR code');
+    } finally {
+      setIsGeneratingQR(false);
+    }
+  };
+
+  const checkDeviceStatusWhacenter = async (deviceId) => {
+    try {
+      const res = await WhatsAppService.getWhacenterDeviceStatus(deviceId);
+      const data = res?.data || res;
+      const statusVal =
+        typeof data?.status === 'string'
+          ? ['online', 'connected', 'true'].includes(data.status.toLowerCase())
+          : data?.status ?? data?.connected ?? false;
+
+      toast[statusVal ? 'success' : 'info'](
+        statusVal ? 'Perangkat terhubung' : 'Perangkat belum terhubung'
+      );
+
+      // Update row status locally
+      setDeviceData((prev) =>
+        prev.map((d) =>
+          d.id_device === deviceId
+            ? { ...d, status: statusVal ? 'Terhubung' : 'Tidak Terhubung' }
+            : d
+        )
+      );
+    } catch (error) {
+      console.error('Gagal cek status perangkat:', error);
+      toast.error('Gagal cek status perangkat');
+    }
+  };
+
+  const relogDeviceWhacenter = async (device) => {
+    if (!device?.id_device) {
+      toast.error('ID device tidak ditemukan');
+      return;
+    }
+    try {
+      setIsGeneratingQR(true);
+      // Panggil relog untuk memaksa Whacenter membuat sesi baru
+      await WhatsAppService.relogWhacenterDevice(device.id_device);
+      // Tunggu sebentar agar QR siap di endpoint
+      await new Promise((r) => setTimeout(r, 1500));
+      const qrUrl = `${WhatsAppService.getWhacenterQRCodeUrl(device.id_device)}&_=${Date.now()}`;
+      setQrCodeDataUrl(qrUrl);
+      setSelectedItem(device);
+      setIsQRModalOpen(true);
+      toast.info('QR siap dipindai. Buka aplikasi WhatsApp untuk scan.');
+    } catch (error) {
+      console.error('Gagal relog perangkat:', error);
+      toast.error('Gagal melakukan relog perangkat');
     } finally {
       setIsGeneratingQR(false);
     }
@@ -165,19 +192,6 @@ const DevicePage = () => {
     setIsQRModalOpen(false);
     setQrCodeDataUrl('');
     setSelectedItem(null);
-  };
-
-  const downloadQRCode = () => {
-    if (!qrCodeDataUrl || !selectedItem) return;
-
-    const link = document.createElement('a');
-    link.download = `QR_${selectedItem.id_device}_${selectedItem.nama_device}.png`;
-    link.href = qrCodeDataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast.success('QR Code berhasil didownload');
   };
 
   const actionsCellRenderer = (params) => {
@@ -191,12 +205,20 @@ const DevicePage = () => {
           {isGeneratingQR ? 'LOADING...' : 'SCAN QR'}
         </button>
         <button
+          className="py-1 text-xs font-bold text-primaryDark1 underline"
+          onClick={() => checkDeviceStatusWhacenter(params.data.id_device)}
+        >
+          CEK STATUS
+        </button>
+        <button
+          className="py-1 text-xs font-bold text-primaryDark1 underline"
+          onClick={() => openDetailModal(params.data.id)}
+        >
+          EDIT
+        </button>
+        <button
           className="py-1 text-xs font-bold text-green8 underline"
-          onClick={() => {
-            router.push(
-              `/kabar-tani/blast-pesan/${params.data.id}/detail-pesan`
-            );
-          }}
+          onClick={() => relogDeviceWhacenter(params.data)}
         >
           RELOG
         </button>
@@ -215,7 +237,7 @@ const DevicePage = () => {
       headerName: '',
       cellRenderer: actionsCellRenderer,
       flex: 1.5,
-      minWidth: 150,
+      minWidth: 180,
       sortable: false,
       filter: false,
     },
@@ -260,9 +282,11 @@ const DevicePage = () => {
     },
   ];
 
-  const autoSizeStrategy = {
-    type: 'fitCellContents',
-  };
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitCellContents',
+    };
+  }, []);
 
   const schemaValidation = Yup.object().shape({
     nama_device: Yup.string().required('Nama device harus diisi'),
@@ -287,30 +311,24 @@ const DevicePage = () => {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
-        const deviceData = {
-          nama_device: values.nama_device,
-          no_handphone: values.no_handphone,
-        };
-        console.log('Saving device:', deviceData);
-
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Add new device to the list
-        const newDevice = {
-          id: Date.now(),
-          id_device: `DV-${String(deviceData.length + 1).padStart(4, '0')}`,
-          nama_device: deviceData.nama_device,
-          no_handphone: deviceData.no_handphone,
-          status: 'Tidak Terhubung',
+        const payload = {
+          nama: values.nama_device,
+          id_device:
+            typeof crypto !== 'undefined' && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}`,
+          no_wa: values.no_handphone,
+          terhubung: false,
         };
 
-        setDeviceData((prev) => [newDevice, ...prev]);
-        setTotalDevice((prev) => prev + 1);
-
-        setIsOpen(false);
-        resetForm();
-        toast.success('Berhasil menambahkan device');
+        const res = await createDeviceService(payload);
+        if (res?.status && res.status >= 200 && res.status < 300) {
+          toast.success('Berhasil menambahkan device');
+          setIsOpen(false);
+          resetForm();
+          setCurrentPage(1);
+          await fetchDeviceData({ page: 1, page_size: pageSize, search });
+        }
       } catch (error) {
         toast.error(error?.response?.data?.message || 'Terjadi kesalahan');
         console.error(error);
@@ -325,8 +343,176 @@ const DevicePage = () => {
     resetForm();
   };
 
+  const openDetailModal = async (id) => {
+    setIsLoadingDetail(true);
+    setIsEditMode(false);
+    try {
+      const res = await getDeviceDetail(id);
+      const data = res?.data?.data || res?.data || {};
+      setDetailData(data);
+      setIsDetailModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching device detail:', error);
+      toast.error(
+        error?.response?.data?.message || 'Gagal memuat detail device'
+      );
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
+
+  const {
+    handleSubmit: handleDetailSubmit,
+    values: detailValues,
+    touched: detailTouched,
+    errors: detailErrors,
+    handleBlur: handleDetailBlur,
+    handleChange: handleDetailChange,
+    isSubmitting: isDetailSubmitting,
+    resetForm: resetDetailForm,
+  } = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      nama_device: detailData?.nama || '',
+      no_handphone: detailData?.no_wa || '',
+      id_device: detailData?.id_device || '',
+    },
+    validationSchema: schemaValidation,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        setSubmitting(true);
+        setIsUpdating(true);
+        const payload = {
+          nama: values.nama_device,
+          no_wa: values.no_handphone,
+          id_device: detailData?.id_device,
+          terhubung: detailData?.terhubung ?? false,
+        };
+        const res = await updateDeviceService(detailData?.id, payload);
+        if (res?.status && res.status >= 200 && res.status < 300) {
+          toast.success('Berhasil mengubah device');
+          setIsEditMode(false);
+          await fetchDeviceData({
+            page: currentPage,
+            page_size: pageSize,
+            search,
+          });
+          const refreshed = await getDeviceDetail(detailData?.id);
+          const refreshedData = refreshed?.data?.data || refreshed?.data || {};
+          setDetailData(refreshedData);
+          resetDetailForm({
+            values: {
+              nama_device: refreshedData?.nama || '',
+              no_handphone: refreshedData?.no_wa || '',
+              id_device: refreshedData?.id_device || '',
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Error updating device:', error);
+        toast.error(error?.response?.data?.message || 'Gagal mengubah data');
+      } finally {
+        setIsUpdating(false);
+        setSubmitting(false);
+      }
+    },
+  });
+
+  const handleDetailClose = () => {
+    setIsDetailModalOpen(false);
+    setIsEditMode(false);
+    setDetailData(null);
+    resetDetailForm();
+  };
+
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
+      {/* Detail/Edit Modal */}
+      <BaseModal
+        open={isDetailModalOpen}
+        setOpen={handleDetailClose}
+        isShowLabel={false}
+        isShowCloseIcon={false}
+        className="flex max-w-md flex-col"
+      >
+        <form onSubmit={handleDetailSubmit}>
+          <Heading
+            level={4}
+            className="text-lg font-bold text-gray-800 sm:text-xl md:text-2xl"
+          >
+            {isEditMode ? 'UBAH DATA DEVICE' : 'DETAIL DEVICE'}
+          </Heading>
+
+          {isLoadingDetail ? (
+            <div className="my-6 flex items-center justify-center">
+              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+            </div>
+          ) : (
+            <div className="my-4 flex flex-col gap-4">
+              <InputText
+                label={'Nama Device'}
+                name="nama_device"
+                placeholder="Masukan nama device"
+                value={detailValues.nama_device}
+                onChange={handleDetailChange}
+                onBlur={handleDetailBlur}
+                errors={detailErrors}
+                touched={detailTouched}
+                disabled={!isEditMode}
+              />
+              <InputText
+                label={'No. Whatsapp'}
+                name="no_handphone"
+                placeholder="masukan no. whatsapp"
+                value={detailValues.no_handphone}
+                onChange={handleDetailChange}
+                onBlur={handleDetailBlur}
+                errors={detailErrors}
+                touched={detailTouched}
+                disabled={!isEditMode}
+              />
+              <InputText
+                label={'Id Device'}
+                name="id_device"
+                placeholder="id device"
+                value={detailValues.id_device}
+                onChange={handleDetailChange}
+                onBlur={handleDetailBlur}
+                errors={detailErrors}
+                touched={detailTouched}
+                disabled={true}
+              />
+            </div>
+          )}
+
+          <div className="flex justify-between gap-3">
+            <button
+              type="button"
+              className="py-1 text-xs font-bold text-primaryDark1 underline"
+              onClick={() => setIsEditMode((prev) => !prev)}
+            >
+              UBAH DATA
+            </button>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="danger"
+                onClick={handleDetailClose}
+              >
+                Tutup
+              </Button>
+              {isEditMode && (
+                <Button
+                  type="submit"
+                  disabled={isDetailSubmitting || isUpdating}
+                >
+                  {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </Button>
+              )}
+            </div>
+          </div>
+        </form>
+      </BaseModal>
       {/* Add Device Modal */}
       <BaseModal
         open={isOpen}
@@ -421,14 +607,14 @@ const DevicePage = () => {
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
-        itemName={`Apakah Anda ingin menghapus device "${selectedItem?.nama_device}"`}
+        itemName={`Apakah Anda ingin menghapus device ${selectedItem?.nama_device}`}
         isLoading={isDeleting}
       />
 
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="flex flex-col gap-1">
-            <Heading level={3} className="text-lg font-bold">
+            <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
               DEVICE
             </Heading>
             <Paragraph level={3}>
@@ -453,17 +639,14 @@ const DevicePage = () => {
           <AgGridReact
             loading={loading}
             columnDefs={colDefs}
-            pagination={false}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             rowData={deviceData}
-            domLayout="autoHeight"
-            suppressCellFocus={true}
           />
         </div>
 
         {/* Pagination section */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}

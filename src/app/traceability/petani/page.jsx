@@ -10,28 +10,26 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
-import ModalConfirmDeletePekebun from '@/components/organisms/Modal/ModalConfirmDeletePekebun';
 import Pagination from '@/components/organisms/Pagination';
 
-// Register all Community features
+import useReferences from '../../../hooks/useReferences';
+import { deletePetani, getListPetani } from '../../../services/petani';
+
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-  { label: 'Kelompok C', value: 'kelompok_c' },
-];
-
 const keanggotaanOptions = [
-  { label: 'Aktif', value: 'aktif' },
-  { label: 'Tidak Aktif', value: 'tidak_aktif' },
+  { label: 'Aktif', value: true },
+  { label: 'Tidak Aktif', value: false },
 ];
 
 const PetaniPage = () => {
   const router = useRouter();
 
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
   const [selectedKeanggotaan, setSelectedKeanggotaan] = useState(null);
@@ -47,39 +45,75 @@ const PetaniPage = () => {
     useState(false);
   const [selectedPetaniToDelete, setSelectedPetaniToDelete] = useState(null);
 
-  // Placeholder fetch function - replace with real API call
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+
+  const kelompokOptions = useMemo(() => {
+    return (
+      kelompokTani?.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })) || []
+    );
+  }, [kelompokTani]);
+
   const fetchPetaniData = async ({
     page,
     page_size,
     search,
-    kelompok,
     keanggotaan,
+    kelompok_tani,
   }) => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const params = {
+        page,
+        page_size,
+        ...(search && { search }),
+        ...(keanggotaan !== null &&
+          keanggotaan !== undefined && { keanggotaan }),
+        ...(kelompok_tani && { kelompok_tani }),
+      };
 
-      // Mock data
-      const mockData = Array.from({ length: page_size }, (_, i) => {
-        const id = `001-PTN-001-${(page - 1) * page_size + i + 1}`;
-        return {
-          id_petani: id,
-          nama_petani: 'Agustinus Nery',
-          jenis_kelamin: 'Laki - Laki',
-          kelompok: 'Bepekaek Besamo',
-          no_ktp: '6109010805890003',
-          no_kk: '610901171110021',
-          status_pernikahan: 'Kawin',
-          no_nib: '2910210022444',
-        };
-      });
+      const response = await getListPetani(params);
 
-      setPetaniData(mockData);
-      setTotalPetani(500); // Mock total count
+      if (response?.status === 200) {
+        const data = response?.data?.data;
+        const results = data?.results || [];
+
+        const mapped = results.map((item) => ({
+          id: item?.id,
+          id_petani: item?.id_petani,
+          nama_petani: item?.nama,
+          jenis_kelamin:
+            item?.jns_kelamin === '1'
+              ? 'Laki - Laki'
+              : item?.jns_kelamin === '2'
+              ? 'Perempuan'
+              : '-',
+          kelompok: item?.nama_kelompok ?? '-',
+          no_ktp: item?.no_ktp ?? '-',
+          no_kk: item?.no_kk ?? '-',
+          status_pernikahan:
+            item?.status_perkawinan === '1'
+              ? 'Belum Kawin'
+              : item?.status_perkawinan === '2'
+              ? 'Kawin'
+              : '-',
+          no_nib: item?.no_nib ?? '-',
+        }));
+
+        setPetaniData(mapped);
+        setTotalPetani(Number(data?.count || 0));
+      } else {
+        setPetaniData([]);
+        setTotalPetani(0);
+      }
     } catch (error) {
-      toast.error('Gagal memuat data petani');
+      toast.error(error?.response?.data?.message || 'Gagal memuat data petani');
+      setPetaniData([]);
+      setTotalPetani(0);
     } finally {
       setLoading(false);
     }
@@ -90,10 +124,10 @@ const PetaniPage = () => {
       page: currentPage,
       page_size: pageSize,
       search,
-      kelompok: selectedKelompok,
       keanggotaan: selectedKeanggotaan,
+      kelompok_tani: selectedKelompok,
     });
-  }, [currentPage, pageSize, search, selectedKelompok, selectedKeanggotaan]);
+  }, [currentPage, pageSize, search, selectedKeanggotaan, selectedKelompok]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -123,7 +157,7 @@ const PetaniPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/petani/${data.id_petani}/detail`);
+    router.push(`/traceability/petani/${data.id}`);
   };
 
   const handleDeleteClicked = (data) => {
@@ -135,13 +169,13 @@ const PetaniPage = () => {
     return (
       <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
         <div
-          className="uppercase underline text-primary font-bold text-[10px] sm:text-[12px] cursor-pointer hover:text-primary/80"
+          className="cursor-pointer text-[10px] font-bold uppercase text-primary underline hover:text-primary/80 sm:text-[12px]"
           onClick={() => handleLihatClicked(e.data)}
         >
           LIHAT
         </div>
         <div
-          className="uppercase underline text-red-500 font-bold text-[10px] sm:text-[12px] cursor-pointer hover:text-red-600"
+          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
           onClick={() => handleDeleteClicked(e.data)}
         >
           HAPUS
@@ -212,38 +246,54 @@ const PetaniPage = () => {
   }, []);
 
   const handleDeletePetani = async () => {
-    try {
-      // TODO: Replace with real delete API call
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setShowModalConfirmDeletePetani(false);
-      toast.success('Data petani berhasil dihapus');
-      fetchPetaniData({
-        page: currentPage,
-        page_size: pageSize,
-        search,
-        kelompok: selectedKelompok,
-        keanggotaan: selectedKeanggotaan,
-      });
-    } catch (error) {
-      toast.error('Data petani gagal dihapus');
+    if (!selectedPetaniToDelete?.id) {
+      toast.error('ID petani tidak ditemukan');
+      return;
     }
+
+    try {
+      const res = await deletePetani(selectedPetaniToDelete.id);
+      if (
+        res?.data?.status === 'success' ||
+        res?.status === 200 ||
+        res?.status === 204
+      ) {
+        toast.success('Data petani berhasil dihapus');
+        setShowModalConfirmDeletePetani(false);
+        fetchPetaniData({
+          page: currentPage,
+          page_size: pageSize,
+          search,
+        });
+      } else {
+        toast.error(res?.data?.message || 'Data petani gagal dihapus');
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || 'Data petani gagal dihapus'
+      );
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowModalConfirmDeletePetani(false);
+    setSelectedPetaniToDelete(null);
   };
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4">
+        <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
           {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
               DATA PETANI
             </Heading>
 
             {/* Controls Container */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
               {/* Search and Filters - Responsive Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row items-center gap-2 w-full sm:w-auto">
+              <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
                   placeholder="Cari petani"
@@ -268,16 +318,15 @@ const PetaniPage = () => {
               </div>
 
               {/* Action Buttons - Responsive */}
-              <div className="flex flex-row items-center gap-2 justify-end">
+              <div className="flex flex-row items-center justify-end gap-2">
                 <Button
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
                 />
                 <Button
-                  onClick={() => router.push('/petani/tambah-petani')}
-                  className="text-xs sm:text-sm whitespace-nowrap"
+                  onClick={() => router.push('/traceability/petani/tambah')}
+                  className="whitespace-nowrap text-xs sm:text-sm"
                 >
                   Tambah Petani
                 </Button>
@@ -288,6 +337,7 @@ const PetaniPage = () => {
           {/* Table Container - Responsive Height */}
         </div>
         <div className="relative w-full flex-1 ">
+          <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."
@@ -314,12 +364,12 @@ const PetaniPage = () => {
         </div>
       </div>
 
-      <ModalConfirmDeletePekebun
-        open={showModalConfirmDeletePetani}
-        setOpen={setShowModalConfirmDeletePetani}
-        namaPekebun={selectedPetaniToDelete?.nama_petani}
-        jumlahKebun={null}
-        handleSubmit={handleDeletePetani}
+      <DeleteConfirmationModal
+        isOpen={showModalConfirmDeletePetani}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeletePetani}
+        itemName={`petani dengan nama ${selectedPetaniToDelete?.nama_petani}`}
+        isLoading={loading}
       />
     </div>
   );

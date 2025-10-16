@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback,useEffect, useMemo, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
@@ -54,7 +54,12 @@ const Select = ({
   const [isAddOption, setIsAddOption] = useState(false);
   const dropdownRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+    placement: 'bottom',
+  });
   const [isInsideModal, setIsInsideModal] = useState(false);
   const searchInputRef = useRef(null);
   const formAddOptionRef = useRef(null);
@@ -64,6 +69,110 @@ const Select = ({
       setSelectedValue(value);
     }
   }, [value]);
+
+  const getDropdownZIndex = useCallback(() => {
+    const modalEl = document?.getElementById('modal');
+    if (modalEl) {
+      return 10000;
+    } else {
+      return 1000;
+    }
+  }, []);
+
+  const calculateDropdownPosition = useCallback(() => {
+    if (!dropdownRef.current) return;
+
+    const modalEl = document?.getElementById('modal');
+    const selectRect = dropdownRef.current.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const modalHeight = modalEl?.clientHeight;
+    const spaceBelow =
+      (modalEl ? modalHeight : windowHeight) - selectRect.bottom;
+    const dropdownHeight = 200;
+
+    const placement = spaceBelow < dropdownHeight ? 'top' : 'bottom';
+
+    const newPosition = {
+      top:
+        placement === 'top'
+          ? selectRect.top - dropdownHeight
+          : selectRect.bottom,
+      left: selectRect.left,
+      width: selectRect.width,
+      placement,
+    };
+
+    setDropdownPosition(newPosition);
+    setIsInsideModal(!!modalEl);
+  }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    let scrollTimer = null;
+
+    const handleScroll = (e) => {
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+
+      const dropdownElement = document.querySelector(
+        '[data-testid="dropdown-menu"]'
+      );
+      const selectElement = dropdownRef.current;
+
+      if (
+        dropdownElement &&
+        selectElement &&
+        !dropdownElement.contains(e.target) &&
+        !selectElement.contains(e.target)
+      ) {
+        setIsDropdownOpen(false);
+        return;
+      }
+
+      scrollTimer = setTimeout(() => {
+        calculateDropdownPosition();
+      }, 10);
+    };
+
+    const handleResize = () => {
+      calculateDropdownPosition();
+    };
+
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('scroll', handleScroll, true);
+
+    calculateDropdownPosition();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('scroll', handleScroll, true);
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+    };
+  }, [isDropdownOpen, calculateDropdownPosition]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isDropdownOpen) {
+        setIsDropdownOpen(false);
+        setSearchTerm('');
+        setIsAddOption(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDropdownOpen]);
 
   useTouchOutside(dropdownRef, () => {
     setSearchTerm('');
@@ -81,21 +190,6 @@ const Select = ({
     }
   };
 
-  useEffect(() => {
-    if (isDropdownOpen) {
-      const modalEl = document?.getElementById('modal');
-      const selectRect = dropdownRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const modalHeight = modalEl?.clientHeight;
-      const spaceBelow = (modalEl ? modalHeight : windowHeight) - selectRect.bottom;
-      const dropdownHeight = document?.querySelector('[data-testid="dropdown-menu"]')?.clientHeight;
-      const dropdownPosition = spaceBelow < dropdownHeight ? 'top' : 'bottom';
-
-      setDropdownPosition(dropdownPosition);
-      setIsInsideModal(modalEl);
-    }
-  }, [isDropdownOpen]);
-
   const handleOptionChange = (optionValue) => {
     setSelectedValue(optionValue);
     onChange({ target: { name, value: optionValue } });
@@ -104,14 +198,18 @@ const Select = ({
   };
 
   const validOptions = useMemo(() => {
-    return options?.filter((option) => option.label && option.label.trim() != '');
+    return options?.filter(
+      (option) => option.label && option.label.trim() != ''
+    );
   }, [options]);
 
   const selectedOption = useMemo(() => {
     return validOptions.find((option) => selectedValue == option.value);
   }, [validOptions, selectedValue]);
 
-  const filteredOptions = validOptions.filter((item) => item.label.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredOptions = validOptions.filter((item) =>
+    item.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -156,9 +254,20 @@ const Select = ({
   };
 
   return (
-    <div className={cn('flex flex-col gap-1', !isInsideModal && 'relative', block && 'w-full', containerClassName)}>
+    <div
+      className={cn(
+        'flex flex-col gap-1',
+        !isInsideModal && 'relative',
+        block && 'w-full',
+        containerClassName
+      )}
+    >
       {label && (
-        <Label data-testid='label-container' className=' text-[12px] font-bold text-gray-500' isRequired={isRequired}>
+        <Label
+          data-testid="label-container"
+          className=" text-[12px] font-bold text-gray-500"
+          isRequired={isRequired}
+        >
           {label}
         </Label>
       )}
@@ -166,14 +275,16 @@ const Select = ({
         <div
           aria-disabled={disabled}
           tabIndex={0}
-          data-testid='select-field'
+          data-testid="select-field"
           onClick={handleSelectFieldClick}
           onBlur={handleBlur}
           className={cn(
             ' flex min-h-[40px] w-full cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[6px] border bg-white px-3 py-2',
             {
-              'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7': disabled,
-              'hover:border-blue6 focus:border-blue6 focus:outline-none': !disabled,
+              'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7':
+                disabled,
+              'hover:border-blue6 focus:border-blue6 focus:outline-none':
+                !disabled,
               'border-neutral6': selectedValue && !disabled && !isError,
               'border-neutral5': !selectedValue && !disabled && !isError,
               '!border-error5': isError,
@@ -182,7 +293,7 @@ const Select = ({
           )}
         >
           <Paragraph
-            data-testid='selected-value'
+            data-testid="selected-value"
             className={cn('w-full overflow-hidden text-[14px]', {
               '': selectedValue && !disabled,
               'text-neutral6': !selectedValue && !disabled,
@@ -190,7 +301,9 @@ const Select = ({
             })}
             level={2}
           >
-            {selectedValue && selectedValue !== '' ? selectedOption?.label : placeholder}
+            {selectedValue && selectedValue !== ''
+              ? selectedOption?.label
+              : placeholder}
           </Paragraph>
           {selectedValue && (
             <CrossCircledIcon
@@ -201,16 +314,18 @@ const Select = ({
               size={20}
               width={20}
               height={20}
-              className='mr-2 scale-100 text-red-500 transition-all duration-300 hover:rotate-180 hover:scale-[1.1]'
+              className="mr-2 scale-100 text-red-500 transition-all duration-300 hover:rotate-180 hover:scale-[1.1]"
             />
           )}
-          <div className='flex flex-row items-center gap-2'>
-            {isError && <ErrorOutline data-testid='error-icon' />}
+          <div className="flex flex-row items-center gap-2">
+            {isError && <ErrorOutline data-testid="error-icon" />}
             <ExpandMore
               size={16}
-              data-testid='expand-icon'
+              data-testid="expand-icon"
               className={cn({ 'rotate-180': isDropdownOpen })}
-              color={disabled ? theme?.colors?.neutral7 : theme?.colors?.neutral8}
+              color={
+                disabled ? theme?.colors?.neutral7 : theme?.colors?.neutral8
+              }
             />
           </div>
         </div>
@@ -218,19 +333,19 @@ const Select = ({
         {isDropdownOpen &&
           createPortal(
             <div
-              data-testid='dropdown-menu'
+              data-testid="dropdown-menu"
               style={{
-                position: 'absolute',
-                top:
-                  dropdownPosition === 'top'
-                    ? dropdownRef.current.getBoundingClientRect().top -
-                      (document?.querySelector('[data-testid="dropdown-menu"]')?.clientHeight || 200)
-                    : dropdownRef.current.getBoundingClientRect().bottom,
-                left: dropdownRef.current.getBoundingClientRect().left,
-                width: dropdownRef.current.offsetWidth,
-                zIndex: 99999,
+                position: 'fixed',
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width,
+                zIndex: getDropdownZIndex(),
+                maxHeight: '250px',
               }}
-              className={cn('rounded-[6px] bg-white p-2 shadow-sm', isCustomScrollBar && 'custom-scrollbar')}
+              className={cn(
+                'rounded-[6px] border bg-white p-2 shadow-lg',
+                isCustomScrollBar && 'custom-scrollbar'
+              )}
             >
               {showSearchBar && (
                 <div ref={searchInputRef}>
@@ -238,14 +353,14 @@ const Select = ({
                     placeholder={`Cari ${label?.toLocaleLowerCase()}`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className='relative'
-                    containerClassName='mb-2'
+                    className="relative"
+                    containerClassName="mb-2"
                     suffix={<Search />}
                   />
                 </div>
               )}
 
-              <div className='max-h-[200px] overflow-y-auto'>
+              <div className="max-h-[200px] overflow-y-auto">
                 {filteredOptions?.length > 0 ? (
                   filteredOptions?.map((option) => (
                     <Cascader
@@ -260,7 +375,11 @@ const Select = ({
                     </Cascader>
                   ))
                 ) : (
-                  <Paragraph data-testid='no-options' level={4} className='py-2 text-center'>
+                  <Paragraph
+                    data-testid="no-options"
+                    level={4}
+                    className="py-2 text-center"
+                  >
                     Tidak ada pilihan
                   </Paragraph>
                 )}
@@ -270,30 +389,34 @@ const Select = ({
                 <form
                   ref={formAddOptionRef}
                   onSubmit={handleSubmitNewOption}
-                  className='my-2'
+                  className="my-2"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className='flex flex-col gap-2'>
+                  <div className="flex flex-col gap-2">
                     {isAddOption && (
                       <InputText
                         value={formik.values.newOption}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        name='newOption'
+                        name="newOption"
                         placeholder={allowAddOption.placeholder}
                         onClick={(e) => e.stopPropagation()}
-                        containerClassName='mb-0 flex-1 px-2 mb-3'
-                        isError={formik.touched.newOption && formik.errors.newOption}
-                        helperText={formik.touched.newOption && formik.errors.newOption}
+                        containerClassName="mb-0 flex-1 px-2 mb-3"
+                        isError={
+                          formik.touched.newOption && formik.errors.newOption
+                        }
+                        helperText={
+                          formik.touched.newOption && formik.errors.newOption
+                        }
                         maxChar={allowAddOption.maxLength}
                       />
                     )}
-                    <div className='flex items-center gap-2 px-2'>
+                    <div className="flex items-center gap-2 px-2">
                       <Button
-                        variant='tertiary'
-                        className='flex w-[135px] items-center gap-1.5 whitespace-nowrap'
+                        variant="tertiary"
+                        className="flex w-[135px] items-center gap-1.5 whitespace-nowrap"
                         icon={<Plus size={8} />}
-                        size='small'
+                        size="small"
                         disabled={isAddOption}
                         onClick={handleAddOptionClick}
                       >
@@ -301,14 +424,15 @@ const Select = ({
                       </Button>
                       <Button
                         onClick={handleApplyClick}
-                        variant='primary'
-                        size='small'
+                        variant="primary"
+                        size="small"
                         isFullWidth
                         disabled={
                           allowAddOption.isLoading ||
                           !formik.values.newOption ||
                           !isAddOption ||
-                          (formik.touched.newOption && formik.errors.newOption) ||
+                          (formik.touched.newOption &&
+                            formik.errors.newOption) ||
                           !formik.isValid
                         }
                       >
@@ -324,7 +448,7 @@ const Select = ({
       </div>
       {helperText && (
         <Paragraph
-          data-testid='helper-text'
+          data-testid="helper-text"
           level={4}
           className={cn('relative z-0 text-neutral7', {
             'text-error5': isError,
@@ -334,7 +458,7 @@ const Select = ({
         </Paragraph>
       )}
       {errors?.[name] && touched?.[name] && (
-        <Paragraph level={4} className='text-error mt-1 text-red-500'>
+        <Paragraph level={4} className="text-error mt-1 text-red-500">
           {errors?.[name]}
         </Paragraph>
       )}

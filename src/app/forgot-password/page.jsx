@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -17,12 +16,24 @@ import InputText from '@/components/molecules/InputText';
 import { forgotPassword } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 
+import LogoSipekebun from '../../../public/keling-kumang-logo.png';
+
 const LoginPage = () => {
   const router = useRouter();
   const schemaValidation = Yup.object().shape({
-    email: Yup.string().email('Email tidak valid').required('Email harus diisi'),
+    email: Yup.string()
+      .email('Email tidak valid')
+      .required('Email harus diisi'),
   });
-  const { handleSubmit, values, touched, errors, handleBlur, handleChange, isSubmitting } = useFormik({
+  const {
+    handleSubmit,
+    values,
+    touched,
+    errors,
+    handleBlur,
+    handleChange,
+    isSubmitting,
+  } = useFormik({
     initialValues: {
       email: '',
     },
@@ -45,34 +56,47 @@ const LoginPage = () => {
   });
 
   return (
-    <div className='flex h-screen w-screen items-center justify-center'>
-      <div className='flex hidden h-full w-2/3 flex-1 md:block'>
-        <Image src={bannerLogin} alt='banner-login' className='h-full w-full object-cover' />
+    <div className="flex h-screen w-screen bg-white">
+      <div className="relative hidden py-8 pl-8 lg:flex lg:w-[60vw]">
+        <Image
+          src={bannerLogin}
+          alt="banner-login"
+          className="h-full w-full rounded-xl object-cover"
+        />
       </div>
-      <div className='flex h-full w-[40vw] flex-col justify-center bg-bgColor p-12'>
-        <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
-          <Link href={'/login'}>
-            <div className='flex flex-row items-center gap-3 font-bold'>
-              <ArrowLeftIcon width={20} height={20} />
-              <Paragraph level={3}>Kembali</Paragraph>
-            </div>
-          </Link>
-          <Heading level={3}>Lupa Kata Sandi</Heading>
-          <Paragraph level={3}>Silahkan ikuti langkah di bawah.</Paragraph>
-          <InputText
-            placeholder='Masukan email terdaftar'
-            label={'Email'}
-            type='email'
-            name='email'
-            value={values.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            errors={errors}
-          />
-          <Button className='w-full' type='submit' loading={isSubmitting}>
-            Submit
-          </Button>
-        </form>
+
+      <div className="flex w-full items-center justify-center px-8 lg:w-1/2">
+        <div className="w-full max-w-xl">
+          <div className="mb-8 flex items-center justify-center">
+            <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
+          </div>
+
+          <div className="mb-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Link href={'/login'}>
+                <div className="flex flex-row items-center gap-3 font-bold">
+                  <ArrowLeftIcon width={20} height={20} />
+                  <Paragraph level={3}>Kembali</Paragraph>
+                </div>
+              </Link>
+              <Heading level={3}>Lupa Kata Sandi</Heading>
+              <Paragraph level={3}>Silahkan ikuti langkah di bawah.</Paragraph>
+              <InputText
+                placeholder="Masukan email terdaftar"
+                label={'Email'}
+                type="email"
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                errors={errors}
+              />
+              <Button className="w-full" type="submit" isLoading={isSubmitting}>
+                Submit
+              </Button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

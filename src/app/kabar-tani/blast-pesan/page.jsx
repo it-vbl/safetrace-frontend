@@ -1,13 +1,18 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import debounce from 'lodash/debounce';
+import { toast } from 'react-toastify';
+
+import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
-import Button from '@/components/atoms/Button';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import { deleteBroadcast, getBroadcastList } from '@/services/broadcast';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -26,45 +31,75 @@ const BlastPesanPage = () => {
   const fetchKontakData = async ({ page, page_size, search }) => {
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const params = {
+        page,
+        page_size,
+        ...(search && { search }),
+      };
 
-      const allData = [
-        {
-          id: 1,
-          id_pesan: 'GK-0001',
-          nama_pesan: 'Pemberitahuan Harga Harian',
-          no_pengirim: 'Fajar Sukmara - 081234567890',
-          grup_penerima: 'Anggota APKS',
-          jumlah_penerima: 1200,
-          waktu_pengiriman: '07:00 25-08-2025',
-          status: 'Selesai',
-        },
-        ...Array(48)
-          .fill(null)
-          .map((_, index) => ({
-            id: index + 3,
-            id_pesan: `GK-${String(index + 3).padStart(4, '0')}`,
-            nama_pesan: 'Pemberitahuan Harga Harian',
-            no_pengirim: 'Fajar Sukmara - 081234567890',
-            grup_penerima: 'Ketua Kelompok',
-            jumlah_penerima: 1200,
-            waktu_pengiriman: '07:00 25-08-2025',
-            status: 'Selesai',
-          })),
-      ];
+      const response = await getBroadcastList(params);
 
-      const filteredData = allData.filter((item) =>
-        item.nama_pesan.toLowerCase().includes(search.toLowerCase())
-      );
+      if (response?.data?.status === 'success') {
+        const { results, count } = response.data.data;
 
-      const startIndex = (page - 1) * page_size;
-      const pagedData = filteredData.slice(startIndex, startIndex + page_size);
+        const mappedData = (results || []).map((item) => {
+          const createdAt = item?.created_at || item?.waktu_pengiriman;
+          const waktuPengiriman = createdAt
+            ? new Date(createdAt).toLocaleString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })
+            : '-';
 
-      setKontakData(pagedData);
-      setTotalKontak(filteredData.length);
+          const jumlahPenerima =
+            item?.jumlah_penerima ??
+            item?.total_penerima ??
+            (Array.isArray(item?.kontak_ids)
+              ? item.kontak_ids.length
+              : item?.recipient_count ?? 0);
+
+          const pengirimNama = item?.no_pengirim_nama || item?.device_nama;
+          const pengirimNo =
+            item?.no_pengirim || item?.device_no || item?.no_wa_pengirim;
+
+          return {
+            id: item?.id,
+            id_pesan:
+              item?.id_pesan || `BC-${String(item?.id || 0).padStart(4, '0')}`,
+            nama_pesan: item?.nama_pesan || item?.nama || '-',
+            no_pengirim:
+              pengirimNama && pengirimNo
+                ? `${pengirimNama} - ${pengirimNo}`
+                : item?.no_pengirim || '-',
+            grup_penerima:
+              item?.grup_penerima ||
+              (item?.jenis_penerima === 'grup'
+                ? item?.grup_nama
+                : 'Kontak Individu'),
+            jumlah_penerima: jumlahPenerima,
+            waktu_pengiriman: waktuPengiriman,
+            status: item?.status || '-',
+          };
+        });
+
+        setKontakData(mappedData);
+        setTotalKontak(count || mappedData.length || 0);
+      } else {
+        setKontakData([]);
+        setTotalKontak(0);
+        toast.error('Gagal mengambil data broadcast');
+      }
     } catch (error) {
       setKontakData([]);
       setTotalKontak(0);
+      toast.error(
+        error?.response?.data?.message ||
+          'Terjadi kesalahan saat mengambil data'
+      );
+      console.error('Error fetching broadcast list:', error);
     } finally {
       setLoading(false);
     }
@@ -83,6 +118,14 @@ const BlastPesanPage = () => {
     setCurrentPage(1);
   }, []);
 
+  const handleSearchTextChange = useCallback(
+    debounce((e) => {
+      setSearch(e.target.value);
+      setCurrentPage(1);
+    }, 300),
+    []
+  );
+
   const handleDeleteClick = (rowData) => {
     setSelectedItem(rowData);
     setIsDeleteModalOpen(true);
@@ -93,22 +136,22 @@ const BlastPesanPage = () => {
 
     setIsDeleting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setKontakData((prev) =>
-        prev.filter((item) => item.id !== selectedItem.id)
-      );
-      setTotalKontak((prev) => prev - 1);
-
-      console.log('Data berhasil dihapus:', selectedItem);
-      setIsDeleteModalOpen(false);
-      setSelectedItem(null);
-
-      // Optionally show success message
-      // toast.success('Data berhasil dihapus');
+      const response = await deleteBroadcast(selectedItem.id);
+      if (
+        response?.status === 200 ||
+        response?.status === 204 ||
+        response?.data?.status === 'success'
+      ) {
+        toast.success('Data berhasil dihapus');
+        setIsDeleteModalOpen(false);
+        setSelectedItem(null);
+        fetchKontakData({ page: currentPage, page_size: pageSize, search });
+      } else {
+        toast.error(response?.data?.message || 'Gagal menghapus data');
+      }
     } catch (error) {
       console.error('Error deleting data:', error);
-      // Optionally show error message
-      // toast.error('Gagal menghapus data');
+      toast.error('Gagal menghapus data');
     } finally {
       setIsDeleting(false);
     }
@@ -125,9 +168,7 @@ const BlastPesanPage = () => {
         <button
           className="py-1 text-xs font-bold text-primaryDark1 underline"
           onClick={() => {
-            router.push(
-              `/kabar-tani/blast-pesan/${params.data.id}/detail-pesan`
-            );
+            router.push(`/kabar-tani/blast-pesan/${params.data.id}`);
           }}
         >
           LIHAT
@@ -196,9 +237,11 @@ const BlastPesanPage = () => {
     },
   ];
 
-  const autoSizeStrategy = {
-    type: 'fitCellContents',
-  };
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitCellContents',
+    };
+  }, []);
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -213,13 +256,18 @@ const BlastPesanPage = () => {
 
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <Heading level={3} className="text-lg font-bold">
+          <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
             BLAST PESAN
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
+            <SearchBar
+              onChange={handleSearchTextChange}
+              placeholder="Cari campaign"
+              className="w-full sm:w-[300px]"
+            />
             <Button
               onClick={() => {
-                router.push('/kabar-tani/blast-pesan/pesan-baru');
+                router.push('/kabar-tani/blast-pesan/tambah');
               }}
             >
               Pesan Baru
@@ -233,17 +281,14 @@ const BlastPesanPage = () => {
           <AgGridReact
             loading={loading}
             columnDefs={colDefs}
-            pagination={false}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             rowData={kontakData}
-            domLayout="autoHeight"
-            suppressCellFocus={true}
           />
         </div>
 
         {/* Pagination section */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}

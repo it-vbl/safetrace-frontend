@@ -7,7 +7,7 @@ export default function SipekebunLogo({ className }) {
   const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
   return (
     <div
-      className={`flex flex-1 text-[12px] sm:text-[16px] items-center font-bold tracking-widest ${className}`}
+      className={`flex flex-1 items-center text-[12px] font-bold tracking-widest sm:text-[16px] ${className}`}
     >
       <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
     </div>

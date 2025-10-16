@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import {
-  BadgeIcon,
+  ChevronRight,
   ContactIcon,
+  Flag,
   FlagIcon,
+  FlagOffIcon,
   FolderIcon,
   MapIcon,
   MedalIcon,
@@ -14,18 +15,17 @@ import {
   MessageSquareIcon,
   PieChart,
   Smartphone,
+  User2Icon,
+  UserCheck2Icon,
   UserCircle2Icon,
-  UserIcon,
+  UsersIcon,
 } from 'lucide-react';
-import { IoHome, IoHomeOutline, IoSettings } from 'react-icons/io5';
+import { IoHomeOutline } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Date } from '@/assets/icons/index';
 import LogoLembaga from '@/components/atoms/LogoLembaga';
-import SipekebunLogo from '@/components/atoms/SipekebunLogo';
 import size from '@/constants/size';
-import { useMobileScreen } from '@/hooks/useMobileScreen';
-import { setSidebarOpen } from '@/store/slices/app';
+import { setSidebarCollapsed, setSidebarOpen } from '@/store/slices/app';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -35,10 +35,9 @@ import {
 const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const storedValue = Cookies.get('storeProfile');
   const profile = storedValue ? JSON.parse(storedValue) : null;
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState(null);
   const [isSubMenuOpened, setIsSubMenuOpened] = useState(false);
-  const { sidebarOpen } = useSelector((state) => state.app);
+  const { sidebarOpen, sidebarCollapsed } = useSelector((state) => state.app);
   const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
   const dispatch = useDispatch();
 
@@ -69,14 +68,33 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         path: '/traceability/kebun',
       },
       {
-        label: 'Produksi',
-        icon: FlagIcon,
-        path: '/traceability/produksi',
+        label: 'GAP',
+        icon: Flag,
+        subMenu: [
+          { label: 'PRODUKSI', path: '/traceability/gap/produksi' },
+          {
+            label: 'PESTISIDA',
+            path: '/traceability/gap/pestisida',
+          },
+          {
+            label: 'PUPUK',
+            path: '/traceability/gap/pupuk',
+          },
+          {
+            label: 'LB3',
+            path: '/traceability/gap/lb3',
+          },
+        ],
       },
       {
         label: 'Diklat',
         icon: MedalIcon,
         path: '/traceability/diklat',
+      },
+      {
+        label: 'Pekerja',
+        icon: UsersIcon,
+        path: '/traceability/pekerja',
       },
     ],
     'kabar-tani': [
@@ -135,14 +153,16 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const menuItems = menuConfig[currentMainMenu] || [];
 
   const handleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-    if (!isCollapsed) {
+    dispatch(setSidebarCollapsed(!sidebarCollapsed));
+    if (!sidebarCollapsed) {
       setOpenSubMenu(null);
     }
   };
 
   const handleSubMenuToggle = (label) => {
-    setOpenSubMenu((prev) => (prev === label && !isCollapsed ? null : label));
+    setOpenSubMenu((prev) =>
+      prev === label && !sidebarCollapsed ? null : label
+    );
     setIsSubMenuOpened(label === openSubMenu ? !isSubMenuOpened : true);
   };
 
@@ -171,13 +191,15 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
           width:
             (isMobileScreen && !sidebarOpen) || !sidebarOpen
               ? 0
+              : sidebarCollapsed
+              ? `${size.SIDEBAR_WIDTH_COLLAPSED}px`
               : `${size.SIDEBAR_WIDTH}px`,
           transform:
             isMobileScreen && !sidebarOpen
               ? 'translateX(-100%)'
               : 'translateX(0)',
         }}
-        className={`fixed left-0 top-0 h-full overflow-x-hidden transition-all duration-300 bg-white z-50 ${
+        className={`fixed left-0 top-0 z-50 h-full overflow-x-hidden bg-white transition-all duration-300 ${
           isMobileScreen ? 'shadow-lg' : 'relative'
         } ${
           (isMobileScreen && !sidebarOpen) || !sidebarOpen
@@ -188,7 +210,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         <div
           className="bg-primary700 flex h-full flex-col border-r border-r-gray-200 px-4 pt-8 text-white"
           style={{
-            width: isCollapsed
+            width: sidebarCollapsed
               ? size.SIDEBAR_WIDTH_COLLAPSED
               : size.SIDEBAR_WIDTH,
           }}
@@ -214,12 +236,12 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                   item?.label?.replaceAll(' ', '-')?.toLowerCase()
                 );
               return (
-                <div key={index}>
+                <div key={item.label || item.path || index}>
                   <div
                     className={`mb-2 flex cursor-pointer items-center p-2 ${
                       isActive ? 'bg-primary text-white' : 'text-gray-900'
                     } w-full rounded font-medium ${
-                      isCollapsed ? 'justify-center' : 'justify-normal'
+                      sidebarCollapsed ? 'justify-center' : 'justify-normal'
                     } relative`}
                     onClick={() =>
                       item.subMenu
@@ -228,12 +250,12 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                     }
                   >
                     <item.icon alt={item.label} className="h-[20px] w-[20px]" />
-                    {!isCollapsed && (
+                    {!sidebarCollapsed && (
                       <span className="ml-4 text-[14px] uppercase leading-[18px]">
                         {item.label}
                       </span>
                     )}
-                    {!isCollapsed &&
+                    {!sidebarCollapsed &&
                       item.subMenu &&
                       (openSubMenu === item.label ? (
                         <ChevronUpIcon className="ml-auto" />
@@ -241,7 +263,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                         <ChevronDownIcon className="ml-auto" />
                       ))}
                   </div>
-                  {!isCollapsed &&
+                  {!sidebarCollapsed &&
                     item.subMenu &&
                     openSubMenu === item.label && (
                       <div className="pl-8">
@@ -249,7 +271,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                           (subItem, subIndex) =>
                             subItem && (
                               <div
-                                key={subIndex}
+                                key={subItem.label || subItem.path || subIndex}
                                 className={`mb-2 ml-1 flex cursor-pointer items-center p-2 ${
                                   pathname?.includes(subItem?.path)
                                     ? 'text-primary'
@@ -274,11 +296,14 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
             .filter((item) => item.subMenu)
             .map((item) => {
               return (
-                isCollapsed &&
+                sidebarCollapsed &&
                 (isSubMenuOpened
                   ? openSubMenu === item.label
                   : isSubMenuOpened) && (
-                  <div className="absolute left-[89px] top-[13%] z-50 w-max rounded bg-[#222636] p-2 shadow-lg">
+                  <div
+                    key={item.label}
+                    className="absolute left-[89px] top-[13%] z-50 w-max rounded bg-[#222636] p-2 shadow-lg"
+                  >
                     {menuItems
                       .filter(
                         (item) => item.subMenu && openSubMenu === item.label
@@ -286,7 +311,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                       .flatMap((item) => item.subMenu)
                       .map((subItem, subIndex) => (
                         <div
-                          key={subIndex}
+                          key={subItem.label || subItem.path || subIndex}
                           className={`mb-2 flex cursor-pointer items-center p-2 ${
                             pathname?.includes(subItem?.path)
                               ? 'text-white'
@@ -303,17 +328,21 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
             })}
           {!isMobileScreen && (
             <div
-              className={`mt-auto flex cursor-pointer items-center p-2 ${
-                isCollapsed ? 'hover:bg-[#151A2D]' : 'hover:bg-[#151A2D]'
-              } rounded ${isCollapsed ? 'justify-center' : 'justify-normal'}`}
               onClick={handleCollapse}
+              className={`mb-10 mt-auto flex cursor-pointer items-center rounded-[4px] p-2 transition-all duration-200 hover:bg-gray-100 ${
+                sidebarCollapsed ? 'justify-center' : 'justify-between'
+              }`}
             >
-              <Date className={`${isCollapsed ? 'rotate-180' : ''}`} />
-              {!isCollapsed && (
-                <span className="ml-4 text-[14px] leading-[18px]">
-                  {'test'}
-                </span>
+              {!sidebarCollapsed && (
+                <span className="text-sm font-medium text-black">COLLAPSE</span>
               )}
+              <ChevronRight
+                size={20}
+                color="black"
+                className={`transition-transform duration-200 ${
+                  sidebarCollapsed ? '' : 'rotate-180'
+                }`}
+              />
             </div>
           )}
         </div>

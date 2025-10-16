@@ -1,21 +1,40 @@
 'use client';
-import { useState } from 'react';
-import { X, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { User, X } from 'lucide-react';
 
 const MemberSelector = ({
   selectedMembers = [],
   availableMembers = [],
   onMembersChange,
   label = 'Anggota',
+  loading = false,
 }) => {
   const [checkedMembers, setCheckedMembers] = useState({});
+  const [internalMembers, setInternalMembers] = useState([]);
+
+  const normalizeGender = (jns_kelamin) => {
+    if (jns_kelamin === '1' || jns_kelamin === 1) return 'Laki - Laki';
+    if (jns_kelamin === '2' || jns_kelamin === 2) return 'Perempuan';
+    return '-';
+  };
+
+  const mapKontakToMember = (item) => ({
+    id: item?.id,
+    name: item?.nama ?? item?.name ?? '-',
+    phone: item?.no_wa ?? item?.phone ?? '-',
+    gender: normalizeGender(item?.jns_kelamin ?? item?.gender),
+  });
+
+  useEffect(() => {
+    const normalized = (availableMembers || []).map(mapKontakToMember);
+    setInternalMembers(normalized);
+  }, [availableMembers]);
 
   const handleRemoveSelectedMember = (memberId) => {
     const updatedMembers = selectedMembers.filter(
       (member) => member.id !== memberId
     );
 
-    // Update checkbox state when member is removed
     setCheckedMembers((prev) => ({
       ...prev,
       [memberId]: false,
@@ -36,14 +55,16 @@ const MemberSelector = ({
     }));
 
     if (isCurrentlySelected) {
-      // Remove member if currently selected
       const updatedMembers = selectedMembers.filter(
         (selected) => selected.id !== memberId
       );
       onMembersChange?.(updatedMembers);
     } else if (!isCurrentlyChecked) {
-      // Add member if not currently checked
-      const memberToAdd = availableMembers.find(
+      const sourceMembers =
+        internalMembers && internalMembers.length > 0
+          ? internalMembers
+          : availableMembers;
+      const memberToAdd = sourceMembers.find(
         (member) => member.id === memberId
       );
       if (memberToAdd) {
@@ -73,9 +94,11 @@ const MemberSelector = ({
               className="inline-flex items-center gap-2 rounded-[4px] border bg-[#FAF2DC] px-3 py-1.5 text-sm text-gray-700 shadow-sm"
             >
               <User className="h-3.5 w-3.5 text-gray-500" />
-              <span className="font-medium">{member.name}</span>
+              <span className="font-medium">{member.name ?? member.nama}</span>
               <span className="text-gray-500">-</span>
-              <span className="text-gray-600">{member.phone}</span>
+              <span className="text-gray-600">
+                {member.phone ?? member.no_wa}
+              </span>
               <button
                 onClick={() => handleRemoveSelectedMember(member.id)}
                 className="ml-1 rounded-full p-0.5 text-gray-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
@@ -93,7 +116,7 @@ const MemberSelector = ({
         <div className="max-h-[180px] overflow-y-auto">
           <table className="w-full divide-y divide-gray-200">
             <tbody className="divide-y divide-gray-200 bg-white">
-              {availableMembers.map((member) => {
+              {(internalMembers || []).map((member) => {
                 const isSelected = isMemberSelected(member.id);
                 const isChecked = checkedMembers[member.id] || isSelected;
 
@@ -133,7 +156,18 @@ const MemberSelector = ({
                 );
               })}
 
-              {availableMembers.length === 0 && (
+              {loading && (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
+                    Memuat data kontak...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && (internalMembers || []).length === 0 && (
                 <tr>
                   <td
                     colSpan="5"
