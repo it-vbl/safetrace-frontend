@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import { toast } from 'react-toastify';
 
-import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
 const DetailKebunPage = () => {
   const { id } = useParams();

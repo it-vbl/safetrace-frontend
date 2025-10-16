@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
 import { cn } from '@/utils/cn';
 
 const Stepper = ({ steps, currentStep, onStepClick, className = '' }) => {

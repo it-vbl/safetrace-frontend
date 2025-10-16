@@ -1,16 +1,20 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import Stepper from '@/components/molecules/Stepper';
 import DetailKebun from '@/components/organisms/KebunForm/DetailKebun';
-import Pemetaan from '@/components/organisms/KebunForm/Pemetaan';
 import Lampiran from '@/components/organisms/KebunForm/Lampiran';
-import { handleStep1, handleStep2, handleStep3 } from '@/utils/kebunStepHandler';
+import Pemetaan from '@/components/organisms/KebunForm/Pemetaan';
 import { getKebunDetail } from '@/services/kebun';
+import {
+  handleStep1,
+  handleStep2,
+  handleStep3,
+} from '@/utils/kebunStepHandler';
 
-
-const CreateKebunTraceability = () => {
+const CreateKebunTraceabilityContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const idKebun = searchParams.get('idKebun');
@@ -43,7 +47,7 @@ const CreateKebunTraceability = () => {
           if (response && response.data) {
             const data = response.data.data;
             setKebunData(data);
-            
+
             // Determine current step based on data
             if (data.geom || data.titik_koordinat) {
               // Has mapping data, go to step 3 (Lampiran)
@@ -75,12 +79,12 @@ const CreateKebunTraceability = () => {
 
   // Function to proceed to next step
   const handleNextStep = async (stepData) => {
-    console.log("CHECK BEFORE ON NEXT", stepData);
+    console.log('CHECK BEFORE ON NEXT', stepData);
     setIsSubmitting(true);
-    
+
     try {
       let result;
-      
+
       switch (currentStep) {
         case 1:
           result = await handleStep1(stepData, idKebun);
@@ -102,7 +106,7 @@ const CreateKebunTraceability = () => {
       }
 
       if (result.success) {
-        setCompletedSteps(prev => [...prev, currentStep]);
+        setCompletedSteps((prev) => [...prev, currentStep]);
         if (currentStep < steps.length) {
           setCurrentStep(currentStep + 1);
         }
@@ -173,10 +177,16 @@ const CreateKebunTraceability = () => {
         />
       </div>
 
-      <div className="space-y-6">
-        {renderStepContent()}
-      </div>
+      <div className="space-y-6">{renderStepContent()}</div>
     </div>
+  );
+};
+
+const CreateKebunTraceability = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateKebunTraceabilityContent />
+    </Suspense>
   );
 };
 

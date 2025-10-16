@@ -7,11 +7,11 @@ import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 
-import PekerjaService from '@/services/pekerja';
 import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import PekerjaService from '@/services/pekerja';
 
 // Mock data for pekerja detail - replace with actual API call
 const mockPekerjaData = {
