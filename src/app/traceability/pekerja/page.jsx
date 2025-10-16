@@ -1,133 +1,111 @@
 'use client';
-
-// 1. React & Next.js (built-in)
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-// 2. External packages
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
+import moment from 'moment/moment';
 import { toast } from 'react-toastify';
 
-// 3. Internal components (alias @/)
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import useReferences from '@/hooks/useReferences';
+import PekerjaService from '@/services/pekerja';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-  { label: 'Kelompok C', value: 'kelompok_c' },
-];
-
 const PekerjaPage = () => {
   const router = useRouter();
-
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
   const [loading, setLoading] = useState(false);
   const [pekerjaData, setPekerjaData] = useState([]);
   const [totalPekerja, setTotalPekerja] = useState(0);
 
-  // Sample data - replace with actual API call
-  const samplePekerjaData = [
-    {
-      id: '001-APKS-001-001',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '0.75',
-      jumlahPekerja: 3,
-    },
-    {
-      id: '001-APKS-001-002',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '1.25',
-      jumlahPekerja: 4,
-    },
-    {
-      id: '001-APKS-001-003',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '2.00',
-      jumlahPekerja: 4,
-    },
-    {
-      id: '001-APKS-001-004',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '1.50',
-      jumlahPekerja: 2,
-    },
-    {
-      id: '001-APKS-001-005',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '0.90',
-      jumlahPekerja: 1,
-    },
-    {
-      id: '001-APKS-001-006',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '1.80',
-      jumlahPekerja: 3,
-    },
-    {
-      id: '001-APKS-001-007',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '2.25',
-      jumlahPekerja: 4,
-    },
-    {
-      id: '001-APKS-001-008',
-      namaPetani: 'Agustinus Nery',
-      jenisKelamin: 'Laki - Laki',
-      kelompok: 'Bepekaek Besamo',
-      noKTP: '6109010805890003',
-      noKK: '6109011711110021',
-      luasKebun: '3.00',
-      jumlahPekerja: 5,
-    },
-  ];
+  // Fetch pekerja data function
+  const fetchPekerjaData = async ({
+    page,
+    page_size,
+    search,
+    kelompok,
+  }) => {
+    setLoading(true);
+    try {
+      // Build query parameters
+      const params = new URLSearchParams({
+        page,
+        page_size,
+      });
 
-  // Initialize pekerjaData with sample data
+      if (search) params.append('search', search);
+      if (kelompok) params.append('kelompok', kelompok);
+
+      const response = await PekerjaService.getListPekerja(params.toString());
+
+      if (response?.data?.status === 'success') {
+        // Map API response to table format
+        const mappedData = response.data.data.results.map((pekerja) => ({
+          id: pekerja.id,
+          id_petani: pekerja.id_petani || '-',
+          nama_petani: pekerja.nama_petani || '-',
+          jenis_kelamin: pekerja.jenis_kelamin || '-',
+          kelompok: pekerja.kelompok || '-',
+          no_ktp: pekerja.no_ktp || '-',
+          no_kk: pekerja.no_kk || '-',
+          luas_kebun: pekerja.luas_kebun || '0',
+          jumlah_pekerja: pekerja.jumlah_pekerja || 0,
+          terakhir_diubah: pekerja.updated_at ? new Date(pekerja.updated_at).toLocaleString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }) : '-',
+        }));
+
+        setPekerjaData(mappedData);
+        setTotalPekerja(response.data.data.count);
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Error fetching pekerja data:', error);
+      toast.error('Gagal memuat data pekerja');
+      setPekerjaData([]);
+      setTotalPekerja(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch kelompok data on component mount
   useEffect(() => {
-    setPekerjaData(samplePekerjaData);
-    setTotalPekerja(samplePekerjaData.length);
-  }, []);
+    if (kelompokTani.length === 0) {
+      fetchKelompokTani();
+    }
+  }, [kelompokTani.length, fetchKelompokTani]);
+
+  useEffect(() => {
+    fetchPekerjaData({
+      page: currentPage,
+      page_size: pageSize,
+      search,
+      kelompok: selectedKelompok,
+    });
+  }, [
+    currentPage,
+    pageSize,
+    search,
+    selectedKelompok,
+  ]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -152,7 +130,7 @@ const PekerjaPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/pekerja/${data.id}`);
+    router.push(`/traceability/pekerja/${data?.id}`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -174,50 +152,61 @@ const PekerjaPage = () => {
         field: 'actions',
         headerName: '',
         cellRenderer: ActionsCellRenderer,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 150,
+        width: 80,
+        minWidth: 70,
+        maxWidth: 100,
         suppressSizeToFit: false,
       },
       {
-        field: 'id',
+        field: 'id_petani',
         headerName: 'Id Petani',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'namaPetani',
+        field: 'nama_petani',
         headerName: 'Nama Petani',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'jenisKelamin',
+        field: 'jenis_kelamin',
         headerName: 'Jenis Kelamin',
         flex: 1,
+        minWidth: 120,
       },
       {
         field: 'kelompok',
         headerName: 'Kelompok',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'noKTP',
+        field: 'no_ktp',
         headerName: 'No. KTP',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'noKK',
+        field: 'no_kk',
         headerName: 'No. KK',
         flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'luasKebun',
+        field: 'luas_kebun',
         headerName: 'Luas Kebun (Ha)',
         flex: 1,
+        minWidth: 120,
+        cellRenderer: (params) => {
+          return `${params.value}`;
+        },
       },
       {
-        field: 'jumlahPekerja',
+        field: 'jumlah_pekerja',
         headerName: 'Jumlah Pekerja',
         flex: 1,
+        minWidth: 120,
       },
     ],
     [ActionsCellRenderer]
@@ -229,52 +218,18 @@ const PekerjaPage = () => {
     };
   }, []);
 
-  // Filter data based on search and kelompok
-  const filteredData = useMemo(() => {
-    let filtered = pekerjaData;
-
-    if (search) {
-      filtered = filtered.filter(
-        (item) =>
-          item.namaPetani.toLowerCase().includes(search.toLowerCase()) ||
-          item.id.toLowerCase().includes(search.toLowerCase()) ||
-          item.kelompok.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (selectedKelompok) {
-      filtered = filtered.filter((item) =>
-        item.kelompok.toLowerCase().includes(selectedKelompok.toLowerCase())
-      );
-    }
-
-    return filtered;
-  }, [pekerjaData, search, selectedKelompok]);
-
-  // Paginated data
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredData.slice(startIndex, endIndex);
-  }, [filteredData, currentPage, pageSize]);
-
-  useEffect(() => {
-    setTotalPekerja(filteredData.length);
-  }, [filteredData]);
-
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
-          {/* Header Section */}
+          {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
               PEKERJA
             </Heading>
 
-            {/* Controls Container */}
             <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-              {/* Search and Filters - Responsive Grid */}
+              {/* === SEARCH FILTER === */}
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
@@ -283,15 +238,15 @@ const PekerjaPage = () => {
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
+                  containerClassName="w-full sm:w-auto lg:w-[150px]"
                   placeholder="Kelompok"
-                  options={kelompokOptions}
+                  options={kelompokTani}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
                 />
               </div>
 
-              {/* Action Buttons - Responsive */}
+              {/* === ACTION BUTTON === */}
               <div className="flex flex-row items-center justify-end gap-2">
                 <Button
                   className="!px-2 sm:!px-3"
@@ -302,18 +257,19 @@ const PekerjaPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Table Container - Responsive Height */}
         </div>
-        <div className="relative w-full flex-1 ">
+
+        {/* === TABLE CONTAINER === */}
+        <div className="relative w-full flex-1">
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
-            rowData={paginatedData}
+            rowData={pekerjaData}
             columnDefs={colDefs}
           />
         </div>
+
         <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}

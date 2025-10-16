@@ -50,15 +50,14 @@ const TextArea = ({
   };
 
   const inputStyles = cn(
-    'w-full min-w-[360px] px-4 h-[100px] py-3.5 border rounded-md hover:outline-none focus:border-blue6 focus:outline-none placeholder:text-neutral6',
+    'w-full px-3 w-full h-[100px] py-2.5 border rounded-[4px] hover:outline-none focus:border-blue6 focus:outline-none placeholder:text-neutral6',
     {
       '!border-error5': hasError,
       'border-[#D9D9D9]': !hasError,
-      'border-neutral8': inputValue !== '',
+      'border-neutral6': inputValue !== '',
       'bg-white hover:border-blue6': !disabled,
       'bg-neutral4 !border-neutral6 text-neutral7 cursor-not-allowed': disabled,
       'w-full': isFullWidth,
-      'w-[360px]': !isFullWidth,
       'placeholder:text-neutral7': disabled,
     }
   );
@@ -68,9 +67,12 @@ const TextArea = ({
   }, [value]);
 
   return (
-    <div className='flex flex-col gap-1'>
-      <div className='flex justify-between'>
-        <Label isRequired={isRequired} className='text-neutral11 text-sm font-bold'>
+    <div className="flex w-full flex-col gap-1">
+      <div className="flex justify-between">
+        <Label
+          isRequired={isRequired}
+          className="text-[12px] font-bold  text-gray-500"
+        >
           {label}
         </Label>
 
@@ -93,16 +95,16 @@ const TextArea = ({
         {...props}
       />
       {hasError ? (
-        <div className='relative'>
-          <div className='absolute right-4 top-[-40px]'>
+        <div className="relative">
+          <div className="absolute right-4 top-[-40px]">
             <ErrorOutline />
           </div>
         </div>
       ) : null}
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center'>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <span
-            className={cn('text-neutral7 text-xs', {
+            className={cn('text-xs text-neutral7', {
               'text-error5': hasError,
               'opacity-0': !helperText,
             })}
@@ -111,7 +113,7 @@ const TextArea = ({
           </span>
         </div>
         {maxChar && (
-          <span className='text-neutral7 text-xs'>
+          <span className="text-xs text-neutral7">
             {inputValue.length}/{maxChar}
           </span>
         )}

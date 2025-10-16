@@ -5,11 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import PekerjaService from '@/services/pekerja';
 
 // Mock data for pekerja detail - replace with actual API call
 const mockPekerjaData = {
@@ -78,15 +80,20 @@ const TraceabilityPekerjaDetail = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call - replace with actual API call
     const fetchDetail = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setPekerjaData(mockPekerjaData);
+        const response = await PekerjaService.getPekerjaById(id);
+
+        if (response?.data?.status === 'success') {
+          setPekerjaData(response.data.data);
+        } else {
+          throw new Error('Invalid response format');
+        }
       } catch (err) {
+        console.error('Error fetching pekerja detail:', err);
+        toast.error('Gagal memuat data pekerja');
         setError(err);
       } finally {
         setLoading(false);
@@ -190,7 +197,7 @@ const TraceabilityPekerjaDetail = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex w-full flex-col gap-8">
       <div className="flex justify-between">
         <BreadcrumbDetail items={crumbs} />
         <Button

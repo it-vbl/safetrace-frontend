@@ -12,119 +12,153 @@ import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-import { getListKebun } from '@/services/pekebun';
+import useReferences from '@/hooks/useReferences';
+import useYearOptions from '@/hooks/useYearOptions';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-];
-
-const rspoOptions = [
-  { label: 'Sudah', value: 'sudah' },
-  { label: 'Belum', value: 'belum' },
-];
-
-const ispoOptions = [
-  { label: 'Sudah', value: 'sudah' },
-  { label: 'Belum', value: 'belum' },
-];
-
-const KebunPage = () => {
+const PupukPage = () => {
   const router = useRouter();
+
+  // Get options from hooks
+  const tahunOptions = useYearOptions();
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
-  const [selectedRSPO, setSelectedRSPO] = useState(null);
-  const [selectedISPO, setSelectedISPO] = useState(null);
+  const [selectedTahun, setSelectedTahun] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
-  const [kebunData, setKebunData] = useState([]);
-  const [totalKebun, setTotalKebun] = useState(0);
+  const [pupukData, setPupukData] = useState([]);
+  const [totalPupuk, setTotalPupuk] = useState(0);
 
-  // Fetch kebun data function
-  const fetchKebunData = async ({
-    page,
-    page_size,
-    search,
-    kelompok,
-    rspo,
-    ispo,
-  }) => {
-    setLoading(true);
-    try {
-      // Build query parameters
-      const params = new URLSearchParams({
-        page,
-        page_size,
-      });
+  // Mock data for demonstration
+  const mockData = useMemo(
+    () => [
+      {
+        id: 1,
+        id_kebun: '001-APKS-001-001',
+        nama_petani: 'Agustinus Nery',
+        kelompok: 'Bepekaek Besamo',
+        luas_kebun: 0.75,
+        tahun_tanam: 2014,
+        umur_tanaman: '21 Tahun',
+        jumlah_pokok: '100 Pohon',
+        total_pupuk: '500 Kg',
+      },
+      {
+        id: 2,
+        id_kebun: '001-APKS-001-002',
+        nama_petani: 'Agustinus Nery',
+        kelompok: 'Bepekaek Besamo',
+        luas_kebun: 0.75,
+        tahun_tanam: 2014,
+        umur_tanaman: '21 Tahun',
+        jumlah_pokok: '100 Pohon',
+        total_pupuk: '500 Kg',
+      },
+      {
+        id: 3,
+        id_kebun: '001-APKS-001-003',
+        nama_petani: 'Agustinus Nery',
+        kelompok: 'Bepekaek Besamo',
+        luas_kebun: 0.75,
+        tahun_tanam: 2014,
+        umur_tanaman: '21 Tahun',
+        jumlah_pokok: '100 Pohon',
+        total_pupuk: '500 Kg',
+      },
+      {
+        id: 4,
+        id_kebun: '001-APKS-001-004',
+        nama_petani: 'Agustinus Nery',
+        kelompok: 'Bepekaek Besamo',
+        luas_kebun: 0.75,
+        tahun_tanam: 2014,
+        umur_tanaman: '21 Tahun',
+        jumlah_pokok: '100 Pohon',
+        total_pupuk: '500 Kg',
+      },
+      {
+        id: 5,
+        id_kebun: '001-APKS-001-005',
+        nama_petani: 'Agustinus Nery',
+        kelompok: 'Bepekaek Besamo',
+        luas_kebun: 0.75,
+        tahun_tanam: 2014,
+        umur_tanaman: '21 Tahun',
+        jumlah_pokok: '100 Pohon',
+        total_pupuk: '500 Kg',
+      },
+    ],
+    []
+  );
 
-      if (search) params.append('search', search);
-      if (kelompok) params.append('kelompok', kelompok);
-      if (rspo) params.append('is_rspo', rspo === 'sudah' ? 'true' : 'false');
-      if (ispo) params.append('is_ispo', ispo === 'sudah' ? 'true' : 'false');
+  // Fetch Pupuk data function
+  const fetchPupukData = useCallback(
+    async ({ page, page_size, search, kelompok, tahun }) => {
+      setLoading(true);
+      try {
+        // For now, use mock data
+        // In real implementation, you would call the API:
+        // const params = new URLSearchParams({
+        //   page,
+        //   page_size,
+        // });
+        // if (search) params.append('search', search);
+        // if (kelompok) params.append('kelompok', kelompok);
+        // if (tahun) params.append('tahun', tahun);
+        // const response = await getListPupuk(params.toString());
 
-      const response = await getListKebun(params.toString());
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      if (response?.data?.status === 'success') {
-        // Map API response to table format
-        const mappedData = response.data.data.results.map((kebun) => ({
-          id: kebun.id,
-          id_kebun: kebun.id_kebun,
-          nama_petani: '-', // Petani name not included in this endpoint
-          kelompok: '-', // Kelompok not included in this endpoint
-          lokasi: kebun.lokasi_kebun,
-          luas_kebun: kebun.luas,
-          waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
-          ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
-        }));
-
-        setKebunData(mappedData);
-        setTotalKebun(response.data.data.count);
-      } else {
-        throw new Error('Invalid response format');
+        // Mock response
+        setPupukData(mockData);
+        setTotalPupuk(500); // Mock total count
+      } catch (error) {
+        console.error('Error fetching Pupuk data:', error);
+        toast.error('Gagal memuat data Pupuk');
+        setPupukData([]);
+        setTotalPupuk(0);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching kebun data:', error);
-      toast.error('Gagal memuat data kebun');
-      setKebunData([]);
-      setTotalKebun(0);
-    } finally {
-      setLoading(false);
+    },
+    [mockData]
+  );
+
+  // Fetch kelompok tani data on component mount
+  useEffect(() => {
+    if (!kelompokTani || kelompokTani.length === 0) {
+      fetchKelompokTani();
     }
-  };
+  }, [kelompokTani, fetchKelompokTani]);
 
   useEffect(() => {
-    fetchKebunData({
+    fetchPupukData({
       page: currentPage,
       page_size: pageSize,
       search,
       kelompok: selectedKelompok,
-      rspo: selectedRSPO,
-      ispo: selectedISPO,
+      tahun: selectedTahun,
     });
   }, [
     currentPage,
     pageSize,
     search,
     selectedKelompok,
-    selectedRSPO,
-    selectedISPO,
+    selectedTahun,
+    fetchPupukData,
   ]);
 
-  const handleSearchTextChange = useCallback(
-    debounce((e) => {
-      setSearch(e.target.value);
-      setCurrentPage(1);
-    }, 300),
+  const handleSearchTextChange = useMemo(
+    () =>
+      debounce((e) => {
+        setSearch(e.target.value);
+        setCurrentPage(1);
+      }, 300),
     []
   );
 
@@ -133,13 +167,8 @@ const KebunPage = () => {
     setCurrentPage(1);
   };
 
-  const handleRSPOChange = (e) => {
-    setSelectedRSPO(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleISPOChange = (e) => {
-    setSelectedISPO(e.target.value);
+  const handleTahunChange = (e) => {
+    setSelectedTahun(e.target.value);
     setCurrentPage(1);
   };
 
@@ -152,37 +181,29 @@ const KebunPage = () => {
     setCurrentPage(1);
   };
 
-  const handleLihatClicked = (data) => {
-    router.push(`/traceability/kebun/${data?.id}`);
-  };
+  const handleLihatClicked = useCallback(
+    (data) => {
+      router.push(`/traceability/gap/pupuk/${data?.id}`);
+    },
+    [router]
+  );
 
-  const ActionsCellRenderer = useCallback((e) => {
-    return (
-      <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-primary underline hover:text-primary/80 sm:text-[12px]"
-          onClick={() => handleLihatClicked(e.data)}
-        >
-          LIHAT
+  const ActionsCellRenderer = useCallback(
+    (e) => {
+      return (
+        <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
+          <button
+            className="cursor-pointer text-[10px] font-bold uppercase text-primary underline hover:text-primary/80 sm:text-[12px]"
+            onClick={() => handleLihatClicked(e.data)}
+            type="button"
+          >
+            LIHAT
+          </button>
         </div>
-      </div>
-    );
-  }, []);
-
-  const StatusCellRenderer = useCallback((params) => {
-    const status = params.value;
-    const isSuccess = status === 'Sudah';
-
-    return (
-      <span
-        className={`text-xs font-medium ${
-          isSuccess ? 'text-green-600' : 'text-red-600'
-        }`}
-      >
-        {status}
-      </span>
-    );
-  }, []);
+      );
+    },
+    [handleLihatClicked]
+  );
 
   const colDefs = useMemo(
     () => [
@@ -214,12 +235,6 @@ const KebunPage = () => {
         minWidth: 140,
       },
       {
-        field: 'lokasi',
-        headerName: 'Lokasi',
-        flex: 1,
-        minWidth: 140,
-      },
-      {
         field: 'luas_kebun',
         headerName: 'Luas Kebun (Ha)',
         flex: 1,
@@ -229,27 +244,31 @@ const KebunPage = () => {
         },
       },
       {
-        field: 'waktu_tanam',
-        headerName: 'Waktu Tanam',
+        field: 'tahun_tanam',
+        headerName: 'Tahun Tanam',
         flex: 1,
         minWidth: 140,
       },
       {
-        field: 'rspo',
-        headerName: 'RSPO',
-        flex: 0.8,
-        minWidth: 100,
-        cellRenderer: StatusCellRenderer,
+        field: 'umur_tanaman',
+        headerName: 'Umur Tanaman',
+        flex: 1,
+        minWidth: 140,
       },
       {
-        field: 'ispo',
-        headerName: 'ISPO',
-        flex: 0.8,
-        minWidth: 100,
-        cellRenderer: StatusCellRenderer,
+        field: 'jumlah_pokok',
+        headerName: 'Jumlah Pokok',
+        flex: 1,
+        minWidth: 120,
+      },
+      {
+        field: 'total_pupuk',
+        headerName: 'Total Pupuk',
+        flex: 1,
+        minWidth: 120,
       },
     ],
-    [ActionsCellRenderer, StatusCellRenderer]
+    [ActionsCellRenderer]
   );
 
   const autoSizeStrategy = useMemo(() => {
@@ -265,7 +284,7 @@ const KebunPage = () => {
           {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
-              DATA KEBUN
+              PUPUK
             </Heading>
 
             <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
@@ -280,25 +299,17 @@ const KebunPage = () => {
                 <Select
                   containerClassName="w-full sm:w-auto lg:w-[150px]"
                   placeholder="Kelompok"
-                  options={kelompokOptions}
+                  options={kelompokTani || []}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
                 />
 
                 <Select
                   containerClassName="w-full sm:w-auto lg:w-[120px]"
-                  placeholder="RSPO"
-                  options={rspoOptions}
-                  value={selectedRSPO}
-                  onChange={handleRSPOChange}
-                />
-
-                <Select
-                  containerClassName="w-full sm:w-auto lg:w-[120px]"
-                  placeholder="ISPO"
-                  options={ispoOptions}
-                  value={selectedISPO}
-                  onChange={handleISPOChange}
+                  placeholder="Tahun"
+                  options={tahunOptions}
+                  value={selectedTahun}
+                  onChange={handleTahunChange}
                 />
               </div>
 
@@ -310,12 +321,6 @@ const KebunPage = () => {
                   title="Export Excel"
                   onClick={() => toast.info('Export Excel clicked')}
                 />
-                <Button
-                  onClick={() => router.push('/traceability/kebun/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm"
-                >
-                  Tambah Kebun
-                </Button>
               </div>
             </div>
           </div>
@@ -327,7 +332,7 @@ const KebunPage = () => {
             loading={loading}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
-            rowData={kebunData}
+            rowData={pupukData}
             columnDefs={colDefs}
           />
         </div>
@@ -336,7 +341,7 @@ const KebunPage = () => {
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}
-            totalItems={totalKebun}
+            totalItems={totalPupuk}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
             showRowsPerPage={true}
@@ -353,4 +358,4 @@ const KebunPage = () => {
   );
 };
 
-export default KebunPage;
+export default PupukPage;

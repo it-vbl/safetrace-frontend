@@ -6,6 +6,7 @@ import {
   getEksPlasma,
   getJenisKelamin,
   getJenisLahan,
+  getJenisLegalitas,
   getJenisPupuk,
   getKelompokTani,
   getKomoditasKelembagaan,
@@ -22,6 +23,7 @@ import {
   setEksPlasma,
   setJenisKelamin,
   setJenisLahan,
+  setJenisLegalitas,
   setJenisPupuk,
   setKelompokTani,
   setKomoditasKelembagaan,
@@ -55,6 +57,7 @@ const useReferences = () => {
     statusPerkawinan,
     kelompokTani,
     sumberKontak,
+    jenisLegalitas,
   } = useSelector((state) => state.referensi);
 
   const fetchData = async (fetchFunction, setAction) => {
@@ -135,6 +138,10 @@ const useReferences = () => {
     () => fetchData(getSumberKontak, setSumberKontak),
     []
   );
+  const fetchJenisLegalitas = useCallback(
+    () => fetchData(getJenisLegalitas, setJenisLegalitas),
+    []
+  );
 
   return {
     loading,
@@ -153,6 +160,7 @@ const useReferences = () => {
     statusPerkawinan,
     kelompokTani,
     sumberKontak,
+    jenisLegalitas,
     fetchSTDBStatuses,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
@@ -167,6 +175,7 @@ const useReferences = () => {
     fetchStatusPerkawinan,
     fetchKelompokTani,
     fetchSumberKontak,
+    fetchJenisLegalitas,
   };
 };
 
