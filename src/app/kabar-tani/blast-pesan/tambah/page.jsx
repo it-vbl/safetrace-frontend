@@ -6,8 +6,10 @@ import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
+import Label from '@/components/atoms/Label';
 import Heading from '@/components/atoms/Typography/Heading';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import InputMessage from '@/components/molecules/InputMessage';
 import InputText from '@/components/molecules/InputText';
 import MemberSelector from '@/components/molecules/MemberSelector';
 import RadioButton from '@/components/molecules/RadioButton';
@@ -15,10 +17,8 @@ import Select from '@/components/molecules/Select';
 import { createBroadcast } from '@/services/broadcast';
 import { getDeviceList } from '@/services/device';
 import { getKontakList } from '@/services/kontak';
-
-import Label from '../../../../components/atoms/Label';
-import WhatsAppService from '../../../../services/whatsapp';
-import { formatPhoneNumber } from '../../../../utils/whatsapp';
+import WhatsAppService from '@/services/whatsapp';
+import { formatPhoneNumber } from '@/utils/whatsapp';
 
 const PesanBaruPage = () => {
   const router = useRouter();
@@ -76,6 +76,8 @@ const PesanBaruPage = () => {
     }
   };
 
+  // Removed: group expansion and per-member sending. Whacenter group send is used directly.
+
   const schemaValidation = Yup.object().shape({
     no_pengirim: Yup.string().required('No pengirim harus diisi'),
     nama_pesan: Yup.string().required('Nama pesan harus diisi'),
@@ -95,7 +97,8 @@ const PesanBaruPage = () => {
     initialValues: {
       no_pengirim: '',
       nama_pesan: '',
-      isi_pesan: 'Lorem Ipsum Dolor Sit Amet', // Default message
+      isi_pesan: 'Lorem Ipsum Dolor Sit Amet',
+      nama_grup: '',
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
@@ -107,10 +110,19 @@ const PesanBaruPage = () => {
           return;
         }
 
-        if (selectedMembers.length === 0) {
-          toast.error('Pilih penerima pesan terlebih dahulu');
-          setSubmitting(false);
-          return;
+        // Validasi penerima sesuai skema
+        if (activeTile === 'group') {
+          if (!values.nama_grup || !values.nama_grup.trim()) {
+            toast.error('Nama grup WhatsApp tidak boleh kosong');
+            setSubmitting(false);
+            return;
+          }
+        } else {
+          if (selectedMembers.length === 0) {
+            toast.error('Pilih penerima pesan terlebih dahulu');
+            setSubmitting(false);
+            return;
+          }
         }
 
         const selectedDevice = deviceData.find(
@@ -118,19 +130,59 @@ const PesanBaruPage = () => {
         );
 
         const jenisPenerima =
-          activeTile === 'group'
-            ? 'grup'
-            : activeTile === 'csv'
-            ? 'csv'
-            : 'personal';
+          activeTile === 'group' ? '2' : activeTile === 'csv' ? '3' : '1';
 
+        let recipientIds = selectedMembers
+          .map((m) => m.id ?? m.kontak_id ?? m.id_kontak ?? m.value)
+          .filter((v) => v !== undefined && v !== null)
+          .map((id) =>
+            typeof id === 'string' && /^\d+$/.test(id) ? parseInt(id, 10) : id
+          );
+
+        if (jenisPenerima === '1' && recipientIds.length === 0) {
+          toast.error(
+            'Kontak tidak boleh kosong ketika jenis penerima adalah individu.'
+          );
+          setSubmitting(false);
+          return;
+        }
+
+        // Skema grup: Kirim pesan ke grup berdasarkan nama (Whacenter) saja
+        if (jenisPenerima === '2') {
+          // Kirim ke grup via Whacenter
+          try {
+            const waSend = await WhatsAppService.sendGroupMessage(
+              values.no_pengirim,
+              values.nama_grup.trim(),
+              values.isi_pesan
+            );
+            const waStatus = waSend?.data?.status ?? waSend?.status;
+            const ok =
+              waStatus === true ||
+              String(waStatus || '').toLowerCase() === 'success';
+            toast[ok ? 'success' : 'info'](
+              ok
+                ? `Pesan WhatsApp terkirim ke grup "${values.nama_grup.trim()}"`
+                : `Status pengiriman ke grup belum pasti`
+            );
+          } catch (waError) {
+            console.error('Gagal kirim WhatsApp ke grup:', waError);
+            toast.error(
+              'Terjadi kesalahan saat mengirim pesan ke grup WhatsApp'
+            );
+          }
+          router.push('/kabar-tani/blast-pesan');
+          setSubmitting(false);
+          return; // Selesai untuk skema grup (Whacenter only)
+        }
+
+        // Skema individu (tetap seperti sebelumnya)
         const payload = {
           nama_pesan: values.nama_pesan,
-          isi_pesan: values.isi_pesan,
+          pesan: values.isi_pesan,
           jenis_penerima: jenisPenerima,
-          kontak_ids: selectedMembers.map((m) => m.id),
-          id_device: values.no_pengirim,
-          no_pengirim: selectedDevice?.no_wa,
+          device: selectedDevice?.id,
+          kontak: recipientIds,
         };
 
         const response = await createBroadcast(payload);
@@ -140,16 +192,64 @@ const PesanBaruPage = () => {
           response?.data?.status === 'success'
         ) {
           toast.success(
-            'Berhasil membuat campaign dan menjadwalkan pengiriman'
+            'Berhasil membuat campaign. Mengirim pesan WhatsApp ke penerima...'
           );
+
+          try {
+            const deviceIdForWhatsApp = values.no_pengirim;
+            const waSend = await sendBulkWhatsAppMessage(
+              deviceIdForWhatsApp,
+              selectedMembers,
+              values.isi_pesan
+            );
+            const waResults = waSend?.data?.results || [];
+            const successCount = waResults.filter((r) => {
+              const status = String(r?.status || '').toLowerCase();
+              return (
+                status === 'sent' || status === 'success' || r?.status === true
+              );
+            }).length;
+            const failureCount = waResults.length - successCount;
+
+            if (successCount > 0) {
+              toast.success(
+                jenisPenerima === '2'
+                  ? `Pesan WhatsApp terkirim ke ${successCount} kontak dalam grup${
+                      failureCount ? `, gagal ${failureCount}` : ''
+                    }`
+                  : `Pesan WhatsApp terkirim ke ${successCount} kontak${
+                      failureCount ? `, gagal ${failureCount}` : ''
+                    }`
+              );
+            } else {
+              toast.error(
+                jenisPenerima === '2'
+                  ? 'Gagal mengirim pesan WhatsApp ke grup'
+                  : 'Gagal mengirim pesan WhatsApp ke semua penerima'
+              );
+            }
+          } catch (waError) {
+            console.error('Gagal kirim WhatsApp:', waError);
+            toast.error('Terjadi kesalahan saat mengirim pesan WhatsApp');
+          }
+
           router.push('/kabar-tani/blast-pesan');
         } else {
-          toast.error(response?.data?.message || 'Gagal membuat campaign');
+          const message = response?.data?.message || 'Gagal membuat campaign';
+          const errors = response?.data?.errors || {};
+          const kontakError = errors?.kontak?.[0];
+          const grupError = errors?.grup?.[0] || errors?.grup?.[0];
+          const errorText = grupError || kontakError;
+          toast.error(errorText ? `${message} - ${errorText}` : message);
         }
       } catch (error) {
-        toast.error(
-          error?.response?.data?.message || 'Terjadi kesalahan sistem'
-        );
+        const message =
+          error?.response?.data?.message || 'Terjadi kesalahan sistem';
+        const errors = error?.response?.data?.errors || {};
+        const kontakError = errors?.kontak?.[0];
+        const grupError = errors?.grup?.[0] || errors?.grup?.[0];
+        const errorText = grupError || kontakError;
+        toast.error(errorText ? `${message} - ${errorText}` : message);
         console.error('System error:', error);
       } finally {
         setSubmitting(false);
@@ -242,6 +342,13 @@ const PesanBaruPage = () => {
     };
   }, []);
 
+  // Remove grup fetching; Whacenter is the only endpoint for group messaging
+
+  useEffect(() => {
+    // Reset selected recipients when switching mode
+    setSelectedMembers([]);
+  }, [activeTile]);
+
   return (
     <div className="relative w-full bg-gray-50">
       <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
@@ -284,7 +391,7 @@ const PesanBaruPage = () => {
                 </div>
 
                 <InputText
-                  label={'Nama Campaign'}
+                  label={'Nama Pesan'}
                   name="nama_pesan"
                   placeholder="Masukan nama campaign"
                   value={values.nama_pesan}
@@ -304,19 +411,34 @@ const PesanBaruPage = () => {
                 options={[
                   { label: 'Kontak Individu', value: 'personal' },
                   { label: 'Kontak Grup', value: 'group' },
-                  { label: 'Upload CSV', value: 'csv' },
                 ]}
               />
 
-              {/* Member Selector Component */}
-              <MemberSelector
-                selectedMembers={selectedMembers}
-                availableMembers={availableMembers}
-                onMembersChange={handleMembersChange}
-                label="Penerima Pesan"
-              />
+              {activeTile === 'personal' ? (
+                <MemberSelector
+                  selectedMembers={selectedMembers}
+                  availableMembers={availableMembers}
+                  onMembersChange={handleMembersChange}
+                  label="Penerima Pesan"
+                />
+              ) : (
+                <div className="flex w-full flex-col gap-1">
+                  <Label className="text-[12px] font-bold text-gray-500">
+                    Grup Kontak
+                  </Label>
+                  <InputText
+                    name="nama_grup"
+                    placeholder="Masukkan nama grup yang sesuai"
+                    value={values.nama_grup}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    errors={errors}
+                    touched={touched}
+                  />
+                </div>
+              )}
 
-              {selectedMembers.length > 0 && (
+              {activeTile === 'personal' && selectedMembers.length > 0 && (
                 <div className="text-sm text-blue-600">
                   Total penerima: {selectedMembers.length} kontak
                 </div>
@@ -325,7 +447,7 @@ const PesanBaruPage = () => {
           </div>
 
           {/* Message Section */}
-          <div className="mt-6 overflow-hidden rounded-[4px] border border-gray-200 bg-white">
+          <div className="mt-6 rounded-[4px] border border-gray-200 bg-white">
             <Heading
               level={3}
               className="mb-4 mt-6 px-6 text-lg font-semibold text-gray-800"
@@ -334,52 +456,16 @@ const PesanBaruPage = () => {
             </Heading>
 
             <div className="mb-6 px-6">
-              <div className="flex gap-6">
-                {/* Message Input */}
-                <div className="flex w-1/2 flex-col gap-1">
-                  <Label className="text-[12px] font-bold text-gray-500">
-                    Isi Pesan
-                  </Label>
-                  <textarea
-                    name="isi_pesan"
-                    placeholder="Tulis pesan Anda di sini..."
-                    value={values.isi_pesan}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    rows={14}
-                    className={`w-full rounded-[4px] border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.isi_pesan && touched.isi_pesan
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.isi_pesan && touched.isi_pesan && (
-                    <span className="text-xs text-red-500">
-                      {errors.isi_pesan}
-                    </span>
-                  )}
-                </div>
-
-                {/* Preview */}
-                <div className="flex w-1/2 flex-col gap-1">
-                  <Label className="text-[12px] font-bold text-gray-500">
-                    Preview
-                  </Label>
-                  <div className="min-h-[298px] rounded-[4px] border border-gray-300 bg-yellow-50 p-4">
-                    <div className="text-sm text-gray-700">
-                      {values.isi_pesan ||
-                        'Preview pesan akan muncul di sini...'}
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <span className="text-xs text-gray-500">
-                        {values.isi_pesan
-                          ? `${values.isi_pesan.length}/160`
-                          : '0/160'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <InputMessage
+                name="isi_pesan"
+                value={values.isi_pesan}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                showCharCount
+                charCountMax={160}
+                error={!!(errors.isi_pesan && touched.isi_pesan)}
+                errorText={errors.isi_pesan}
+              />
             </div>
           </div>
 
@@ -395,7 +481,12 @@ const PesanBaruPage = () => {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || selectedMembers.length === 0}
+              disabled={
+                isSubmitting ||
+                (activeTile === 'group'
+                  ? !values.nama_grup || !values.nama_grup.trim()
+                  : selectedMembers.length === 0)
+              }
               className={isSubmitting ? 'opacity-75' : ''}
             >
               {isSubmitting ? (
@@ -403,6 +494,8 @@ const PesanBaruPage = () => {
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                   Mengirim...
                 </div>
+              ) : activeTile === 'group' ? (
+                `Kirim Pesan (Grup)`
               ) : (
                 `Kirim Pesan (${selectedMembers.length})`
               )}

@@ -2,18 +2,13 @@ import api from './api';
 import wa from './wa';
 
 const WhatsAppService = {
-  // Whacenter: Device Status & QR
   getWhacenterDeviceStatus: (deviceId) => {
     return wa.get('/statusDevice', { params: { device_id: deviceId } }, false);
   },
-  // Whacenter: Relog device to generate new QR
   relogWhacenterDevice: (deviceId) => {
-    // Whacenter relog endpoint uses GET with device_id
-    // After relog, the QR image becomes available at /qr?device_id=...
-    return wa.get('/relog', { params: { device_id: deviceId } }, false);
+    return wa.get('/relogDevice', { params: { device_id: deviceId } }, false);
   },
 
-  // Returns direct image URL to QR code (Whacenter serves image)
   getWhacenterQRCodeUrl: (deviceId) => {
     let base =
       process.env.NEXT_PUBLIC_WHATSAPP_API_URL ||
@@ -22,13 +17,11 @@ const WhatsAppService = {
     return `${base}qr?device_id=${deviceId}`;
   },
 
-  // Whacenter: Webhook management
   getWhacenterWebhook: (deviceId) => {
     return wa.get('/getWebhook', { params: { device_id: deviceId } }, false);
   },
 
   setWhacenterWebhook: (deviceId, webhookUrl) => {
-    // Whacenter uses GET with query params for setting webhook
     return wa.get(
       '/setWebhook',
       {
@@ -38,18 +31,16 @@ const WhatsAppService = {
     );
   },
 
-  // Whacenter: Send private and group messages
   sendPrivateMessage: ({ deviceId, number, message }) => {
     const form = { device_id: deviceId, number, message };
     return wa.post('/send', form, null, {}, null, false);
   },
 
   sendGroupMessage: ({ deviceId, group, message }) => {
-    // Whacenter uses '/sendGroup' endpoint for group messages
     const form = { device_id: deviceId, group, message };
     return wa.post('/sendGroup', form, null, {}, null, false);
   },
-  // Device Management
+
   getDevices: (params = {}) => {
     const queryParams = {
       page: params.page || 1,
@@ -75,7 +66,6 @@ const WhatsAppService = {
     return api.get(`/whatsapp/devices/${deviceId}`);
   },
 
-  // Device Connection & Status
   connectDevice: (deviceId) => {
     return api.post(`/whatsapp/devices/${deviceId}/connect`);
   },
@@ -92,7 +82,6 @@ const WhatsAppService = {
     return api.get(`/whatsapp/devices/${deviceId}/qr`);
   },
 
-  // Device Logs
   getDeviceLogs: (deviceId, params = {}) => {
     const queryParams = {
       page: params.page || 1,
@@ -105,7 +94,6 @@ const WhatsAppService = {
     });
   },
 
-  // Message Management
   sendMessage: (deviceId, messageData) => {
     return api.post(
       `/whatsapp/devices/${deviceId}/send-message`,
@@ -141,7 +129,6 @@ const WhatsAppService = {
     );
   },
 
-  // Blast Message Campaign
   createCampaign: (campaignData) => {
     return api.post('/whatsapp/campaigns', null, campaignData);
   },
@@ -184,7 +171,6 @@ const WhatsAppService = {
     return api.get(`/whatsapp/campaigns/${campaignId}/report`);
   },
 
-  // Contact Management
   getContacts: (params = {}) => {
     const queryParams = {
       page: params.page || 1,
@@ -215,7 +201,6 @@ const WhatsAppService = {
     return api.get('/whatsapp/contacts/export', { params });
   },
 
-  // Contact Groups
   getContactGroups: (params = {}) => {
     const queryParams = {
       page: params.page || 1,
@@ -237,7 +222,6 @@ const WhatsAppService = {
     return api.delete(`/whatsapp/contact-groups/${groupId}`);
   },
 
-  // Templates
   getTemplates: (params = {}) => {
     const queryParams = {
       page: params.page || 1,
@@ -264,7 +248,6 @@ const WhatsAppService = {
     return api.get(`/whatsapp/templates/${templateId}`);
   },
 
-  // Media Management
   uploadMedia: (mediaData) => {
     return api.postData('/whatsapp/media/upload', mediaData);
   },
@@ -273,7 +256,7 @@ const WhatsAppService = {
     const queryParams = {
       page: params.page || 1,
       page_size: params.page_size || 10,
-      type: params.type || '', // image, video, audio, document
+      type: params.type || '',
     };
     return api.get('/whatsapp/media', { params: queryParams });
   },
@@ -282,7 +265,6 @@ const WhatsAppService = {
     return api.delete(`/whatsapp/media/${mediaId}`);
   },
 
-  // Webhook & Settings
   getWebhookSettings: () => {
     return api.get('/whatsapp/webhook/settings');
   },
@@ -297,7 +279,6 @@ const WhatsAppService = {
     });
   },
 
-  // Analytics & Reports
   getDashboardStats: (params = {}) => {
     const queryParams = {
       date_from: params.date_from || '',
@@ -314,7 +295,7 @@ const WhatsAppService = {
       date_from: params.date_from || '',
       date_to: params.date_to || '',
       device_id: params.device_id || '',
-      group_by: params.group_by || 'day', // day, week, month
+      group_by: params.group_by || 'day',
     };
     return api.get('/whatsapp/analytics/messages', {
       params: queryParams,
@@ -331,7 +312,6 @@ const WhatsAppService = {
     });
   },
 
-  // Auto Reply
   getAutoReplies: (deviceId, params = {}) => {
     const queryParams = {
       page: params.page || 1,
