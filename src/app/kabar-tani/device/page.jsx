@@ -124,7 +124,7 @@ const DevicePage = () => {
   const generateQRCode = async (deviceData) => {
     setIsGeneratingQR(true);
     try {
-      const whacenterId = deviceData?.device_id || deviceData?.id_device;
+      const whacenterId = deviceData?.id_device;
       const qrUrl = WhatsAppService.getWhacenterQRCodeUrl(whacenterId);
       setQrCodeDataUrl(qrUrl);
       setSelectedItem(deviceData);
@@ -325,11 +325,7 @@ const DevicePage = () => {
         setSubmitting(true);
         const payload = {
           nama: values.nama_device,
-          id_device:
-            typeof crypto !== 'undefined' && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `${Date.now()}`,
-          device_id: values.device_id,
+          id_device: values.device_id,
           no_wa: values.no_handphone,
           terhubung: false,
         };

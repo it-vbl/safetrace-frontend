@@ -1,7 +1,13 @@
 'use client';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { toast } from 'react-toastify';
+
 import Heading from '@/components/atoms/Typography/Heading';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputMessage from '@/components/molecules/InputMessage';
+import SectionLoading from '@/components/molecules/SectionLoading';
+import { getPesanDetail } from '@/services/pesan';
 
 const DetailKirimPesanPage = () => {
   const breadcrumbItems = [
@@ -9,18 +15,35 @@ const DetailKirimPesanPage = () => {
     { label: 'DETAIL PESAN' },
   ];
 
-  const messageText = `Dengan hormat, bersama ini kami sampaikan informasi harga TBS kelapa sawit pada hari ini.
+  const params = useParams();
+  const id = params?.id;
 
-Tanggal: 25 Agustus 2025
-Petani Swadaya : Rp 2.150/kg
-Plasma / Mitra : Rp 2.320/kg
+  const [loading, setLoading] = useState(false);
+  const [detail, setDetail] = useState(null);
 
-Harga tersebut berlaku mulai tanggal tersebut hingga adanya pembaruan berikutnya.
+  const fetchDetail = async () => {
+    setLoading(true);
+    try {
+      const res = await getPesanDetail(id);
+      const data = res?.data?.data || res?.data;
+      setDetail(data);
+    } catch (error) {
+      console.error('Error fetching detail pesan:', error);
+      toast.error(
+        error?.response?.data?.message || 'Gagal memuat detail pesan'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami ucapkan terima kasih.`;
+  useEffect(() => {
+    if (id) fetchDetail();
+  }, [id]);
 
   return (
     <div className="relative w-full bg-gray-50">
+      <SectionLoading loading={loading} />
       <div className="mx-auto flex max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
@@ -37,11 +60,30 @@ Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami uca
 
           <div className="mb-6 space-y-4 px-6">
             <InputMessage
-              value={messageText}
+              value={detail?.pesan || ''}
               editable={false}
               showCharCount={false}
               charCountMax={160}
             />
+            <div className="mt-2 flex justify-between text-xs text-gray-500">
+              <span>
+                Pengirim: {detail?.device_data?.nama || '-'}
+                {detail?.device_data?.no_wa
+                  ? ` - ${detail?.device_data?.no_wa}`
+                  : ''}
+              </span>
+              <span>
+                {detail?.created_at
+                  ? new Date(detail.created_at).toLocaleString('id-ID', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })
+                  : ''}
+              </span>
+            </div>
           </div>
         </div>
       </div>

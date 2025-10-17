@@ -10,6 +10,7 @@ import InputMessage from '@/components/molecules/InputMessage';
 import Select from '@/components/molecules/Select';
 import { getDeviceList } from '@/services/device';
 import { getKontakList } from '@/services/kontak';
+import { createPesan } from '@/services/pesan';
 import WhatsAppService from '@/services/whatsapp';
 import { formatPhoneNumber } from '@/utils/whatsapp';
 
@@ -29,16 +30,13 @@ const PesanBaruKirimPesanPage = () => {
   const [noPengirim, setNoPengirim] = useState('');
   const [noPenerima, setNoPenerima] = useState('');
 
-  const [message, setMessage] =
-    useState(`Dengan hormat, bersama ini kami sampaikan informasi harga TBS kelapa sawit pada hari ini.
-
-Tanggal: 25 Agustus 2025
-Petani Swadaya : Rp 2.150/kg
-Plasma / Mitra : Rp 2.320/kg
-
-Harga tersebut berlaku mulai tanggal tersebut hingga adanya pembaruan berikutnya.
-
-Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami ucapkan terima kasih.`);
+  // Tambahkan data mentah untuk pemetaan ID
+  const [deviceData, setDeviceData] = useState([]);
+  const [kontakData, setKontakData] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState(
+    `Lorem Ipsum is simply dummy text of the printing and typesetting industry.`
+  );
 
   const fetchDevices = async () => {
     setLoadingDevices(true);
@@ -47,15 +45,27 @@ Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami uca
       const res = await getDeviceList(params);
       const data = res?.data?.data || res?.data || {};
       const results = data?.results || [];
-      const options = results.map((d) => ({
+
+      const mappedDevices = results.map((item) => ({
+        id: item.id,
+        id_device: item.id_device,
+        nama: item.nama,
+        no_wa: item.no_wa,
+        terhubung: !!item.terhubung,
+      }));
+
+      const options = mappedDevices.map((d) => ({
         value: d.id_device,
         label: `${d?.nama ?? '-'} - ${d?.no_wa ?? '-'}`,
       }));
+
+      setDeviceData(mappedDevices);
       setDeviceOptions(options);
       if (options.length > 0 && !noPengirim) {
         setNoPengirim(options[0].value);
       }
     } catch (err) {
+      setDeviceData([]);
       setDeviceOptions([]);
       toast.error('Gagal mengambil daftar device');
     } finally {
@@ -69,15 +79,27 @@ Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami uca
       const res = await getKontakList({ page: 1, page_size: 100 });
       const data = res?.data?.data || res?.data || {};
       const results = data?.results || [];
-      const options = results.map((k) => ({
-        value: k?.no_wa || '',
+
+      const mappedKontak = results
+        .map((k) => ({
+          id: k?.id ?? k?.id_kontak ?? k?.kontak_id,
+          nama: k?.nama,
+          no_wa: k?.no_wa || '',
+        }))
+        .filter((k) => k.id !== undefined && k.id !== null);
+
+      const options = mappedKontak.map((k) => ({
+        value: k.id,
         label: `${k?.nama ?? '-'} - ${k?.no_wa ?? '-'}`,
       }));
+
+      setKontakData(mappedKontak);
       setKontakOptions(options);
       if (options.length > 0 && !noPenerima) {
         setNoPenerima(options[0].value);
       }
     } catch (err) {
+      setKontakData([]);
       setKontakOptions([]);
       toast.error('Gagal mengambil daftar kontak');
     } finally {
@@ -113,30 +135,66 @@ Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami uca
         return;
       }
 
-      const formattedNumber = formatPhoneNumber(noPenerima);
-      const res = await WhatsAppService.sendPrivateMessage({
+      setIsSubmitting(true);
+
+      const selectedDevice = deviceData.find(
+        (d) => String(d.id_device) === String(noPengirim)
+      );
+      const selectedKontak = kontakData.find(
+        (k) => String(k.id) === String(noPenerima)
+      );
+
+      const payload = {
+        kontak: selectedKontak?.id,
+        pesan: message,
+        device: selectedDevice?.id,
+        terkirim: true,
+      };
+
+      const response = await createPesan(payload);
+      const ok =
+        response?.status === 200 ||
+        response?.status === 201 ||
+        String(response?.data?.status || '').toLowerCase() === 'success';
+
+      if (!ok) {
+        const msg = response?.data?.message || 'Gagal membuat pesan';
+        const errors = response?.data?.errors || {};
+        const errText =
+          errors?.kontak?.[0] || errors?.device?.[0] || errors?.pesan?.[0];
+        toast.error(errText ? `${msg} - ${errText}` : msg);
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast.success('Berhasil membuat pesan. Mengirim WhatsApp...');
+
+      const formattedNumber = formatPhoneNumber(selectedKontak?.no_wa || '');
+
+      const resWa = await WhatsAppService.sendPrivateMessage({
         deviceId: noPengirim,
         number: formattedNumber,
         message,
       });
 
-      const status = res?.data?.status ?? res?.status ?? 'success';
-      if (
-        String(status).toLowerCase() === 'success' ||
-        String(status).toLowerCase() === 'sent' ||
-        status === true
-      ) {
-        toast.success('Pesan WhatsApp terkirim');
-        router.push('/kabar-tani/kirim-pesan');
-      } else {
-        toast.error('Gagal mengirim pesan WhatsApp');
-      }
+      const status = resWa?.data?.status ?? resWa?.status;
+      const sent =
+        status === true ||
+        String(status || '').toLowerCase() === 'success' ||
+        String(status || '').toLowerCase() === 'sent';
+
+      toast[sent ? 'success' : 'error'](
+        sent ? 'Pesan WhatsApp terkirim' : 'Gagal mengirim pesan WhatsApp'
+      );
+      router.push('/kabar-tani/kirim-pesan');
     } catch (error) {
       console.error('Gagal kirim WhatsApp:', error);
       toast.error(
         error?.response?.data?.message ||
           'Terjadi kesalahan saat mengirim pesan'
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -218,8 +276,20 @@ Demikian informasi yang dapat kami sampaikan. Atas perhatian Bapak/Ibu, kami uca
           <Button type="button" variant="danger" onClick={handleCancel}>
             Batalkan
           </Button>
-          <Button type="button" onClick={handleSend}>
-            Kirim Pesan
+          <Button
+            type="button"
+            onClick={handleSend}
+            disabled={isSubmitting}
+            className={isSubmitting ? 'opacity-75' : ''}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                Mengirim...
+              </div>
+            ) : (
+              'Kirim Pesan'
+            )}
           </Button>
         </div>
       </div>

@@ -3,12 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
+import { deletePesan, getPesanList } from '@/services/pesan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -23,27 +25,66 @@ const KirimPesanPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const fetchPesanData = async ({ page, page_size }) => {
+    setLoading(true);
+    try {
+      const params = { page, page_size };
+      const res = await getPesanList(params);
+      const data = res?.data?.data || res?.data;
+      const results = data?.results || [];
+
+      const mapped = (results || []).map((item) => {
+        const createdAt = item?.created_at || item?.waktu_pengiriman;
+        const waktuPengiriman = createdAt
+          ? new Date(createdAt).toLocaleString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
+          : '-';
+
+        const pengirimNama = item?.device_data?.nama;
+        const pengirimNo = item?.device_data?.no_wa;
+
+        const statusLabel =
+          item?.terkirim === true
+            ? 'Terkirim'
+            : item?.gagal === true
+            ? 'Gagal'
+            : 'Dalam Antrian';
+
+        return {
+          id: item?.id,
+          id_pesan:
+            item?.id_pesan ||
+            `KP-${String(item?.id || 0)
+              .toString()
+              .padStart(4, '0')}`,
+          no_pengirim:
+            `${pengirimNama || '-'}` + (pengirimNo ? ` - ${pengirimNo}` : ''),
+          no_penerima: item?.kontak_data?.no_wa || '-',
+          waktu_pengiriman: waktuPengiriman,
+          status: statusLabel,
+        };
+      });
+
+      setRows(mapped);
+      setTotalItems(data?.count ?? mapped.length);
+    } catch (error) {
+      console.error('Error fetching pesan list:', error);
+      toast.error(error?.response?.data?.message || 'Gagal memuat data pesan');
+      setRows([]);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const initialRows = [
-      {
-        id: 1,
-        id_pesan: 'PN-0001',
-        no_pengirim: 'Fajar Sukmara - 082211591642',
-        no_penerima: '082211591642',
-        waktu_pengiriman: '07:00 25-08-2025',
-        status: 'Selesai',
-      },
-      {
-        id: 2,
-        id_pesan: 'PN-0001',
-        no_pengirim: 'Fajar Sukmara - 082211591642',
-        no_penerima: '082211591642',
-        waktu_pengiriman: '07:00 25-08-2025',
-        status: 'Selesai',
-      },
-    ];
-    setRows(initialRows);
-  }, []);
+    fetchPesanData({ page: currentPage, page_size: pageSize });
+  }, [currentPage, pageSize]);
 
   const handlePageChange = useCallback(
     (newPage) => setCurrentPage(newPage),
@@ -63,12 +104,20 @@ const KirimPesanPage = () => {
     if (!selectedItem) return;
     setIsDeleting(true);
     try {
-      setRows((prev) => prev.filter((item) => item.id !== selectedItem.id));
-      setTotalItems((prev) => Math.max(0, prev - 1));
-      setIsDeleteModalOpen(false);
-      setSelectedItem(null);
+      const res = await deletePesan(selectedItem.id);
+      const success = res?.data?.status === 'success' || res?.status === 200;
+
+      if (success) {
+        toast.success(res?.data?.message || 'Berhasil menghapus pesan');
+        setIsDeleteModalOpen(false);
+        setSelectedItem(null);
+        await fetchPesanData({ page: currentPage, page_size: pageSize });
+      } else {
+        throw new Error(res?.data?.message || 'Gagal menghapus pesan');
+      }
     } catch (error) {
-      console.error('Error deleting data:', error);
+      console.error('Error deleting pesan:', error);
+      toast.error(error?.response?.data?.message || 'Gagal menghapus pesan');
     } finally {
       setIsDeleting(false);
     }
