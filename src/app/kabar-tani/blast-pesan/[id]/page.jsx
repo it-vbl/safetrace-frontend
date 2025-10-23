@@ -4,7 +4,9 @@ import { useParams, useRouter } from 'next/navigation';
 
 import Heading from '@/components/atoms/Typography/Heading';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import InputMessage from '@/components/molecules/InputMessage';
 import SectionLoading from '@/components/molecules/SectionLoading';
+import Pagination from '@/components/organisms/Pagination';
 import {
   getBroadcastDetail,
   getBroadcastKontakList,
@@ -17,6 +19,13 @@ const DetailPesanPage = () => {
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
   const [recipients, setRecipients] = useState([]);
+  const [summaryCounts, setSummaryCounts] = useState({
+    success: 0,
+    failed: 0,
+    pending: 0,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const breadcrumbItems = [
     { label: 'BLAST PESAN', href: '/kabar-tani/blast-pesan' },
@@ -46,22 +55,34 @@ const DetailPesanPage = () => {
           (Array.isArray(data?.kontak_ids)
             ? data.kontak_ids.length
             : data?.recipient_count ?? 0);
-        const pengirimNama = data?.no_pengirim_nama || data?.device_nama;
+        const deviceData = data?.device_data || {};
+        const pengirimNama =
+          data?.no_pengirim_nama || data?.device_nama || deviceData?.nama;
         const pengirimNo =
-          data?.no_pengirim || data?.device_no || data?.no_wa_pengirim;
+          data?.no_pengirim ||
+          data?.device_no ||
+          data?.no_wa_pengirim ||
+          deviceData?.no_wa;
+
+        const jenisPenerimaLabel =
+          data?.jenis_penerima_label ||
+          (data?.jenis_penerima === 'grup' ? 'Kontak Grup' : 'Kontak Individu');
+
+        const statusLabel = (() => {
+          if (data?.terkirim === true) return 'Terkirim';
+          if (data?.gagal === true) return 'Gagal';
+          return data?.status || 'Menunggu';
+        })();
 
         const mappedDetail = {
           id_pesan:
             data?.id_pesan || `BC-${String(data?.id || 0).padStart(4, '0')}`,
           nama_pesan: data?.nama_pesan || data?.nama || '-',
           grup_penerima:
-            data?.grup_penerima ||
-            (data?.jenis_penerima === 'grup'
-              ? data?.grup_nama
-              : 'Kontak Individu'),
+            data?.grup_penerima || data?.grup_nama || jenisPenerimaLabel,
           jumlah_penerima: jumlahPenerima,
           waktu_pengiriman: waktuPengiriman,
-          status: data?.status || '-',
+          status: statusLabel,
           sender:
             pengirimNama && pengirimNo
               ? `${pengirimNama} - ${pengirimNo}`
@@ -73,22 +94,64 @@ const DetailPesanPage = () => {
         const recRes = await getBroadcastKontakList(id);
         const recData = recRes?.data?.data || recRes?.data || {};
         const list = recData?.results || recData || [];
-        const mappedRecipients = (list || []).map((r, idx) => ({
-          no: idx + 1,
-          name: r?.nama ?? r?.name ?? '-',
-          phone: r?.no_wa ?? r?.phone ?? '-',
-          sendTime: r?.waktu_pengiriman
-            ? new Date(r.waktu_pengiriman).toLocaleString('id-ID', {
+        const mappedRecipients = (list || []).map((r, idx) => {
+          const rawTime =
+            r?.waktu_pengiriman ||
+            r?.created_at ||
+            r?.sent_at ||
+            r?.updated_at ||
+            r?.time;
+          const sendTime = rawTime
+            ? new Date(rawTime).toLocaleString('id-ID', {
                 hour: '2-digit',
                 minute: '2-digit',
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
               })
-            : '-',
-          status: r?.status ?? '-',
-        }));
+            : '-';
+
+          let status = r?.status || r?.status_label || r?.status_kirim || r?.keterangan || '';
+          if (!status) {
+            if (r?.gagal === true) status = 'Gagal';
+            else if (r?.terkirim === true) status = 'Terkirim';
+            else status = 'Menunggu';
+          }
+
+          return {
+            no: idx + 1,
+            name: r?.nama ?? r?.name ?? '-',
+            phone: r?.no_wa ?? r?.phone ?? '-',
+            sendTime,
+            status,
+          };
+        });
         setRecipients(mappedRecipients);
+
+        const normalize = (s) => String(s || '').toLowerCase();
+        const success = mappedRecipients.filter((r) => {
+          const st = normalize(r.status);
+          return (
+            st.includes('terkirim') ||
+            st.includes('success') ||
+            st.includes('sent') ||
+            st.includes('berhasil')
+          );
+        }).length;
+        const failed = mappedRecipients.filter((r) => {
+          const st = normalize(r.status);
+          return (
+            st.includes('gagal') ||
+            st.includes('failed') ||
+            st.includes('error') ||
+            st.includes('cancel')
+          );
+        }).length;
+        const pending = Math.max(
+          (mappedRecipients || []).length - success - failed,
+          0
+        );
+        setSummaryCounts({ success, failed, pending });
       } catch (e) {
         console.error('Error fetching broadcast detail:', e);
       } finally {
@@ -98,8 +161,23 @@ const DetailPesanPage = () => {
     fetchDetail();
   }, [id]);
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
+
+  const paginatedRecipients = recipients.slice(
+    (currentPage - 1) * pageSize,
+    (currentPage - 1) * pageSize + pageSize
+  );
+
   return (
     <div className="relative w-full bg-gray-50">
+      <SectionLoading loading={loading} />
       <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
@@ -144,15 +222,21 @@ const DetailPesanPage = () => {
             <div className="mt-4 grid grid-cols-4 gap-4 border-t border-gray-200 pt-4 text-sm">
               <div>
                 <span className="text-gray-600">Total Berhasil</span>
-                <div className="font-medium text-gray-800">-</div>
+                <div className="font-medium text-gray-800">
+                  {summaryCounts.success}
+                </div>
               </div>
               <div>
                 <span className="text-gray-600">Total Gagal</span>
-                <div className="font-medium text-gray-800">-</div>
+                <div className="font-medium text-gray-800">
+                  {summaryCounts.failed}
+                </div>
               </div>
               <div>
                 <span className="text-gray-600">Total Berjalan</span>
-                <div className="font-medium text-gray-800">-</div>
+                <div className="font-medium text-gray-800">
+                  {summaryCounts.pending}
+                </div>
               </div>
               <div>
                 <span className="text-gray-600">Pengirim</span>
@@ -174,30 +258,15 @@ const DetailPesanPage = () => {
           </Heading>
 
           <div className="mb-6 px-6">
-            <div className="flex gap-6">
-              {/* Message Content */}
-              <div className="flex-1">
-                <div className="rounded border border-gray-200 p-4">
-                  <div className="whitespace-pre-line text-sm text-gray-700">
-                    {detail?.isi_pesan || ''}
-                  </div>
-                </div>
-              </div>
-
-              {/* Preview */}
-              <div className="w-80">
-                <div className="mb-2 text-sm font-medium text-gray-700">
-                  Preview
-                </div>
-                <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
-                  <div className="whitespace-pre-line text-xs text-gray-700">
-                    {detail?.isi_pesan || ''}
-                  </div>
-                  <div className="mt-4 text-right text-xs text-gray-500">
-                    {detail?.waktu_pengiriman || ''}
-                  </div>
-                </div>
-              </div>
+            <InputMessage
+              value={detail?.isi_pesan || ''}
+              showInput={false}
+              editable={false}
+              showCharCount={false}
+              previewContainerClassName="w-full"
+            />
+            <div className="mt-2 flex justify-end">
+              <span className="text-xs text-gray-500">{detail?.waktu_pengiriman || ''}</span>
             </div>
           </div>
         </div>
@@ -234,7 +303,7 @@ const DetailPesanPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(recipients || []).map((recipient) => (
+                  {(paginatedRecipients || []).map((recipient) => (
                     <tr
                       key={recipient.no}
                       className="border-b border-gray-100 hover:bg-gray-50"
@@ -259,32 +328,22 @@ const DetailPesanPage = () => {
                 </tbody>
               </table>
             </div>
-
             {/* Pagination */}
-            <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Baris Per Halaman</span>
-                <select className="rounded border border-gray-200 px-2 py-1 text-sm">
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">
-                  Menampilkan 1 - {Math.min(10, (recipients || []).length)} dari{' '}
-                  {(recipients || []).length}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button className="rounded border border-gray-200 px-2 py-1 text-sm hover:bg-gray-50">
-                    &lt;
-                  </button>
-                  <button className="rounded border border-gray-200 px-2 py-1 text-sm hover:bg-gray-50">
-                    &gt;
-                  </button>
-                </div>
-              </div>
+            <div className="mt-4 flex justify-center sm:justify-end">
+              <Pagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalItems={recipients.length}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                showRowsPerPage={true}
+                labels={{
+                  rowsPerPage: 'Baris Per Halaman',
+                  showing: 'Menampilkan',
+                  of: 'dari',
+                }}
+                className="text-xs sm:text-sm"
+              />
             </div>
           </div>
         </div>

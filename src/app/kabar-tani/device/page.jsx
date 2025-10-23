@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useFormik } from 'formik';
-import QRCode from 'qrcode';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -64,6 +63,7 @@ const DevicePage = () => {
       const mapped = results.map((item) => ({
         id: item.id,
         id_device: item.id_device,
+        device_id: item.device_id,
         nama_device: item.nama,
         no_handphone: item.no_wa,
         status: item.terhubung ? 'Terhubung' : 'Tidak Terhubung',
@@ -124,8 +124,8 @@ const DevicePage = () => {
   const generateQRCode = async (deviceData) => {
     setIsGeneratingQR(true);
     try {
-      // Use Whacenter QR endpoint which returns an image
-      const qrUrl = WhatsAppService.getWhacenterQRCodeUrl(deviceData.id_device);
+      const whacenterId = deviceData?.id_device;
+      const qrUrl = WhatsAppService.getWhacenterQRCodeUrl(whacenterId);
       setQrCodeDataUrl(qrUrl);
       setSelectedItem(deviceData);
       setIsQRModalOpen(true);
@@ -150,10 +150,9 @@ const DevicePage = () => {
         statusVal ? 'Perangkat terhubung' : 'Perangkat belum terhubung'
       );
 
-      // Update row status locally
       setDeviceData((prev) =>
         prev.map((d) =>
-          d.id_device === deviceId
+          d.device_id === deviceId || d.id_device === deviceId
             ? { ...d, status: statusVal ? 'Terhubung' : 'Tidak Terhubung' }
             : d
         )
@@ -165,17 +164,18 @@ const DevicePage = () => {
   };
 
   const relogDeviceWhacenter = async (device) => {
-    if (!device?.id_device) {
+    const whacenterId = device?.device_id || device?.id_device;
+    if (!whacenterId) {
       toast.error('ID device tidak ditemukan');
       return;
     }
     try {
       setIsGeneratingQR(true);
-      // Panggil relog untuk memaksa Whacenter membuat sesi baru
-      await WhatsAppService.relogWhacenterDevice(device.id_device);
-      // Tunggu sebentar agar QR siap di endpoint
+      await WhatsAppService.relogWhacenterDevice(whacenterId);
       await new Promise((r) => setTimeout(r, 1500));
-      const qrUrl = `${WhatsAppService.getWhacenterQRCodeUrl(device.id_device)}&_=${Date.now()}`;
+      const qrUrl = `${WhatsAppService.getWhacenterQRCodeUrl(
+        whacenterId
+      )}&_=${Date.now()}`;
       setQrCodeDataUrl(qrUrl);
       setSelectedItem(device);
       setIsQRModalOpen(true);
@@ -206,7 +206,11 @@ const DevicePage = () => {
         </button>
         <button
           className="py-1 text-xs font-bold text-primaryDark1 underline"
-          onClick={() => checkDeviceStatusWhacenter(params.data.id_device)}
+          onClick={() =>
+            checkDeviceStatusWhacenter(
+              params.data.device_id || params.data.id_device
+            )
+          }
         >
           CEK STATUS
         </button>
@@ -288,9 +292,16 @@ const DevicePage = () => {
     };
   }, []);
 
-  const schemaValidation = Yup.object().shape({
+  const createSchemaValidation = Yup.object().shape({
     nama_device: Yup.string().required('Nama device harus diisi'),
     no_handphone: Yup.string().required('No handphone harus diisi'),
+    device_id: Yup.string().required('Device ID harus diisi'),
+  });
+
+  const detailSchemaValidation = Yup.object().shape({
+    nama_device: Yup.string().required('Nama device harus diisi'),
+    no_handphone: Yup.string().required('No handphone harus diisi'),
+    device_id: Yup.string().required('Device ID harus diisi'),
   });
 
   const {
@@ -306,17 +317,15 @@ const DevicePage = () => {
     initialValues: {
       nama_device: '',
       no_handphone: '',
+      device_id: '',
     },
-    validationSchema: schemaValidation,
+    validationSchema: createSchemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
         const payload = {
           nama: values.nama_device,
-          id_device:
-            typeof crypto !== 'undefined' && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `${Date.now()}`,
+          id_device: values.device_id,
           no_wa: values.no_handphone,
           terhubung: false,
         };
@@ -376,8 +385,9 @@ const DevicePage = () => {
       nama_device: detailData?.nama || '',
       no_handphone: detailData?.no_wa || '',
       id_device: detailData?.id_device || '',
+      device_id: detailData?.device_id || '',
     },
-    validationSchema: schemaValidation,
+    validationSchema: detailSchemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
       try {
         setSubmitting(true);
@@ -386,6 +396,7 @@ const DevicePage = () => {
           nama: values.nama_device,
           no_wa: values.no_handphone,
           id_device: detailData?.id_device,
+          device_id: values.device_id,
           terhubung: detailData?.terhubung ?? false,
         };
         const res = await updateDeviceService(detailData?.id, payload);
@@ -405,6 +416,7 @@ const DevicePage = () => {
               nama_device: refreshedData?.nama || '',
               no_handphone: refreshedData?.no_wa || '',
               id_device: refreshedData?.id_device || '',
+              device_id: refreshedData?.device_id || '',
             },
           });
         }
@@ -465,6 +477,17 @@ const DevicePage = () => {
                 name="no_handphone"
                 placeholder="masukan no. whatsapp"
                 value={detailValues.no_handphone}
+                onChange={handleDetailChange}
+                onBlur={handleDetailBlur}
+                errors={detailErrors}
+                touched={detailTouched}
+                disabled={!isEditMode}
+              />
+              <InputText
+                label={'Device ID (API Key)'}
+                name="device_id"
+                placeholder="Masukkan device_id Whacenter"
+                value={detailValues.device_id}
                 onChange={handleDetailChange}
                 onBlur={handleDetailBlur}
                 errors={detailErrors}
@@ -544,6 +567,16 @@ const DevicePage = () => {
               name="no_handphone"
               placeholder="masukan no. whatsapp"
               value={values.no_handphone}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errors={errors}
+              touched={touched}
+            />
+            <InputText
+              label={'Device ID (API Key)'}
+              name="device_id"
+              placeholder="Masukkan device_id Whacenter"
+              value={values.device_id}
               onChange={handleChange}
               onBlur={handleBlur}
               errors={errors}

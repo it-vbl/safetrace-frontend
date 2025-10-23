@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
-import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import { deleteBroadcast, getBroadcastList } from '@/services/broadcast';
@@ -61,9 +60,15 @@ const BlastPesanPage = () => {
               ? item.kontak_ids.length
               : item?.recipient_count ?? 0);
 
-          const pengirimNama = item?.no_pengirim_nama || item?.device_nama;
-          const pengirimNo =
-            item?.no_pengirim || item?.device_no || item?.no_wa_pengirim;
+          const pengirimNama = item?.device_data?.nama;
+          const pengirimNo = item?.device_data?.no_wa;
+
+          const statusLabel =
+            item?.terkirim === true
+              ? 'Terkirim'
+              : item?.gagal === true
+              ? 'Gagal'
+              : 'Dalam Antrian';
 
           return {
             id: item?.id,
@@ -81,7 +86,7 @@ const BlastPesanPage = () => {
                 : 'Kontak Individu'),
             jumlah_penerima: jumlahPenerima,
             waktu_pengiriman: waktuPengiriman,
-            status: item?.status || '-',
+            status: statusLabel,
           };
         });
 
@@ -250,7 +255,7 @@ const BlastPesanPage = () => {
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
-        itemName={`Apakah Anda ingin mengapus data pesan dengan nama "${selectedItem?.nama_pesan}"`}
+        itemName={`dengan nama ${selectedItem?.nama_pesan}`}
         isLoading={isDeleting}
       />
 
@@ -260,11 +265,11 @@ const BlastPesanPage = () => {
             BLAST PESAN
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
-            <SearchBar
+            {/* <SearchBar
               onChange={handleSearchTextChange}
               placeholder="Cari campaign"
               className="w-full sm:w-[300px]"
-            />
+            /> */}
             <Button
               onClick={() => {
                 router.push('/kabar-tani/blast-pesan/tambah');
