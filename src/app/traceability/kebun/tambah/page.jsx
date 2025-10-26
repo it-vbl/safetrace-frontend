@@ -32,6 +32,7 @@ const CreateKebunTraceabilityContent = () => {
   ];
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [lastStep, setLastStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [kebunData, setKebunData] = useState(null);
@@ -52,10 +53,12 @@ const CreateKebunTraceabilityContent = () => {
             if (data.geom || data.titik_koordinat) {
               // Has mapping data, go to step 3 (Lampiran)
               setCurrentStep(3);
+              setLastStep(3);
               setCompletedSteps([1, 2]);
             } else {
               // No mapping data, go to step 2 (Pemetaan)
               setCurrentStep(2);
+              setLastStep(2);
               setCompletedSteps([1]);
             }
           }
@@ -79,7 +82,6 @@ const CreateKebunTraceabilityContent = () => {
 
   // Function to proceed to next step
   const handleNextStep = async (stepData) => {
-    console.log('CHECK BEFORE ON NEXT', stepData);
     setIsSubmitting(true);
 
     try {
@@ -172,6 +174,8 @@ const CreateKebunTraceabilityContent = () => {
       <div className="flex">
         <Stepper
           steps={steps}
+          completedSteps={completedSteps}
+          lastStep={lastStep}
           currentStep={currentStep}
           onStepClick={handleStepClick}
         />

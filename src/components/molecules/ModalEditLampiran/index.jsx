@@ -1,23 +1,37 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useFormik } from 'formik';
+
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
+import BaseModal from '@/components/molecules/Modal';
 import Button from '@/components/atoms/Button';
 import Upload from '@/components/molecules/Upload';
 import { createKebunLampiran, updateKebunLampiran } from '@/services/kebun';
 
-const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
-  const router = useRouter();
-  const [petaFile, setPetaFile] = useState(null);
+const ModalEditLampiran = ({
+  isOpen,
+  onClose,
+  kebunData,
+  lampiranData,
+  onSuccess,
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [legalitasFile, setLegalitasFile] = useState(null);
   const [stdbFile, setStdbFile] = useState(null);
   const [rspoFile, setRspoFile] = useState(null);
   const [ispoFile, setIspoFile] = useState(null);
 
-  const validationSchema = Yup.object().shape({
+  // Check if lampiranData has any existing files
+  const hasExistingFiles =
+    lampiranData &&
+    (lampiranData.file_legalitas ||
+      lampiranData.file_stdb ||
+      lampiranData.file_rspo ||
+      lampiranData.file_ispo);
+
+  const validationSchema = Yup.object({
     file_legalitas: Yup.mixed().nullable(),
     file_stdb: Yup.mixed().nullable(),
     file_rspo: Yup.mixed().nullable(),
@@ -34,58 +48,80 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        // Prepare form data for API
+        setIsLoading(true);
+
+        // Prepare FormData
         const formData = new FormData();
-        formData.append('kebun_id', idKebun);
 
-        if (legalitasFile) formData.append('file_legalitas', legalitasFile);
-        if (stdbFile) formData.append('file_stdb', stdbFile);
-        if (rspoFile) formData.append('file_rspo', rspoFile);
-        if (ispoFile) formData.append('file_ispo', ispoFile);
+        if (hasExistingFiles) {
+          // Update existing lampiran
+          if (legalitasFile) formData.append('file_legalitas', legalitasFile);
+          if (stdbFile) formData.append('file_stdb', stdbFile);
+          if (rspoFile) formData.append('file_rspo', rspoFile);
+          if (ispoFile) formData.append('file_ispo', ispoFile);
 
-        // Call API to create lampiran
-        const response = await createKebunLampiran(formData);
+          // Call update API
+          const response = await updateKebunLampiran(kebunData?.id, formData);
 
-        if (response?.data?.status === 'success') {
-          toast.success('Lampiran berhasil diupload');
-          await onNext({
-            ...values,
-            petaFile,
-            legalitasFile,
-            stdbFile,
-            rspoFile,
-            ispoFile,
-          });
+          if (response?.data?.status === 'success') {
+            toast.success('Lampiran kebun berhasil diperbarui');
+            onSuccess?.();
+            onClose();
+          } else {
+            throw new Error(
+              response?.data?.message || 'Gagal memperbarui lampiran kebun'
+            );
+          }
         } else {
-          throw new Error('Invalid response format');
+          // Create new lampiran
+          formData.append('kebun_id', kebunData?.id);
+
+          if (legalitasFile) formData.append('file_legalitas', legalitasFile);
+          if (stdbFile) formData.append('file_stdb', stdbFile);
+          if (rspoFile) formData.append('file_rspo', rspoFile);
+          if (ispoFile) formData.append('file_ispo', ispoFile);
+
+          // Call create API
+          const response = await createKebunLampiran(formData);
+
+          if (response?.data?.status === 'success') {
+            toast.success('Lampiran kebun berhasil dibuat');
+            onSuccess?.();
+            onClose();
+          } else {
+            throw new Error(
+              response?.data?.message || 'Gagal membuat lampiran kebun'
+            );
+          }
         }
       } catch (error) {
-        console.error('Error uploading lampiran:', error);
-        toast.error('Gagal mengupload lampiran');
+        console.error('Error updating lampiran:', error);
+        toast.error(error.message || 'Gagal memperbarui lampiran kebun');
+      } finally {
+        setIsLoading(false);
       }
     },
   });
 
-  const handleSubmit = async () => {
-    // Check if any files are uploaded
-    const hasAnyFile = legalitasFile || stdbFile || rspoFile || ispoFile;
-
-    if (!hasAnyFile) {
-      // No files uploaded, redirect to kebun detail page
-      toast.info('Tidak ada file yang diupload, mengarahkan ke detail kebun');
-      router.push(`/traceability/kebun/${idKebun}/detail`);
-      return;
-    }
-
-    // If files are present, proceed with form submission
-    await formik.handleSubmit();
+  const handleClose = () => {
+    setLegalitasFile(null);
+    setStdbFile(null);
+    setRspoFile(null);
+    setIspoFile(null);
+    formik.resetForm();
+    onClose();
   };
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
-        <form onSubmit={formik.handleSubmit}>
+    <BaseModal
+      open={isOpen}
+      setOpen={handleClose}
+      label="UBAH LAMPIRAN KEBUN"
+      className="max-w-4xl"
+    >
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <div className="rounded-lg border border-gray-300 bg-white p-6">
+          <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
           <div className="grid grid-cols-2 gap-6 py-4">
             <div>
               <Upload
@@ -248,39 +284,25 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                 )}
             </div>
           </div>
-        </form>
+        </div>
 
-        <div className="mt-4 flex justify-between gap-2">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              className="bg-red-600 hover:bg-red-700"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Batalkan
-            </Button>
-            <Button
-              type="button"
-              className="bg-gray-600 hover:bg-gray-700"
-              onClick={onPrevious}
-              disabled={isSubmitting}
-            >
-              Sebelumnya
-            </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3 pt-6">
           <Button
             type="button"
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={handleSubmit}
-            isLoading={isSubmitting}
+            variant="danger"
+            onClick={handleClose}
+            disabled={isLoading}
           >
-            Selesai
+            Batalkan
+          </Button>
+          <Button type="submit" isLoading={isLoading} disabled={isLoading}>
+            Simpan
           </Button>
         </div>
-      </div>
-    </div>
+      </form>
+    </BaseModal>
   );
 };
 
-export default Lampiran;
+export default ModalEditLampiran;
