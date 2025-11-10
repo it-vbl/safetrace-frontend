@@ -8,14 +8,20 @@ import { toast } from 'react-toastify';
 
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import ModalEditKebun from '@/components/molecules/ModalEditKebun';
+import ModalEditLampiran from '@/components/molecules/ModalEditLampiran';
+import ModalEditPeta from '@/components/molecules/ModalEditPeta';
 import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
 const DetailKebunPage = () => {
-  const { id } = useParams();
+  const { idKebun: id } = useParams();
   const router = useRouter();
   const [kebunData, setKebunData] = useState(null);
   const [lampiranData, setLampiranData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditPetaModal, setShowEditPetaModal] = useState(false);
+  const [showEditLampiranModal, setShowEditLampiranModal] = useState(false);
 
   // Dynamic import for MapView component
   const Map = useMemo(
@@ -45,12 +51,7 @@ const DetailKebunPage = () => {
 
           // Map API response to component structure
           const mappedData = {
-            id_kebun: kebun.id_kebun,
-            petani: '-', // Petani name not included in this endpoint
-            kelompok_tani: '-', // Kelompok not included in this endpoint
-            lokasi_kebun: kebun.lokasi_kebun,
-            luas_kebun: kebun.luas,
-            luas_peta: kebun.luas, // Using same value as luas_kebun
+            ...kebun,
             waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString(
               'id-ID',
               {
@@ -61,15 +62,8 @@ const DetailKebunPage = () => {
             ),
             rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
             ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
-            jenis_legalitas: kebun.jenis_legalitas,
-            no_legalitas: kebun.nomor_legalitas,
-            pemilik_legalitas: kebun.pemiliki_legalitas,
-            stdb: kebun.nomor_stdb,
-            // Map geometry data for the map
-            geom: kebun.geom,
-            titik_koordinat: kebun.titik_koordinat,
           };
-
+          console.log('MAPPED DATA', mappedData);
           setKebunData(mappedData);
         } else {
           throw new Error('Invalid kebun response format');
@@ -93,6 +87,24 @@ const DetailKebunPage = () => {
       fetchData();
     }
   }, [id]);
+
+  // Handle edit modal success
+  const handleEditSuccess = () => {
+    // Refresh the page data
+    window.location.reload();
+  };
+
+  // Handle edit peta modal success
+  const handleEditPetaSuccess = () => {
+    // Refresh the page data
+    window.location.reload();
+  };
+
+  // Handle edit lampiran modal success
+  const handleEditLampiranSuccess = () => {
+    // Refresh the page data
+    window.location.reload();
+  };
 
   const crumbs = [
     { label: 'KEBUN', href: '/traceability/kebun' },
@@ -141,7 +153,7 @@ const DetailKebunPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex w-full flex-col gap-8">
       <BreadcrumbDetail items={crumbs} />
 
       <div className="flex flex-col gap-6">
@@ -149,19 +161,19 @@ const DetailKebunPage = () => {
         <section className="rounded border border-gray-300 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">DETAIL KEBUN</h3>
-            <Link
-              href={`/kebun/${id}/edit`}
+            <button
+              onClick={() => setShowEditModal(true)}
               className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
             >
               Ubah Data
-            </Link>
+            </button>
           </div>
 
           {/* === GRID LAYOUT FOR KEBUN DETAIL === */}
           <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
             {/* Row 1 */}
             <BorderBottomColData label="Id Kebun" value={kebunData.id_kebun} />
-            <BorderBottomColData label="Petani" value={kebunData.petani} />
+            <BorderBottomColData label="Petani" value={kebunData.nama_petani} />
             <BorderBottomColData
               label="Kelompok Tani"
               value={kebunData.kelompok_tani}
@@ -221,25 +233,38 @@ const DetailKebunPage = () => {
               >
                 Unduh SHP
               </Link>
-              <Link
-                href={`/kebun/${id}/ubah-peta`}
+              <button
+                onClick={() => setShowEditPetaModal(true)}
                 className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
               >
                 Ubah Data
-              </Link>
+              </button>
             </div>
           </div>
 
           <div className="h-96 w-full overflow-hidden rounded border bg-gray-100">
             <Map
               mapClassName="h-full w-full"
-              highlightedPolygon={kebunData?.geom?.coordinates?.[0]}
-              position={kebunData?.titik_koordinat?.coordinates}
+              polygons={kebunData?.geom}
+              position={[
+                kebunData?.titik_koordinat?.coordinates[1],
+                kebunData?.titik_koordinat?.coordinates[0],
+              ]}
+              highlightedPolygon={kebunData?.geom?.coordinates?.[0]?.map(
+                (coord) => [coord[1], coord[0]]
+              )}
               data={[
                 {
                   id: kebunData.id_kebun,
                   peta: {
-                    geom: kebunData.geom,
+                    geom: {
+                      coordinates: [
+                        kebunData?.geom?.coordinates?.[0]?.map((coord) => [
+                          coord[1],
+                          coord[0],
+                        ]),
+                      ],
+                    },
                     titik_koordinat: kebunData.titik_koordinat,
                   },
                   lahan: {
@@ -248,7 +273,7 @@ const DetailKebunPage = () => {
                   },
                   komoditas_info: 'Kelapa Sawit',
                   pekebun: {
-                    nama: kebunData.petani,
+                    nama: kebunData.nama_petani,
                   },
                 },
               ]}
@@ -262,12 +287,12 @@ const DetailKebunPage = () => {
         <section className="rounded border border-gray-300 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">LAMPIRAN</h3>
-            <Link
-              href={`/kebun/${id}/ubah-lampiran`}
+            <button
+              onClick={() => setShowEditLampiranModal(true)}
               className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
             >
               Ubah Data
-            </Link>
+            </button>
           </div>
 
           {/* === GRID DOCUMENT === */}
@@ -404,6 +429,37 @@ const DetailKebunPage = () => {
           </div>
         </section>
       </div>
+
+      {/* Edit Modal */}
+      <ModalEditKebun
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        kebunData={kebunData}
+        onSuccess={handleEditSuccess}
+      />
+
+      {/* Edit Peta Modal */}
+      <ModalEditPeta
+        isOpen={showEditPetaModal}
+        onClose={() => setShowEditPetaModal(false)}
+        kebunData={{
+          ...kebunData,
+          peta: {
+            geom: kebunData?.geom,
+            titik_koordinat: kebunData?.titik_koordinat,
+          },
+        }}
+        onSuccess={handleEditPetaSuccess}
+      />
+
+      {/* Edit Lampiran Modal */}
+      <ModalEditLampiran
+        isOpen={showEditLampiranModal}
+        onClose={() => setShowEditLampiranModal(false)}
+        kebunData={kebunData}
+        lampiranData={lampiranData}
+        onSuccess={handleEditLampiranSuccess}
+      />
     </div>
   );
 };

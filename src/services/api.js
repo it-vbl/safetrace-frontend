@@ -410,6 +410,53 @@ const APIInstance = {
         );
       });
   },
+
+  /**
+   * @param {String} url '/path/to/endpoint'
+   * @param {Object} form
+   * @param {Object} json
+   * @param {Object} customConfig
+   * @param {Boolean} auth
+   * @param {Boolean} toastError
+   * @param {Boolean} showErrorPage
+   */
+  patch: (
+    url,
+    form = {},
+    json = {},
+    customConfig = {},
+    auth = true,
+    toastError = false,
+    showErrorPage = false
+  ) => {
+    api.defaults.headers.common['Content-Type'] = json
+      ? 'application/json'
+      : 'application/x-www-form-urlencoded';
+    const data = querystring.stringify(form) || json;
+    return api
+      .patch(url, data, {
+        params: querystring.stringify(form),
+        ...customConfig,
+      })
+      .then((response) => {
+        return APIResponseValidation(
+          response,
+          Promise.resolve(response),
+          toastError,
+          showErrorPage,
+          auth
+        );
+      })
+      .catch((err) => {
+        return APIResponseValidation(
+          err.response,
+          Promise.reject(err),
+          toastError,
+          showErrorPage,
+          auth
+        );
+      });
+  },
   /**
    * Send request with Content-Type multipart/form
    * used to upload file

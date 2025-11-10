@@ -153,7 +153,7 @@ const KebunPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/kebun/${data?.id}`);
+    router.push(`/traceability/kebun/${data?.id}/detail`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
