@@ -3,13 +3,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
+import {
+  deleteProduksi,
+  getDetailProduksi,
+  updateProduksi,
+} from '@/services/produksi';
 
 const formatNumber = (num) =>
   typeof num === 'number'
@@ -86,6 +93,9 @@ const TraceabilityProduksiDetail = () => {
   const [detail, setDetail] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editYearData, setEditYearData] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteYearData, setDeleteYearData] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const crumbs = [
     { label: 'HOME', href: '/' },
@@ -94,13 +104,64 @@ const TraceabilityProduksiDetail = () => {
   ];
 
   useEffect(() => {
-    setDetail(mockProduksiDetail);
+    const fetchDetail = async () => {
+      if (!id) return;
+      try {
+        const res = await getDetailProduksi(id);
+        const payload = res?.data?.data || res?.data || {};
+
+        const months = {
+          Januari: payload?.januari ?? 0,
+          Februari: payload?.februari ?? 0,
+          Maret: payload?.maret ?? 0,
+          April: payload?.april ?? 0,
+          Mei: payload?.mei ?? 0,
+          Juni: payload?.juni ?? 0,
+          Juli: payload?.juli ?? 0,
+          Agustus: payload?.agustus ?? 0,
+          September: payload?.september ?? 0,
+          Oktober: payload?.oktober ?? 0,
+          November: payload?.november ?? 0,
+          Desember: payload?.desember ?? 0,
+        };
+
+        const normalized = {
+          kebun: {
+            id: payload?.kebun ?? null,
+            id_kebun: payload?.id_kebun || '-',
+            petani: payload?.nama_petani || '-',
+            kelompok_tani: payload?.kelompok_tani || '-',
+            total_produksi_kg: payload?.total_produksi ?? 0,
+            umur_tanaman: payload?.umur_tanaman ?? null,
+            prod_per_ha_th_ton: payload?.prod_ha_th ?? 0,
+            tahun_produksi: payload?.tahun ?? null,
+          },
+          produksi_tahunan: [
+            {
+              tahun: payload?.tahun ?? 0,
+              bulan: months,
+            },
+          ],
+        };
+
+        setDetail(normalized);
+      } catch (error) {
+        toast.error('Gagal memuat detail produksi');
+      }
+    };
+
+    fetchDetail();
   }, [id]);
 
   const umurTanamanText = useMemo(() => {
-    if (!detail?.kebun?.tahun_tanam) return '-';
-    const currentYear = new Date().getFullYear();
-    return `${currentYear - detail.kebun.tahun_tanam} Tahun`;
+    if (detail?.kebun?.umur_tanaman != null) {
+      return `${detail.kebun.umur_tanaman} Tahun`;
+    }
+    if (detail?.kebun?.tahun_tanam) {
+      const currentYear = new Date().getFullYear();
+      return `${currentYear - detail.kebun.tahun_tanam} Tahun`;
+    }
+    return '-';
   }, [detail]);
 
   const renderYearCard = (yearData) => {
@@ -123,10 +184,10 @@ const TraceabilityProduksiDetail = () => {
             <button
               type="button"
               className="text-sm font-medium text-red-600 underline hover:text-red-700"
-              onClick={() =>
-                typeof window !== 'undefined' &&
-                window.alert(`Hapus data tahun ${yearData.tahun}`)
-              }
+              onClick={() => {
+                setDeleteYearData(yearData);
+                setShowDeleteModal(true);
+              }}
             >
               Hapus
             </button>
@@ -165,20 +226,27 @@ const TraceabilityProduksiDetail = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
       <div className="flex justify-between">
         <BreadcrumbDetail items={crumbs} />
         <Button
           variant="primary"
           size="medium"
-          onClick={() => router.push('/traceability/gap/produksi/tambah')}
+          onClick={() => {
+            const kebunId = detail?.kebun?.id;
+            if (kebunId) {
+              router.push(`/traceability/gap/produksi/tambah?kebun=${kebunId}`);
+            } else {
+              router.push('/traceability/gap/produksi/tambah');
+            }
+          }}
           className="whitespace-nowrap"
         >
           Tambah Tahun Produksi
         </Button>
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         {/* DETAIL KEBUN Card */}
         {detail?.kebun && (
           <section className="rounded border border-gray-300 bg-white p-6">
@@ -200,12 +268,8 @@ const TraceabilityProduksiDetail = () => {
                 value={detail.kebun.kelompok_tani ?? '-'}
               />
               <BorderBottomColData
-                label="Luas Kebun (Ha)"
-                value={detail.kebun.luas_kebun_ha ?? '-'}
-              />
-              <BorderBottomColData
-                label="Tahun Tanam"
-                value={detail.kebun.tahun_tanam ?? '-'}
+                label="Tahun Produksi"
+                value={detail.kebun.tahun_produksi ?? '-'}
               />
 
               <BorderBottomColData
@@ -232,18 +296,96 @@ const TraceabilityProduksiDetail = () => {
           open={isEditOpen}
           onClose={() => setIsEditOpen(false)}
           yearData={editYearData}
-          onSave={(updatedMonths) => {
-            setDetail((prev) => {
-              if (!prev) return prev;
-              const updated = prev.produksi_tahunan.map((y) =>
-                y.tahun === editYearData?.tahun
-                  ? { ...y, bulan: { ...updatedMonths } }
-                  : y
+          onSave={async (updatedMonths) => {
+            try {
+              const monthKey = {
+                Januari: 'januari',
+                Februari: 'februari',
+                Maret: 'maret',
+                April: 'april',
+                Mei: 'mei',
+                Juni: 'juni',
+                Juli: 'juli',
+                Agustus: 'agustus',
+                September: 'september',
+                Oktober: 'oktober',
+                November: 'november',
+                Desember: 'desember',
+              };
+
+              const flatMonths = Object.fromEntries(
+                MONTHS.map((m) => [monthKey[m], updatedMonths[m] ?? 0])
               );
-              return { ...prev, produksi_tahunan: updated };
-            });
-            setIsEditOpen(false);
+
+              const payload = {
+                kebun: Number(detail?.kebun?.id) || undefined,
+                tahun: editYearData?.tahun,
+                ...flatMonths,
+              };
+              await updateProduksi(id, payload);
+              toast.success('Data produksi berhasil diperbarui');
+              const res = await getDetailProduksi(id);
+              const p = res?.data?.data || res?.data || {};
+              const months = {
+                Januari: p?.januari ?? 0,
+                Februari: p?.februari ?? 0,
+                Maret: p?.maret ?? 0,
+                April: p?.april ?? 0,
+                Mei: p?.mei ?? 0,
+                Juni: p?.juni ?? 0,
+                Juli: p?.juli ?? 0,
+                Agustus: p?.agustus ?? 0,
+                September: p?.september ?? 0,
+                Oktober: p?.oktober ?? 0,
+                November: p?.november ?? 0,
+                Desember: p?.desember ?? 0,
+              };
+              setDetail({
+                kebun: {
+                  id: p?.kebun ?? null,
+                  id_kebun: p?.id_kebun || '-',
+                  petani: p?.nama_petani || '-',
+                  kelompok_tani: p?.kelompok_tani || '-',
+                  total_produksi_kg: p?.total_produksi ?? 0,
+                  umur_tanaman: p?.umur_tanaman ?? null,
+                  prod_per_ha_th_ton: p?.prod_ha_th ?? 0,
+                  tahun_produksi: p?.tahun ?? null,
+                },
+                produksi_tahunan: [
+                  {
+                    tahun: p?.tahun ?? 0,
+                    bulan: months,
+                  },
+                ],
+              });
+              setIsEditOpen(false);
+            } catch (error) {
+              toast.error('Gagal memperbarui data produksi');
+            }
           }}
+        />
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setDeleteYearData(null);
+          }}
+          onConfirm={async () => {
+            if (!id) return;
+            try {
+              setIsDeleting(true);
+              await deleteProduksi(id);
+              toast.success('Data produksi berhasil dihapus');
+              setShowDeleteModal(false);
+              router.push('/traceability/gap/produksi');
+            } catch (e) {
+              toast.error('Gagal menghapus data produksi');
+            } finally {
+              setIsDeleting(false);
+            }
+          }}
+          itemName={`produksi tahun ${deleteYearData?.tahun ?? ''}`}
+          isLoading={isDeleting}
         />
       </div>
     </div>

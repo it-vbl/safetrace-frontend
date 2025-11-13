@@ -13,23 +13,21 @@ import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
+import { getListProduksi } from '@/services/produksi';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Bepekaek Besamo', value: 'Bepekaek Besamo' },
-  { label: 'Kelompok A', value: 'Kelompok A' },
-  { label: 'Kelompok B', value: 'Kelompok B' },
-  { label: 'Kelompok C', value: 'Kelompok C' },
-];
+// Options sourced dynamically from referensi service
 
 const ProduksiPage = () => {
   const router = useRouter();
 
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
-  const [selectedKelompok, setSelectedKelompok] = useState(null);
+  const [selectedKelompok, setSelectedKelompok] = useState('');
   const [selectedYear, setSelectedYear] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,55 +39,57 @@ const ProduksiPage = () => {
 
   const yearOptions = useYearOptions();
 
-  const currentYear = new Date().getFullYear();
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+
+  const kelompokOptions = useMemo(() => {
+    return (
+      kelompokTani?.map((item) => ({ label: item.label, value: item.label })) ||
+      []
+    );
+  }, [kelompokTani]);
+
   const formatNumber = (num) =>
     typeof num === 'number'
       ? num.toLocaleString('id-ID')
       : (Number(num) || 0).toLocaleString('id-ID');
 
-  const sampleProduksiData = [
-    {
-      idKebun: '001-APKS-001-001',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalProduksi: 13000,
-      produksiPerHaPerTahun: 100,
-    },
-    {
-      idKebun: '001-APKS-001-002',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalProduksi: 13000,
-      produksiPerHaPerTahun: 100,
-    },
-    {
-      idKebun: '001-APKS-001-003',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalProduksi: 13000,
-      produksiPerHaPerTahun: 100,
-    },
-    {
-      idKebun: '001-APKS-001-004',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalProduksi: 13000,
-      produksiPerHaPerTahun: 100,
-    },
-  ];
+  const fetchProduksiList = async () => {
+    setLoading(true);
+    try {
+      // API terms indicate simple GET with no query params
+      const res = await getListProduksi();
+
+      const payload = res?.data?.data || res?.data || {};
+      const results = payload?.results || payload?.data || payload || [];
+      const count =
+        payload?.count ?? (Array.isArray(results) ? results.length : 0);
+
+      const mapped = (results || []).map((item) => ({
+        id: item?.id,
+        idKebun: item?.id_kebun ?? '-',
+        namaPetani: item?.nama_petani ?? '-',
+        kelompok: item?.kelompok_tani ?? '-',
+        tahun: item?.tahun ?? '-',
+        umurTanaman: item?.umur_tanaman ?? '-',
+        totalProduksi: item?.total_produksi ?? 0,
+        produksiPerHaPerTahun: item?.prod_ha_th ?? 0,
+      }));
+
+      setProduksiData(mapped);
+      setTotalProduksi(count);
+    } catch (error) {
+      toast.error('Gagal memuat data produksi');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setProduksiData(sampleProduksiData);
-    setTotalProduksi(sampleProduksiData.length);
-  }, []);
+    fetchProduksiList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, pageSize, search, selectedKelompok, selectedYear]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -99,13 +99,15 @@ const ProduksiPage = () => {
     []
   );
 
-  const handleKelompokChange = (value) => {
-    setSelectedKelompok(value);
+  const handleKelompokChange = (e) => {
+    const val = e?.target?.value ?? '';
+    setSelectedKelompok(val);
     setCurrentPage(1);
   };
 
-  const handleYearChange = (value) => {
-    setSelectedYear(value);
+  const handleYearChange = (e) => {
+    const val = e?.target?.value ?? '';
+    setSelectedYear(val);
     setCurrentPage(1);
   };
 
@@ -119,7 +121,7 @@ const ProduksiPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/gap/produksi/${data.idKebun}`);
+    router.push(`/traceability/gap/produksi/${data.id}`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -148,18 +150,12 @@ const ProduksiPage = () => {
       },
       { field: 'idKebun', headerName: 'Id Kebun', flex: 1 },
       { field: 'namaPetani', headerName: 'Nama Petani', flex: 1 },
-      { field: 'kelompok', headerName: 'Kelompok', flex: 1 },
-      {
-        field: 'luasKebunHa',
-        headerName: 'Luas Kebun (Ha)',
-        flex: 1,
-      },
-      { field: 'tahunTanam', headerName: 'Tahun Tanam', flex: 1 },
+      { field: 'kelompok', headerName: 'Kelompok Tani', flex: 1 },
+      { field: 'tahun', headerName: 'Tahun', flex: 1 },
       {
         field: 'umurTanaman',
         headerName: 'Umur Tanaman',
-        valueGetter: (params) =>
-          `${currentYear - params.data.tahunTanam} Tahun`,
+        valueFormatter: (p) => `${p.value} Tahun`,
         flex: 1,
       },
       {
@@ -171,11 +167,11 @@ const ProduksiPage = () => {
       {
         field: 'produksiPerHaPerTahun',
         headerName: 'Prod/Ha/Th',
-        valueFormatter: (params) => `${formatNumber(params.value)} Ton`,
+        valueFormatter: (params) => `${formatNumber(params.value)} Kg`,
         flex: 1,
       },
     ],
-    [ActionsCellRenderer, currentYear]
+    [ActionsCellRenderer]
   );
 
   const autoSizeStrategy = useMemo(() => {
@@ -184,38 +180,46 @@ const ProduksiPage = () => {
     };
   }, []);
 
+  // Client-side filtering and pagination based on API response
   const filteredData = useMemo(() => {
-    let filtered = produksiData;
+    let data = [...produksiData];
 
     if (search) {
-      filtered = filtered.filter(
+      const q = search.toLowerCase();
+      data = data.filter(
         (item) =>
-          item.namaPetani.toLowerCase().includes(search.toLowerCase()) ||
-          item.idKebun.toLowerCase().includes(search.toLowerCase()) ||
-          item.kelompok.toLowerCase().includes(search.toLowerCase()) ||
-          (item?.luasKebunHa + '')?.toLowerCase().includes(search.toLowerCase())
+          String(item?.namaPetani || '')
+            ?.toLowerCase()
+            .includes(q) ||
+          String(item?.idKebun || '')
+            ?.toLowerCase()
+            .includes(q) ||
+          String(item?.kelompok || '')
+            ?.toLowerCase()
+            .includes(q)
       );
     }
 
     if (selectedKelompok) {
-      filtered = filtered.filter((item) =>
-        item.kelompok.toLowerCase().includes(selectedKelompok.toLowerCase())
+      const k = String(selectedKelompok).toLowerCase();
+      data = data.filter((item) =>
+        (item?.kelompok || '')?.toLowerCase().includes(k)
       );
     }
 
     if (selectedYear) {
-      filtered = filtered.filter(
-        (item) => item.tahunTanam === Number(selectedYear)
+      data = data.filter(
+        (item) => String(item?.tahun) === String(selectedYear)
       );
     }
 
-    return filtered;
+    return data;
   }, [produksiData, search, selectedKelompok, selectedYear]);
 
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredData.slice(startIndex, endIndex);
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredData.slice(start, end);
   }, [filteredData, currentPage, pageSize]);
 
   useEffect(() => {

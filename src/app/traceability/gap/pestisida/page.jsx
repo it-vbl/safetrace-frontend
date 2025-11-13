@@ -13,23 +13,21 @@ import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
+import { getListPestisida } from '@/services/pestisida';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Bepekaek Besamo', value: 'Bepekaek Besamo' },
-  { label: 'Kelompok A', value: 'Kelompok A' },
-  { label: 'Kelompok B', value: 'Kelompok B' },
-  { label: 'Kelompok C', value: 'Kelompok C' },
-];
+// Kelompok options will be loaded from referensi
 
 const PestisidaPage = () => {
   const router = useRouter();
+  const { kelompokTani, fetchKelompokTani } = useReferences();
 
   const [search, setSearch] = useState('');
-  const [selectedKelompok, setSelectedKelompok] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedKelompok, setSelectedKelompok] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -39,50 +37,56 @@ const PestisidaPage = () => {
   const [totalPestisida, setTotalPestisida] = useState(0);
   const yearOptions = useYearOptions();
 
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+
+  const kelompokOptions = useMemo(() => {
+    return (
+      kelompokTani?.map((item) => ({ label: item.label, value: item.label })) ||
+      []
+    );
+  }, [kelompokTani]);
+
   const currentYear = new Date().getFullYear();
   const formatNumber = (num) =>
     typeof num === 'number'
       ? num.toLocaleString('id-ID')
       : (Number(num) || 0).toLocaleString('id-ID');
 
-  const samplePestisidaData = [
-    {
-      idKebun: '001-APKS-001-001',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalPestisida: 13,
-    },
-    {
-      idKebun: '001-APKS-001-002',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalPestisida: 13,
-    },
-    {
-      idKebun: '001-APKS-001-003',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalPestisida: 13,
-    },
-    {
-      idKebun: '001-APKS-001-004',
-      namaPetani: 'Agustinus Nery',
-      kelompok: 'Bepekaek Besamo',
-      luasKebunHa: 0.75,
-      tahunTanam: 2014,
-      totalPestisida: 13,
-    },
-  ];
-
   useEffect(() => {
-    setPestisidaData(samplePestisidaData);
-    setTotalPestisida(samplePestisidaData.length);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await getListPestisida();
+        const payload = res?.data?.data || res?.data || {};
+        const list = payload?.results || payload?.data || payload || [];
+        const normalized = (Array.isArray(list) ? list : []).map((item) => ({
+          id: item?.id,
+          idKebun: item?.id_kebun ?? '-',
+          namaPetani: item?.nama_petani ?? '-',
+          kelompok: item?.kelompok_tani ?? '-',
+          luasKebunHa:
+            typeof item?.luas_kebun === 'string'
+              ? Number(item.luas_kebun)
+              : item?.luas_kebun ?? null,
+          tahun: item?.tahun ?? null,
+          umurTanaman: item?.umur_tanaman ?? null,
+          totalPestisida:
+            typeof item?.total_pestisida === 'number'
+              ? item.total_pestisida
+              : Number(item?.total_pestisida) || 0,
+        }));
+        setPestisidaData(normalized);
+        const count = payload?.count ?? normalized.length;
+        setTotalPestisida(count);
+      } catch (err) {
+        toast.error('Gagal memuat data pestisida');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const handleSearchTextChange = useCallback(
@@ -93,13 +97,13 @@ const PestisidaPage = () => {
     []
   );
 
-  const handleKelompokChange = (value) => {
-    setSelectedKelompok(value);
+  const handleKelompokChange = (e) => {
+    setSelectedKelompok(e?.target?.value ?? '');
     setCurrentPage(1);
   };
 
-  const handleYearChange = (value) => {
-    setSelectedYear(value);
+  const handleYearChange = (e) => {
+    setSelectedYear(e?.target?.value ?? '');
     setCurrentPage(1);
   };
 
@@ -117,7 +121,7 @@ const PestisidaPage = () => {
   };
 
   const handleLihatClicked = (data) => {
-    router.push(`/traceability/gap/pestisida/${data.idKebun}`);
+    router.push(`/traceability/gap/pestisida/${data.id}`);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -148,11 +152,14 @@ const PestisidaPage = () => {
       { field: 'namaPetani', headerName: 'Nama Petani', flex: 1 },
       { field: 'kelompok', headerName: 'Kelompok', flex: 1 },
       { field: 'luasKebunHa', headerName: 'Luas Kebun (Ha)', flex: 1 },
-      { field: 'tahunTanam', headerName: 'Tahun Tanam', flex: 1 },
+      { field: 'tahun', headerName: 'Tahun', flex: 1 },
       {
         field: 'umurTanaman',
         headerName: 'Umur Tanaman',
-        valueGetter: (params) => `${currentYear - params.data.tahunTanam} Tahun`,
+        valueFormatter: (p) => {
+          const v = p.value;
+          return v == null || v < 0 ? '-' : `${v} Tahun`;
+        },
         flex: 1,
       },
       {
@@ -192,7 +199,7 @@ const PestisidaPage = () => {
 
     if (selectedYear) {
       filtered = filtered.filter(
-        (item) => item.tahunTanam === Number(selectedYear)
+        (item) => String(item?.tahun) === String(selectedYear)
       );
     }
 
@@ -246,7 +253,6 @@ const PestisidaPage = () => {
                 />
               </div>
 
-              {/* Action Buttons - Responsive */}
               <div className="flex flex-row items-center justify-end gap-2">
                 <Button
                   className="!px-2 sm:!px-3"
