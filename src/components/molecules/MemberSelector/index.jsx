@@ -1,6 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { User, X } from 'lucide-react';
+
+import SearchBar from '@/components/molecules/SearchBar';
 
 const MemberSelector = ({
   selectedMembers = [],
@@ -8,9 +10,12 @@ const MemberSelector = ({
   onMembersChange,
   label = 'Anggota',
   loading = false,
+  showSearch = true,
+  searchPlaceholder = 'Cari kontak',
 }) => {
   const [checkedMembers, setCheckedMembers] = useState({});
   const [internalMembers, setInternalMembers] = useState([]);
+  const [search, setSearch] = useState('');
 
   const normalizeGender = (jns_kelamin) => {
     if (jns_kelamin === '1' || jns_kelamin === 1) return 'Laki - Laki';
@@ -29,6 +34,16 @@ const MemberSelector = ({
     const normalized = (availableMembers || []).map(mapKontakToMember);
     setInternalMembers(normalized);
   }, [availableMembers]);
+
+  const filteredMembers = useMemo(() => {
+    if (!search) return internalMembers || [];
+    const q = search.toLowerCase();
+    return (internalMembers || []).filter(
+      (m) =>
+        (m?.name || '')?.toLowerCase().includes(q) ||
+        (m?.phone || '')?.toLowerCase().includes(q)
+    );
+  }, [internalMembers, search]);
 
   const handleRemoveSelectedMember = (memberId) => {
     const updatedMembers = selectedMembers.filter(
@@ -113,10 +128,20 @@ const MemberSelector = ({
 
       {/* Available Members Table */}
       <div className="overflow-hidden rounded-[4px] border border-gray-200">
+        {showSearch && (
+          <div className="border-b border-gray-200 p-2">
+            <SearchBar
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full"
+            />
+          </div>
+        )}
         <div className="max-h-[180px] overflow-y-auto">
           <table className="w-full divide-y divide-gray-200">
             <tbody className="divide-y divide-gray-200 bg-white">
-              {(internalMembers || []).map((member) => {
+              {(filteredMembers || []).map((member) => {
                 const isSelected = isMemberSelected(member.id);
                 const isChecked = checkedMembers[member.id] || isSelected;
 

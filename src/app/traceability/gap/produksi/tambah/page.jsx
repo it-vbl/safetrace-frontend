@@ -1,52 +1,53 @@
-"use client";
+'use client';
 
-import { useMemo,useState } from "react";
-import { useRouter } from "next/navigation";
-import { useFormik } from "formik";
-import { toast } from "react-toastify";
-import * as Yup from "yup";
+import { useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
+import * as Yup from 'yup';
 
-import Button from "@/components/atoms/Button";
-import Heading from "@/components/atoms/Typography/Heading";
-import BreadcrumbDetail from "@/components/molecules/BreadcrumbDetail";
-import InputText from "@/components/molecules/InputText";
-import Select from "@/components/molecules/Select";
-import useYearOptions from "@/hooks/useYearOptions";
+import Button from '@/components/atoms/Button';
+import Heading from '@/components/atoms/Typography/Heading';
+import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import InputText from '@/components/molecules/InputText';
+import Select from '@/components/molecules/Select';
+import useYearOptions from '@/hooks/useYearOptions';
+import { createProduksi } from '@/services/produksi';
 
 const MONTHS = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
 ];
 
 const parseKgInput = (v) => {
-  const num = Number(String(v ?? "").replace(/\D/g, ""));
+  const num = Number(String(v ?? '').replace(/\D/g, ''));
   return Number.isNaN(num) ? 0 : num;
 };
 
 const formatKgInput = (v) => {
-  const num = Number(String(v ?? "").replace(/\D/g, ""));
-  return num.toLocaleString("id-ID");
+  const num = Number(String(v ?? '').replace(/\D/g, ''));
+  return num.toLocaleString('id-ID');
 };
 
 const validationSchema = Yup.object({
   tahun: Yup.number()
-    .typeError("Tahun wajib dipilih")
-    .required("Tahun wajib dipilih"),
+    .typeError('Tahun wajib dipilih')
+    .required('Tahun wajib dipilih'),
   bulan: Yup.object(
     MONTHS.reduce((acc, m) => {
       acc[m] = Yup.string()
-        .required("Wajib diisi")
-        .test("is-number", "Harus angka", (val) => {
+        .required('Wajib diisi')
+        .test('is-number', 'Harus angka', (val) => {
           const n = parseKgInput(val);
           return !Number.isNaN(n) && n >= 0;
         });
@@ -57,12 +58,14 @@ const validationSchema = Yup.object({
 
 export default function TambahProduksiPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const kebunParam = searchParams.get('kebun');
   const [isLoading, setIsLoading] = useState(false);
 
   const crumbs = [
-    { label: "HOME", href: "/" },
-    { label: "PRODUKSI", href: "/traceability/gap/produksi" },
-    { label: "TAMBAH TAHUN PRODUKSI" },
+    { label: 'HOME', href: '/' },
+    { label: 'PRODUKSI', href: '/traceability/gap/produksi' },
+    { label: 'TAMBAH TAHUN PRODUKSI' },
   ];
 
   const yearOptions = useYearOptions();
@@ -70,7 +73,7 @@ export default function TambahProduksiPage() {
   const initialMonths = useMemo(
     () =>
       MONTHS.reduce((acc, m) => {
-        acc[m] = "";
+        acc[m] = '';
         return acc;
       }, {}),
     []
@@ -78,24 +81,51 @@ export default function TambahProduksiPage() {
 
   const formik = useFormik({
     initialValues: {
-      tahun: "",
+      kebun: kebunParam ? Number(kebunParam) : '',
+      tahun: '',
       bulan: initialMonths,
     },
     validationSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const payload = {
-          tahun: values.tahun,
-          bulan: Object.fromEntries(
-            MONTHS.map((m) => [m, parseKgInput(values?.bulan?.[m])])
-          ),
+        if (!values.kebun || Number.isNaN(Number(values.kebun))) {
+          toast.error(
+            'Id Kebun tidak ditemukan. Coba dari halaman detail kebun.'
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        const monthKey = {
+          Januari: 'januari',
+          Februari: 'februari',
+          Maret: 'maret',
+          April: 'april',
+          Mei: 'mei',
+          Juni: 'juni',
+          Juli: 'juli',
+          Agustus: 'agustus',
+          September: 'september',
+          Oktober: 'oktober',
+          November: 'november',
+          Desember: 'desember',
         };
-        console.log("Payload:", payload);
-        toast.success("Data produksi berhasil disimpan");
-        router.push("/traceability/gap/produksi");
+
+        const flatMonths = Object.fromEntries(
+          MONTHS.map((m) => [monthKey[m], parseKgInput(values?.bulan?.[m])])
+        );
+
+        const payload = {
+          kebun: Number(values.kebun),
+          tahun: values.tahun,
+          ...flatMonths,
+        };
+        await createProduksi(payload);
+        toast.success('Data produksi berhasil disimpan');
+        router.push('/traceability/gap/produksi');
       } catch (error) {
-        toast.error("Gagal menyimpan data produksi");
+        toast.error('Gagal menyimpan data produksi');
       } finally {
         setIsLoading(false);
       }
@@ -103,39 +133,39 @@ export default function TambahProduksiPage() {
   });
 
   const handleCancel = () => {
-    router.push("/traceability/gap/produksi");
+    router.push('/traceability/gap/produksi');
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0">
+    <div className="flex w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
 
       <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
         <div className="rounded-[4px] border border-gray-300 bg-white">
           <div className="border-b border-gray-200 p-4">
-            <Heading level={3} className="text-sm sm:text-base text-gray-600">
+            <Heading level={3} className="text-sm text-gray-600 sm:text-base">
               HASIL PRODUKSI
             </Heading>
           </div>
 
           <div className="p-4 sm:p-6">
-            <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-6">
               <Select
                 label="Tahun"
                 name="tahun"
                 placeholder="Pilih Tahun"
                 options={yearOptions}
                 value={formik.values.tahun}
-                onChange={(value) => formik.setFieldValue("tahun", value)}
+                onChange={(e) => formik.setFieldValue('tahun', e.target.value)}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
-                selectClassName="!min-h-[30px] !h-[30px]"
+                // selectClassName="!min-h-[30px] !h-[30px]"
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-3">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-6">
               {MONTHS.map((m) => (
                 <InputText
                   key={`bulan-${m}`}
@@ -157,7 +187,12 @@ export default function TambahProduksiPage() {
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="danger" onClick={handleCancel} disabled={isLoading}>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
             Batalkan
           </Button>
           <Button type="submit" isLoading={isLoading}>

@@ -89,7 +89,7 @@ const YearCard = ({
 
         {/* Usage Panel */}
         <div className="flex flex-1">
-          <div className="rounded border border-gray-300 bg-white p-4">
+          <div className="w-full rounded border border-gray-300 bg-white p-3">
             <div className="mb-3 font-semibold">{title}</div>
             <div className="grid grid-cols-4 gap-x-6 gap-y-3">
               {dataFields.map((field) => (
@@ -158,4 +158,3 @@ YearCard.propTypes = {
 };
 
 export default YearCard;
-
