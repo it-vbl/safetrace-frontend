@@ -19,8 +19,6 @@ import { getListPestisida } from '@/services/pestisida';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Kelompok options will be loaded from referensi
-
 const PestisidaPage = () => {
   const router = useRouter();
   const { kelompokTani, fetchKelompokTani } = useReferences();
@@ -39,7 +37,7 @@ const PestisidaPage = () => {
 
   useEffect(() => {
     fetchKelompokTani();
-  }, [fetchKelompokTani]);
+  }, []);
 
   const kelompokOptions = useMemo(() => {
     return (
@@ -58,11 +56,17 @@ const PestisidaPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await getListPestisida();
+        const params = {};
+        if (selectedKelompok) params.kelompok = selectedKelompok;
+        if (search) params.search = search;
+        if (selectedYear) params.tahun = selectedYear;
+        const res = Object.keys(params).length
+          ? await getListPestisida(params)
+          : await getListPestisida();
         const payload = res?.data?.data || res?.data || {};
         const list = payload?.results || payload?.data || payload || [];
         const normalized = (Array.isArray(list) ? list : []).map((item) => ({
-          id: item?.id,
+          id: item?.kebun_id,
           idKebun: item?.id_kebun ?? '-',
           namaPetani: item?.nama_petani ?? '-',
           kelompok: item?.kelompok_tani ?? '-',
@@ -87,7 +91,7 @@ const PestisidaPage = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [search, selectedKelompok, selectedYear]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -114,10 +118,6 @@ const PestisidaPage = () => {
   const handlePageSizeChange = (newPageSize) => {
     setPageSize(newPageSize);
     setCurrentPage(1);
-  };
-
-  const handleTambahClicked = () => {
-    router.push('/traceability/gap/pestisida/tambah');
   };
 
   const handleLihatClicked = (data) => {

@@ -2,12 +2,17 @@ import api from './api';
 
 // *** GET ***
 
-export const getListPestisida = () => {
-  return api.get('/gap/pestisida/list/');
+export const getListPestisida = (params = undefined) => {
+  const config = params ? { params } : {};
+  return api.get('/gap/pestisida/list/', config);
 };
 
-export const getDetailPestisida = (id) =>
-  api.get(`/gap/pestisida/detail/${id}/`);
+export const getDetailPestisidaKebun = (id) =>
+  api.get(`/gap/pestisida/detail/kebun/${id}/`);
+
+export const getListPestisidaKebun = (id) => {
+  return api.get(`/gap/pestisida/list/kebun/${id}/`);
+};
 
 export const deletePestisida = (id) =>
   api.delete(`/gap/pestisida/delete/${id}/`);

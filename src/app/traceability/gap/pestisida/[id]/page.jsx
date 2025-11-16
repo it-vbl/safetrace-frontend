@@ -18,7 +18,8 @@ import YearCard from '@/components/molecules/YearCard';
 import { MONTH_NAMES } from '@/constants/months';
 import {
   deletePestisida,
-  getDetailPestisida,
+  getDetailPestisidaKebun,
+  getListPestisidaKebun,
   updatePestisida,
 } from '@/services/pestisida';
 import { formatLiterInput, parseLiterInput } from '@/utils/literFormat';
@@ -337,59 +338,90 @@ const TraceabilityPestisidaDetail = () => {
       if (!id) return;
       try {
         setLoading(true);
-        const res = await getDetailPestisida(id);
-        const data = res?.data?.data || res?.data || null;
-        if (data) {
-          const penggunaan = {
-            tahun: data?.tahun ?? null,
+        const [resKebun, resList] = await Promise.all([
+          getDetailPestisidaKebun(id),
+          getListPestisidaKebun(id),
+        ]);
+
+        const kebun = resKebun?.data?.data || resKebun?.data || {};
+        const listPayload = resList?.data?.data || resList?.data || {};
+        const results = listPayload?.results || listPayload?.data || [];
+
+        const penggunaanTahunan = (Array.isArray(results) ? results : []).map(
+          (r) => ({
+            id: r?.id,
+            tahun: r?.tahun ?? null,
             semester: {
               'Semester 1': {
                 sistemik: {
-                  waktu: data?.s1_sistemik_waktu_label ?? '-',
-                  jumlah: Number(data?.s1_sistemik_jumlah) || 0,
+                  waktu:
+                    MONTH_NAMES[
+                      (Number(r?.s1_sistemik_waktu_aplikasi) || 1) - 1
+                    ] || '-',
+                  jumlah:
+                    typeof r?.s1_sistemik_jumlah === 'string'
+                      ? Number(r.s1_sistemik_jumlah)
+                      : r?.s1_sistemik_jumlah ?? 0,
                 },
                 kontak: {
-                  waktu: data?.s1_kontak_waktu_label ?? '-',
-                  jumlah: Number(data?.s1_kontak_jumlah) || 0,
+                  waktu:
+                    MONTH_NAMES[
+                      (Number(r?.s1_kontak_waktu_aplikasi) || 1) - 1
+                    ] || '-',
+                  jumlah:
+                    typeof r?.s1_kontak_jumlah === 'string'
+                      ? Number(r.s1_kontak_jumlah)
+                      : r?.s1_kontak_jumlah ?? 0,
                 },
               },
               'Semester 2': {
                 sistemik: {
-                  waktu: data?.s2_sistemik_waktu_label ?? '-',
-                  jumlah: Number(data?.s2_sistemik_jumlah) || 0,
+                  waktu:
+                    MONTH_NAMES[
+                      (Number(r?.s2_sistemik_waktu_aplikasi) || 1) - 1
+                    ] || '-',
+                  jumlah:
+                    typeof r?.s2_sistemik_jumlah === 'string'
+                      ? Number(r.s2_sistemik_jumlah)
+                      : r?.s2_sistemik_jumlah ?? 0,
                 },
                 kontak: {
-                  waktu: data?.s2_kontak_waktu_label ?? '-',
-                  jumlah: Number(data?.s2_kontak_jumlah) || 0,
+                  waktu:
+                    MONTH_NAMES[
+                      (Number(r?.s2_kontak_waktu_aplikasi) || 1) - 1
+                    ] || '-',
+                  jumlah:
+                    typeof r?.s2_kontak_jumlah === 'string'
+                      ? Number(r.s2_kontak_jumlah)
+                      : r?.s2_kontak_jumlah ?? 0,
                 },
               },
             },
-          };
+          })
+        );
 
-          const normalized = {
-            id: data?.id,
-            kebun: data?.kebun ?? null,
-            id_kebun: data?.id_kebun ?? '-',
-            nama_petani: data?.nama_petani ?? '-',
-            kelompok_tani: data?.kelompok_tani ?? '-',
-            luas_kebun_ha:
-              typeof data?.luas_kebun === 'string'
-                ? Number(data.luas_kebun)
-                : data?.luas_kebun ?? null,
-            tahun_tanam: data?.tahun ?? null,
-            umur_tanaman: data?.umur_tanaman ?? null,
-            total_pestisida:
-              typeof data?.total_pestisida === 'number'
-                ? data.total_pestisida
-                : Number(data?.total_pestisida) || 0,
-            intensitas_per_ha: data?.intensitas_per_ha ?? null,
-            penggunaan_tahunan: penggunaan?.tahun ? [penggunaan] : [],
-          };
+        const latestYear = penggunaanTahunan.length
+          ? Math.max(...penggunaanTahunan.map((y) => Number(y.tahun) || 0))
+          : null;
 
-          setDetail(normalized);
-        } else {
-          toast.error('Detail pestisida tidak ditemukan');
-        }
+        setDetail({
+          kebun: kebun?.kebun_id ?? null,
+          id_kebun: kebun?.id_kebun ?? '-',
+          nama_petani: kebun?.nama_petani ?? '-',
+          kelompok_tani: kebun?.kelompok_tani ?? '-',
+          luas_kebun_ha:
+            typeof kebun?.luas_kebun === 'string'
+              ? Number(kebun.luas_kebun)
+              : kebun?.luas_kebun ?? null,
+          tahun_tanam: kebun?.tahun_tanam ?? null,
+          umur_tanaman: kebun?.umur_tanaman ?? null,
+          total_pestisida:
+            typeof kebun?.total_pestisida === 'number'
+              ? kebun.total_pestisida
+              : Number(kebun?.total_pestisida) || 0,
+          penggunaan_tahunan: penggunaanTahunan,
+          tahun_produksi: latestYear,
+        });
       } catch (err) {
         toast.error('Gagal memuat detail pestisida');
       } finally {
@@ -445,7 +477,7 @@ const TraceabilityPestisidaDetail = () => {
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.id_kebun ?? '-'}
@@ -479,20 +511,22 @@ const TraceabilityPestisidaDetail = () => {
         )}
 
         {/* Year Cards */}
-        {detail?.penggunaan_tahunan?.map((yearData) => (
-          <YearCard
-            className="mb-4"
-            key={yearData.tahun}
-            yearData={yearData}
-            onEdit={handleEditYear}
-            onDelete={handleDeleteYear}
-            title="Penggunaan Pestisida"
-            dataFields={[
-              { key: 'sistemik', label: '(Sistemik)', unit: 'Liter' },
-              { key: 'kontak', label: '(Kontak)', unit: 'Liter' },
-            ]}
-          />
-        ))}
+        <div className="mb-4 flex flex-col gap-4">
+          {detail?.penggunaan_tahunan?.map((yearData) => (
+            <YearCard
+              className="mb-4"
+              key={yearData.tahun}
+              yearData={yearData}
+              onEdit={handleEditYear}
+              onDelete={handleDeleteYear}
+              title="Penggunaan Pestisida"
+              dataFields={[
+                { key: 'sistemik', label: '(Sistemik)', unit: 'Liter' },
+                { key: 'kontak', label: '(Kontak)', unit: 'Liter' },
+              ]}
+            />
+          ))}
+        </div>
 
         {/* Edit Modal */}
         <EditPestisidaModal
@@ -501,67 +535,96 @@ const TraceabilityPestisidaDetail = () => {
           yearData={editYearData}
           onSave={async (updatedSemesters) => {
             try {
-              const res = await updatePestisida(id, {
+              await updatePestisida(editYearData?.id, {
                 kebun: detail?.kebun,
                 ...updatedSemesters,
                 tahun: editYearData?.tahun,
               });
-              const ok = res?.status === 200;
-              if (ok) {
-                setDetail((prev) => {
-                  if (!prev) return prev;
-                  const updated = prev.penggunaan_tahunan.map((y) =>
-                    y.tahun === editYearData?.tahun
-                      ? {
-                          ...y,
-                          semester: {
-                            'Semester 1': {
-                              sistemik: {
-                                waktu:
-                                  MONTH_NAMES[
-                                    updatedSemesters.s1_sistemik_waktu_aplikasi -
-                                      1
-                                  ],
-                                jumlah: updatedSemesters.s1_sistemik_jumlah,
-                              },
-                              kontak: {
-                                waktu:
-                                  MONTH_NAMES[
-                                    updatedSemesters.s1_kontak_waktu_aplikasi -
-                                      1
-                                  ],
-                                jumlah: updatedSemesters.s1_kontak_jumlah,
-                              },
-                            },
-                            'Semester 2': {
-                              sistemik: {
-                                waktu:
-                                  MONTH_NAMES[
-                                    updatedSemesters.s2_sistemik_waktu_aplikasi -
-                                      1
-                                  ],
-                                jumlah: updatedSemesters.s2_sistemik_jumlah,
-                              },
-                              kontak: {
-                                waktu:
-                                  MONTH_NAMES[
-                                    updatedSemesters.s2_kontak_waktu_aplikasi -
-                                      1
-                                  ],
-                                jumlah: updatedSemesters.s2_kontak_jumlah,
-                              },
-                            },
-                          },
-                        }
-                      : y
-                  );
-                  return { ...prev, penggunaan_tahunan: updated };
-                });
-                toast.success('Perubahan berhasil disimpan');
-                setIsEditOpen(false);
-              } else {
-                throw new Error('Invalid response');
-              }
+              toast.success('Perubahan berhasil disimpan');
+
+              const [resKebun, resList] = await Promise.all([
+                getDetailPestisidaKebun(id),
+                getListPestisidaKebun(id),
+              ]);
+              const kebun = resKebun?.data?.data || resKebun?.data || {};
+              const listPayload = resList?.data?.data || resList?.data || {};
+              const results = listPayload?.results || listPayload?.data || [];
+              const penggunaanTahunan = (
+                Array.isArray(results) ? results : []
+              ).map((r) => ({
+                id: r?.id,
+                tahun: r?.tahun ?? null,
+                semester: {
+                  'Semester 1': {
+                    sistemik: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s1_sistemik_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s1_sistemik_jumlah === 'string'
+                          ? Number(r.s1_sistemik_jumlah)
+                          : r?.s1_sistemik_jumlah ?? 0,
+                    },
+                    kontak: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s1_kontak_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s1_kontak_jumlah === 'string'
+                          ? Number(r.s1_kontak_jumlah)
+                          : r?.s1_kontak_jumlah ?? 0,
+                    },
+                  },
+                  'Semester 2': {
+                    sistemik: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s2_sistemik_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s2_sistemik_jumlah === 'string'
+                          ? Number(r.s2_sistemik_jumlah)
+                          : r?.s2_sistemik_jumlah ?? 0,
+                    },
+                    kontak: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s2_kontak_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s2_kontak_jumlah === 'string'
+                          ? Number(r.s2_kontak_jumlah)
+                          : r?.s2_kontak_jumlah ?? 0,
+                    },
+                  },
+                },
+              }));
+              const latestYear = penggunaanTahunan.length
+                ? Math.max(
+                    ...penggunaanTahunan.map((y) => Number(y.tahun) || 0)
+                  )
+                : null;
+              setDetail({
+                kebun: kebun?.kebun_id ?? null,
+                id_kebun: kebun?.id_kebun ?? '-',
+                nama_petani: kebun?.nama_petani ?? '-',
+                kelompok_tani: kebun?.kelompok_tani ?? '-',
+                luas_kebun_ha:
+                  typeof kebun?.luas_kebun === 'string'
+                    ? Number(kebun.luas_kebun)
+                    : kebun?.luas_kebun ?? null,
+                tahun_tanam: kebun?.tahun_tanam ?? null,
+                umur_tanaman: kebun?.umur_tanaman ?? null,
+                total_pestisida:
+                  typeof kebun?.total_pestisida === 'number'
+                    ? kebun.total_pestisida
+                    : Number(kebun?.total_pestisida) || 0,
+                penggunaan_tahunan: penggunaanTahunan,
+                tahun_produksi: latestYear,
+              });
+              setIsEditOpen(false);
             } catch (err) {
               toast.error('Gagal menyimpan perubahan');
             }
@@ -576,27 +639,97 @@ const TraceabilityPestisidaDetail = () => {
           onConfirm={async () => {
             try {
               setIsDeleting(true);
-              const res = await deletePestisida(id);
-              const ok =
-                res?.data?.status === 'success' ||
-                res?.status === 200 ||
-                res?.status === 204;
-              if (ok) {
-                toast.success(
-                  res?.data?.message || 'Data pestisida berhasil dihapus'
-                );
-                router.push('/traceability/gap/pestisida');
-              } else {
-                throw new Error('Invalid response');
-              }
-            } catch (err) {
-              toast.error(
-                err?.response?.data?.message || 'Gagal menghapus data pestisida'
-              );
-            } finally {
-              setIsDeleting(false);
+              await deletePestisida(editYearData?.id);
+              toast.success('Data pestisida berhasil dihapus');
+
+              const [resKebun, resList] = await Promise.all([
+                getDetailPestisidaKebun(id),
+                getListPestisidaKebun(id),
+              ]);
+              const kebun = resKebun?.data?.data || resKebun?.data || {};
+              const listPayload = resList?.data?.data || resList?.data || {};
+              const results = listPayload?.results || listPayload?.data || [];
+              const penggunaanTahunan = (
+                Array.isArray(results) ? results : []
+              ).map((r) => ({
+                id: r?.id,
+                tahun: r?.tahun ?? null,
+                semester: {
+                  'Semester 1': {
+                    sistemik: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s1_sistemik_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s1_sistemik_jumlah === 'string'
+                          ? Number(r.s1_sistemik_jumlah)
+                          : r?.s1_sistemik_jumlah ?? 0,
+                    },
+                    kontak: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s1_kontak_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s1_kontak_jumlah === 'string'
+                          ? Number(r.s1_kontak_jumlah)
+                          : r?.s1_kontak_jumlah ?? 0,
+                    },
+                  },
+                  'Semester 2': {
+                    sistemik: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s2_sistemik_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s2_sistemik_jumlah === 'string'
+                          ? Number(r.s2_sistemik_jumlah)
+                          : r?.s2_sistemik_jumlah ?? 0,
+                    },
+                    kontak: {
+                      waktu:
+                        MONTH_NAMES[
+                          (Number(r?.s2_kontak_waktu_aplikasi) || 1) - 1
+                        ] || '-',
+                      jumlah:
+                        typeof r?.s2_kontak_jumlah === 'string'
+                          ? Number(r.s2_kontak_jumlah)
+                          : r?.s2_kontak_jumlah ?? 0,
+                    },
+                  },
+                },
+              }));
+              const latestYear = penggunaanTahunan.length
+                ? Math.max(
+                    ...penggunaanTahunan.map((y) => Number(y.tahun) || 0)
+                  )
+                : null;
+              setDetail({
+                kebun: kebun?.kebun_id ?? null,
+                id_kebun: kebun?.id_kebun ?? '-',
+                nama_petani: kebun?.nama_petani ?? '-',
+                kelompok_tani: kebun?.kelompok_tani ?? '-',
+                luas_kebun_ha:
+                  typeof kebun?.luas_kebun === 'string'
+                    ? Number(kebun.luas_kebun)
+                    : kebun?.luas_kebun ?? null,
+                tahun_tanam: kebun?.tahun_tanam ?? null,
+                umur_tanaman: kebun?.umur_tanaman ?? null,
+                total_pestisida:
+                  typeof kebun?.total_pestisida === 'number'
+                    ? kebun.total_pestisida
+                    : Number(kebun?.total_pestisida) || 0,
+                penggunaan_tahunan: penggunaanTahunan,
+                tahun_produksi: latestYear,
+              });
               setShowDeleteModal(false);
               setEditYearData(null);
+            } catch (err) {
+              toast.error('Gagal menghapus data pestisida');
+            } finally {
+              setIsDeleting(false);
             }
           }}
           itemName={`pestisida tahun ${editYearData?.tahun ?? ''}`}

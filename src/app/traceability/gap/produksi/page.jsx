@@ -17,10 +17,7 @@ import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
 import { getListProduksi } from '@/services/produksi';
 
-// Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
-
-// Options sourced dynamically from referensi service
 
 const ProduksiPage = () => {
   const router = useRouter();
@@ -41,7 +38,7 @@ const ProduksiPage = () => {
 
   useEffect(() => {
     fetchKelompokTani();
-  }, [fetchKelompokTani]);
+  }, []);
 
   const kelompokOptions = useMemo(() => {
     return (
@@ -58,8 +55,14 @@ const ProduksiPage = () => {
   const fetchProduksiList = async () => {
     setLoading(true);
     try {
-      // API terms indicate simple GET with no query params
-      const res = await getListProduksi();
+      const params = {};
+      if (selectedKelompok) params.kelompok = selectedKelompok;
+      if (search) params.search = search;
+      if (selectedYear) params.tahun = selectedYear;
+
+      const res = Object.keys(params).length
+        ? await getListProduksi(params)
+        : await getListProduksi();
 
       const payload = res?.data?.data || res?.data || {};
       const results = payload?.results || payload?.data || payload || [];
@@ -67,11 +70,11 @@ const ProduksiPage = () => {
         payload?.count ?? (Array.isArray(results) ? results.length : 0);
 
       const mapped = (results || []).map((item) => ({
-        id: item?.id,
+        id: item?.kebun_id ?? item?.id,
         idKebun: item?.id_kebun ?? '-',
         namaPetani: item?.nama_petani ?? '-',
         kelompok: item?.kelompok_tani ?? '-',
-        tahun: item?.tahun ?? '-',
+        tahun: item?.tahun_tanam ?? item?.tahun ?? '-',
         umurTanaman: item?.umur_tanaman ?? '-',
         totalProduksi: item?.total_produksi ?? 0,
         produksiPerHaPerTahun: item?.prod_ha_th ?? 0,
@@ -180,7 +183,6 @@ const ProduksiPage = () => {
     };
   }, []);
 
-  // Client-side filtering and pagination based on API response
   const filteredData = useMemo(() => {
     let data = [...produksiData];
 

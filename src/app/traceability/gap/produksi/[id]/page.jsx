@@ -12,9 +12,11 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
+import { MONTH_NAMES } from '@/constants/months';
 import {
   deleteProduksi,
-  getDetailProduksi,
+  getDetailProduksiKebun,
+  getListProduksiKebun,
   updateProduksi,
 } from '@/services/produksi';
 
@@ -22,69 +24,6 @@ const formatNumber = (num) =>
   typeof num === 'number'
     ? num.toLocaleString('id-ID')
     : (Number(num) || 0).toLocaleString('id-ID');
-
-const MONTHS = [
-  'Januari',
-  'Februari',
-  'Maret',
-  'April',
-  'Mei',
-  'Juni',
-  'Juli',
-  'Agustus',
-  'September',
-  'Oktober',
-  'November',
-  'Desember',
-];
-
-const mockProduksiDetail = {
-  kebun: {
-    id_kebun: 'GR-001-002-002',
-    petani: 'Akeng Rupinus',
-    kelompok_tani: 'Bepekaek Besamo',
-    luas_kebun_ha: 0.78,
-    tahun_tanam: 2002,
-    total_produksi_kg: 13000,
-    prod_per_ha_th_ton: 10,
-  },
-  produksi_tahunan: [
-    {
-      tahun: 2025,
-      bulan: {
-        Januari: 1000,
-        Februari: 1000,
-        Maret: 1000,
-        April: 1000,
-        Mei: 1000,
-        Juni: 1000,
-        Juli: 1000,
-        Agustus: 1000,
-        September: 1000,
-        Oktober: 0,
-        November: 0,
-        Desember: 0,
-      },
-    },
-    {
-      tahun: 2024,
-      bulan: {
-        Januari: 1000,
-        Februari: 1000,
-        Maret: 1000,
-        April: 1000,
-        Mei: 1000,
-        Juni: 1000,
-        Juli: 1000,
-        Agustus: 1000,
-        September: 1000,
-        Oktober: 1000,
-        November: 1000,
-        Desember: 1000,
-      },
-    },
-  ],
-};
 
 const TraceabilityProduksiDetail = () => {
   const { id } = useParams();
@@ -107,44 +46,58 @@ const TraceabilityProduksiDetail = () => {
     const fetchDetail = async () => {
       if (!id) return;
       try {
-        const res = await getDetailProduksi(id);
-        const payload = res?.data?.data || res?.data || {};
+        const [resKebun, resList] = await Promise.all([
+          getDetailProduksiKebun(id),
+          getListProduksiKebun(id),
+        ]);
 
-        const months = {
-          Januari: payload?.januari ?? 0,
-          Februari: payload?.februari ?? 0,
-          Maret: payload?.maret ?? 0,
-          April: payload?.april ?? 0,
-          Mei: payload?.mei ?? 0,
-          Juni: payload?.juni ?? 0,
-          Juli: payload?.juli ?? 0,
-          Agustus: payload?.agustus ?? 0,
-          September: payload?.september ?? 0,
-          Oktober: payload?.oktober ?? 0,
-          November: payload?.november ?? 0,
-          Desember: payload?.desember ?? 0,
-        };
+        const kebun = resKebun?.data?.data || resKebun?.data || {};
+        const listPayload = resList?.data?.data || resList?.data || {};
+        const results = listPayload?.results || listPayload?.data || [];
 
-        const normalized = {
-          kebun: {
-            id: payload?.kebun ?? null,
-            id_kebun: payload?.id_kebun || '-',
-            petani: payload?.nama_petani || '-',
-            kelompok_tani: payload?.kelompok_tani || '-',
-            total_produksi_kg: payload?.total_produksi ?? 0,
-            umur_tanaman: payload?.umur_tanaman ?? null,
-            prod_per_ha_th_ton: payload?.prod_ha_th ?? 0,
-            tahun_produksi: payload?.tahun ?? null,
-          },
-          produksi_tahunan: [
-            {
-              tahun: payload?.tahun ?? 0,
-              bulan: months,
+        const produksiTahunan = (Array.isArray(results) ? results : []).map(
+          (r) => ({
+            id: r?.id,
+            tahun: r?.tahun ?? 0,
+            bulan: {
+              Januari: r?.januari ?? 0,
+              Februari: r?.februari ?? 0,
+              Maret: r?.maret ?? 0,
+              April: r?.april ?? 0,
+              Mei: r?.mei ?? 0,
+              Juni: r?.juni ?? 0,
+              Juli: r?.juli ?? 0,
+              Agustus: r?.agustus ?? 0,
+              September: r?.september ?? 0,
+              Oktober: r?.oktober ?? 0,
+              November: r?.november ?? 0,
+              Desember: r?.desember ?? 0,
             },
-          ],
-        };
+          })
+        );
 
-        setDetail(normalized);
+        const latestYear = produksiTahunan.length
+          ? Math.max(...produksiTahunan.map((y) => Number(y.tahun) || 0))
+          : null;
+
+        setDetail({
+          kebun: {
+            id: kebun?.kebun_id ?? null,
+            id_kebun: kebun?.id_kebun ?? '-',
+            petani: kebun?.nama_petani ?? '-',
+            kelompok_tani: kebun?.kelompok_tani ?? '-',
+            total_produksi_kg: kebun?.total_produksi ?? 0,
+            umur_tanaman: kebun?.umur_tanaman ?? null,
+            prod_per_ha_th_ton: kebun?.prod_ha_th ?? 0,
+            tahun_tanam: kebun?.tahun_tanam ?? null,
+            luas_kebun_ha:
+              typeof kebun?.luas_kebun === 'string'
+                ? Number(kebun.luas_kebun)
+                : kebun?.luas_kebun ?? null,
+            tahun_produksi: latestYear,
+          },
+          produksi_tahunan: produksiTahunan,
+        });
       } catch (error) {
         toast.error('Gagal memuat detail produksi');
       }
@@ -165,7 +118,7 @@ const TraceabilityProduksiDetail = () => {
   }, [detail]);
 
   const renderYearCard = (yearData) => {
-    const monthEntries = MONTHS.map((m) => ({
+    const monthEntries = MONTH_NAMES.map((m) => ({
       name: m,
       valueKg: yearData?.bulan?.[m] ?? 0,
     }));
@@ -254,7 +207,7 @@ const TraceabilityProduksiDetail = () => {
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.kebun.id_kebun ?? '-'}
@@ -268,10 +221,13 @@ const TraceabilityProduksiDetail = () => {
                 value={detail.kebun.kelompok_tani ?? '-'}
               />
               <BorderBottomColData
-                label="Tahun Produksi"
-                value={detail.kebun.tahun_produksi ?? '-'}
+                label="Luas Kebun (Ha)"
+                value={detail.kebun.luas_kebun_ha ?? '-'}
               />
-
+              <BorderBottomColData
+                label="Tahun Tanam"
+                value={detail.kebun.tahun_tanam ?? '-'}
+              />
               <BorderBottomColData
                 label="Umur Tanaman"
                 value={umurTanamanText}
@@ -289,7 +245,9 @@ const TraceabilityProduksiDetail = () => {
         )}
 
         {/* Yearly Production Cards */}
-        {detail?.produksi_tahunan?.map((y) => renderYearCard(y))}
+        <div className="mb-4 flex flex-col gap-4">
+          {detail?.produksi_tahunan?.map((y) => renderYearCard(y))}
+        </div>
 
         {/* Edit Modal */}
         <EditProduksiModal
@@ -314,7 +272,7 @@ const TraceabilityProduksiDetail = () => {
               };
 
               const flatMonths = Object.fromEntries(
-                MONTHS.map((m) => [monthKey[m], updatedMonths[m] ?? 0])
+                MONTH_NAMES.map((m) => [monthKey[m], updatedMonths[m] ?? 0])
               );
 
               const payload = {
@@ -322,41 +280,56 @@ const TraceabilityProduksiDetail = () => {
                 tahun: editYearData?.tahun,
                 ...flatMonths,
               };
-              await updateProduksi(id, payload);
+              await updateProduksi(editYearData?.id, payload);
               toast.success('Data produksi berhasil diperbarui');
-              const res = await getDetailProduksi(id);
-              const p = res?.data?.data || res?.data || {};
-              const months = {
-                Januari: p?.januari ?? 0,
-                Februari: p?.februari ?? 0,
-                Maret: p?.maret ?? 0,
-                April: p?.april ?? 0,
-                Mei: p?.mei ?? 0,
-                Juni: p?.juni ?? 0,
-                Juli: p?.juli ?? 0,
-                Agustus: p?.agustus ?? 0,
-                September: p?.september ?? 0,
-                Oktober: p?.oktober ?? 0,
-                November: p?.november ?? 0,
-                Desember: p?.desember ?? 0,
-              };
+
+              const [resKebun, resList] = await Promise.all([
+                getDetailProduksiKebun(id),
+                getListProduksiKebun(id),
+              ]);
+              const kebun = resKebun?.data?.data || resKebun?.data || {};
+              const listPayload = resList?.data?.data || resList?.data || {};
+              const results = listPayload?.results || listPayload?.data || [];
+              const produksiTahunan = (
+                Array.isArray(results) ? results : []
+              ).map((r) => ({
+                id: r?.id,
+                tahun: r?.tahun ?? 0,
+                bulan: {
+                  Januari: r?.januari ?? 0,
+                  Februari: r?.februari ?? 0,
+                  Maret: r?.maret ?? 0,
+                  April: r?.april ?? 0,
+                  Mei: r?.mei ?? 0,
+                  Juni: r?.juni ?? 0,
+                  Juli: r?.juli ?? 0,
+                  Agustus: r?.agustus ?? 0,
+                  September: r?.september ?? 0,
+                  Oktober: r?.oktober ?? 0,
+                  November: r?.november ?? 0,
+                  Desember: r?.desember ?? 0,
+                },
+              }));
+              const latestYear = produksiTahunan.length
+                ? Math.max(...produksiTahunan.map((y) => Number(y.tahun) || 0))
+                : null;
               setDetail({
                 kebun: {
-                  id: p?.kebun ?? null,
-                  id_kebun: p?.id_kebun || '-',
-                  petani: p?.nama_petani || '-',
-                  kelompok_tani: p?.kelompok_tani || '-',
-                  total_produksi_kg: p?.total_produksi ?? 0,
-                  umur_tanaman: p?.umur_tanaman ?? null,
-                  prod_per_ha_th_ton: p?.prod_ha_th ?? 0,
-                  tahun_produksi: p?.tahun ?? null,
+                  id: kebun?.kebun_id ?? null,
+                  id_kebun: kebun?.id_kebun ?? '-',
+                  petani: kebun?.nama_petani ?? '-',
+                  kelompok_tani: kebun?.kelompok_tani ?? '-',
+                  total_produksi_kg: kebun?.total_produksi ?? 0,
+                  umur_tanaman: kebun?.umur_tanaman ?? null,
+                  prod_per_ha_th_ton: kebun?.prod_ha_th ?? 0,
+                  tahun_tanam: kebun?.tahun_tanam ?? null,
+                  luas_kebun_ha:
+                    typeof kebun?.luas_kebun === 'string'
+                      ? Number(kebun.luas_kebun)
+                      : kebun?.luas_kebun ?? null,
+                  tahun_produksi: latestYear,
                 },
-                produksi_tahunan: [
-                  {
-                    tahun: p?.tahun ?? 0,
-                    bulan: months,
-                  },
-                ],
+                produksi_tahunan: produksiTahunan,
               });
               setIsEditOpen(false);
             } catch (error) {
@@ -371,13 +344,62 @@ const TraceabilityProduksiDetail = () => {
             setDeleteYearData(null);
           }}
           onConfirm={async () => {
-            if (!id) return;
+            if (!deleteYearData?.id) return;
             try {
               setIsDeleting(true);
-              await deleteProduksi(id);
+              await deleteProduksi(deleteYearData.id);
               toast.success('Data produksi berhasil dihapus');
               setShowDeleteModal(false);
-              router.push('/traceability/gap/produksi');
+
+              const [resKebun, resList] = await Promise.all([
+                getDetailProduksiKebun(id),
+                getListProduksiKebun(id),
+              ]);
+              const kebun = resKebun?.data?.data || resKebun?.data || {};
+              const listPayload = resList?.data?.data || resList?.data || {};
+              const results = listPayload?.results || listPayload?.data || [];
+              const produksiTahunan = (
+                Array.isArray(results) ? results : []
+              ).map((r) => ({
+                id: r?.id,
+                tahun: r?.tahun ?? 0,
+                bulan: {
+                  Januari: r?.januari ?? 0,
+                  Februari: r?.februari ?? 0,
+                  Maret: r?.maret ?? 0,
+                  April: r?.april ?? 0,
+                  Mei: r?.mei ?? 0,
+                  Juni: r?.juni ?? 0,
+                  Juli: r?.juli ?? 0,
+                  Agustus: r?.agustus ?? 0,
+                  September: r?.september ?? 0,
+                  Oktober: r?.oktober ?? 0,
+                  November: r?.november ?? 0,
+                  Desember: r?.desember ?? 0,
+                },
+              }));
+              const latestYear = produksiTahunan.length
+                ? Math.max(...produksiTahunan.map((y) => Number(y.tahun) || 0))
+                : null;
+              setDetail({
+                kebun: {
+                  id: kebun?.kebun_id ?? null,
+                  id_kebun: kebun?.id_kebun ?? '-',
+                  petani: kebun?.nama_petani ?? '-',
+                  kelompok_tani: kebun?.kelompok_tani ?? '-',
+                  total_produksi_kg: kebun?.total_produksi ?? 0,
+                  umur_tanaman: kebun?.umur_tanaman ?? null,
+                  prod_per_ha_th_ton: kebun?.prod_ha_th ?? 0,
+                  tahun_tanam: kebun?.tahun_tanam ?? null,
+                  luas_kebun_ha:
+                    typeof kebun?.luas_kebun === 'string'
+                      ? Number(kebun.luas_kebun)
+                      : kebun?.luas_kebun ?? null,
+                  tahun_produksi: latestYear,
+                },
+                produksi_tahunan: produksiTahunan,
+              });
+              setDeleteYearData(null);
             } catch (e) {
               toast.error('Gagal menghapus data produksi');
             } finally {
@@ -406,7 +428,7 @@ const parseKgInput = (v) => {
 
 const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
   const initialValues = useMemo(() => {
-    const months = MONTHS.reduce((acc, m) => {
+    const months = MONTH_NAMES.reduce((acc, m) => {
       acc[m] = formatKgInput(yearData?.bulan?.[m] ?? 0);
       return acc;
     }, {});
@@ -414,7 +436,7 @@ const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
   }, [yearData]);
 
   const validationSchema = useMemo(() => {
-    const shape = MONTHS.reduce((acc, m) => {
+    const shape = MONTH_NAMES.reduce((acc, m) => {
       acc[m] = Yup.string()
         .required('Wajib diisi')
         .test('angka-valid', 'Harus angka >= 0', (val) => {
@@ -431,7 +453,7 @@ const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-      const updated = MONTHS.reduce((acc, m) => {
+      const updated = MONTH_NAMES.reduce((acc, m) => {
         acc[m] = parseKgInput(values[m]);
         return acc;
       }, {});
@@ -451,7 +473,7 @@ const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
     >
       <div className="pt-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {MONTHS.map((m) => (
+          {MONTH_NAMES.map((m) => (
             <InputText
               key={`input-${m}`}
               label={m}

@@ -7,7 +7,12 @@ export const getListProduksi = (params = undefined) => {
   return api.get('/gap/produksi/list/', config);
 };
 
-export const getDetailProduksi = (id) => api.get(`/gap/produksi/detail/${id}/`);
+export const getDetailProduksiKebun = (id) =>
+  api.get(`/gap/produksi/detail/kebun/${id}/`);
+
+export const getListProduksiKebun = (id) => {
+  return api.get(`/gap/produksi/list/kebun/${id}/`);
+};
 
 export const deleteProduksi = (id) => api.delete(`/gap/produksi/delete/${id}/`);
 
