@@ -1,4 +1,4 @@
-import { useCallback,useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
@@ -34,10 +34,11 @@ const Select = ({
   selectClassName = '',
   allowAddOption = {
     visible: false,
-    placeholder: 'Add new option',
+    placeholder: 'Tambah opsi baru',
     isLoading: false,
     onSubmitOption: () => {},
     addButtonText: 'Tambah',
+    cancelButtonText: 'Batalkan',
     applyButtonText: 'Terapkan',
     validationSchema: null,
     maxLength: 255,
@@ -253,6 +254,17 @@ const Select = ({
     onBlur({ target: { name } });
   };
 
+  const handleCancelClick = () => {
+    setIsAddOption(false);
+  };
+
+  const errorClassName = {
+    field:
+      (touched?.[name] && errors?.[name]) || isError ? '!border-error5' : '',
+    helperText:
+      (touched?.[name] && errors?.[name]) || isError ? 'text-error5' : '',
+  };
+
   return (
     <div
       className={cn(
@@ -285,10 +297,18 @@ const Select = ({
                 disabled,
               'hover:border-blue6 focus:border-blue6 focus:outline-none':
                 !disabled,
-              'border-neutral6': selectedValue && !disabled && !isError,
-              'border-neutral5': !selectedValue && !disabled && !isError,
-              '!border-error5': isError,
+              'border-neutral6':
+                selectedValue &&
+                !disabled &&
+                !(touched?.[name] && errors?.[name]) &&
+                !isError,
+              'border-neutral5':
+                !selectedValue &&
+                !disabled &&
+                !(touched?.[name] && errors?.[name]) &&
+                !isError,
             },
+            errorClassName.field,
             `${selectClassName}`
           )}
         >
@@ -318,7 +338,6 @@ const Select = ({
             />
           )}
           <div className="flex flex-row items-center gap-2">
-            {isError && <ErrorOutline data-testid="error-icon" />}
             <ExpandMore
               size={16}
               data-testid="expand-icon"
@@ -340,10 +359,10 @@ const Select = ({
                 left: dropdownPosition.left,
                 width: dropdownPosition.width,
                 zIndex: getDropdownZIndex(),
-                maxHeight: '250px',
+                maxHeight: '300px',
               }}
               className={cn(
-                'rounded-[6px] border bg-white p-2 shadow-lg',
+                'rounded-[6px] flex flex-col border bg-white p-2 shadow-lg',
                 isCustomScrollBar && 'custom-scrollbar'
               )}
             >
@@ -353,14 +372,14 @@ const Select = ({
                     placeholder={`Cari ${label?.toLocaleLowerCase()}`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="relative"
-                    containerClassName="mb-2"
+                    className="relative text-[12px] "
+                    containerClassName="mb-2 h-[32px] "
                     suffix={<Search />}
                   />
                 </div>
               )}
 
-              <div className="max-h-[200px] overflow-y-auto">
+              <div className="flex flex-col h-full flex-shrink flex-1 overflow-y-auto">
                 {filteredOptions?.length > 0 ? (
                   filteredOptions?.map((option) => (
                     <Cascader
@@ -389,10 +408,10 @@ const Select = ({
                 <form
                   ref={formAddOptionRef}
                   onSubmit={handleSubmitNewOption}
-                  className="my-2"
+                  className="flex  flex-1 h-full w-full mt-2 "
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex flex-col gap-2">
+                  <div className="flex w-full flex-col gap-2">
                     {isAddOption && (
                       <InputText
                         value={formik.values.newOption}
@@ -401,7 +420,8 @@ const Select = ({
                         name="newOption"
                         placeholder={allowAddOption.placeholder}
                         onClick={(e) => e.stopPropagation()}
-                        containerClassName="mb-0 flex-1 px-2 mb-3"
+                        className="!text-[12px] !h-[32px]"
+                        containerClassName="mb-0"
                         isError={
                           formik.touched.newOption && formik.errors.newOption
                         }
@@ -411,33 +431,47 @@ const Select = ({
                         maxChar={allowAddOption.maxLength}
                       />
                     )}
-                    <div className="flex items-center gap-2 px-2">
-                      <Button
-                        variant="tertiary"
-                        className="flex w-[135px] items-center gap-1.5 whitespace-nowrap"
-                        icon={<Plus size={8} />}
-                        size="small"
-                        disabled={isAddOption}
-                        onClick={handleAddOptionClick}
-                      >
-                        {allowAddOption.addButtonText}
-                      </Button>
-                      <Button
-                        onClick={handleApplyClick}
-                        variant="primary"
-                        size="small"
-                        isFullWidth
-                        disabled={
-                          allowAddOption.isLoading ||
-                          !formik.values.newOption ||
-                          !isAddOption ||
-                          (formik.touched.newOption &&
-                            formik.errors.newOption) ||
-                          !formik.isValid
-                        }
-                      >
-                        {allowAddOption.applyButtonText}
-                      </Button>
+                    <div className="flex items-center gap-2">
+                      {!isAddOption && (
+                        <Button
+                          variant="primary"
+                          className="flex w-full items-center gap-1.5 whitespace-nowrap"
+                          icon={<Plus size={8} />}
+                          size="small"
+                          disabled={isAddOption}
+                          onClick={handleAddOptionClick}
+                        >
+                          {allowAddOption.addButtonText}
+                        </Button>
+                      )}
+                      {isAddOption && (
+                        <div className="w-full flex flex-row gap-2">
+                          <Button
+                            onClick={handleCancelClick}
+                            variant="secondary"
+                            size="small"
+                            isFullWidth
+                          >
+                            {allowAddOption.cancelButtonText}
+                          </Button>
+                          <Button
+                            onClick={handleApplyClick}
+                            variant="primary"
+                            size="small"
+                            isFullWidth
+                            disabled={
+                              allowAddOption.isLoading ||
+                              !formik.values.newOption ||
+                              !isAddOption ||
+                              (formik.touched.newOption &&
+                                formik.errors.newOption) ||
+                              !formik.isValid
+                            }
+                          >
+                            {allowAddOption.applyButtonText}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </form>
@@ -450,9 +484,10 @@ const Select = ({
         <Paragraph
           data-testid="helper-text"
           level={4}
-          className={cn('relative z-0 text-neutral7', {
-            'text-error5': isError,
-          })}
+          className={cn(
+            'relative z-0 text-neutral7',
+            errorClassName.helperText
+          )}
         >
           {helperText}
         </Paragraph>

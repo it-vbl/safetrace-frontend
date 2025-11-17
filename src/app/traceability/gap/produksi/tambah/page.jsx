@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
@@ -57,6 +57,20 @@ const validationSchema = Yup.object({
 });
 
 export default function TambahProduksiPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+          Memuat data...
+        </div>
+      }
+    >
+      <TambahProduksiContent />
+    </Suspense>
+  );
+}
+
+function TambahProduksiContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const kebunParam = searchParams.get('kebun');

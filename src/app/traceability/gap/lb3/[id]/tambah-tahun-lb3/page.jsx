@@ -9,15 +9,16 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useYearOptions from '@/hooks/useYearOptions';
+import { createLB3 } from '@/services/lb3';
 
 const TambahTahunLB3Page = ({ params }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     tahun: new Date().getFullYear().toString(),
-    limbahBotol: '2',
-    limbahJeriken: '2',
-    limbahKarungPupuk: '2',
+    limbahBotol: '',
+    limbahJeriken: '',
+    limbahKarungPupuk: '',
   });
 
   // Use existing year options hook
@@ -37,27 +38,47 @@ const TambahTahunLB3Page = ({ params }) => {
   };
 
   const handleSave = async () => {
+    // Validate form data
+    if (!formData.tahun) {
+      toast.error('Tahun harus diisi');
+      return;
+    }
+
+    if (
+      !formData.limbahBotol &&
+      !formData.limbahJeriken &&
+      !formData.limbahKarungPupuk
+    ) {
+      toast.error('Minimal salah satu jenis limbah harus diisi');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const payload = {
+        kebun: parseInt(params.id),
+        tahun: parseInt(formData.tahun),
+        limbah_bobot: parseInt(formData.limbahBotol) || 0,
+        limbah_jeriken: parseInt(formData.limbahJeriken) || 0,
+        limbah_karung_pupuk: parseInt(formData.limbahKarungPupuk) || 0,
+      };
 
-      // In real implementation, you would call the API here:
-      // const wasteData = [
-      //   { type: 'Limbah Botol', quantity: `${formData.limbahBotol} Kg` },
-      //   { type: 'Limbah Jeriken', quantity: `${formData.limbahJeriken} Kg` },
-      //   { type: 'Limbah Karung Pupuk', quantity: `${formData.limbahKarungPupuk} Kg` },
-      // ];
-      // await LB3Service.addTahunLB3(params.id, {
-      //   tahun: parseInt(formData.tahun),
-      //   wasteData: wasteData
-      // });
+      const response = await createLB3(payload);
 
-      toast.success(`Data tahun ${formData.tahun} berhasil ditambahkan`);
-      router.push(`/traceability/gap/lb3/${params.id}`);
+      if (response?.status === 200 || response?.status === 201) {
+        toast.success(
+          response?.data?.message ||
+            `Data tahun ${formData.tahun} berhasil ditambahkan`
+        );
+        router.push(`/traceability/gap/lb3/${params.id}`);
+      } else {
+        toast.error('Gagal menambahkan data tahun LB3');
+      }
     } catch (error) {
       console.error('Error adding tahun LB3:', error);
-      toast.error('Gagal menambahkan data tahun LB3');
+      toast.error(
+        error?.response?.data?.message || 'Gagal menambahkan data tahun LB3'
+      );
     } finally {
       setLoading(false);
     }

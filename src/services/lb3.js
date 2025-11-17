@@ -1,13 +1,46 @@
 import api from './api';
 
-export const getListLB3 = async (params = '') => {
-  try {
-    const response = await api.get(`/lb3?${params}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching LB3 data:', error);
-    throw error;
-  }
+// *** GET ***
+
+export const getListLB3 = (params = {}) => {
+  const formattedParams = {
+    ...params,
+    ...(params.search && {
+      search: params.search,
+    }),
+    ...(params.kelompok && {
+      kelompok: params.kelompok,
+    }),
+    ...(params.tahun && {
+      tahun: params.tahun,
+    }),
+  };
+
+  return api.get(`/gap/lb3/list/`, { params: formattedParams });
+};
+
+export const getDetailLB3Kebun = (kebunId) => {
+  return api.get(`/gap/lb3/detail/kebun/${kebunId}/`);
+};
+
+export const getListLB3Kebun = (kebunId) => {
+  return api.get(`/gap/lb3/list/kebun/${kebunId}/`);
+};
+
+// *** POST ***
+
+export const createLB3 = (payload) => {
+  return api.post(`/gap/lb3/create/`, null, payload);
+};
+
+export const updateLB3 = (lb3Id, payload) => {
+  return api.post(`/gap/lb3/update/${lb3Id}/`, null, payload);
+};
+
+// *** DELETE ***
+
+export const deleteLB3 = (lb3Id) => {
+  return api.get(`/gap/lb3/delete/${lb3Id}/`);
 };
 
 export const getLB3Detail = async (id) => {

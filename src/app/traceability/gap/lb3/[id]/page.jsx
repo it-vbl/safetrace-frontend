@@ -7,7 +7,14 @@ import { toast } from 'react-toastify';
 import Button from '@/components/atoms/Button';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import EditWasteDataModal from '@/components/molecules/EditWasteDataModal';
+import {
+  deleteLB3,
+  getDetailLB3Kebun,
+  getListLB3Kebun,
+  updateLB3,
+} from '@/services/lb3';
 
 const LB3DetailPage = ({ params }) => {
   const router = useRouter();
@@ -17,55 +24,91 @@ const LB3DetailPage = ({ params }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTahun, setSelectedTahun] = useState(null);
   const [selectedWasteData, setSelectedWasteData] = useState([]);
+  const [selectedItemId, setSelectedItemId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Transform waste data from API to component format
+  const transformWasteData = useCallback((item) => {
+    const wasteData = [];
+    
+    // Always include all three waste types, even if value is 0
+    wasteData.push({
+      type: 'Limbah Botol',
+      quantity: `${item?.limbah_bobot || 0} Kg`,
+    });
+    
+    wasteData.push({
+      type: 'Limbah Jeriken',
+      quantity: `${item?.limbah_jeriken || 0} Kg`,
+    });
+    
+    wasteData.push({
+      type: 'Limbah Karung Pupuk',
+      quantity: `${item?.limbah_karung_pupuk || 0} Kg`,
+    });
+    
+    return wasteData;
+  }, []);
 
   // Fetch LB3 detail data
   const fetchLB3Detail = useCallback(async (id) => {
     setLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Fetch kebun details and LB3 list in parallel
+      const [kebunResponse, lb3ListResponse] = await Promise.all([
+        getDetailLB3Kebun(id),
+        getListLB3Kebun(id),
+      ]);
 
-      // Mock data for demonstration
-      const mockKebunData = {
-        idKebun: 'GR-001-002-002',
-        petani: 'Akeng Rupinus',
-        kelompokTani: 'Bepekaek Besamo',
-        luasKebun: '0.78',
-        tahunTanam: '2002',
-        umurTanaman: '21 Tahun',
-        totalLb3: '3 Kg',
-      };
+      if (kebunResponse?.status === 200 && lb3ListResponse?.status === 200) {
+        const kebunDataApi = kebunResponse?.data?.data;
+        const lb3ListData = lb3ListResponse?.data?.data;
 
-      const mockTahunData = [
-        {
-          tahun: 2025,
-          wasteData: [
-            { type: 'Limbah Botol', quantity: '1 Kg' },
-            { type: 'Limbah Jeriken', quantity: '1 Kg' },
-            { type: 'Limbah Karung Pupuk', quantity: '1 Kg' },
-          ],
-        },
-        {
-          tahun: 2024,
-          wasteData: [
-            { type: 'Limbah Botol', quantity: '1 Kg' },
-            { type: 'Limbah Jeriken', quantity: '1 Kg' },
-            { type: 'Limbah Karung Pupuk', quantity: '1 Kg' },
-          ],
-        },
-      ];
+        // Transform kebun data
+        const kebun = {
+          idKebun: kebunDataApi?.id_kebun || '-',
+          petani: kebunDataApi?.nama_petani || '-',
+          kelompokTani: kebunDataApi?.kelompok_tani || '-',
+          luasKebun: kebunDataApi?.luas_kebun || '-',
+          tahunTanam: kebunDataApi?.tahun_tanam || '-',
+          umurTanaman: kebunDataApi?.umur_tanaman
+            ? `${kebunDataApi.umur_tanaman} Tahun`
+            : '-',
+          totalLb3: kebunDataApi?.total_lb3
+            ? `${kebunDataApi.total_lb3} Kg`
+            : '-',
+        };
 
-      // Mock response
-      setKebunData(mockKebunData);
-      setTahunData(mockTahunData);
+        // Transform LB3 list data to tahunData format
+        const tahunDataTransformed = (lb3ListData?.results || [])
+          .map((item) => ({
+            id: item?.id,
+            tahun: item?.tahun,
+            wasteData: transformWasteData(item),
+          }))
+          .sort((a, b) => b.tahun - a.tahun); // Sort by year descending
+
+        setKebunData(kebun);
+        setTahunData(tahunDataTransformed);
+      } else {
+        toast.error('Gagal memuat detail LB3');
+        setKebunData({});
+        setTahunData([]);
+      }
     } catch (error) {
       console.error('Error fetching LB3 detail:', error);
-      toast.error('Gagal memuat detail LB3');
+      toast.error(
+        error?.response?.data?.message || 'Gagal memuat detail LB3'
+      );
+      setKebunData({});
+      setTahunData([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [transformWasteData]);
 
   useEffect(() => {
     if (params?.id) {
@@ -82,6 +125,7 @@ const LB3DetailPage = ({ params }) => {
     if (tahunDataItem) {
       setSelectedTahun(tahun);
       setSelectedWasteData(tahunDataItem.wasteData);
+      setSelectedItemId(tahunDataItem.id);
       setIsEditModalOpen(true);
     }
   };
@@ -90,32 +134,114 @@ const LB3DetailPage = ({ params }) => {
     setIsEditModalOpen(false);
     setSelectedTahun(null);
     setSelectedWasteData([]);
+    setSelectedItemId(null);
   };
 
-  const handleSaveWasteData = (tahun, updatedWasteData) => {
+  const handleSaveWasteData = async (tahun, updatedWasteData) => {
+    if (!selectedItemId) {
+      toast.error('Data tidak valid untuk diperbarui');
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // Update the tahunData state
-      setTahunData((prevData) =>
-        prevData.map((item) =>
-          item.tahun === tahun ? { ...item, wasteData: updatedWasteData } : item
-        )
+      // Map waste data from component format to API format
+      const limbahBotol = updatedWasteData.find(
+        (w) => w.type === 'Limbah Botol'
+      );
+      const limbahJeriken = updatedWasteData.find(
+        (w) => w.type === 'Limbah Jeriken'
+      );
+      const limbahKarungPupuk = updatedWasteData.find(
+        (w) => w.type === 'Limbah Karung Pupuk'
       );
 
-      toast.success(`Data tahun ${tahun} berhasil diperbarui`);
-      handleCloseEditModal();
+      // Extract numeric values from "X Kg" format
+      const extractNumericValue = (quantity) => {
+        if (!quantity) return 0;
+        const numericStr = quantity.toString().replace(' Kg', '').trim();
+        return parseInt(numericStr) || 0;
+      };
+
+      const payload = {
+        kebun: parseInt(params.id),
+        tahun: parseInt(tahun),
+        limbah_bobot: extractNumericValue(limbahBotol?.quantity || '0'),
+        limbah_jeriken: extractNumericValue(limbahJeriken?.quantity || '0'),
+        limbah_karung_pupuk: extractNumericValue(
+          limbahKarungPupuk?.quantity || '0'
+        ),
+      };
+
+      const response = await updateLB3(selectedItemId, payload);
+
+      if (response?.status === 200 || response?.status === 201) {
+        toast.success(
+          response?.data?.message ||
+            `Data tahun ${tahun} berhasil diperbarui`
+        );
+        handleCloseEditModal();
+        // Refresh the data
+        await fetchLB3Detail(params.id);
+      } else {
+        toast.error('Gagal memperbarui data');
+      }
     } catch (error) {
       console.error('Error saving waste data:', error);
-      toast.error('Gagal menyimpan data');
+      toast.error(
+        error?.response?.data?.message || 'Gagal memperbarui data'
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDeleteTahun = (tahun) => {
-    toast.info(`Hapus data tahun ${tahun} clicked`);
-    // In real implementation, you would show confirmation dialog
-    // and call delete API
+    const tahunDataItem = tahunData.find((item) => item.tahun === tahun);
+    if (tahunDataItem) {
+      setItemToDelete(tahunDataItem);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete || !itemToDelete.id) {
+      toast.error('Data tidak valid untuk dihapus');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await deleteLB3(itemToDelete.id);
+
+      if (
+        response?.status === 200 ||
+        response?.status === 204 ||
+        response?.data?.status === 'success'
+      ) {
+        toast.success(
+          response?.data?.message || 'Data LB3 berhasil dihapus'
+        );
+        setIsDeleteModalOpen(false);
+        setItemToDelete(null);
+        // Refresh the data
+        await fetchLB3Detail(params.id);
+      } else {
+        throw new Error('Gagal menghapus data');
+      }
+    } catch (error) {
+      console.error('Error deleting LB3:', error);
+      toast.error(
+        error?.response?.data?.message || 'Gagal menghapus data LB3'
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
   };
 
   const crumbs = [
@@ -233,6 +359,15 @@ const LB3DetailPage = ({ params }) => {
         tahun={selectedTahun}
         wasteData={selectedWasteData}
         isLoading={isSaving}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        itemName={`data tahun ${itemToDelete?.tahun}`}
+        isLoading={isDeleting}
       />
     </div>
   );

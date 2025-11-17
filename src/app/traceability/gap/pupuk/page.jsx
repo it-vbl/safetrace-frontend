@@ -14,6 +14,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
+import { getListPupuk } from '@/services/pupuk';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -33,100 +34,55 @@ const PupukPage = () => {
   const [pupukData, setPupukData] = useState([]);
   const [totalPupuk, setTotalPupuk] = useState(0);
 
-  // Mock data for demonstration
-  const mockData = useMemo(
-    () => [
-      {
-        id: 1,
-        id_kebun: '001-APKS-001-001',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        jumlah_pokok: '100 Pohon',
-        total_pupuk: '500 Kg',
-      },
-      {
-        id: 2,
-        id_kebun: '001-APKS-001-002',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        jumlah_pokok: '100 Pohon',
-        total_pupuk: '500 Kg',
-      },
-      {
-        id: 3,
-        id_kebun: '001-APKS-001-003',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        jumlah_pokok: '100 Pohon',
-        total_pupuk: '500 Kg',
-      },
-      {
-        id: 4,
-        id_kebun: '001-APKS-001-004',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        jumlah_pokok: '100 Pohon',
-        total_pupuk: '500 Kg',
-      },
-      {
-        id: 5,
-        id_kebun: '001-APKS-001-005',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        jumlah_pokok: '100 Pohon',
-        total_pupuk: '500 Kg',
-      },
-    ],
-    []
-  );
-
   // Fetch Pupuk data function
   const fetchPupukData = useCallback(
     async ({ page, page_size, search, kelompok, tahun }) => {
       setLoading(true);
       try {
-        // For now, use mock data
-        // In real implementation, you would call the API:
-        // const params = new URLSearchParams({
-        //   page,
-        //   page_size,
-        // });
-        // if (search) params.append('search', search);
-        // if (kelompok) params.append('kelompok', kelompok);
-        // if (tahun) params.append('tahun', tahun);
-        // const response = await getListPupuk(params.toString());
+        const params = {
+          page,
+          page_size,
+          ...(search && { search }),
+          ...(kelompok && { kelompok }),
+          ...(tahun && { tahun }),
+        };
 
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const response = await getListPupuk(params);
 
-        // Mock response
-        setPupukData(mockData);
-        setTotalPupuk(500); // Mock total count
+        if (response?.status === 200) {
+          const data = response?.data?.data;
+          const results = data?.results || [];
+
+          const mapped = results.map((item) => ({
+            id: item?.kebun_id || item?.id,
+            id_kebun: item?.id_kebun || '-',
+            nama_petani: item?.nama_petani || '-',
+            kelompok: item?.kelompok_tani || '-',
+            luas_kebun: item?.luas_kebun || 0,
+            tahun_tanam: item?.tahun_tanam || '-',
+            umur_tanaman: item?.umur_tanaman || '-',
+            jumlah_pokok: '-', // Not available in API response
+            total_pupuk: item?.total_pupuk || '-',
+          }));
+
+          setPupukData(mapped);
+          setTotalPupuk(Number(data?.count || 0));
+        } else {
+          setPupukData([]);
+          setTotalPupuk(0);
+        }
       } catch (error) {
         console.error('Error fetching Pupuk data:', error);
-        toast.error('Gagal memuat data Pupuk');
+        toast.error(
+          error?.response?.data?.message || 'Gagal memuat data Pupuk'
+        );
         setPupukData([]);
         setTotalPupuk(0);
       } finally {
         setLoading(false);
       }
     },
-    [mockData]
+    []
   );
 
   // Fetch kelompok tani data on component mount
