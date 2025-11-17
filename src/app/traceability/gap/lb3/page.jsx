@@ -12,27 +12,19 @@ import Heading from '@/components/atoms/Typography/Heading';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import useReferences from '@/hooks/useReferences';
+import useYearOptions from '@/hooks/useYearOptions';
+import { getListLB3 } from '@/services/lb3';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Mock data options for filters
-const kelompokOptions = [
-  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-];
-
-const tahunOptions = [
-  { label: '2024', value: '2024' },
-  { label: '2023', value: '2023' },
-  { label: '2022', value: '2022' },
-  { label: '2021', value: '2021' },
-  { label: '2020', value: '2020' },
-];
-
-const PupukPage = () => {
+const LB3Page = () => {
   const router = useRouter();
+
+  // Get options from hooks
+  const tahunOptions = useYearOptions();
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
   const [selectedTahun, setSelectedTahun] = useState(null);
@@ -42,96 +34,62 @@ const PupukPage = () => {
   const [lb3Data, setLb3Data] = useState([]);
   const [totalLb3, setTotalLb3] = useState(0);
 
-  // Mock data for demonstration
-  const mockData = useMemo(
-    () => [
-      {
-        id: 1,
-        id_kebun: '001-APKS-001-001',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        total_lb3: '10 Kg',
-      },
-      {
-        id: 2,
-        id_kebun: '001-APKS-001-002',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        total_lb3: '10 Kg',
-      },
-      {
-        id: 3,
-        id_kebun: '001-APKS-001-003',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        total_lb3: '10 Kg',
-      },
-      {
-        id: 4,
-        id_kebun: '001-APKS-001-004',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        total_lb3: '10 Kg',
-      },
-      {
-        id: 5,
-        id_kebun: '001-APKS-001-005',
-        nama_petani: 'Agustinus Nery',
-        kelompok: 'Bepekaek Besamo',
-        luas_kebun: 0.75,
-        tahun_tanam: 2014,
-        umur_tanaman: '21 Tahun',
-        total_lb3: '10 Kg',
-      },
-    ],
-    []
-  );
-
   // Fetch LB3 data function
   const fetchLB3Data = useCallback(
     async ({ page, page_size, search, kelompok, tahun }) => {
       setLoading(true);
       try {
-        // For now, use mock data
-        // In real implementation, you would call the API:
-        // const params = new URLSearchParams({
-        //   page,
-        //   page_size,
-        // });
-        // if (search) params.append('search', search);
-        // if (kelompok) params.append('kelompok', kelompok);
-        // if (tahun) params.append('tahun', tahun);
-        // const response = await getListLB3(params.toString());
+        const params = {
+          page,
+          page_size,
+          ...(search && { search }),
+          ...(kelompok && { kelompok }),
+          ...(tahun && { tahun }),
+        };
 
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const response = await getListLB3(params);
 
-        // Mock response
-        setLb3Data(mockData);
-        setTotalLb3(500); // Mock total count
+        if (response?.status === 200) {
+          const data = response?.data?.data;
+          const results = data?.results || [];
+
+          const mapped = results.map((item) => ({
+            id: item?.kebun_id || item?.id,
+            id_kebun: item?.id_kebun || '-',
+            nama_petani: item?.nama_petani || '-',
+            kelompok: item?.kelompok_tani || '-',
+            luas_kebun: item?.luas_kebun || 0,
+            tahun_tanam: item?.tahun_tanam || '-',
+            umur_tanaman: item?.umur_tanaman
+              ? `${item.umur_tanaman} Tahun`
+              : '-',
+            total_lb3: item?.total_lb3 ? `${item.total_lb3} Kg` : '-',
+          }));
+
+          setLb3Data(mapped);
+          setTotalLb3(Number(data?.count || 0));
+        } else {
+          setLb3Data([]);
+          setTotalLb3(0);
+        }
       } catch (error) {
         console.error('Error fetching LB3 data:', error);
-        toast.error('Gagal memuat data LB3');
+        toast.error(error?.response?.data?.message || 'Gagal memuat data LB3');
         setLb3Data([]);
         setTotalLb3(0);
       } finally {
         setLoading(false);
       }
     },
-    [mockData]
+    []
   );
+
+  // Fetch kelompok tani data on component mount
+  useEffect(() => {
+    if (!kelompokTani || kelompokTani.length === 0) {
+      fetchKelompokTani();
+    }
+  }, [kelompokTani]);
 
   useEffect(() => {
     fetchLB3Data({
@@ -150,12 +108,12 @@ const PupukPage = () => {
     fetchLB3Data,
   ]);
 
-  const handleSearchTextChange = useCallback(
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    debounce((e) => {
-      setSearch(e.target.value);
-      setCurrentPage(1);
-    }, 300),
+  const handleSearchTextChange = useMemo(
+    () =>
+      debounce((e) => {
+        setSearch(e.target.value);
+        setCurrentPage(1);
+      }, 300),
     []
   );
 
@@ -290,7 +248,7 @@ const PupukPage = () => {
                 <Select
                   containerClassName="w-full sm:w-auto lg:w-[150px]"
                   placeholder="Kelompok"
-                  options={kelompokOptions}
+                  options={kelompokTani || []}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
                 />
@@ -349,4 +307,4 @@ const PupukPage = () => {
   );
 };
 
-export default PupukPage;
+export default LB3Page;

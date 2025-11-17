@@ -7,21 +7,24 @@ import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
+import { MONTH_OPTIONS } from '@/constants/months';
 
-const MONTH_OPTIONS = [
-  'Januari',
-  'Februari',
-  'Maret',
-  'April',
-  'Mei',
-  'Juni',
-  'Juli',
-  'Agustus',
-  'September',
-  'Oktober',
-  'November',
-  'Desember',
-];
+// Convert month name to month number (1-12)
+const monthNameToNumber = (monthName) => {
+  const monthOption = MONTH_OPTIONS.find(
+    (option) =>
+      option.label.toLowerCase() === String(monthName || '').toLowerCase()
+  );
+  return monthOption?.value || 1;
+};
+
+// Convert month number to month name
+const monthNumberToName = (monthNumber) => {
+  const monthOption = MONTH_OPTIONS.find(
+    (option) => option.value === Number(monthNumber)
+  );
+  return monthOption?.label || 'Januari';
+};
 
 const formatKgInput = (v) => {
   const num = Number(String(v ?? '').replace(/\D/g, ''));
@@ -53,35 +56,36 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
     };
 
     return {
-      s1_npk_waktu: s1.npk.waktu || '',
+      // Convert month names to numbers for Select component
+      s1_npk_waktu: monthNameToNumber(s1.npk.waktu),
       s1_npk_jumlah: formatKgInput(s1.npk.jumlah || 0),
-      s1_nitrogen_waktu: s1.nitrogen.waktu || '',
+      s1_nitrogen_waktu: monthNameToNumber(s1.nitrogen.waktu),
       s1_nitrogen_jumlah: formatKgInput(s1.nitrogen.jumlah || 0),
-      s1_pospat_waktu: s1.pospat.waktu || '',
+      s1_pospat_waktu: monthNameToNumber(s1.pospat.waktu),
       s1_pospat_jumlah: formatKgInput(s1.pospat.jumlah || 0),
-      s1_kalium_waktu: s1.kalium.waktu || '',
+      s1_kalium_waktu: monthNameToNumber(s1.kalium.waktu),
       s1_kalium_jumlah: formatKgInput(s1.kalium.jumlah || 0),
-      s1_boron_waktu: s1.boron.waktu || '',
+      s1_boron_waktu: monthNameToNumber(s1.boron.waktu),
       s1_boron_jumlah: formatKgInput(s1.boron.jumlah || 0),
-      s1_magnesium_waktu: s1.magnesium.waktu || '',
+      s1_magnesium_waktu: monthNameToNumber(s1.magnesium.waktu),
       s1_magnesium_jumlah: formatKgInput(s1.magnesium.jumlah || 0),
-      s2_npk_waktu: s2.npk.waktu || '',
+      s2_npk_waktu: monthNameToNumber(s2.npk.waktu),
       s2_npk_jumlah: formatKgInput(s2.npk.jumlah || 0),
-      s2_nitrogen_waktu: s2.nitrogen.waktu || '',
+      s2_nitrogen_waktu: monthNameToNumber(s2.nitrogen.waktu),
       s2_nitrogen_jumlah: formatKgInput(s2.nitrogen.jumlah || 0),
-      s2_pospat_waktu: s2.pospat.waktu || '',
+      s2_pospat_waktu: monthNameToNumber(s2.pospat.waktu),
       s2_pospat_jumlah: formatKgInput(s2.pospat.jumlah || 0),
-      s2_kalium_waktu: s2.kalium.waktu || '',
+      s2_kalium_waktu: monthNameToNumber(s2.kalium.waktu),
       s2_kalium_jumlah: formatKgInput(s2.kalium.jumlah || 0),
-      s2_boron_waktu: s2.boron.waktu || '',
+      s2_boron_waktu: monthNameToNumber(s2.boron.waktu),
       s2_boron_jumlah: formatKgInput(s2.boron.jumlah || 0),
-      s2_magnesium_waktu: s2.magnesium.waktu || '',
+      s2_magnesium_waktu: monthNameToNumber(s2.magnesium.waktu),
       s2_magnesium_jumlah: formatKgInput(s2.magnesium.jumlah || 0),
     };
   }, [yearData]);
 
   const validationSchema = Yup.object().shape({
-    s1_npk_waktu: Yup.string().required('Wajib diisi'),
+    s1_npk_waktu: Yup.number().required('Wajib diisi'),
     s1_npk_jumlah: Yup.string()
       .required('Wajib diisi')
       .test('angka-valid', 'Harus angka >= 0', (val) => {
@@ -172,56 +176,57 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      // Convert month numbers back to month names for onSave callback
       const updated = {
         'Semester 1': {
           npk: {
-            waktu: values.s1_npk_waktu || '-',
+            waktu: monthNumberToName(values.s1_npk_waktu) || '-',
             jumlah: parseKgInput(values.s1_npk_jumlah),
           },
           nitrogen: {
-            waktu: values.s1_nitrogen_waktu || '-',
+            waktu: monthNumberToName(values.s1_nitrogen_waktu) || '-',
             jumlah: parseKgInput(values.s1_nitrogen_jumlah),
           },
           pospat: {
-            waktu: values.s1_pospat_waktu || '-',
+            waktu: monthNumberToName(values.s1_pospat_waktu) || '-',
             jumlah: parseKgInput(values.s1_pospat_jumlah),
           },
           kalium: {
-            waktu: values.s1_kalium_waktu || '-',
+            waktu: monthNumberToName(values.s1_kalium_waktu) || '-',
             jumlah: parseKgInput(values.s1_kalium_jumlah),
           },
           boron: {
-            waktu: values.s1_boron_waktu || '-',
+            waktu: monthNumberToName(values.s1_boron_waktu) || '-',
             jumlah: parseKgInput(values.s1_boron_jumlah),
           },
           magnesium: {
-            waktu: values.s1_magnesium_waktu || '-',
+            waktu: monthNumberToName(values.s1_magnesium_waktu) || '-',
             jumlah: parseKgInput(values.s1_magnesium_jumlah),
           },
         },
         'Semester 2': {
           npk: {
-            waktu: values.s2_npk_waktu || '-',
+            waktu: monthNumberToName(values.s2_npk_waktu) || '-',
             jumlah: parseKgInput(values.s2_npk_jumlah),
           },
           nitrogen: {
-            waktu: values.s2_nitrogen_waktu || '-',
+            waktu: monthNumberToName(values.s2_nitrogen_waktu) || '-',
             jumlah: parseKgInput(values.s2_nitrogen_jumlah),
           },
           pospat: {
-            waktu: values.s2_pospat_waktu || '-',
+            waktu: monthNumberToName(values.s2_pospat_waktu) || '-',
             jumlah: parseKgInput(values.s2_pospat_jumlah),
           },
           kalium: {
-            waktu: values.s2_kalium_waktu || '-',
+            waktu: monthNumberToName(values.s2_kalium_waktu) || '-',
             jumlah: parseKgInput(values.s2_kalium_jumlah),
           },
           boron: {
-            waktu: values.s2_boron_waktu || '-',
+            waktu: monthNumberToName(values.s2_boron_waktu) || '-',
             jumlah: parseKgInput(values.s2_boron_jumlah),
           },
           magnesium: {
-            waktu: values.s2_magnesium_waktu || '-',
+            waktu: monthNumberToName(values.s2_magnesium_waktu) || '-',
             jumlah: parseKgInput(values.s2_magnesium_jumlah),
           },
         },
@@ -244,7 +249,7 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
       <div id="modal" className="pt-4">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Semester 1 */}
-          <div>
+          <div className="flex flex-col gap-2">
             <div className="mb-2 text-sm font-semibold">Semester 1</div>
             <Select
               label="(NPK) Waktu Aplikasi"
@@ -417,7 +422,7 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
           </div>
 
           {/* Semester 2 */}
-          <div>
+          <div className="flex flex-col gap-2">
             <div className="mb-2 text-sm font-semibold">Semester 2</div>
             <Select
               label="(NPK) Waktu Aplikasi"
@@ -671,4 +676,3 @@ EditPupukModal.propTypes = {
 };
 
 export default EditPupukModal;
-

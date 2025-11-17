@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import moment from 'moment';
@@ -47,6 +47,13 @@ const CreatePetaniTraceability = () => {
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
+  const [customKelompokTani, setCustomKelompokTani] = useState([]);
+  const [isAddingKelompokTani, setIsAddingKelompokTani] = useState(false);
+
+  // Combine API options with custom options
+  const kelompokTaniOptions = useMemo(() => {
+    return [...kelompokTani, ...customKelompokTani];
+  }, [kelompokTani, customKelompokTani]);
 
   // Fetch reference data on component mount
   useEffect(() => {
@@ -98,10 +105,18 @@ const CreatePetaniTraceability = () => {
       const formatDate = (val) => (val ? moment(val).format('YYYY-MM-DD') : '');
 
       try {
+        // Get kelompok tani name - if it's an existing option, get the label; otherwise use the value directly
+        const selectedKelompokOption = kelompokTaniOptions.find(
+          (opt) => opt.value === values.kelompok_tani
+        );
+        const namaKelompok = selectedKelompokOption
+          ? selectedKelompokOption.label
+          : values.kelompok_tani;
+
         const payload = {
           id_petani: values.id_petani,
           nama: values.nama_petani,
-          nama_kelompok: values.kelompok_tani,
+          nama_kelompok: namaKelompok,
           jns_kelamin: values.jenis_kelamin,
           no_ktp: values.no_ktp,
           tempat: values.tempat_lahir,
@@ -177,6 +192,32 @@ const CreatePetaniTraceability = () => {
     },
   });
 
+  // Handle adding new kelompok tani option
+  const handleAddKelompokTani = (newOptionName) => {
+    const trimmedName = newOptionName.trim();
+    if (!trimmedName) return;
+
+    // Check if option already exists
+    const exists = kelompokTaniOptions.some(
+      (opt) => opt.label?.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (exists) {
+      toast.error('Kelompok Tani sudah ada');
+      return;
+    }
+
+    // Add new option with label as value (since API expects nama_kelompok as string)
+    const newOption = {
+      label: trimmedName,
+      value: trimmedName,
+    };
+
+    setCustomKelompokTani((prev) => [...prev, newOption]);
+    formik.setFieldValue('kelompok_tani', trimmedName);
+    toast.success('Kelompok Tani berhasil ditambahkan');
+  };
+
   return (
     <div className="flex w-full flex-col gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
@@ -224,13 +265,32 @@ const CreatePetaniTraceability = () => {
                 label="Kelompok Tani"
                 name="kelompok_tani"
                 placeholder="Pilih Kelompok Tani"
-                options={kelompokTani}
+                options={kelompokTaniOptions}
                 value={formik.values.kelompok_tani}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
+                allowAddOption={{
+                  visible: true,
+                  placeholder: 'Masukan Nama Kelompok Tani',
+                  isLoading: isAddingKelompokTani,
+                  onSubmitOption: (newOption) => {
+                    setIsAddingKelompokTani(true);
+                    handleAddKelompokTani(newOption);
+                    setIsAddingKelompokTani(false);
+                  },
+                  addButtonText: 'Tambah Opsi',
+                  cancelButtonText: 'Batalkan',
+                  applyButtonText: 'Terapkan',
+                  validationSchema: Yup.string()
+                    .required('Nama Kelompok Tani harus diisi')
+                    .min(3, 'Nama Kelompok Tani minimal 3 karakter')
+                    .max(255, 'Nama Kelompok Tani maksimal 255 karakter'),
+                  maxLength: 255,
+                }}
+                showSearchBar
               />
               <InputText
                 label="Alamat"

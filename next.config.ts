@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['highlandindonesia.com', '127.0.0.1', 'localhost', 'poc-jasindo.digiform.co.id'],
+    domains: ['cukk-be.buatin.com'],
   },
 };
 

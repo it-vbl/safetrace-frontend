@@ -15,6 +15,7 @@ import {
   MessageSquareIcon,
   PieChart,
   Smartphone,
+  TrendingUp,
   User2Icon,
   UserCheck2Icon,
   UserCircle2Icon,
@@ -66,6 +67,11 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         label: 'Kebun',
         icon: MapIcon,
         path: '/traceability/kebun',
+      },
+      {
+        label: 'Penjualan',
+        icon: TrendingUp,
+        path: '/traceability/penjualan',
       },
       {
         label: 'GAP',
@@ -199,7 +205,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
               ? 'translateX(-100%)'
               : 'translateX(0)',
         }}
-        className={`fixed left-0 top-0 z-50 h-full overflow-x-hidden bg-white transition-all duration-300 ${
+        className={`flex flex-shrink-0 z-50 h-full overflow-x-hidden bg-white transition-all duration-300 ${
           isMobileScreen ? 'shadow-lg' : 'relative'
         } ${
           (isMobileScreen && !sidebarOpen) || !sidebarOpen

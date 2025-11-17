@@ -61,7 +61,7 @@ const YearCard = ({
         </div>
       </div>
 
-      <div className="flex gap-x-4 gap-y-3 text-sm text-gray-700">
+      <div className="flex flex-1 gap-x-4 gap-y-3 text-sm text-gray-700 w-full">
         {/* Semester Switch */}
         <div className="flex flex-row items-start">
           <div className="rounded border border-gray-300 bg-white p-2">
@@ -89,7 +89,7 @@ const YearCard = ({
 
         {/* Usage Panel */}
         <div className="flex flex-1">
-          <div className="rounded border border-gray-300 bg-white p-4">
+          <div className="rounded border border-gray-300 bg-white p-4 w-full">
             <div className="mb-3 font-semibold">{title}</div>
             <div className="grid grid-cols-4 gap-x-6 gap-y-3">
               {dataFields.map((field) => (
@@ -158,4 +158,3 @@ YearCard.propTypes = {
 };
 
 export default YearCard;
-

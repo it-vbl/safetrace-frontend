@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -12,6 +13,45 @@ import ModalEditKebun from '@/components/molecules/ModalEditKebun';
 import ModalEditLampiran from '@/components/molecules/ModalEditLampiran';
 import ModalEditPeta from '@/components/molecules/ModalEditPeta';
 import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
+
+const DOCUMENT_CONFIGS = [
+  {
+    id: 'legalitas',
+    label: 'Dokumen Legalitas',
+    badge: 'SERTIFIKAT',
+    fileKey: 'file_legalitas',
+    thumbKey: 'thumb_legalitas',
+    accentBorder: 'border-blue-200',
+    accentBackground: 'bg-blue-50',
+  },
+  {
+    id: 'stdb',
+    label: 'Dokumen STDB',
+    badge: 'STDB',
+    fileKey: 'file_stdb',
+    thumbKey: 'thumb_stdb',
+    accentBorder: 'border-orange-200',
+    accentBackground: 'bg-orange-50',
+  },
+  {
+    id: 'rspo',
+    label: 'Dokumen RSPO',
+    badge: 'RSPO',
+    fileKey: 'file_rspo',
+    thumbKey: 'thumb_rspo',
+    accentBorder: 'border-green-200',
+    accentBackground: 'bg-green-50',
+  },
+  {
+    id: 'ispo',
+    label: 'Dokumen ISPO',
+    badge: 'ISPO',
+    fileKey: 'file_ispo',
+    thumbKey: 'thumb_ispo',
+    accentBorder: 'border-purple-200',
+    accentBackground: 'bg-purple-50',
+  },
+];
 
 const DetailKebunPage = () => {
   const { idKebun: id } = useParams();
@@ -297,122 +337,59 @@ const DetailKebunPage = () => {
 
           {/* === GRID DOCUMENT === */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {/* Legalitas Document */}
-            {lampiranData?.file_legalitas && (
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <div className="mb-3">
-                  <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                    Dokumen Legalitas
-                  </h4>
-                </div>
-                <div className="flex h-48 items-center justify-center overflow-hidden rounded border bg-white p-2">
-                  <div className="flex h-full w-full items-center justify-center rounded border border-blue-200 bg-blue-50">
-                    <div className="text-center">
-                      <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded border border-gray-300 bg-white">
-                        <span className="text-xs font-bold">SERTIFIKAT</span>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        Sertifikat Legalitas
-                      </p>
-                      <a
-                        href={lampiranData.file_legalitas}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800"
-                      >
-                        Lihat Dokumen
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {DOCUMENT_CONFIGS.filter((doc) => lampiranData?.[doc.fileKey]).map(
+              (doc) => {
+                const fileUrl = lampiranData?.[doc.fileKey];
+                const thumbUrl =
+                  lampiranData?.[doc.thumbKey] || lampiranData?.[doc.fileKey];
 
-            {/* STDB Document */}
-            {lampiranData?.file_stdb && (
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <div className="mb-3">
-                  <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                    Dokumen STDB
-                  </h4>
-                </div>
-                <div className="flex h-48 items-center justify-center overflow-hidden rounded border bg-white p-2">
-                  <div className="flex h-full w-full items-center justify-center rounded border border-orange-200 bg-orange-50">
-                    <div className="text-center">
-                      <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded border border-gray-300 bg-white">
-                        <span className="text-xs font-bold">STDB</span>
+                return (
+                  <div
+                    key={doc.id}
+                    className="rounded-lg border bg-gray-50 p-4"
+                  >
+                    <div className="mb-3">
+                      <h4 className="mb-2 text-sm font-semibold text-gray-800">
+                        {doc.label}
+                      </h4>
+                    </div>
+                    <div className="flex h-48 items-center justify-center overflow-hidden rounded border bg-white p-2">
+                      <div
+                        className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded border`}
+                      >
+                        {thumbUrl ? (
+                          <Image
+                            src={thumbUrl}
+                            alt={doc.label}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                        ) : (
+                          <div className="text-center">
+                            <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded border border-gray-300 bg-white">
+                              <span className="text-xs font-bold">
+                                {doc.badge}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500">{doc.label}</p>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-gray-500">Dokumen STDB</p>
+                    </div>
+                    <div className="mt-3 text-center">
                       <a
-                        href={lampiranData.file_stdb}
+                        href={fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800"
+                        className="inline-block text-xs font-semibold text-blue-600 hover:text-blue-800"
                       >
                         Lihat Dokumen
                       </a>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* RSPO Document */}
-            {lampiranData?.file_rspo && (
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <div className="mb-3">
-                  <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                    Dokumen RSPO
-                  </h4>
-                </div>
-                <div className="flex h-48 items-center justify-center overflow-hidden rounded border bg-white p-2">
-                  <div className="flex h-full w-full items-center justify-center rounded border border-green-200 bg-green-50">
-                    <div className="text-center">
-                      <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded border border-gray-300 bg-white">
-                        <span className="text-xs font-bold">RSPO</span>
-                      </div>
-                      <p className="text-xs text-gray-500">Dokumen RSPO</p>
-                      <a
-                        href={lampiranData.file_rspo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800"
-                      >
-                        Lihat Dokumen
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ISPO Document */}
-            {lampiranData?.file_ispo && (
-              <div className="rounded-lg border bg-gray-50 p-4">
-                <div className="mb-3">
-                  <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                    Dokumen ISPO
-                  </h4>
-                </div>
-                <div className="flex h-48 items-center justify-center overflow-hidden rounded border bg-white p-2">
-                  <div className="flex h-full w-full items-center justify-center rounded border border-purple-200 bg-purple-50">
-                    <div className="text-center">
-                      <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded border border-gray-300 bg-white">
-                        <span className="text-xs font-bold">ISPO</span>
-                      </div>
-                      <p className="text-xs text-gray-500">Dokumen ISPO</p>
-                      <a
-                        href={lampiranData.file_ispo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800"
-                      >
-                        Lihat Dokumen
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                );
+              }
             )}
 
             {/* No documents message */}

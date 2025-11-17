@@ -30,18 +30,21 @@ function LayoutContent({ children, hideNavbar, hideSidebar, noPadding }) {
     <>
       {!hideNavbar && <Navbar />}
       <div
-        className={`flex ${
+        className={`flex  flex-1 w-[100dvw] overflow-x-clip min-w-full max-w-full ${
           hideNavbar ? 'h-full' : 'h-[calc(100vh-72px)]'
-        } flex-row`}
+        } flex-row `}
       >
-        {!hideSidebar ? (
-          <div className="h-full">
-            <Sidebar />
-          </div>
-        ) : null}
-        <div className="flex flex-1 flex-col transition-all duration-300">
+        {!hideSidebar ? <Sidebar /> : null}
+        <div
+          style={{
+            width: hideSidebar
+              ? '100%'
+              : `calc(100% - ${size.SIDEBAR_WIDTH}px)`,
+          }}
+          className="flex flex-1 flex-col transition-all duration-300 bg-slate-600 w-full max-w-full"
+        >
           <div
-            className={`flex flex-1 overflow-y-auto bg-[#F7F9FD] ${
+            className={`flex flex-1 overflow-y-auto max-w-full bg-[#F7F9FD] ${
               noPadding ? 'p-0' : 'p-4 md:p-8'
             }`}
           >
