@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -11,59 +11,55 @@ import Heading from '@/components/atoms/Typography/Heading';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
+import { MONTH_NAMES } from '@/constants/months';
 import useYearOptions from '@/hooks/useYearOptions';
+import { createPestisida } from '@/services/pestisida';
+import { formatLiterInput, parseLiterInput } from '@/utils/literFormat';
 
-const MONTH_OPTIONS = [
-  'Januari',
-  'Februari',
-  'Maret',
-  'April',
-  'Mei',
-  'Juni',
-  'Juli',
-  'Agustus',
-  'September',
-  'Oktober',
-  'November',
-  'Desember',
-].map((m) => ({ label: m, value: m }));
-
-const parseLiterInput = (v) => {
-  const num = Number(String(v ?? '').replace(/\D/g, ''));
-  return Number.isNaN(num) ? 0 : num;
-};
-
-const formatLiterInput = (v) => {
-  const num = Number(String(v ?? '').replace(/\D/g, ''));
-  return num.toLocaleString('id-ID');
-};
+const MONTH_OPTIONS = MONTH_NAMES.map((m, i) => ({ label: m, value: i + 1 }));
 
 const validationSchema = Yup.object({
   tahun: Yup.number()
     .typeError('Tahun wajib dipilih')
     .required('Tahun wajib dipilih'),
-  s1_sistemik_waktu: Yup.string().required('Wajib diisi'),
+  s1_sistemik_waktu: Yup.number()
+    .typeError('Wajib diisi')
+    .min(1)
+    .max(12)
+    .required('Wajib diisi'),
   s1_sistemik_jumlah: Yup.string()
     .required('Wajib diisi')
     .test('angka-valid', 'Harus angka >= 0', (val) => {
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
-  s1_kontak_waktu: Yup.string().required('Wajib diisi'),
+  s1_kontak_waktu: Yup.number()
+    .typeError('Wajib diisi')
+    .min(1)
+    .max(12)
+    .required('Wajib diisi'),
   s1_kontak_jumlah: Yup.string()
     .required('Wajib diisi')
     .test('angka-valid', 'Harus angka >= 0', (val) => {
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
-  s2_sistemik_waktu: Yup.string().required('Wajib diisi'),
+  s2_sistemik_waktu: Yup.number()
+    .typeError('Wajib diisi')
+    .min(1)
+    .max(12)
+    .required('Wajib diisi'),
   s2_sistemik_jumlah: Yup.string()
     .required('Wajib diisi')
     .test('angka-valid', 'Harus angka >= 0', (val) => {
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
-  s2_kontak_waktu: Yup.string().required('Wajib diisi'),
+  s2_kontak_waktu: Yup.number()
+    .typeError('Wajib diisi')
+    .min(1)
+    .max(12)
+    .required('Wajib diisi'),
   s2_kontak_jumlah: Yup.string()
     .required('Wajib diisi')
     .test('angka-valid', 'Harus angka >= 0', (val) => {
@@ -74,6 +70,8 @@ const validationSchema = Yup.object({
 
 export default function TambahPestisidaPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const kebunParam = searchParams.get('kebun');
   const [isLoading, setIsLoading] = useState(false);
 
   const crumbs = [
@@ -100,37 +98,43 @@ export default function TambahPestisidaPage() {
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
+        const kebunId = kebunParam ? Number(kebunParam) : null;
+        if (!kebunId || Number.isNaN(kebunId)) {
+          toast.error(
+            'Id Kebun tidak ditemukan. Coba dari halaman detail kebun.'
+          );
+          setIsLoading(false);
+          return;
+        }
         const payload = {
+          kebun: kebunId,
           tahun: values.tahun,
-          semester: {
-            'Semester 1': {
-              sistemik: {
-                waktu: values.s1_sistemik_waktu,
-                jumlah: parseLiterInput(values.s1_sistemik_jumlah),
-              },
-              kontak: {
-                waktu: values.s1_kontak_waktu,
-                jumlah: parseLiterInput(values.s1_kontak_jumlah),
-              },
-            },
-            'Semester 2': {
-              sistemik: {
-                waktu: values.s2_sistemik_waktu,
-                jumlah: parseLiterInput(values.s2_sistemik_jumlah),
-              },
-              kontak: {
-                waktu: values.s2_kontak_waktu,
-                jumlah: parseLiterInput(values.s2_kontak_jumlah),
-              },
-            },
-          },
+          s1_sistemik_waktu_aplikasi: Number(values.s1_sistemik_waktu),
+          s1_sistemik_jumlah: parseLiterInput(values.s1_sistemik_jumlah),
+          s1_kontak_waktu_aplikasi: Number(values.s1_kontak_waktu),
+          s1_kontak_jumlah: parseLiterInput(values.s1_kontak_jumlah),
+          s2_sistemik_waktu_aplikasi: Number(values.s2_sistemik_waktu),
+          s2_sistemik_jumlah: parseLiterInput(values.s2_sistemik_jumlah),
+          s2_kontak_waktu_aplikasi: Number(values.s2_kontak_waktu),
+          s2_kontak_jumlah: parseLiterInput(values.s2_kontak_jumlah),
         };
-
-        console.log('Payload:', payload);
-        toast.success('Data pestisida berhasil disimpan');
-        router.push('/traceability/gap/pestisida');
+        const res = await createPestisida(payload);
+        const ok =
+          res?.data?.status === 'success' ||
+          res?.status === 200 ||
+          res?.status === 201;
+        if (ok) {
+          toast.success(
+            res?.data?.message || 'Data pestisida berhasil disimpan'
+          );
+          router.push('/traceability/gap/pestisida');
+        } else {
+          throw new Error('Invalid response');
+        }
       } catch (error) {
-        toast.error('Gagal menyimpan data pestisida');
+        toast.error(
+          error?.response?.data?.message || 'Gagal menyimpan data pestisida'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -154,7 +158,7 @@ export default function TambahPestisidaPage() {
           </div>
 
           <div className="p-4 sm:p-6">
-            <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-6">
               <Select
                 label="Tahun"
                 name="tahun"
@@ -166,7 +170,6 @@ export default function TambahPestisidaPage() {
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
-                selectClassName="!min-h-[30px] !h-[30px]"
               />
             </div>
 
@@ -182,7 +185,10 @@ export default function TambahPestisidaPage() {
                     options={MONTH_OPTIONS}
                     value={formik.values.s1_sistemik_waktu}
                     onChange={(e) =>
-                      formik.setFieldValue('s1_sistemik_waktu', e.target.value)
+                      formik.setFieldValue(
+                        's1_sistemik_waktu',
+                        Number(e.target.value)
+                      )
                     }
                     onBlur={formik.handleBlur}
                     errors={formik.errors}
@@ -210,7 +216,10 @@ export default function TambahPestisidaPage() {
                     options={MONTH_OPTIONS}
                     value={formik.values.s1_kontak_waktu}
                     onChange={(e) =>
-                      formik.setFieldValue('s1_kontak_waktu', e.target.value)
+                      formik.setFieldValue(
+                        's1_kontak_waktu',
+                        Number(e.target.value)
+                      )
                     }
                     onBlur={formik.handleBlur}
                     errors={formik.errors}
@@ -245,7 +254,10 @@ export default function TambahPestisidaPage() {
                     options={MONTH_OPTIONS}
                     value={formik.values.s2_sistemik_waktu}
                     onChange={(e) =>
-                      formik.setFieldValue('s2_sistemik_waktu', e.target.value)
+                      formik.setFieldValue(
+                        's2_sistemik_waktu',
+                        Number(e.target.value)
+                      )
                     }
                     onBlur={formik.handleBlur}
                     errors={formik.errors}
@@ -273,7 +285,10 @@ export default function TambahPestisidaPage() {
                     options={MONTH_OPTIONS}
                     value={formik.values.s2_kontak_waktu}
                     onChange={(e) =>
-                      formik.setFieldValue('s2_kontak_waktu', e.target.value)
+                      formik.setFieldValue(
+                        's2_kontak_waktu',
+                        Number(e.target.value)
+                      )
                     }
                     onBlur={formik.handleBlur}
                     errors={formik.errors}
