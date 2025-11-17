@@ -21,8 +21,8 @@ import Pagination from '@/components/organisms/Pagination';
 import useReferences from '../../../hooks/useReferences';
 import {
   deletePenjualan,
-  getListPenjualan,
   exportPenjualanToExcel,
+  getListPenjualan,
 } from '../../../services/penjualan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);

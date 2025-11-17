@@ -1,8 +1,8 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { X } from 'lucide-react';
+import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';

@@ -10,9 +10,9 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import EditWasteDataModal from '@/components/molecules/EditWasteDataModal';
 import {
+  deleteLB3,
   getDetailLB3Kebun,
   getListLB3Kebun,
-  deleteLB3,
   updateLB3,
 } from '@/services/lb3';
 
