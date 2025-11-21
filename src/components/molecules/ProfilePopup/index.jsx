@@ -1,31 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { LogOutIcon } from 'lucide-react';
+import { LogOutIcon, Users2Icon } from 'lucide-react';
 import { LockIcon } from 'lucide-react';
 import { UserIcon } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 
-import LogoutIcon from '@/assets/icons/logout';
-import ProfileIcon from '@/assets/icons/profile';
+import ModalConfirmation from '@/components/molecules/ModalConfirmation';
 import ModalGantiKataSandi from '@/components/organisms/Modal/ModalGantiKataSandi';
 import useTouchOutside from '@/hooks/useTouchOutside';
 import { logout as logoutService } from '@/services/auth';
 import { changePassword } from '@/services/user';
-import { PersonIcon } from '@radix-ui/react-icons';
+import { StackIcon } from '@radix-ui/react-icons';
 
 const ProfilePopup = ({ children }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const popupRef = useRef(null);
   const triggerRef = useRef(null);
 
-  // Close popup when clicking outside
   useTouchOutside(popupRef, () => setIsOpen(false));
-
-  // Close popup on Escape key press
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
@@ -50,7 +47,19 @@ const ProfilePopup = ({ children }) => {
   const handleProfileClick = () => {
     setIsOpen(false);
     // For now, using a dummy route
-    router.push('/profile');
+    router.push('/settings/profile');
+  };
+
+  const handlePetaOverlayClick = () => {
+    setIsOpen(false);
+    // For now, using a dummy route
+    router.push('/settings/peta-overlay');
+  };
+
+  const handleUsersClick = () => {
+    setIsOpen(false);
+    // For now, using a dummy route
+    router.push('/settings/users');
   };
 
   const handleGantiKataSandiClick = () => {
@@ -58,7 +67,11 @@ const ProfilePopup = ({ children }) => {
     setIsPasswordModalOpen(true);
   };
 
-  const handleLogoutClick = async () => {
+  const handleLogoutClick = () => {
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
     try {
       const refresh = Cookies.get('refreshToken');
       if (refresh) {
@@ -67,11 +80,12 @@ const ProfilePopup = ({ children }) => {
       Cookies.remove('token');
       Cookies.remove('refreshToken');
       toast.success('Anda telah logout');
+      setIsLogoutConfirmOpen(false);
       router.replace('/login');
     } catch (err) {
-      // Even if API fails, ensure local logout
       Cookies.remove('token');
       Cookies.remove('refreshToken');
+      setIsLogoutConfirmOpen(false);
       router.replace('/login');
     }
   };
@@ -115,6 +129,20 @@ const ProfilePopup = ({ children }) => {
             >
               <div className="py-1">
                 <button
+                  onClick={handleUsersClick}
+                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <Users2Icon size={18} className="mr-2" />
+                  <span>Pengguna</span>
+                </button>
+                <button
+                  onClick={handlePetaOverlayClick}
+                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <StackIcon size={18} className="mr-2" />
+                  <span>Peta Overlay</span>
+                </button>
+                <button
                   onClick={handleProfileClick}
                   className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -144,6 +172,15 @@ const ProfilePopup = ({ children }) => {
         open={isPasswordModalOpen}
         setOpen={setIsPasswordModalOpen}
         onSubmit={handlePasswordSubmit}
+      />
+      <ModalConfirmation
+        open={isLogoutConfirmOpen}
+        setOpen={handleConfirmLogout}
+        title="KELUAR"
+        message="Apakah kamu yakin ingin keluar dari aplikasi?"
+        confirmText="Batalkan"
+        cancelText="Ya, Keluar"
+        onConfirm={setIsLogoutConfirmOpen}
       />
     </>
   );

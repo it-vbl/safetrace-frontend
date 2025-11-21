@@ -57,7 +57,7 @@ const Navbar = () => {
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/traceability'
           )}`}
-          onClick={() => handleMenuClick('/traceability')}
+          onClick={() => handleMenuClick('/traceability/petani')}
         >
           Traceability
         </div>

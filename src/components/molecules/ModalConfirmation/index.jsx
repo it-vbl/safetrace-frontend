@@ -3,21 +3,26 @@ import { useState } from 'react';
 import Button from '@/components/atoms/Button';
 import Modal from '@/components/molecules/Modal';
 
-const ModalConfirmDeletePekebun = ({
+const ModalConfirmation = ({
   open,
   setOpen,
-  namaPekebun,
-  jumlahKebun,
-  handleSubmit,
+  title = 'KONFIRMASI',
+  message,
+  confirmText = 'Ya, Konfirmasi',
+  cancelText = 'Batalkan',
+  onConfirm,
+  isLoading = false,
+  variant = 'danger',
 }) => {
   const handleOnClose = () => setOpen(false);
   const [loading, setLoading] = useState(false);
 
   const handleOnSubmit = async () => {
     try {
-      console.log('TEST');
       setLoading(true);
-      const res = await handleSubmit();
+      if (onConfirm) {
+        await onConfirm();
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -30,26 +35,26 @@ const ModalConfirmDeletePekebun = ({
       open={open}
       onclose={handleOnClose}
       className="!w-[400px]"
-      label="HAPUS PEKEBUN"
+      label={title}
     >
       <div className="gap-6 py-2">
-        <span className="text-[14px]">
-          Apakah Anda tidak ingin menerbitkan STDB atas nama{' '}
-          <b>{namaPekebun}</b> dengan <b>jumlah kebun {jumlahKebun}</b>?
-        </span>
+        <span className="text-[14px] font-normal normal-case">{message}</span>
       </div>
       <div className="mt-4 flex flex-row justify-end gap-2">
         <Button
           isLoading={loading}
           onClick={() => setOpen(false)}
           className="bg-red-500"
-        ></Button>
-        <Button isLoading={loading} onClick={handleOnSubmit}>
-          Ya, Hapus Data
+          variant={variant}
+        >
+          {cancelText}
+        </Button>
+        <Button isLoading={loading || isLoading} onClick={handleOnSubmit}>
+          {confirmText}
         </Button>
       </div>
     </Modal>
   );
 };
 
-export default ModalConfirmDeletePekebun;
+export default ModalConfirmation;
