@@ -9,6 +9,7 @@ const BaseModal = ({
   handleOnNoClick = () => {},
   handleOnYesClick = () => {},
   className = '',
+  labelClassName = '',
   isReject = false,
   isLoading = false,
   showBottomButton = true,
