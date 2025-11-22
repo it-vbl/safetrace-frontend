@@ -42,7 +42,7 @@ const RadioButton = ({
           </Label>
         )}
         <div
-          className={`${containerClassName} radio-button-group flex ${directionClasses} gap-8`}
+          className={`${containerClassName} radio-button-group flex ${directionClasses} gap-2`}
         >
           {options.map((option) => (
             <label

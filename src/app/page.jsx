@@ -3,22 +3,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
 
+import Button from '@/components/atoms/Button';
 import Checkbox from '@/components/atoms/Checkbox';
-import Close from '@/components/atoms/Icons/Close';
 import Statistic from '@/components/atoms/Icons/Statistic';
 import STDBStatusChip from '@/components/atoms/STDBStatusChip';
-import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import RadioButton from '@/components/molecules/RadioButton';
-import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
-import Select from '@/components/molecules/Select';
-import SelectMultiple from '@/components/molecules/SelectMultiple';
-import Pagination from '@/components/organisms/Pagination';
+import DataAlertDeforestasi from '@/components/organisms/DataAlertDeforestasi';
+import DataPekebunTable from '@/components/organisms/DataPekebunTable';
+import FilterSidebar from '@/components/organisms/MapView/FilterSidebar';
+import RightSidebar from '@/components/organisms/MapView/RightSidebar';
 import pekebuns from '@/constants/pekebuns';
 import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
 import useKomoditas from '@/hooks/useKomoditas';
@@ -32,7 +30,6 @@ import {
   setFilterKomoditas,
   setFilterSTDBStatus,
 } from '@/store/slices/stdb';
-import { Button } from '@/stories/Button';
 import getPolygonCenter from '@/utils/getPolygonCenter';
 import theme from '@/utils/tailwindTheme';
 
@@ -49,14 +46,47 @@ const layerFilter = [
 const MapDashboard = () => {
   const dispatch = useDispatch();
   const [showTable, setShowTable] = useState(false);
+  const [showAlertTable, setShowAlertTable] = useState(false);
   const [selectedPekebun, setSelectedPekebun] = useState(pekebuns[0]);
   const [activeFilter, setActiveFilter] = useState('');
   const [activeTile, setActiveTile] = useState('osm');
+  const [dateRange, setDateRange] = useState({
+    startDate: '',
+    endDate: '',
+  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const [searchText, setSearchText] = useState('');
+  const [filterKelompok, setFilterKelompok] = useState('');
+  const [filterRSPO, setFilterRSPO] = useState('');
+  const [filterISPO, setFilterISPO] = useState('');
+  const [filterLegalitas, setFilterLegalitas] = useState('');
+
+  // Alert table states
+  const [alertSearchText, setAlertSearchText] = useState('');
+  const [alertCurrentPage, setAlertCurrentPage] = useState(1);
+  const [alertPageSize, setAlertPageSize] = useState(10);
+  const [filterAlertType, setFilterAlertType] = useState('');
+  const [filterAlertKabupaten, setFilterAlertKabupaten] = useState('');
+  const [filterAlertKecamatan, setFilterAlertKecamatan] = useState('');
+
+  const rspoOptions = [
+    { label: 'Sudah', value: 'sudah' },
+    { label: 'Belum', value: 'belum' },
+  ];
+
+  const ispoOptions = [
+    { label: 'Sudah', value: 'sudah' },
+    { label: 'Belum', value: 'belum' },
+  ];
+
+  const alertTypeOptions = [
+    { label: 'GLAD', value: 'glad' },
+    { label: 'RADD', value: 'radd' },
+    { label: 'UMD', value: 'umd' },
+  ];
 
   const { komoditas } = useKomoditas();
   const { kecamatanSanggau } = useKecamatanSanggau();
@@ -73,7 +103,14 @@ const MapDashboard = () => {
     page: currentPage,
     search: searchText,
   });
-  const { stdbStatuses, fetchSTDBStatuses } = useReferences();
+  const {
+    stdbStatuses,
+    kelompokTani,
+    jenisLegalitas,
+    fetchSTDBStatuses,
+    fetchKelompokTani,
+    fetchJenisLegalitas,
+  } = useReferences();
   const {
     staticLayerList,
     staticLayersDetail,
@@ -134,26 +171,47 @@ const MapDashboard = () => {
       alert('PETA clicked for ID: ' + params.data.id);
     };
 
-    const handleDetailClick = () => {
-      // Implement the logic to show detail or navigate to detail page
-      alert('DETAIL clicked for ID: ' + params.data.id);
-    };
+    const coordinates = params.data?.peta?.titik_koordinat?.coordinates;
+    const coordText = coordinates
+      ? convertCoordToDMS(coordinates[0], coordinates[1])
+      : '';
+    const idKebun = params.data?.id || '';
 
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-1">
         <button
           onClick={handlePetaClick}
-          className="font-bold text-orange-600 underline"
+          className="font-bold text-orange-600 underline text-left"
         >
-          PETA
+          PETA DETAIL
         </button>
-        <button
-          onClick={handleDetailClick}
-          className="font-bold text-blue-600 underline"
-        >
-          DETAIL
-        </button>
+        {coordText && <div className="text-sm text-gray-600">{coordText}</div>}
+        {idKebun && <div className="text-sm text-gray-600">{idKebun}</div>}
       </div>
+    );
+  };
+
+  const ResikoDeforestasiCellRenderer = (params) => {
+    const value = params.value?.toLowerCase() || '';
+    let chipClass = '';
+    let displayText = params.value || '';
+
+    if (value === 'rendah') {
+      chipClass = 'bg-green-100 text-green-800 border-green-300';
+    } else if (value === 'menengah') {
+      chipClass = 'bg-orange-100 text-orange-800 border-orange-300';
+    } else if (value === 'tinggi') {
+      chipClass = 'bg-red-100 text-red-800 border-red-300';
+    } else {
+      chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${chipClass}`}
+      >
+        {displayText}
+      </span>
     );
   };
 
@@ -173,6 +231,111 @@ const MapDashboard = () => {
     );
   };
 
+  // Alert table cell renderers
+  const IdAlertCellRenderer = (params) => {
+    const handleLihatClick = () => {
+      // Implement the logic to show alert detail
+      alert('LIHAT clicked for ID: ' + params.data.id_alert);
+    };
+
+    const idAlert = params.data?.id_alert || '';
+
+    return (
+      <div className="flex flex-col gap-1">
+        <button
+          onClick={handleLihatClick}
+          className="font-bold text-blue-600 underline text-left"
+        >
+          LIHAT
+        </button>
+        {idAlert && <div className="text-sm text-gray-600">{idAlert}</div>}
+      </div>
+    );
+  };
+
+  // Dummy data for alert table
+  const alertDummyData = [
+    {
+      id_alert: 'GR-001-002-001',
+      lokasi_alert: { coordinates: [3.0883, 103.2533] },
+      area_deforestasi: 0.5,
+      tanggal_terdeteksi: '2025-11-10',
+      alert_type: 'GLAD',
+      kabupaten: 'Sanggau',
+      kecamatan: 'Toba Hilir',
+    },
+    {
+      id_alert: 'GR-001-002-002',
+      lokasi_alert: { coordinates: [3.0884, 103.2534] },
+      area_deforestasi: 0.3,
+      tanggal_terdeteksi: '2025-11-09',
+      alert_type: 'GLAD',
+      kabupaten: 'Sanggau',
+      kecamatan: 'Toba Hilir',
+    },
+    {
+      id_alert: 'GR-001-002-003',
+      lokasi_alert: { coordinates: [3.0885, 103.2535] },
+      area_deforestasi: 0.7,
+      tanggal_terdeteksi: '2025-11-08',
+      alert_type: 'RADD',
+      kabupaten: 'Sanggau',
+      kecamatan: 'Toba Hilir',
+    },
+  ];
+
+  // Alert table column definitions
+  const alertColDefs = [
+    {
+      headerName: 'Id Alert',
+      field: 'id_alert',
+      cellRenderer: IdAlertCellRenderer,
+      width: 180,
+      pinned: 'left',
+      suppressMenu: true,
+      sortable: false,
+      filter: false,
+    },
+    {
+      headerName: 'Lokasi Alert',
+      field: 'lokasi_alert.coordinates',
+      valueFormatter: (params) => {
+        if (!params?.value) return '';
+        return convertCoordToDMS(params.value[0], params.value[1]);
+      },
+      width: 200,
+    },
+    {
+      headerName: 'Area Deforestasi (Ha)',
+      field: 'area_deforestasi',
+      width: 180,
+      valueFormatter: (params) => {
+        if (params.value == null) return '';
+        return params.value.toFixed(1);
+      },
+    },
+    {
+      headerName: 'Tanggal Terdeteksi',
+      field: 'tanggal_terdeteksi',
+      width: 160,
+    },
+    {
+      headerName: 'Alert Type',
+      field: 'alert_type',
+      width: 120,
+    },
+    {
+      headerName: 'Kabupaten',
+      field: 'kabupaten',
+      width: 140,
+    },
+    {
+      headerName: 'Kecamatan',
+      field: 'kecamatan',
+      width: 160,
+    },
+  ];
+
   // Dummy data array to replace real data source for table display
   const dummyData = [
     {
@@ -191,6 +354,7 @@ const MapDashboard = () => {
       rspo: 'Sudah',
       ispo: 'Sudah',
       legalitas: 'SHM',
+      resiko_deforestasi: 'Menengah',
     },
     {
       id: 'GR-001-002-002',
@@ -208,6 +372,7 @@ const MapDashboard = () => {
       rspo: 'Belum',
       ispo: 'Sudah',
       legalitas: 'SHM',
+      resiko_deforestasi: 'Rendah',
     },
     {
       id: 'GR-001-002-003',
@@ -225,34 +390,32 @@ const MapDashboard = () => {
       rspo: 'Sudah',
       ispo: 'Belum',
       legalitas: 'SHM',
+      resiko_deforestasi: 'Tinggi',
     },
   ];
 
   const colDefs = [
     {
-      headerName: '',
-      field: 'actions',
+      headerName: 'Titik Koordinat',
+      field: 'peta.titik_koordinat.coordinates',
       cellRenderer: PetaDetailCellRenderer,
-      width: 120,
+      width: 200,
       pinned: 'left',
       suppressMenu: true,
       sortable: false,
       filter: false,
     },
     {
-      field: 'peta.titik_koordinat.coordinates',
-      headerName: 'Titik Koordinat',
-      valueFormatter: (params) => {
-        return convertCoordToDMS(params?.value?.[0], params?.value?.[1]);
-      },
+      headerName: 'Resiko Deforestasi',
+      field: 'resiko_deforestasi',
+      cellRenderer: ResikoDeforestasiCellRenderer,
       width: 160,
     },
-    { field: 'id', headerName: 'Id Kebun', width: 140 },
     { field: 'pekebun.nama', headerName: 'Petani', width: 160 },
     {
       headerName: 'Kelompok',
       field: 'kelompok',
-      width: 160,
+      width: 200,
     },
     {
       headerName: 'Lokasi',
@@ -388,9 +551,77 @@ const MapDashboard = () => {
     []
   );
 
+  const handleFilterKelompokChange = useCallback(
+    debounce((e) => {
+      setFilterKelompok(e.target.value);
+    }, 500),
+    []
+  );
+
+  const handleFilterRSPOChange = useCallback(
+    debounce((e) => {
+      setFilterRSPO(e.target.value);
+    }, 500),
+    []
+  );
+
+  const handleFilterISPOChange = useCallback(
+    debounce((e) => {
+      setFilterISPO(e.target.value);
+    }, 500),
+    []
+  );
+
+  const handleFilterLegalitasChange = useCallback(
+    debounce((e) => {
+      setFilterLegalitas(e.target.value);
+    }, 500),
+    []
+  );
+
+  // Alert table handlers
+  const handleAlertSearchTextChange = useCallback(
+    debounce((e) => {
+      setAlertSearchText(e.target.value);
+    }, 300),
+    []
+  );
+
+  const handleAlertPageChange = useCallback((newPage) => {
+    setAlertCurrentPage(newPage);
+  }, []);
+
+  const handleAlertPageSizeChange = useCallback((newPageSize) => {
+    setAlertPageSize(newPageSize);
+    setAlertCurrentPage(1);
+  }, []);
+
+  const handleFilterAlertTypeChange = useCallback(
+    debounce((e) => {
+      setFilterAlertType(e.target.value);
+    }, 500),
+    []
+  );
+
+  const handleFilterAlertKabupatenChange = useCallback(
+    debounce((e) => {
+      setFilterAlertKabupaten(e.target.value);
+    }, 500),
+    []
+  );
+
+  const handleFilterAlertKecamatanChange = useCallback(
+    debounce((e) => {
+      setFilterAlertKecamatan(e.target.value);
+    }, 500),
+    []
+  );
+
   useEffect(() => {
     fetchSTDBStatuses();
     fetchStaticLayerList();
+    fetchKelompokTani();
+    fetchJenisLegalitas();
 
     return () => {
       dispatch(setFilterSTDBStatus(''));
@@ -411,8 +642,20 @@ const MapDashboard = () => {
   ]);
 
   return (
-    <div className="relative h-full w-full max-w-full overflow-x-hidden">
+    <div className="relative h-full w-full max-w-full max-h-full overflow-y-hidden overflow-x-hidden">
       <div className="relative max-h-[calc(100vh-72px)]">
+        <FilterSidebar
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          staticLayers={staticLayerList}
+          activeStaticLayers={staticLayersDetail}
+          onStaticLayerChange={(layer, value) => {
+            handleStaticLayerChange({ target: { checked: value } }, layer);
+          }}
+          activeBasemap={activeTile}
+          onBasemapChange={setActiveTile}
+        />
+        <RightSidebar />
         <Map
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
           zoom={zoomMap}
@@ -427,156 +670,89 @@ const MapDashboard = () => {
           tileLayer={activeTile}
           staticLayers={staticLayersDetail}
         />
-        <div className="absolute right-4 top-4 z-[400]">
-          <div
-            onClick={() => setShowTable(!showTable)}
-            className="flex flex-row items-center gap-2 rounded-[4px] border border-primary bg-white px-[10px] py-[10px] py-[10px] py-[10px]"
+        <DataPekebunTable
+          showTable={showTable}
+          onClose={() => {
+            setShowTable(false);
+          }}
+          searchText={searchText}
+          onSearchTextChange={handleSearchTextChange}
+          filterKelompok={filterKelompok}
+          onFilterKelompokChange={handleFilterKelompokChange}
+          filterRSPO={filterRSPO}
+          onFilterRSPOChange={handleFilterRSPOChange}
+          filterISPO={filterISPO}
+          onFilterISPOChange={handleFilterISPOChange}
+          filterLegalitas={filterLegalitas}
+          onFilterLegalitasChange={handleFilterLegalitasChange}
+          kelompokOptions={kelompokTani}
+          rspoOptions={rspoOptions}
+          ispoOptions={ispoOptions}
+          legalitasOptions={jenisLegalitas}
+          loading={loading}
+          rowData={dummyData}
+          columnDefs={colDefs}
+          autoSizeStrategy={autoSizeStrategy}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalItems={totalSTDB}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+        <DataAlertDeforestasi
+          showTable={showAlertTable}
+          onClose={() => {
+            setShowAlertTable(false);
+          }}
+          searchText={alertSearchText}
+          onSearchTextChange={handleAlertSearchTextChange}
+          filterAlertType={filterAlertType}
+          onFilterAlertTypeChange={handleFilterAlertTypeChange}
+          filterKabupaten={filterAlertKabupaten}
+          onFilterKabupatenChange={handleFilterAlertKabupatenChange}
+          filterKecamatan={filterAlertKecamatan}
+          onFilterKecamatanChange={handleFilterAlertKecamatanChange}
+          alertTypeOptions={alertTypeOptions}
+          kabupatenOptions={kecamatanSanggau}
+          kecamatanOptions={kecamatanSanggau}
+          loading={false}
+          rowData={alertDummyData}
+          columnDefs={alertColDefs}
+          autoSizeStrategy={autoSizeStrategy}
+          currentPage={alertCurrentPage}
+          pageSize={alertPageSize}
+          totalItems={500}
+          onPageChange={handleAlertPageChange}
+          onPageSizeChange={handleAlertPageSizeChange}
+        />
+      </div>
+
+      <div className="absolute left-1/2 bottom-0 z-[400] mx-auto -translate-x-1/2 -translate-y-1/2">
+        <div className="flex flex-row items-center gap-2">
+          <Button
+            className="bg-white"
+            variant="secondary"
+            label=""
+            onClick={() => {
+              setShowAlertTable(!showAlertTable);
+              if (!showAlertTable) {
+                setShowTable(false);
+              }
+            }}
           >
-            <Statistic color={theme.colors?.primary} />
-            <Paragraph level={3} className="font-bold text-primary">
-              Data Kebun
-            </Paragraph>
-          </div>
-        </div>
-        <div
-          className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-scroll rounded-xl border bg-white p-4 duration-500 ease-in-out ${
-            showTable ? 'translate-x-0' : 'left-[200px] translate-x-full'
-          } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
-        >
-          <div className="flex h-full flex-col gap-4">
-            <div className="flex flex-row items-center justify-between">
-              <Heading level={2}>Data Pekebun</Heading>
-              <div className="flex flex-row items-center gap-8">
-                <div className="flex flex-row items-center gap-2">
-                  <SearchBar
-                    placeholder="Cari Pekebun"
-                    value={searchText}
-                    onChange={handleSearchTextChange}
-                    // onSearch={handleSearch}
-                  />
-                  {/* <Select containerClassName='w-[200px]' placeholder='Pilih Komoditas' options={komoditas} /> */}
-                  <SelectMultiple
-                    value={filterKomoditas}
-                    onChange={handleFilterKomoditasMultipleSelectChange}
-                    containerClassName="w-[200px]"
-                    placeholder="Pilih Komoditas"
-                    options={komoditas}
-                  />
-                  <SelectMultiple
-                    value={filterKecamatan}
-                    onChange={handleFilterKecamatanMultipleSelectChange}
-                    containerClassName="w-[200px]"
-                    placeholder="Pilih Kecamatan"
-                    options={kecamatanSanggau}
-                  />
-                  <Select
-                    value={filterSTDBStatus}
-                    onChange={handleFilterSTDBStatusChange}
-                    containerClassName="w-[200px]"
-                    placeholder="Pilih STDB"
-                    options={stdbStatuses}
-                  />
-                </div>
-                <Close onClick={() => setShowTable(false)} />
-              </div>
-            </div>
-            <div className="w-full flex-1">
-              <SectionLoading loading={loading} />
-              <AgGridReact
-                loading={loading}
-                autoSizeStrategy={autoSizeStrategy}
-                rowData={dummyData}
-                columnDefs={colDefs}
-              />
-            </div>
-            <Pagination
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalItems={totalSTDB}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-              pageSizeOptions={[5, 10, 20, 50, 100]}
-              showRowsPerPage={true}
-              labels={{
-                rowsPerPage: 'Baris Per Halaman',
-                showing: 'Menampilkan',
-                of: 'dari',
-              }}
-            />
-          </div>
-        </div>
-      </div>
-      <div
-        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-black50/60 bg-white p-4 transition-all duration-300 ${
-          activeFilter === 'komoditas' ? 'translate-x-0' : '-translate-x-[200%]'
-        }`}
-      >
-        <div className="flex flex-col gap-2">
-          {komoditas?.map((data) => {
-            return (
-              <Checkbox
-                size={14}
-                key={`komoditas-${data?.value}`}
-                value={filterKomoditas?.includes(data?.value)}
-                onChange={(v) => handleFilterKomoditasChange(v, data)}
-                label={data?.label}
-              />
-            );
-          })}
-        </div>
-      </div>
-      <div
-        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-black50/60 bg-white  transition-all duration-300 ${
-          activeFilter === 'kecamatan' ? 'translate-x-0' : '-translate-x-[200%]'
-        }`}
-      >
-        <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4">
-          {kecamatanSanggau?.map((data) => {
-            return (
-              <Checkbox
-                size={14}
-                key={`kecamatan-${data?.value}`}
-                value={filterKecamatan?.includes(data?.value)}
-                onChange={(v) => handleFilterKecamatanChange(v, data)}
-                label={data?.label}
-              />
-            );
-          })}
-        </div>
-      </div>
-      <div
-        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-black50/60 bg-white  transition-all duration-300 ${
-          activeFilter === 'tilelayer' ? 'translate-x-0' : '-translate-x-[200%]'
-        }`}
-      >
-        <SectionLoading loading={loadingDetailStaticLayer} />
-        <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto p-4">
-          <div>
-            <RadioButton
-              labelClassName="text-[16px]"
-              containerClassName="gap-2"
-              value={activeTile}
-              onChangeValue={(e) => setActiveTile(e)}
-              options={[
-                { label: 'Open Street Map', value: 'osm' },
-                { label: 'Light Map', value: 'light' },
-                { label: 'Dark Map', value: 'dark' },
-                { label: 'Satellite Map', value: 'satellite' },
-              ]}
-            />
-          </div>
-          <div className="w-full border-b" />
-          {staticLayerList?.map((data) => {
-            return (
-              <Checkbox
-                size={14}
-                key={`komoditas-${data?.value}`}
-                value={filterKomoditas?.includes(data?.value)}
-                onChange={(v) => handleStaticLayerChange(v, data)}
-                label={data?.label}
-              />
-            );
-          })}
+            Data Alert
+          </Button>
+          <Button
+            label=""
+            onClick={() => {
+              setShowTable(!showTable);
+              if (!showTable) {
+                setShowAlertTable(false);
+              }
+            }}
+          >
+            Data Kebun
+          </Button>
         </div>
       </div>
     </div>
