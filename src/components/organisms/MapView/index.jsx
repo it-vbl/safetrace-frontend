@@ -12,11 +12,13 @@ import {
   useMap,
 } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Close from '@/components/atoms/Icons/Close';
 import STDBStatusChip from '@/components/atoms/STDBStatusChip';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
+import { setMapviewFilterSidebarOpen } from '@/store/slices/app';
 
 import EnableRulerTool from './EnableRulerTool';
 import IupMap from './StaticLayers';
@@ -166,23 +168,51 @@ const DrawControl = ({
   );
 };
 
+const toggleIcon = `
+  <svg
+    class="toggle-icon"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M9.02362 10.0006L13.1484 5.87577L11.9699 4.69727L6.66662 10.0006L11.9699 15.3038L13.1484 14.1253L9.02362 10.0006Z"
+      fill="black"
+    />
+  </svg>`;
+
 function CustomButtonControl({
   onFilterChange = (e) => {},
   activeFilter = '',
 }) {
   const map = useMap();
+  const dispatch = useDispatch();
+  const { mapviewFilterSidebarOpen } = useSelector((state) => state.app);
+
+  const onToggleFilterSidebar = () => {
+    dispatch(setMapviewFilterSidebarOpen(!mapviewFilterSidebarOpen));
+  };
 
   useEffect(() => {
-    const createControl = (title, innerHTML, position, onClick) => {
+    const createControl = (
+      title,
+      innerHTML,
+      position,
+      onClick,
+      beforeDefaultControl = false,
+      customClassName = ''
+    ) => {
       const Control = L.Control.extend({
         onAdd: function () {
           const container = L.DomUtil.create(
             'div',
-            'leaflet-bar leaflet-control leaflet-control-custom'
+            `leaflet-bar leaflet-control leaflet-control-custom ${customClassName}`
           );
           container.style.backgroundColor = 'white';
-          container.style.width = '34px';
-          container.style.height = '34px';
+          container.style.width = '32px';
+          container.style.height = '32px';
           container.style.fontSize = '16px';
           container.style.display = 'flex';
           container.style.alignItems = 'center';
@@ -190,9 +220,7 @@ function CustomButtonControl({
           container.style.cursor = 'pointer';
           container.style.borderColor = activeFilter === title ? 'green' : '';
           container.title = title;
-
           container.innerHTML = innerHTML;
-
           container.onclick = onClick;
 
           return container;
@@ -201,24 +229,29 @@ function CustomButtonControl({
 
       const control = new Control({ position });
       map.addControl(control);
+      if (beforeDefaultControl) {
+        const corner = document.querySelector('.leaflet-top.leaflet-left');
+        if (corner) {
+          corner.insertBefore(control.getContainer(), corner.firstChild);
+        }
+      }
 
       return () => map.removeControl(control);
     };
 
     const controls = [
-      createControl('Filter Komoditas', '🥬', 'topleft', () =>
-        onFilterChange('komoditas')
-      ),
-      createControl('Filter Kecamatan', '📍', 'topleft', () =>
-        onFilterChange('kecamatan')
-      ),
-      createControl('Tile Layer', '🗺️', 'topleft', () =>
-        onFilterChange('tilelayer')
+      createControl(
+        'Sidebar Toggle',
+        toggleIcon,
+        'topleft',
+        () => onToggleFilterSidebar(),
+        true,
+        !mapviewFilterSidebarOpen ? 'rotate-180' : ''
       ),
     ];
 
     return () => controls.forEach((control) => control());
-  }, [map, onFilterChange, activeFilter]);
+  }, [map, onFilterChange, activeFilter, mapviewFilterSidebarOpen]);
 
   return null;
 }

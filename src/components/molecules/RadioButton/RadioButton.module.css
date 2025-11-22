@@ -14,11 +14,11 @@
 }
 
 .radio-button:checked {
-  border-color: #388aaf;
+  border-color: #2559A6;
 }
 
 .radio-button:focus {
-  border-color: #388aaf;
+  border-color: #2559A6;
 }
 
 .radio-button:checked::before {
@@ -26,7 +26,7 @@
   display: block;
   width: 10px;
   height: 10px;
-  background: #388aaf;
+  background: #2559A6;
   border-radius: 50%;
   position: absolute;
   top: 50%;

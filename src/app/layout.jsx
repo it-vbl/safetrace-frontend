@@ -108,7 +108,7 @@ export default function Layout({ children }) {
 
   return (
     <html lang="en" className={DMSans.className}>
-      <title>SIPEKEBUN</title>
+      <title>CUKK</title>
       <head>
         <link
           rel="stylesheet"
