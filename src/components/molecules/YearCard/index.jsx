@@ -61,7 +61,7 @@ const YearCard = ({
         </div>
       </div>
 
-      <div className="flex flex-1 gap-x-4 gap-y-3 text-sm text-gray-700 w-full">
+      <div className="flex w-full flex-col gap-x-4 gap-y-3 text-sm text-gray-700 sm:flex-row">
         {/* Semester Switch */}
         <div className="flex flex-row items-start">
           <div className="rounded border border-gray-300 bg-white p-2">
@@ -91,20 +91,20 @@ const YearCard = ({
         <div className="flex flex-1">
           <div className="rounded border border-gray-300 bg-white p-4 w-full">
             <div className="mb-3 font-semibold">{title}</div>
-            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-3 break-words sm:grid-cols-2 lg:grid-cols-4">
               {dataFields.map((field) => (
                 <React.Fragment key={field.key}>
                   <div>
                     <div className="text-gray-500">
                       {field.label} Waktu Aplikasi
                     </div>
-                    <div className="font-medium">
+                    <div className="font-medium leading-relaxed">
                       {usage[field.key]?.waktu ?? '-'}
                     </div>
                   </div>
                   <div>
                     <div className="text-gray-500">{field.label} Jumlah</div>
-                    <div className="font-medium">
+                    <div className="font-medium leading-relaxed">
                       {formatNumber(usage[field.key]?.jumlah)} {field.unit}
                     </div>
                   </div>

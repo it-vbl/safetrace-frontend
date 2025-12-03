@@ -104,7 +104,7 @@ const TambahGrupPage = () => {
 
   return (
     <div className="relative w-full bg-gray-50">
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
+      <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
 
@@ -142,7 +142,9 @@ const TambahGrupPage = () => {
                 onBlur={handleBlur}
                 isFullWidth={true}
                 maxChar={null}
-                hasError={touched?.group_description && !!errors?.group_description}
+                hasError={
+                  touched?.group_description && !!errors?.group_description
+                }
                 helperText={
                   touched?.group_description && errors?.group_description
                     ? errors.group_description
@@ -162,7 +164,7 @@ const TambahGrupPage = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="my-6 flex justify-end gap-3">
+          <div className="my-6 flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-3">
             <Button
               type="button"
               onClick={handleCancel}

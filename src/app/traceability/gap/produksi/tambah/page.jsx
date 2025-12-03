@@ -151,7 +151,7 @@ function TambahProduksiContent() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
 
       <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
@@ -200,16 +200,21 @@ function TambahProduksiContent() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col justify-end gap-2 sm:flex-row">
           <Button
             type="button"
             variant="danger"
             onClick={handleCancel}
             disabled={isLoading}
+            className="w-full sm:w-auto"
           >
             Batalkan
           </Button>
-          <Button type="submit" isLoading={isLoading}>
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="w-full sm:w-auto"
+          >
             Simpan
           </Button>
         </div>

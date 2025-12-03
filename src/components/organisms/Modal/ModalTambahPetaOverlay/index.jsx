@@ -11,6 +11,10 @@ const ModalTambahPetaOverlay = ({
   setOpen,
   onSubmit,
   isLoading = false,
+  initialValues = { nama_layer: '', file: null },
+  title = 'TAMBAH LAYER STATIS',
+  requireFile = true,
+  fileUrl = '',
 }) => {
   const {
     values,
@@ -23,13 +27,12 @@ const ModalTambahPetaOverlay = ({
     errors,
     isSubmitting,
   } = useFormik({
-    initialValues: {
-      nama_layer: '',
-      file: null,
-    },
+    initialValues,
     validationSchema: Yup.object({
       nama_layer: Yup.string().required('Nama Layer Statis harus diisi'),
-      file: Yup.mixed().required('File .geojson harus diupload'),
+      file: requireFile
+        ? Yup.mixed().required('File .geojson harus diupload')
+        : Yup.mixed().nullable(),
     }),
     onSubmit: async (values) => {
       try {
@@ -56,7 +59,7 @@ const ModalTambahPetaOverlay = ({
       className="!w-[500px]"
       open={open}
       onclose={handleOnClose}
-      label="TAMBAH LAYER STATIS"
+      label={title}
     >
       <div className="flex flex-col gap-4 pt-4">
         <InputText
@@ -80,12 +83,13 @@ const ModalTambahPetaOverlay = ({
             onChangeValue={handleFileChange}
             allowedFiles={['.geojson', 'application/geo+json']}
             maxSize={50}
-            isRequired={true}
+            isRequired={requireFile}
             name="file"
             keyField="peta-overlay-file"
             file={values.file}
+            url={fileUrl}
           />
-          {errors.file && touched.file && (
+          {errors.file && touched.file && requireFile && (
             <p className="mt-1 text-sm text-red-500">{errors.file}</p>
           )}
         </div>

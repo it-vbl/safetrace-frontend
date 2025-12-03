@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+'use client';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -6,8 +7,6 @@ import {
   ChevronRight,
   ContactIcon,
   Flag,
-  FlagIcon,
-  FlagOffIcon,
   FolderIcon,
   MapIcon,
   MedalIcon,
@@ -16,8 +15,6 @@ import {
   PieChart,
   Smartphone,
   TrendingUp,
-  User2Icon,
-  UserCheck2Icon,
   UserCircle2Icon,
   UsersIcon,
 } from 'lucide-react';
@@ -41,6 +38,46 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const { sidebarOpen, sidebarCollapsed } = useSelector((state) => state.app);
   const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
   const dispatch = useDispatch();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isMobileClient = mounted && isMobileScreen;
+
+  const [tooltipLabel, setTooltipLabel] = useState(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [pressTimer, setPressTimer] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const showTooltip = (label, targetEl) => {
+    setTooltipLabel(label);
+    setTooltipVisible(true);
+    if (targetEl) {
+      const rect = targetEl.getBoundingClientRect();
+      const x = Math.round(rect.right + 4);
+      const y = Math.round(rect.top + rect.height * -1.5);
+      setTooltipPos({ x, y });
+    }
+  };
+  const hideTooltip = () => {
+    setTooltipVisible(false);
+    setTooltipLabel(null);
+  };
+  const startTouchTooltip = (label, targetEl) => {
+    if (!isMobileScreen) return;
+    if (pressTimer) clearTimeout(pressTimer);
+    showTooltip(label, targetEl);
+    const t = setTimeout(() => {
+      hideTooltip();
+    }, 1200);
+    setPressTimer(t);
+  };
+  const endTouchTooltip = () => {
+    if (pressTimer) clearTimeout(pressTimer);
+    setPressTimer(null);
+    hideTooltip();
+  };
 
   const router = useRouter();
   const pathname = usePathname();
@@ -185,9 +222,9 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   return (
     <>
       {/* Mobile overlay */}
-      {isMobileScreen && sidebarOpen && (
+      {isMobileClient && sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300"
+          className="fixed bottom-0 left-0 right-0 top-[72px] z-40 bg-black bg-opacity-50 transition-opacity duration-300"
           onClick={() => dispatch(setSidebarOpen(false))}
         />
       )}
@@ -195,22 +232,22 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
       <div
         style={{
           width:
-            (isMobileScreen && !sidebarOpen) || !sidebarOpen
+            (isMobileClient && !sidebarOpen) || !sidebarOpen
               ? 0
               : sidebarCollapsed
               ? `${size.SIDEBAR_WIDTH_COLLAPSED}px`
               : `${size.SIDEBAR_WIDTH}px`,
           transform:
-            isMobileScreen && !sidebarOpen
+            isMobileClient && !sidebarOpen
               ? 'translateX(-100%)'
               : 'translateX(0)',
         }}
-        className={`flex flex-shrink-0 z-50 h-full overflow-x-hidden bg-white transition-all duration-300 ${
-          isMobileScreen ? 'shadow-lg' : 'relative'
+        className={`z-50 flex h-full flex-shrink-0 bg-white transition-all duration-300 ${
+          isMobileClient ? 'shadow-lg' : 'relative'
         } ${
-          (isMobileScreen && !sidebarOpen) || !sidebarOpen
-            ? 'opacity-0'
-            : 'opacity-100'
+          (isMobileClient && !sidebarOpen) || !sidebarOpen
+            ? 'opacity-0 pointer-events-none overflow-hidden'
+            : 'opacity-100 overflow-visible'
         }`}
       >
         <div
@@ -222,15 +259,18 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
           }}
           id="sidebar"
         >
-          {/* Mobile: Show LogoLembaga and SipekebunLogo at the top */}
-          {isMobileScreen && (
+          {/* Mobile: Show LogoLembaga at the top */}
+          {isMobileClient && (
             <div className="mb-6 flex flex-col self-center">
-              <LogoLembaga />
+              <LogoLembaga
+                orientation={sidebarCollapsed ? 'vertical' : 'horizontal'}
+                size={28}
+              />
             </div>
           )}
 
           {menuItems
-            .filter((item) => !item.mobileOnly || isMobileScreen)
+            .filter((item) => !item.mobileOnly || isMobileClient)
             .map((item, index) => {
               const isActive =
                 pathname === item?.path ||
@@ -249,6 +289,18 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                     } w-full rounded font-medium ${
                       sidebarCollapsed ? 'justify-center' : 'justify-normal'
                     } relative`}
+                    title={item.label}
+                    aria-label={item.label}
+                    onMouseEnter={(e) =>
+                      (isMobileClient || sidebarCollapsed) &&
+                      showTooltip(item.label, e.currentTarget)
+                    }
+                    onMouseLeave={hideTooltip}
+                    onTouchStart={(e) =>
+                      startTouchTooltip(item.label, e.currentTarget)
+                    }
+                    onTouchEnd={endTouchTooltip}
+                    onTouchCancel={endTouchTooltip}
                     onClick={() =>
                       item.subMenu
                         ? handleSubMenuToggle(item.label)
@@ -268,6 +320,20 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                       ) : (
                         <ChevronDownIcon className="ml-auto" />
                       ))}
+                    {(isMobileClient || sidebarCollapsed) &&
+                      tooltipVisible &&
+                      tooltipLabel === item.label && (
+                        <div
+                          className="pointer-events-none fixed z-[600] whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white"
+                          style={{
+                            left: tooltipPos.x,
+                            top: tooltipPos.y,
+                            transform: 'translateY(-50%)',
+                          }}
+                        >
+                          {item.label}
+                        </div>
+                      )}
                   </div>
                   {!sidebarCollapsed &&
                     item.subMenu &&
@@ -278,11 +344,26 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                             subItem && (
                               <div
                                 key={subItem.label || subItem.path || subIndex}
-                                className={`mb-2 ml-1 flex cursor-pointer items-center p-2 ${
+                                className={`relative mb-2 ml-1 flex cursor-pointer items-center p-2 ${
                                   pathname?.includes(subItem?.path)
                                     ? 'text-primary'
                                     : 'text-gray-400'
                                 } hover:bg-primary500 rounded font-medium`}
+                                title={subItem.label}
+                                aria-label={subItem.label}
+                                onMouseEnter={(e) =>
+                                  (isMobileClient || sidebarCollapsed) &&
+                                  showTooltip(subItem.label, e.currentTarget)
+                                }
+                                onMouseLeave={hideTooltip}
+                                onTouchStart={(e) =>
+                                  startTouchTooltip(
+                                    subItem.label,
+                                    e.currentTarget
+                                  )
+                                }
+                                onTouchEnd={endTouchTooltip}
+                                onTouchCancel={endTouchTooltip}
                                 onClick={() =>
                                   handleMenuItemClick(subItem?.path)
                                 }
@@ -290,6 +371,20 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                                 <span className="text-[14px] leading-[18px]">
                                   {subItem?.label}
                                 </span>
+                                {(isMobileClient || sidebarCollapsed) &&
+                                  tooltipVisible &&
+                                  tooltipLabel === subItem.label && (
+                                    <div
+                                      className="pointer-events-none fixed z-[600] whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white"
+                                      style={{
+                                        left: tooltipPos.x,
+                                        top: tooltipPos.y,
+                                        transform: 'translateY(-50%)',
+                                      }}
+                                    >
+                                      {subItem.label}
+                                    </div>
+                                  )}
                               </div>
                             )
                         )}
@@ -332,7 +427,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                 )
               );
             })}
-          {!isMobileScreen && (
+          {!isMobileClient && (
             <div
               onClick={handleCollapse}
               className={`mb-10 mt-auto flex cursor-pointer items-center rounded-[4px] p-2 transition-all duration-200 hover:bg-gray-100 ${

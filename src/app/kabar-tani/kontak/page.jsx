@@ -5,6 +5,7 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useFormik } from 'formik';
 import debounce from 'lodash/debounce';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -55,6 +56,11 @@ const KontakPage = () => {
   const [errorPage, setErrorPage] = useState(1);
   const [errorPageSize, setErrorPageSize] = useState(10);
   const { sumberKontak, fetchSumberKontak } = useReferences();
+  const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchSumberKontak();
@@ -204,52 +210,66 @@ const KontakPage = () => {
     }
   };
 
-  const colDefs = [
-    {
-      field: 'actions',
-      headerName: '',
-      cellRenderer: ActionsCellRenderer,
-      width: 120,
-      minWidth: 100,
-      maxWidth: 150,
-      suppressSizeToFit: false,
-    },
-    { field: 'id', headerName: 'ID Kontak', flex: 1, minWidth: 100 },
-    { field: 'nama', headerName: 'Nama', flex: 1, minWidth: 150 },
-    {
-      field: 'no_wa',
-      headerName: 'No. WhatsApp',
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'jns_kelamin',
-      headerName: 'Jenis Kelamin',
-      flex: 1,
-      minWidth: 120,
-      cellRenderer: (params) => {
-        return params.value === '1' ? 'Laki-laki' : 'Perempuan';
+  const colDefs = useMemo(() => {
+    const base = [
+      {
+        field: 'actions',
+        headerName: '',
+        cellRenderer: ActionsCellRenderer,
+        width: isMobileScreen ? 80 : 120,
+        minWidth: isMobileScreen ? 70 : 100,
+        maxWidth: 150,
+        suppressSizeToFit: false,
       },
-    },
-    {
-      field: 'sumber',
-      headerName: 'Sumber',
-      flex: 1,
-      minWidth: 120,
-      cellRenderer: (params) => {
-        return params.value === '1' ? 'Manual' : 'CSV';
+      {
+        field: 'nama',
+        headerName: 'Nama',
+        flex: 2,
+        minWidth: isMobileScreen ? 120 : 150,
       },
-    },
-    {
-      field: 'wa_valid',
-      headerName: 'Status WA',
-      flex: 1,
-      minWidth: 100,
-      cellRenderer: (params) => {
-        return params.value ? 'Valid' : 'Tidak Valid';
+      {
+        field: 'no_wa',
+        headerName: 'No. WhatsApp',
+        flex: 2,
+        minWidth: isMobileScreen ? 120 : 150,
       },
-    },
-  ];
+    ];
+
+    if (!isMobileScreen) {
+      base.push(
+        { field: 'id', headerName: 'ID Kontak', flex: 1, minWidth: 100 },
+        {
+          field: 'jns_kelamin',
+          headerName: 'Jenis Kelamin',
+          flex: 1,
+          minWidth: 120,
+          cellRenderer: (params) => {
+            return params.value === '1' ? 'Laki-laki' : 'Perempuan';
+          },
+        },
+        {
+          field: 'sumber',
+          headerName: 'Sumber',
+          flex: 1,
+          minWidth: 120,
+          cellRenderer: (params) => {
+            return params.value === '1' ? 'Manual' : 'CSV';
+          },
+        },
+        {
+          field: 'wa_valid',
+          headerName: 'Status WA',
+          flex: 1,
+          minWidth: 100,
+          cellRenderer: (params) => {
+            return params.value ? 'Valid' : 'Tidak Valid';
+          },
+        }
+      );
+    }
+
+    return base;
+  }, [isMobileScreen, ActionsCellRenderer]);
 
   const autoSizeStrategy = useMemo(() => {
     return {
@@ -781,7 +801,7 @@ const KontakPage = () => {
 
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
+          <Heading className=" flex flex-1 uppercase tracking-[2px]" level={3}>
             KONTAK
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
@@ -800,15 +820,21 @@ const KontakPage = () => {
           </div>
         </div>
 
-        <div className="relative w-full flex-1">
+        <div className="relative w-full flex-1 overflow-x-auto">
           <SectionLoading loading={loading} />
-          <AgGridReact
-            loading={loading}
-            overlayLoadingTemplate="."
-            autoSizeStrategy={autoSizeStrategy}
-            rowData={kontakData}
-            columnDefs={colDefs}
-          />
+          <div className="min-w-[320px]">
+            {mounted && (
+              <AgGridReact
+                loading={loading}
+                overlayLoadingTemplate="."
+                autoSizeStrategy={autoSizeStrategy}
+                domLayout="autoHeight"
+                rowHeight={isMobileScreen ? 36 : 40}
+                rowData={kontakData}
+                columnDefs={colDefs}
+              />
+            )}
+          </div>
         </div>
 
         <div className="flex justify-center sm:justify-end">

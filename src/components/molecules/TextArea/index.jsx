@@ -67,7 +67,7 @@ const TextArea = ({
   }, [value]);
 
   return (
-    <div className="flex w-full flex-col gap-1">
+    <div className="flex w-full min-w-0 flex-col gap-1">
       <div className="flex justify-between">
         <Label
           isRequired={isRequired}
