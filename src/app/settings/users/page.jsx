@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import ModalCreateUser from '@/components/organisms/Modal/ModalCreateUser';
@@ -26,6 +27,9 @@ const Users = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [showModalCreateUser, setShowModalCreateUser] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUserToDelete, setSelectedUserToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     users,
@@ -47,19 +51,31 @@ const Users = () => {
     dispatch(setSelectedUser(data));
     router.push(`/settings/users/${data.id}/detail`);
   };
-  const handleOnDeleteClicked = async (data) => {
-    if (
-      window.confirm(
-        `Apakah Anda yakin ingin menghapus pengguna ${data.username}?`
-      )
-    ) {
-      try {
-        await deleteUser(data.id);
-        toast.success('Pengguna berhasil dihapus');
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-        toast.error('Gagal menghapus pengguna');
-      }
+  const handleOnDeleteClicked = (data) => {
+    setSelectedUserToDelete(data);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedUserToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedUserToDelete?.id) {
+      toast.error('ID pengguna tidak ditemukan');
+      return;
+    }
+    try {
+      setIsDeleting(true);
+      await deleteUser(selectedUserToDelete.id);
+      setIsDeleteModalOpen(false);
+      setSelectedUserToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast.error('Gagal menghapus pengguna');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -68,13 +84,13 @@ const Users = () => {
       return (
         <div className="flex h-full w-full flex-row items-center justify-center gap-2">
           <div
-            className="uppercase underline text-primary font-bold text-[12px] cursor-pointer"
+            className="cursor-pointer text-[12px] font-bold uppercase text-primary underline"
             onClick={() => handleOnLihatClicked(e.data)}
           >
             Lihat
           </div>
           <div
-            className="uppercase underline text-red-500 font-bold text-[12px] cursor-pointer"
+            className="cursor-pointer text-[12px] font-bold uppercase text-red-500 underline"
             onClick={() => handleOnDeleteClicked(e.data)}
           >
             Hapus
@@ -100,7 +116,7 @@ const Users = () => {
       headerName: 'Status',
       cellRenderer: (params) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs ${
+          className={`rounded-full px-2 py-1 text-xs ${
             params.value === true
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
@@ -133,24 +149,35 @@ const Users = () => {
   );
 
   const handleCreateUser = async (values) => {
-    try {
-      // Map form values to API expected format
-      const userData = {
-        name: values.nama,
-        email: values.email,
-        is_active: values.status === '1', // Convert to boolean
-        roles: values.roles.map((role) => parseInt(role)), // Convert string roles to integers
-        username: values.username,
-        password: values.password,
-        repassword: values.confirmPassword,
-      };
+    const userData = {
+      name: values.nama,
+      email: values.email,
+      password: values.password,
+      repassword: values.confirmPassword,
+      is_active: values.status === '1',
+      roles: values.roles.map((role) => parseInt(role, 10)),
+      username: values.username,
+    };
 
-      await createUser(userData);
-      setShowModalCreateUser(false);
+    try {
+      const res = await createUser(userData);
+      const status = res?.status || res?.data?.status;
+      if (status === 'success' || status === 200) {
+        setShowModalCreateUser(false);
+      } else {
+        toast.error(res?.data?.message || 'Permintaan tidak valid.');
+      }
     } catch (error) {
-      console.error('Failed to create user:', error);
-      // Error handling is already done in the createUser hook
-      throw error;
+      const apiMessage = error?.response?.data?.message;
+      const apiErrors = error?.response?.data?.errors;
+      if (apiMessage) toast.error(apiMessage);
+      if (apiErrors && typeof apiErrors === 'object') {
+        Object.entries(apiErrors).forEach(([field, msgs]) => {
+          if (Array.isArray(msgs) && msgs.length > 0) {
+            toast.error(`${field}: ${msgs[0]}`);
+          }
+        });
+      }
     }
   };
 
@@ -200,6 +227,13 @@ const Users = () => {
             showing: 'Menampilkan',
             of: 'dari',
           }}
+        />
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          itemName={`pengguna dengan username ${selectedUserToDelete?.username}`}
+          isLoading={isDeleting}
         />
       </div>
       <ModalCreateUser

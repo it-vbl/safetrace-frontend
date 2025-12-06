@@ -222,14 +222,25 @@ const TraceabilityPetaniDetail = () => {
 
   const renderLampiranError = () => {
     const errorStatus = lampiranError?.response?.status;
-    const errorMessage = lampiranError?.response?.data?.message || lampiranError?.message;
+    const errorMessage =
+      lampiranError?.response?.data?.message || lampiranError?.message;
     if (errorStatus === 500) {
       return (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg
+                className="h-6 w-6 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"
+                />
               </svg>
             </div>
             <div className="flex-1">
@@ -237,8 +248,9 @@ const TraceabilityPetaniDetail = () => {
                 Terjadi Kesalahan Server
               </h4>
               <p className="mt-1 text-xs text-red-700 sm:text-sm">
-                Maaf, terjadi kesalahan pada server saat memuat data lampiran. 
-                Silakan coba lagi dalam beberapa saat atau hubungi administrator jika masalah berlanjut.
+                Maaf, terjadi kesalahan pada server saat memuat data lampiran.
+                Silakan coba lagi dalam beberapa saat atau hubungi administrator
+                jika masalah berlanjut.
               </p>
               {errorMessage && (
                 <p className="mt-2 text-xs text-red-600 sm:text-sm">
@@ -253,16 +265,41 @@ const TraceabilityPetaniDetail = () => {
                 >
                   {lampiranLoading ? (
                     <>
-                      <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="mr-2 h-4 w-4 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Mencoba lagi...
                     </>
                   ) : (
                     <>
-                      <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      <svg
+                        className="mr-2 h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
                       </svg>
                       Coba Lagi {retryCount > 0 && `(${retryCount})`}
                     </>
@@ -272,8 +309,18 @@ const TraceabilityPetaniDetail = () => {
                   onClick={() => window.location.reload()}
                   className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
                 >
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
                   </svg>
                   Muat Ulang Halaman
                 </button>
@@ -290,8 +337,18 @@ const TraceabilityPetaniDetail = () => {
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 sm:p-6">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-6 w-6 text-yellow-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div className="flex-1">
@@ -299,7 +356,8 @@ const TraceabilityPetaniDetail = () => {
                 Data Lampiran Tidak Ditemukan
               </h4>
               <p className="mt-1 text-xs text-yellow-700 sm:text-sm">
-                Data lampiran untuk petani ini belum tersedia atau telah dihapus.
+                Data lampiran untuk petani ini belum tersedia atau telah
+                dihapus.
               </p>
               <button
                 onClick={handleRetryLampiran}
@@ -319,8 +377,18 @@ const TraceabilityPetaniDetail = () => {
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-6 w-6 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </div>
           <div className="flex-1">
@@ -426,7 +494,7 @@ const TraceabilityPetaniDetail = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
       {/* Notification */}
       {notification.show && (
         <div
@@ -479,7 +547,7 @@ const TraceabilityPetaniDetail = () => {
           )}
 
           {!loading && !error && petani && (
-            <div className="grid grid-cols-1 gap-x-3 gap-y-4 text-sm text-gray-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="grid grid-cols-1 gap-x-3 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
               <BorderBottomColData
                 label="Id Petani"
                 value={petani?.id_petani || petani?.id || '-'}
@@ -581,7 +649,7 @@ const TraceabilityPetaniDetail = () => {
           {lampiranError && renderLampiranError()}
 
           {!lampiranLoading && !lampiranError && lampiran && (
-            <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 md:gap-6">
+            <div className="flex flex-col gap-4 overflow-x-auto sm:flex-row sm:gap-4 md:gap-6">
               {renderLampiranItem('KTP ', lampiran.file_ktp)}
               {renderLampiranItem('KK', lampiran.file_kk)}
               {renderLampiranItem('NIB ', lampiran.file_nib)}

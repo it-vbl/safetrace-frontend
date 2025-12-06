@@ -22,7 +22,7 @@ const DMSans = DM_Sans({
 
 // Inner component that can access Redux state
 function LayoutContent({ children, hideNavbar, hideSidebar, noPadding }) {
-  const { sidebarCollapsed, isMobileScreen } = useSelector(
+  const { sidebarCollapsed, isMobileScreen, sidebarOpen } = useSelector(
     (state) => state.app
   );
 
@@ -30,21 +30,22 @@ function LayoutContent({ children, hideNavbar, hideSidebar, noPadding }) {
     <>
       {!hideNavbar && <Navbar />}
       <div
-        className={`flex  flex-1 w-[100dvw] overflow-x-clip min-w-full max-w-full ${
+        className={`flex  w-[100dvw] min-w-full max-w-full flex-1 overflow-x-clip ${
           hideNavbar ? 'h-full' : 'h-[calc(100vh-72px)]'
         } flex-row `}
       >
         {!hideSidebar ? <Sidebar /> : null}
         <div
           style={{
-            width: hideSidebar
-              ? '100%'
-              : `calc(100% - ${size.SIDEBAR_WIDTH}px)`,
+            width:
+              hideSidebar || !sidebarOpen
+                ? '100%'
+                : `calc(100% - ${size.SIDEBAR_WIDTH}px)`,
           }}
-          className="flex flex-1 flex-col transition-all duration-300 bg-slate-600 w-full max-w-full"
+          className="flex w-full max-w-full flex-1 flex-col bg-slate-600 transition-all duration-300"
         >
           <div
-            className={`flex flex-1 overflow-y-auto max-w-full bg-[#F7F9FD] ${
+            className={`flex max-w-full flex-1 overflow-y-auto bg-[#F7F9FD] ${
               noPadding ? 'p-0' : 'p-4 md:p-8'
             }`}
           >

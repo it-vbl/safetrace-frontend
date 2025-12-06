@@ -31,12 +31,7 @@ const PekerjaPage = () => {
   const [totalPekerja, setTotalPekerja] = useState(0);
 
   // Fetch pekerja data function
-  const fetchPekerjaData = async ({
-    page,
-    page_size,
-    search,
-    kelompok,
-  }) => {
+  const fetchPekerjaData = async ({ page, page_size, search, kelompok }) => {
     setLoading(true);
     try {
       // Build query parameters
@@ -62,13 +57,15 @@ const PekerjaPage = () => {
           no_kk: pekerja.no_kk || '-',
           luas_kebun: pekerja.luas_kebun || '0',
           jumlah_pekerja: pekerja.jumlah_pekerja || 0,
-          terakhir_diubah: pekerja.updated_at ? new Date(pekerja.updated_at).toLocaleString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          }) : '-',
+          terakhir_diubah: pekerja.updated_at
+            ? new Date(pekerja.updated_at).toLocaleString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })
+            : '-',
         }));
 
         setPekerjaData(mappedData);
@@ -100,12 +97,7 @@ const PekerjaPage = () => {
       search,
       kelompok: selectedKelompok,
     });
-  }, [
-    currentPage,
-    pageSize,
-    search,
-    selectedKelompok,
-  ]);
+  }, [currentPage, pageSize, search, selectedKelompok]);
 
   const handleSearchTextChange = useCallback(
     debounce((e) => {
@@ -224,7 +216,10 @@ const PekerjaPage = () => {
         <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
           {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
+            <Heading
+              className=" flex flex-1 uppercase tracking-[2px]"
+              level={3}
+            >
               PEKERJA
             </Heading>
 

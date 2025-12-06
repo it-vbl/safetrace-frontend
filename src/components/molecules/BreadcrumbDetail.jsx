@@ -9,7 +9,7 @@ import { ChevronRight } from 'lucide-react';
 const BreadcrumbDetail = ({ items }) => {
   return (
     <nav
-      className="flex items-center text-sm font-semibold text-gray-700"
+      className="flex items-center text-xs sm:text-sm font-semibold text-gray-700"
       aria-label="Breadcrumb"
     >
       <ol className="inline-flex items-center space-x-1">
@@ -17,7 +17,7 @@ const BreadcrumbDetail = ({ items }) => {
           const isLast = index === items.length - 1;
           return (
             <React.Fragment key={index}>
-              <li className="tracking-[2px] font-bold text-[18px]">
+              <li className="font-bold tracking-[0.5px] sm:tracking-[2px] text-[12px] sm:text-[18px]">
                 {isLast ? (
                   <div className="text-black" aria-current="page">
                     {item.label}
@@ -30,7 +30,7 @@ const BreadcrumbDetail = ({ items }) => {
               </li>
               {!isLast && (
                 <li>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                 </li>
               )}
             </React.Fragment>

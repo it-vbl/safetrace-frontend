@@ -133,7 +133,7 @@ const InputText = ({
   }, [value]);
 
   return (
-    <div className={cn('flex w-full flex-col gap-1', containerClassName)}>
+    <div className={cn('flex w-full min-w-0 flex-col gap-1', containerClassName)}>
       {label && (
         <Label
           isRequired={isRequired}
@@ -145,7 +145,7 @@ const InputText = ({
       )}
       <div
         className={cn(
-          'group relative flex h-[42px] w-full items-center gap-[10px] rounded-[4px] border border-neutral5 bg-white',
+          'group relative flex h-[42px] w-full min-w-0 items-center gap-[10px] rounded-[4px] border border-neutral5 bg-white',
           filledClassName.field,
           disabledClassName.field,
           errorClassName.field,

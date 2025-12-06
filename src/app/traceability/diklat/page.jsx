@@ -96,8 +96,8 @@ const DiklatPage = () => {
   }, [currentPage, pageSize, search, selectedKelompok]);
 
   const handleSearchTextChange = useCallback(
-    debounce((e) => {
-      setSearch(e.target.value);
+    debounce((value) => {
+      setSearch(value);
       setCurrentPage(1);
     }, 300),
     []
@@ -243,6 +243,16 @@ const DiklatPage = () => {
     };
   }, []);
 
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      minWidth: 100,
+      wrapText: true,
+      autoHeight: true,
+    }),
+    []
+  );
+
   const schemaValidation = Yup.object().shape({
     nama_device: Yup.string().required('Nama device harus diisi'),
     no_handphone: Yup.string().required('No handphone harus diisi'),
@@ -317,7 +327,7 @@ const DiklatPage = () => {
   );
 
   return (
-    <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
+    <div className="relative !min-h-[calc(100%-72px)] w-full min-w-[320px] max-w-full">
       <BaseModal
         open={isOpen}
         setOpen={handleCancel}
@@ -402,7 +412,10 @@ const DiklatPage = () => {
         <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
           {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
+            <Heading
+              className=" flex flex-1 uppercase tracking-[2px]"
+              level={3}
+            >
               DIKLAT
             </Heading>
 
@@ -410,7 +423,7 @@ const DiklatPage = () => {
               {/* === SEARCH FILTER === */}
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
-                  onChange={handleSearchTextChange}
+                  onChange={(e) => handleSearchTextChange(e.target.value)}
                   placeholder="Cari..."
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
@@ -425,7 +438,7 @@ const DiklatPage = () => {
               </div>
 
               {/* === ACTION BUTTON === */}
-              <div className="flex flex-row items-center justify-end gap-2">
+              <div className="flex flex-row flex-wrap items-center justify-end gap-2">
                 <Button
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
@@ -447,32 +460,35 @@ const DiklatPage = () => {
           </div>
         </div>
 
-        <div className="relative w-full flex-1">
-          <SectionLoading loading={loading} />
-          <AgGridReact
-            loading={loading}
-            overlayLoadingTemplate="."
-            autoSizeStrategy={autoSizeStrategy}
-            rowData={diklatData}
-            columnDefs={colDefs}
-          />
-        </div>
-
-        <div className="flex justify-center sm:justify-end">
-          <Pagination
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalItems={totalDiklat}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            showRowsPerPage={true}
-            labels={{
-              rowsPerPage: 'Baris Per Halaman',
-              showing: 'Menampilkan',
-              of: 'dari',
-            }}
-            className="text-xs sm:text-sm"
-          />
+        <div className="relative flex max-h-[60vh] min-h-[300px] w-full flex-col overflow-hidden">
+          <div className="flex-1 overflow-x-auto overflow-y-auto">
+            <SectionLoading loading={loading} />
+            <AgGridReact
+              loading={loading}
+              overlayLoadingTemplate="."
+              autoSizeStrategy={autoSizeStrategy}
+              defaultColDef={defaultColDef}
+              domLayout="normal"
+              rowData={diklatData}
+              columnDefs={colDefs}
+            />
+          </div>
+          <div className="sticky bottom-0 mt-2 flex w-full justify-center sm:justify-end">
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={totalDiklat}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              showRowsPerPage={true}
+              labels={{
+                rowsPerPage: 'Baris Per Halaman',
+                showing: 'Menampilkan',
+                of: 'dari',
+              }}
+              className="text-xs sm:text-sm"
+            />
+          </div>
         </div>
       </div>
     </div>

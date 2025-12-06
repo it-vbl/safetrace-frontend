@@ -111,7 +111,12 @@ const DetailPesanPage = () => {
               })
             : '-';
 
-          let status = r?.status || r?.status_label || r?.status_kirim || r?.keterangan || '';
+          let status =
+            r?.status ||
+            r?.status_label ||
+            r?.status_kirim ||
+            r?.keterangan ||
+            '';
           if (!status) {
             if (r?.gagal === true) status = 'Gagal';
             else if (r?.terkirim === true) status = 'Terkirim';
@@ -178,7 +183,7 @@ const DetailPesanPage = () => {
   return (
     <div className="relative w-full bg-gray-50">
       <SectionLoading loading={loading} />
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
+      <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
 
@@ -191,9 +196,9 @@ const DetailPesanPage = () => {
             LOG
           </Heading>
 
-          <div className="mb-6 px-6">
+          <div className="mb-6 overflow-x-auto px-6">
             {/* Header Row */}
-            <div className="grid grid-cols-6 gap-4 border-b border-gray-200 pb-2 text-sm font-medium text-gray-600">
+            <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-2 text-xs font-medium text-gray-600 sm:grid-cols-3 sm:text-sm md:grid-cols-6">
               <div>Id Pesan</div>
               <div>Nama Pesan</div>
               <div>Grup Penerima</div>
@@ -203,7 +208,7 @@ const DetailPesanPage = () => {
             </div>
 
             {/* Data Row */}
-            <div className="grid grid-cols-6 gap-4 py-3 text-sm">
+            <div className="grid grid-cols-2 gap-4 py-3 text-xs sm:grid-cols-3 sm:text-sm md:grid-cols-6">
               <div className="text-gray-800">{detail?.id_pesan || '-'}</div>
               <div className="text-gray-800">{detail?.nama_pesan || '-'}</div>
               <div className="text-gray-800">
@@ -219,7 +224,7 @@ const DetailPesanPage = () => {
             </div>
 
             {/* Summary Row */}
-            <div className="mt-4 grid grid-cols-4 gap-4 border-t border-gray-200 pt-4 text-sm">
+            <div className="mt-4 grid grid-cols-2 gap-4 border-t border-gray-200 pt-4 text-xs sm:text-sm md:grid-cols-4">
               <div>
                 <span className="text-gray-600">Total Berhasil</span>
                 <div className="font-medium text-gray-800">
@@ -266,7 +271,9 @@ const DetailPesanPage = () => {
               previewContainerClassName="w-full"
             />
             <div className="mt-2 flex justify-end">
-              <span className="text-xs text-gray-500">{detail?.waktu_pengiriman || ''}</span>
+              <span className="text-xs text-gray-500">
+                {detail?.waktu_pengiriman || ''}
+              </span>
             </div>
           </div>
         </div>

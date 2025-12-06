@@ -44,7 +44,7 @@ const DetailKirimPesanPage = () => {
   return (
     <div className="relative w-full bg-gray-50">
       <SectionLoading loading={loading} />
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 p-2">
+      <div className="mx-auto flex w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
 
@@ -65,7 +65,7 @@ const DetailKirimPesanPage = () => {
               showCharCount={false}
               charCountMax={160}
             />
-            <div className="mt-2 flex justify-between text-xs text-gray-500">
+            <div className="mt-2 flex flex-col justify-between gap-1 text-xs text-gray-500 sm:flex-row sm:gap-2">
               <span>
                 Pengirim: {detail?.device_data?.nama || '-'}
                 {detail?.device_data?.no_wa
