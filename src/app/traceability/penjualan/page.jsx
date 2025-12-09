@@ -22,7 +22,7 @@ import useReferences from '../../../hooks/useReferences';
 import {
   deletePenjualan,
   exportPenjualanToExcel,
-  getListPenjualan,
+  getListPenjualanAngkutan,
 } from '../../../services/penjualan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -89,23 +89,40 @@ const PenjualanPage = () => {
         ...(end_date && { end_date }),
       };
 
-      const response = await getListPenjualan(params);
+      const response = await getListPenjualanAngkutan(params);
 
-      if (response?.status === 200) {
+      if (
+        response?.status === 200 &&
+        (response?.data?.status === 'success' || response?.data?.data)
+      ) {
         const data = response?.data?.data;
         const results = data?.results || [];
 
         const mapped = results.map((item) => ({
           id: item?.id,
-          id_penjualan: item?.id_penjualan || item?.id_penjualan || '-',
+          id_penjualan: item?.id_penjualan || '-',
           tanggal_penjualan: item?.tanggal_penjualan
             ? moment(item.tanggal_penjualan).format('DD MMMM YYYY')
             : '-',
           driver: item?.driver || '-',
-          no_polisi: item?.no_polisi || item?.no_polisi || '-',
-          jumlah_tandan: item?.jumlah_tandan || item?.jumlah_tandan || '0',
+          no_registrasi: item?.no_registrasi || '-',
+          no_polisi: item?.no_polisi || '-',
+          jumlah_tandan: item?.jumlah_tandan || '0',
           berat_timbangan: item?.berat_timbangan
             ? Number(item.berat_timbangan).toLocaleString('id-ID')
+            : '0',
+          tarra: item?.tarra
+            ? Number(item.tarra).toLocaleString('id-ID')
+            : '0',
+          t_potongan_persen: item?.t_potongan_persen || '0',
+          t_potongan_kg: item?.t_potongan_kg
+            ? Number(item.t_potongan_kg).toLocaleString('id-ID')
+            : '0',
+          berat_bersih: item?.berat_bersih
+            ? Number(item.berat_bersih).toLocaleString('id-ID')
+            : '0',
+          harga_per_kilo: item?.harga_per_kilo
+            ? Number(item.harga_per_kilo).toLocaleString('id-ID')
             : '0',
           total_penjualan: item?.total_penjualan
             ? Number(item.total_penjualan).toLocaleString('id-ID')
@@ -119,20 +136,12 @@ const PenjualanPage = () => {
         setTotalPenjualan(0);
       }
     } catch (error) {
-      // For now, use mock data if API fails
-      const mockData = Array.from({ length: 8 }, (_, i) => ({
-        id: `mock-${i + 1}`,
-        id_penjualan: 'P009201',
-        tanggal_penjualan: '25 Oktober 2025',
-        driver: 'Welly',
-        no_polisi: 'KB9194AG',
-        jumlah_tandan: '546',
-        berat_timbangan: '12.520',
-        total_penjualan: '28.790.786',
-      }));
-      setPenjualanData(mockData);
-      setTotalPenjualan(500);
-      // toast.error(error?.response?.data?.message || 'Gagal memuat data penjualan');
+      setPenjualanData([]);
+      setTotalPenjualan(0);
+      toast.error(
+        error?.response?.data?.message ||
+          'Gagal memuat data penjualan angkutan'
+      );
     } finally {
       setLoading(false);
     }
@@ -343,12 +352,20 @@ const PenjualanPage = () => {
       ) {
         toast.success('Data penjualan berhasil dihapus');
         setShowModalConfirmDeletePenjualan(false);
+        const startDate = selectedDate
+          ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+          : null;
+        const endDate = selectedDate
+          ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+          : null;
         fetchPenjualanData({
           page: currentPage,
           page_size: pageSize,
           search,
           kelompok: selectedKelompok,
           pabrik: selectedPabrik,
+          start_date: startDate,
+          end_date: endDate,
         });
       } else {
         toast.error(res?.data?.message || 'Data penjualan gagal dihapus');

@@ -12,7 +12,11 @@ import {
   PenjualanDetailKelompokCard,
   PenjualanDetailPabrikCard,
 } from '@/components/organisms/PenjualanDetail';
-import { getDetailPenjualan } from '@/services/penjualan';
+import {
+  getDetailPenjualanAngkutan,
+  getDetailPenjualanKelompokPenyetor,
+  getDetailPenjualanPabrik,
+} from '@/services/penjualan';
 
 const mockDetailPenjualan = {
   angkutan: {
@@ -86,16 +90,114 @@ const PenjualanDetailPage = () => {
       if (!id) return;
       setLoading(true);
       try {
-        const response = await getDetailPenjualan(id);
-        if (response?.status === 200) {
-          setDetailData(response?.data?.data);
+        // Fetch angkutan detail (id is angkutan ID)
+        const angkutanResponse = await getDetailPenjualanAngkutan(id);
+        if (
+          angkutanResponse?.status === 200 &&
+          (angkutanResponse?.data?.status === 'success' ||
+            angkutanResponse?.data?.data)
+        ) {
+          const angkutanData =
+            angkutanResponse?.data?.data || angkutanResponse?.data;
+
+          let kelompokTaniData = [];
+          let pabrikData = null;
+
+          // Fetch kelompok penyetor using id_penjualan from angkutan
+          if (angkutanData?.id_penjualan) {
+            try {
+              const kelompokPenyetorResponse =
+                await getDetailPenjualanKelompokPenyetor(
+                  angkutanData.id_penjualan
+                );
+              if (
+                kelompokPenyetorResponse?.status === 200 &&
+                (kelompokPenyetorResponse?.data?.status === 'success' ||
+                  kelompokPenyetorResponse?.data?.data)
+              ) {
+                const kelompokPenyetorRaw =
+                  kelompokPenyetorResponse?.data?.data ||
+                  kelompokPenyetorResponse?.data;
+
+                // Handle both array and single object responses
+                const kelompokPenyetorArray = Array.isArray(kelompokPenyetorRaw)
+                  ? kelompokPenyetorRaw
+                  : [kelompokPenyetorRaw];
+
+                // Transform to match card component structure
+                kelompokTaniData = kelompokPenyetorArray.map((item) => ({
+                  id: item.id,
+                  kelompok_penyetor: {
+                    nama: item.nama_kelompok,
+                  },
+                  anggota_petani: (item.anggota_petani || []).map((petani) => ({
+                    id: petani.id,
+                    nama: petani.nama,
+                  })),
+                }));
+              }
+            } catch (error) {
+              console.error('Failed to fetch kelompok penyetor:', error);
+            }
+          }
+
+          // Fetch pabrik detail using pabrik ID from angkutan
+          // Always call the pabrik detail endpoint if pabrik ID exists
+          if (angkutanData?.pabrik) {
+            try {
+              const pabrikResponse = await getDetailPenjualanPabrik(
+                angkutanData.pabrik
+              );
+              if (
+                pabrikResponse?.status === 200 &&
+                (pabrikResponse?.data?.status === 'success' ||
+                  pabrikResponse?.data?.data)
+              ) {
+                const pabrikRaw =
+                  pabrikResponse?.data?.data || pabrikResponse?.data;
+                pabrikData = {
+                  nama: pabrikRaw.nama,
+                  pabrik_penerima: pabrikRaw.nama,
+                  provinsi_label: pabrikRaw.provinsi_label,
+                  kabupaten_label: pabrikRaw.kabupaten_label,
+                  kecamatan_label: pabrikRaw.kecamatan_label,
+                  provinsi: pabrikRaw.provinsi,
+                  kabupaten: pabrikRaw.kabupaten,
+                  kecamatan: pabrikRaw.kecamatan,
+                  alamat: pabrikRaw.alamat,
+                };
+              }
+            } catch (error) {
+              console.error('Failed to fetch pabrik:', error);
+            }
+          }
+
+          // Set the transformed data
+          setDetailData({
+            angkutan: {
+              tanggal_penjualan: angkutanData.tanggal_penjualan,
+              driver: angkutanData.driver,
+              no_registrasi: angkutanData.no_registrasi,
+              no_polisi: angkutanData.no_polisi,
+              jumlah_tandan: angkutanData.jumlah_tandan,
+              berat_timbangan: angkutanData.berat_timbangan,
+              tarra: angkutanData.tarra,
+              t_potongan_persen: angkutanData.t_potongan_persen,
+              t_potongan_kg: angkutanData.t_potongan_kg,
+              berat_bersih: angkutanData.berat_bersih,
+              harga_per_kilo: angkutanData.harga_per_kilo,
+              total_penjualan: angkutanData.total_penjualan,
+            },
+            kelompok_tani: kelompokTaniData,
+            pabrik: pabrikData,
+          });
         } else {
           throw new Error('Invalid response format');
         }
       } catch (error) {
         console.error('Failed to fetch penjualan detail:', error);
-        toast.error('Gagal memuat detail penjualan, menampilkan data contoh.');
-        setDetailData(mockDetailPenjualan);
+        toast.error('Gagal memuat detail penjualan');
+        setDetailData(null);
       } finally {
         setLoading(false);
       }
@@ -106,7 +208,8 @@ const PenjualanDetailPage = () => {
 
   const handleEditData = () => {
     if (!id) return;
-    router.push(`/traceability/penjualan/tambah?idPenjualan=${id}`);
+    // Redirect to edit page with angkutan ID
+    router.push(`/traceability/penjualan/${id}/edit`);
   };
 
   const handleTambahPenjualan = () => {

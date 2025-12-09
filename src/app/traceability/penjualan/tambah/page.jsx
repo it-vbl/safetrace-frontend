@@ -1,6 +1,7 @@
 'use client';
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
@@ -8,7 +9,11 @@ import Stepper from '@/components/molecules/Stepper';
 import DataAngkutan from '@/components/organisms/PenjualanForm/DataAngkutan';
 import DataKelompokTani from '@/components/organisms/PenjualanForm/DataKelompokTani';
 import DataPabrik from '@/components/organisms/PenjualanForm/DataPabrik';
-import { getDetailPenjualan } from '@/services/penjualan';
+import {
+  createPenjualanAngkutan,
+  createPenjualanPabrik,
+  getDetailPenjualan,
+} from '@/services/penjualan';
 
 const TambahPenjualanContent = () => {
   const router = useRouter();
@@ -38,6 +43,7 @@ const TambahPenjualanContent = () => {
     kelompokTani: null,
     pabrik: null,
   });
+  const [createdAngkutanId, setCreatedAngkutanId] = useState(null);
 
   // Fetch penjualan data and determine step when idPenjualan exists
   useEffect(() => {
@@ -110,28 +116,102 @@ const TambahPenjualanContent = () => {
     try {
       // Store form data for current step
       if (currentStep === 1) {
-        setFormData((prev) => ({ ...prev, angkutan: stepData }));
-        // TODO: Save angkutan data to API
-        // For now, just proceed to next step
-        setCompletedSteps((prev) => [...prev, 1]);
-        setCurrentStep(2);
-        setLastStep(2);
+        // Check if we're editing existing data or creating new
+        const existingAngkutan =
+          formData.angkutan?.id || penjualanData?.angkutan?.id;
+
+        // Only create if it's a new record
+        if (!existingAngkutan) {
+          // Prepare payload for API - convert string numbers to proper numbers
+          const payload = {
+            tanggal_penjualan: stepData.tanggal_penjualan,
+            driver: stepData.driver,
+            no_registrasi: stepData.no_registrasi,
+            no_polisi: stepData.no_polisi,
+            jumlah_tandan: Number(stepData.jumlah_tandan),
+            berat_timbangan: parseFloat(stepData.berat_timbangan),
+            tarra: parseFloat(stepData.tarra),
+            t_potongan_persen: parseFloat(stepData.t_potongan_persen),
+            t_potongan_kg: parseFloat(stepData.t_potongan_kg),
+            berat_bersih: parseFloat(stepData.berat_bersih),
+            harga_per_kilo: parseFloat(stepData.harga_per_kilo),
+            total_penjualan: parseFloat(stepData.total_penjualan),
+          };
+
+          // Save angkutan data to API
+          const response = await createPenjualanAngkutan(payload);
+
+          if (
+            response?.status === 200 ||
+            response?.status === 201 ||
+            response?.data?.status === 'success'
+          ) {
+            const createdData = response?.data?.data;
+            // Store the created ID for potential use in subsequent steps
+            if (createdData?.id) {
+              toast.success('Data angkutan berhasil disimpan');
+              // Redirect to edit page with angkutan id as URL param and query param for DataKelompokTani
+              router.replace(
+                `/traceability/penjualan/${createdData.id}/edit?idAngkutan=${createdData.id}`
+              );
+              return; // Exit early to prevent state updates after redirect
+            }
+            // Fallback if no ID (shouldn't happen)
+            toast.error('ID angkutan tidak ditemukan dalam response');
+          } else {
+            toast.error(
+              response?.data?.message || 'Gagal menyimpan data angkutan'
+            );
+          }
+        } else {
+          // Editing existing data - just update local state and proceed
+          // TODO: Add update endpoint integration when needed
+          setFormData((prev) => ({ ...prev, angkutan: stepData }));
+          toast.success('Data angkutan berhasil diperbarui');
+          setCompletedSteps((prev) => [...prev, 1]);
+          setCurrentStep(2);
+          setLastStep(2);
+        }
       } else if (currentStep === 2) {
+        // Data kelompok tani is already saved via API in DataKelompokTani component
         setFormData((prev) => ({ ...prev, kelompokTani: stepData }));
-        // TODO: Save kelompok tani data to API
         setCompletedSteps((prev) => [...prev, 2]);
         setCurrentStep(3);
         setLastStep(3);
       } else if (currentStep === 3) {
-        setFormData((prev) => ({ ...prev, pabrik: stepData }));
-        // TODO: Save pabrik data and finalize penjualan
-        setCompletedSteps((prev) => [...prev, 3]);
-        // Redirect to penjualan list after completion
-        router.push('/traceability/penjualan');
-        return;
+        // Prepare payload for API - map pabrik_penerima to nama and convert IDs to numbers
+        const payload = {
+          nama: stepData.pabrik_penerima,
+          provinsi: Number(stepData.provinsi),
+          kabupaten: Number(stepData.kabupaten),
+          kecamatan: Number(stepData.kecamatan),
+          alamat: stepData.alamat,
+        };
+
+        // Save pabrik data to API
+        const response = await createPenjualanPabrik(payload);
+
+        if (
+          response?.status === 200 ||
+          response?.status === 201 ||
+          response?.data?.status === 'success'
+        ) {
+          toast.success('Data pabrik berhasil disimpan');
+          setFormData((prev) => ({ ...prev, pabrik: stepData }));
+          setCompletedSteps((prev) => [...prev, 3]);
+          // Redirect to penjualan list after completion
+          router.push('/traceability/penjualan');
+          return;
+        } else {
+          toast.error(response?.data?.message || 'Gagal menyimpan data pabrik');
+        }
       }
     } catch (error) {
       console.error('Error in step:', error);
+      toast.error(
+        error?.response?.data?.message ||
+          'Terjadi kesalahan saat menyimpan data'
+      );
     } finally {
       setIsSubmitting(false);
     }

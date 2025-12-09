@@ -57,11 +57,7 @@ export const getKelompokName = (kelompok) => {
 
 export const getKelompokLink = (kelompok) => {
   if (!kelompok || typeof kelompok === 'string') return null;
-  return (
-    kelompok.href ||
-    kelompok.url ||
-    null
-  );
+  return kelompok.href || kelompok.url || null;
 };
 
 export const getAnggotaNames = (anggotaList = []) => {
@@ -86,3 +82,9 @@ export const getAnggotaNames = (anggotaList = []) => {
   return names.length > 0 ? names.join(', ') : '-';
 };
 
+export const getPetaniLink = (anggota) => {
+  if (!anggota || typeof anggota === 'string') return null;
+  const petaniId = anggota.id_petani || anggota.id;
+  if (!petaniId) return null;
+  return `/traceability/petani/${petaniId}`;
+};

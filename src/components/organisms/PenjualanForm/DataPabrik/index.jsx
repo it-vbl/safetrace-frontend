@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -7,6 +7,7 @@ import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useWilayah from '@/hooks/useWilayah';
+import { getListPabrik } from '@/services/penjualan';
 
 const DataPabrik = ({
   pabrikData,
@@ -24,6 +25,12 @@ const DataPabrik = ({
     fetchListKecamatan,
   } = useWilayah();
 
+  const [pabrikList, setPabrikList] = useState([]);
+  const [pabrikOptions, setPabrikOptions] = useState([]);
+  const [isLoadingPabrik, setIsLoadingPabrik] = useState(false);
+  const [selectedPabrikId, setSelectedPabrikId] = useState(null);
+  const [isCustomPabrik, setIsCustomPabrik] = useState(false);
+
   const validationSchema = Yup.object().shape({
     pabrik_penerima: Yup.string().required('Pabrik Penerima harus diisi'),
     provinsi: Yup.string().required('Provinsi harus diisi'),
@@ -34,7 +41,7 @@ const DataPabrik = ({
 
   const formik = useFormik({
     initialValues: {
-      pabrik_penerima: pabrikData?.pabrik_penerima || '',
+      pabrik_penerima: pabrikData?.pabrik_penerima || pabrikData?.nama || '',
       provinsi: pabrikData?.provinsi || '',
       kabupaten: pabrikData?.kabupaten || '',
       kecamatan: pabrikData?.kecamatan || '',
@@ -43,9 +50,115 @@ const DataPabrik = ({
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      await onNext(values);
+      // Extract real pabrik ID (not custom temp ID)
+      const realPabrikId =
+        selectedPabrikId && !selectedPabrikId.toString().startsWith('custom_')
+          ? Number(selectedPabrikId)
+          : null;
+
+      await onNext({
+        ...values,
+        pabrik_id: realPabrikId,
+        isCustomPabrik:
+          isCustomPabrik ||
+          (selectedPabrikId &&
+            selectedPabrikId.toString().startsWith('custom_')),
+      });
     },
   });
+
+  // Fetch pabrik list on mount
+  useEffect(() => {
+    const fetchPabrikList = async () => {
+      setIsLoadingPabrik(true);
+      try {
+        const response = await getListPabrik();
+        if (
+          response?.status === 200 &&
+          (response?.data?.status === 'success' || response?.data?.data)
+        ) {
+          const data =
+            response?.data?.data?.results || response?.data?.results || [];
+          setPabrikList(data);
+
+          // Transform to options format
+          const options = data.map((pabrik) => ({
+            value: pabrik.id,
+            label: pabrik.nama,
+          }));
+          setPabrikOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching pabrik list:', error);
+      } finally {
+        setIsLoadingPabrik(false);
+      }
+    };
+
+    fetchPabrikList();
+  }, []);
+
+  // Handle pabrik selection
+  const handlePabrikChange = (e) => {
+    const selectedId = e.target.value;
+    setSelectedPabrikId(selectedId);
+
+    // Check if it's a custom pabrik (starts with "custom_")
+    if (selectedId && selectedId.toString().startsWith('custom_')) {
+      setIsCustomPabrik(true);
+      // Don't clear the form, just keep the custom name
+      return;
+    }
+
+    setIsCustomPabrik(false);
+
+    if (selectedId) {
+      // Find selected pabrik from list
+      const selectedPabrik = pabrikList.find(
+        (p) => p.id === Number(selectedId)
+      );
+      if (selectedPabrik) {
+        // Prefill form with selected pabrik data
+        formik.setValues({
+          pabrik_penerima: selectedPabrik.nama,
+          provinsi: String(selectedPabrik.provinsi),
+          kabupaten: String(selectedPabrik.kabupaten),
+          kecamatan: String(selectedPabrik.kecamatan),
+          alamat: selectedPabrik.alamat || '',
+        });
+
+        // Fetch dependent wilayah data
+        if (selectedPabrik.provinsi) {
+          fetchListKota(selectedPabrik.provinsi);
+        }
+        if (selectedPabrik.kabupaten) {
+          fetchListKecamatan(selectedPabrik.kabupaten);
+        }
+      }
+    } else {
+      // Clear form if no selection
+      setIsCustomPabrik(false);
+      formik.setFieldValue('pabrik_penerima', '');
+      formik.setFieldValue('provinsi', '');
+      formik.setFieldValue('kabupaten', '');
+      formik.setFieldValue('kecamatan', '');
+      formik.setFieldValue('alamat', '');
+    }
+  };
+
+  // Handle custom pabrik creation via allowAddOption
+  const handleAddCustomPabrik = (customName) => {
+    setIsCustomPabrik(true);
+    setSelectedPabrikId(null);
+    formik.setFieldValue('pabrik_penerima', customName);
+
+    // Add custom pabrik to options temporarily so Select can display it
+    // Use a temporary ID that won't conflict with real IDs
+    const tempId = `custom_${Date.now()}`;
+    setPabrikOptions((prev) => [...prev, { value: tempId, label: customName }]);
+    setSelectedPabrikId(tempId);
+    // User needs to fill the rest of the fields manually
+  };
 
   // Fetch provinsi on mount
   useEffect(() => {
@@ -78,13 +191,28 @@ const DataPabrik = ({
   // Update form values when pabrikData changes
   useEffect(() => {
     if (pabrikData) {
+      const pabrikName = pabrikData.pabrik_penerima || pabrikData.nama || '';
+      const pabrikId = pabrikData.id || pabrikData.pabrik_id;
+
       formik.setValues({
-        pabrik_penerima: pabrikData.pabrik_penerima || '',
-        provinsi: pabrikData.provinsi || '',
-        kabupaten: pabrikData.kabupaten || '',
-        kecamatan: pabrikData.kecamatan || '',
+        pabrik_penerima: pabrikName,
+        provinsi: String(pabrikData.provinsi || ''),
+        kabupaten: String(pabrikData.kabupaten || ''),
+        kecamatan: String(pabrikData.kecamatan || ''),
         alamat: pabrikData.alamat || '',
       });
+
+      // If pabrikData has an id, try to match it with pabrikList
+      if (pabrikId && pabrikList.length > 0) {
+        const matchedPabrik = pabrikList.find((p) => p.id === Number(pabrikId));
+        if (matchedPabrik) {
+          setSelectedPabrikId(Number(pabrikId));
+          setIsCustomPabrik(false);
+        } else {
+          setSelectedPabrikId(null);
+          setIsCustomPabrik(true);
+        }
+      }
 
       // Fetch dependent data if values exist
       if (pabrikData.provinsi) {
@@ -94,7 +222,7 @@ const DataPabrik = ({
         fetchListKecamatan(pabrikData.kabupaten);
       }
     }
-  }, [pabrikData]);
+  }, [pabrikData, pabrikList]);
 
   const handleSubmit = async () => {
     const errors = await formik.validateForm();
@@ -103,6 +231,12 @@ const DataPabrik = ({
     }
   };
 
+  // Check if an existing pabrik (not custom) is selected
+  const isExistingPabrikSelected =
+    selectedPabrikId &&
+    !selectedPabrikId.toString().startsWith('custom_') &&
+    !isCustomPabrik;
+
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-gray-300 bg-white p-6">
@@ -110,16 +244,31 @@ const DataPabrik = ({
 
         {/* Row 1 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
-          <InputText
+          <Select
             label="Pabrik Penerima"
             name="pabrik_penerima"
-            placeholder="Masukan Pabrik Penerima"
-            value={formik.values.pabrik_penerima}
-            onChange={formik.handleChange}
+            placeholder="Pilih atau tambah Pabrik Penerima"
+            options={pabrikOptions}
+            value={selectedPabrikId ? String(selectedPabrikId) : ''}
+            onChange={handlePabrikChange}
             onBlur={formik.handleBlur}
             errors={formik.errors}
             touched={formik.touched}
             isRequired
+            showSearchBar={true}
+            allowAddOption={{
+              visible: true,
+              placeholder: 'Masukan nama pabrik baru',
+              isLoading: isLoadingPabrik,
+              onSubmitOption: handleAddCustomPabrik,
+              addButtonText: 'Tambah Pabrik Baru',
+              cancelButtonText: 'Batalkan',
+              applyButtonText: 'Terapkan',
+              validationSchema: Yup.string()
+                .required('Nama pabrik harus diisi')
+                .min(2, 'Nama pabrik minimal 2 karakter'),
+              maxLength: 255,
+            }}
           />
           <Select
             label="Provinsi"
@@ -137,6 +286,7 @@ const DataPabrik = ({
             touched={formik.touched}
             isRequired
             showSearchBar={true}
+            disabled={isExistingPabrikSelected}
           />
           <Select
             label="Kabupaten"
@@ -152,7 +302,7 @@ const DataPabrik = ({
             errors={formik.errors}
             touched={formik.touched}
             isRequired
-            disabled={!formik.values.provinsi}
+            disabled={!formik.values.provinsi || isExistingPabrikSelected}
             showSearchBar={true}
           />
         </div>
@@ -170,7 +320,7 @@ const DataPabrik = ({
             errors={formik.errors}
             touched={formik.touched}
             isRequired
-            disabled={!formik.values.kabupaten}
+            disabled={!formik.values.kabupaten || isExistingPabrikSelected}
             showSearchBar={true}
           />
           <div className="sm:col-span-1 lg:col-span-2">
@@ -184,6 +334,7 @@ const DataPabrik = ({
               errors={formik.errors}
               touched={formik.touched}
               isRequired
+              disabled={isExistingPabrikSelected}
             />
           </div>
         </div>
@@ -212,4 +363,3 @@ const DataPabrik = ({
 };
 
 export default DataPabrik;
-
