@@ -21,6 +21,7 @@ const ProfilePopup = ({ children }) => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const popupRef = useRef(null);
   const triggerRef = useRef(null);
+  const [fullName, setFullName] = useState('');
 
   useTouchOutside(popupRef, () => setIsOpen(false));
   useEffect(() => {
@@ -113,6 +114,11 @@ const ProfilePopup = ({ children }) => {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const name = Cookies.get('fullName');
+    if (name) setFullName(name);
+  }, []);
+
   return (
     <>
       <div className="relative" ref={triggerRef} onClick={handleTriggerClick}>
@@ -127,6 +133,9 @@ const ProfilePopup = ({ children }) => {
                 right: `${popupPosition.right}px`,
               }}
             >
+              <div className="block border-b border-gray-200 px-4 py-2 text-sm font-semibold text-gray-800 md:hidden">
+                {fullName || 'Pengguna'}
+              </div>
               <div className="py-1">
                 <button
                   onClick={handleUsersClick}

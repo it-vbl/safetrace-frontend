@@ -199,98 +199,103 @@ const PesanBaruKirimPesanPage = () => {
   };
 
   return (
-    <div className="relative w-full bg-gray-50">
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
-        {/* Breadcrumb */}
-        <BreadcrumbDetail items={breadcrumbItems} />
+    <div className="w-full">
+      <div className="relative w-full bg-gray-50">
+        <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
+          {/* Breadcrumb */}
+          <BreadcrumbDetail items={breadcrumbItems} />
 
-        {/* DETAIL Card */}
-        <div className="rounded-[4px] border border-gray-200 bg-white">
-          <Heading
-            level={3}
-            className="mb-4 mt-6 px-6 text-lg font-semibold text-gray-800"
-          >
-            DETAIL
-          </Heading>
+          {/* DETAIL Card */}
+          <div className="rounded-[4px] border border-gray-200 bg-white">
+            <Heading
+              level={3}
+              className="mb-4 mt-6 px-6 text-lg font-semibold text-gray-800"
+            >
+              DETAIL
+            </Heading>
 
-          <div className="mb-6 space-y-4 px-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="flex flex-col gap-1">
-                <Select
-                  label="No. Pengirim"
-                  name="no_pengirim"
-                  placeholder={
-                    loadingDevices
-                      ? 'Memuat perangkat...'
-                      : 'Pilih device WhatsApp'
-                  }
-                  options={deviceOptions}
-                  value={noPengirim}
-                  onChange={handleSelectChange}
-                  disabled={loadingDevices}
-                />
-                <span className="text-xs text-gray-400">
-                  Pilih device WhatsApp yang akan digunakan untuk mengirim pesan
-                </span>
-              </div>
+            <div className="mb-6 space-y-4 px-6">
+              <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+                <div className="flex flex-col gap-1">
+                  <Select
+                    label="No. Pengirim"
+                    name="no_pengirim"
+                    placeholder={
+                      loadingDevices
+                        ? 'Memuat perangkat...'
+                        : 'Pilih device WhatsApp'
+                    }
+                    options={deviceOptions}
+                    value={noPengirim}
+                    onChange={handleSelectChange}
+                    disabled={loadingDevices}
+                  />
+                  <span className="text-xs text-gray-400">
+                    Pilih device WhatsApp yang akan digunakan untuk mengirim
+                    pesan
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <Select
-                  label="No. Penerima"
-                  name="no_penerima"
-                  placeholder={
-                    loadingKontak ? 'Memuat kontak...' : 'Pilih kontak penerima'
-                  }
-                  options={kontakOptions}
-                  value={noPenerima}
-                  onChange={handleSelectChange}
-                  disabled={loadingKontak}
-                  showSearchBar={true}
-                />
+                <div className="flex w-full flex-col gap-1">
+                  <Select
+                    label="No. Penerima"
+                    name="no_penerima"
+                    placeholder={
+                      loadingKontak
+                        ? 'Memuat kontak...'
+                        : 'Pilih kontak penerima'
+                    }
+                    options={kontakOptions}
+                    value={noPenerima}
+                    onChange={handleSelectChange}
+                    disabled={loadingKontak}
+                    showSearchBar={true}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* PESAN Card */}
-        <div className="rounded-[4px] border border-gray-200 bg-white">
-          <Heading
-            level={3}
-            className="mb-4 mt-6 px-6 text-lg font-semibold text-gray-800"
-          >
-            PESAN
-          </Heading>
+          {/* PESAN Card */}
+          <div className="rounded-[4px] border border-gray-200 bg-white">
+            <Heading
+              level={3}
+              className="mb-4 mt-6 px-6 text-lg font-semibold text-gray-800"
+            >
+              PESAN
+            </Heading>
 
-          <div className="mb-6   px-6">
-            <InputMessage
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              showCharCount
-              charCountMax={160}
-            />
+            <div className="mb-6 px-6">
+              <InputMessage
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                showCharCount
+                charCountMax={160}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <Button type="button" variant="danger" onClick={handleCancel}>
-            Batalkan
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSend}
-            disabled={isSubmitting}
-            className={isSubmitting ? 'opacity-75' : ''}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                Mengirim...
-              </div>
-            ) : (
-              'Kirim Pesan'
-            )}
-          </Button>
+          {/* Actions */}
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-3">
+            <Button type="button" variant="danger" onClick={handleCancel}>
+              Batalkan
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSend}
+              disabled={isSubmitting}
+              className={isSubmitting ? 'mb-6 opacity-75' : ''}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  Mengirim...
+                </div>
+              ) : (
+                'Kirim Pesan'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

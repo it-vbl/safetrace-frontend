@@ -188,7 +188,7 @@ const GrupDetailPage = () => {
 
   return (
     <div className="relative w-full bg-gray-50">
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
+      <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
 
@@ -197,7 +197,7 @@ const GrupDetailPage = () => {
           <div className="overflow-hidden rounded-[4px] border border-gray-200 bg-white">
             {/* Header */}
             <div className="mt-6 px-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                 <Heading
                   level={3}
                   className="text-lg font-semibold text-gray-800"
@@ -261,43 +261,45 @@ const GrupDetailPage = () => {
                     </span>
                   )}
                   {!loading && !error && members.length > 0 && (
-                    <div className="ag-theme-quartz relative w-full">
-                      <AgGridReact
-                        loading={loading}
-                        overlayLoadingTemplate="."
-                        autoSizeStrategy={autoSizeStrategy}
-                        domLayout="autoHeight"
-                        rowHeight={40}
-                        defaultColDef={defaultColDef}
-                        rowData={members
-                          .slice(
-                            (membersPage - 1) * membersPageSize,
-                            (membersPage - 1) * membersPageSize +
-                              membersPageSize
-                          )
-                          .map((m) => ({
-                            id: m.id,
-                            nama: m.name ?? m.nama ?? '-',
-                            nomor_wa: m.phone ?? m.no_wa ?? '-',
-                          }))}
-                        columnDefs={colDefs}
-                      />
-                      <div className="mt-3 flex justify-end">
-                        <Pagination
-                          currentPage={membersPage}
-                          pageSize={membersPageSize}
-                          totalItems={members.length}
-                          onPageChange={(page) => setMembersPage(page)}
-                          onPageSizeChange={(size) => {
-                            setMembersPageSize(size);
-                            setMembersPage(1);
-                          }}
-                          labels={{
-                            rowsPerPage: 'Baris per halaman',
-                            showing: 'Menampilkan',
-                            of: 'dari',
-                          }}
+                    <div className="ag-theme-quartz relative w-full overflow-x-auto">
+                      <div className="min-w-[320px]">
+                        <AgGridReact
+                          loading={loading}
+                          overlayLoadingTemplate="."
+                          autoSizeStrategy={autoSizeStrategy}
+                          domLayout="autoHeight"
+                          rowHeight={36}
+                          defaultColDef={defaultColDef}
+                          rowData={members
+                            .slice(
+                              (membersPage - 1) * membersPageSize,
+                              (membersPage - 1) * membersPageSize +
+                                membersPageSize
+                            )
+                            .map((m) => ({
+                              id: m.id,
+                              nama: m.name ?? m.nama ?? '-',
+                              nomor_wa: m.phone ?? m.no_wa ?? '-',
+                            }))}
+                          columnDefs={colDefs}
                         />
+                        <div className="mt-3 flex justify-end">
+                          <Pagination
+                            currentPage={membersPage}
+                            pageSize={membersPageSize}
+                            totalItems={members.length}
+                            onPageChange={(page) => setMembersPage(page)}
+                            onPageSizeChange={(size) => {
+                              setMembersPageSize(size);
+                              setMembersPage(1);
+                            }}
+                            labels={{
+                              rowsPerPage: 'Baris per halaman',
+                              showing: 'Menampilkan',
+                              of: 'dari',
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}

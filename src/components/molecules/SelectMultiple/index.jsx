@@ -57,77 +57,101 @@ const SelectMultiple = ({
   }, [disabled]);
 
   // Filter out options without labels
-  const validOptions = options?.filter((option) => option.label && option.label.trim() !== '');
+  const validOptions = options?.filter(
+    (option) => option.label && option.label.trim() !== ''
+  );
   selectAll && validOptions.unshift({ label: selectAll, value: 'all' });
 
-  const selectedOptions = validOptions.filter((option) => selectedValues.includes(option.value));
+  const selectedOptions = validOptions.filter((option) =>
+    selectedValues.includes(option.value)
+  );
 
   const handleOptionChange = useCallback(
     (optionValue) => {
-      setSelectedValues((prevValues) => {
-        let updatedValues;
+      let updatedValues;
 
-        if (optionValue === 'all') {
-          if (prevValues.length === validOptions.length - 1) {
-            // Remove all values
-            updatedValues = [];
-          } else {
-            // Fill all values
-            updatedValues = validOptions.filter((item) => item.value !== 'all').map((item) => item.value);
-          }
-        } else if (prevValues.includes(optionValue)) {
-          // Remove selected value
-          updatedValues = prevValues.filter((v) => v !== optionValue);
+      if (optionValue === 'all') {
+        if (selectedValues.length === validOptions.length - 1) {
+          updatedValues = [];
         } else {
-          // Add selected value
-          updatedValues = [...prevValues, optionValue];
+          updatedValues = validOptions
+            .filter((item) => item.value !== 'all')
+            .map((item) => item.value);
         }
+      } else if (selectedValues.includes(optionValue)) {
+        updatedValues = selectedValues.filter((v) => v !== optionValue);
+      } else {
+        updatedValues = [...selectedValues, optionValue];
+      }
 
-        onChange({ target: { name, value: updatedValues } });
-        return updatedValues;
-      });
+      setSelectedValues(updatedValues);
+      onChange({ target: { name, value: updatedValues } });
     },
-    [onChange, name, validOptions]
+    [onChange, name, validOptions, selectedValues]
   );
 
   useEffect(() => {
     if (selectAll) {
       const selectedValuesLength = selectedValues.length;
-      const optionsLength = validOptions?.filter?.((item) => item.value !== 'all').length;
+      const optionsLength = validOptions?.filter?.(
+        (item) => item.value !== 'all'
+      ).length;
 
-      selectedValuesLength === optionsLength ? setIsSelectAll(true) : setIsSelectAll(false);
+      selectedValuesLength === optionsLength
+        ? setIsSelectAll(true)
+        : setIsSelectAll(false);
     }
   }, [selectedValues, options]);
 
   return (
-    <div className={cn(' relative flex flex-col gap-1', block && 'w-full', containerClassName)}>
+    <div
+      className={cn(
+        ' relative flex flex-col gap-1',
+        block && 'w-full',
+        containerClassName
+      )}
+    >
       {label && (
-        <Label data-testid='label-container' className=' text-[12px] font-bold text-gray-500' isRequired={isRequired}>
+        <Label
+          data-testid="label-container"
+          className=" text-[12px] font-bold text-gray-500"
+          isRequired={isRequired}
+        >
           {label}
         </Label>
       )}
-      <div className='relative ' ref={dropdownRef}>
+      <div className="relative " ref={dropdownRef}>
         <div
           aria-disabled={disabled}
           tabIndex={0}
           onClick={handleSelectFieldClick}
-          className={cn('flex h-[40px] w-full cursor-pointer items-center gap-1 rounded-[6px] border px-3 py-2', {
-            'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7': disabled,
-            'border-neutral8 hover:border-blue6': selectedValues.length > 0 && !disabled && !isError,
-            'border-neutral5 hover:border-blue6': selectedValues.length === 0 && !disabled && !isError,
-            'focus:border-blue6 focus:outline-none': !disabled && !isError,
-            'border-error5': isError,
-          }, selectClassName)}
+          className={cn(
+            'flex h-[40px] w-full cursor-pointer items-center gap-1 rounded-[6px] border px-3 py-2',
+            {
+              'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7':
+                disabled,
+              'border-neutral8 hover:border-blue6':
+                selectedValues.length > 0 && !disabled && !isError,
+              'border-neutral5 hover:border-blue6':
+                selectedValues.length === 0 && !disabled && !isError,
+              'focus:border-blue6 focus:outline-none': !disabled && !isError,
+              'border-error5': isError,
+            },
+            selectClassName
+          )}
         >
-          <div className='hide-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto'>
+          <div className="hide-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto">
             {selectedValues.length > 0 ? (
-              <div className='flex flex-row flex-nowrap overflow-x-auto gap-1 hide-scrollbar'>
+              <div className="hide-scrollbar flex flex-row flex-nowrap gap-1 overflow-x-auto">
                 {selectedOptions.map((option) => (
                   <div
                     key={option.value}
-                    className='flex items-center gap-1 bg-neutral2 rounded-[4px] bg-gray-100 px-2 py-1'
+                    className="bg-neutral2 flex items-center gap-1 rounded-[4px] bg-gray-100 px-2 py-1"
                   >
-                    <Paragraph level={4} className='text-xs truncate max-w-[100px]'>
+                    <Paragraph
+                      level={4}
+                      className="max-w-[100px] truncate text-xs"
+                    >
                       {option.label}
                     </Paragraph>
                     <div
@@ -135,7 +159,7 @@ const SelectMultiple = ({
                         e.stopPropagation();
                         handleOptionChange(option.value);
                       }}
-                      className='cursor-pointer hover:bg-neutral3 rounded p-0.5'
+                      className="cursor-pointer rounded p-0.5 hover:bg-neutral3"
                     >
                       <Close size={12} />
                     </div>
@@ -154,24 +178,30 @@ const SelectMultiple = ({
               </Paragraph>
             )}
           </div>
-          <div className='flex flex-row items-center gap-2'>
+          <div className="flex flex-row items-center gap-2">
             {isError && <ErrorOutline />}
             <ExpandMore
               className={cn({ 'rotate-180': isDropdownOpen })}
-              color={disabled ? theme?.colors?.neutral7 : theme?.colors?.neutral8}
+              color={
+                disabled ? theme?.colors?.neutral7 : theme?.colors?.neutral8
+              }
             />
           </div>
         </div>
 
         {isDropdownOpen && (
-          <div className='absolute left-0 top-full z-10 mt-1 max-h-[200px] w-full overflow-y-auto rounded-[6px] bg-white p-2 shadow-sm'>
+          <div className="absolute left-0 top-full z-10 mt-1 max-h-[200px] w-full overflow-y-auto rounded-[6px] bg-white p-2 shadow-sm">
             {validOptions?.length > 0 ? (
               validOptions?.map((option) => (
                 <Cascader
                   key={option.value}
                   onClick={() => handleOptionChange(option?.value)}
                   value={option.value}
-                  isSelected={option.value === 'all' ? isSelectAll : selectedValues?.includes(option.value)}
+                  isSelected={
+                    option.value === 'all'
+                      ? isSelectAll
+                      : selectedValues?.includes(option.value)
+                  }
                   checkbox={withCheckbox}
                 >
                   {option.label}

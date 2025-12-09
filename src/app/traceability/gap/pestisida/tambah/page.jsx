@@ -160,189 +160,201 @@ function TambahPestisidaContent() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
-      <BreadcrumbDetail items={crumbs} />
+    <div className="relative w-full">
+      <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
+        <BreadcrumbDetail items={crumbs} />
 
-      <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
-        <div className="rounded-[4px] border border-gray-300 bg-white">
-          <div className="border-b border-gray-200 p-4">
-            <Heading level={3} className="text-sm text-gray-600 sm:text-base">
-              PENGGUNAAN PESTISIDA
-            </Heading>
-          </div>
-
-          <div className="p-4 sm:p-6">
-            <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-6">
-              <Select
-                label="Tahun"
-                name="tahun"
-                placeholder="Pilih Tahun"
-                options={yearOptions}
-                value={formik.values.tahun}
-                onChange={(e) => formik.setFieldValue('tahun', e.target.value)}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-              />
+        <form
+          onSubmit={formik.handleSubmit}
+          className="mb-6 space-y-4 sm:space-y-6"
+        >
+          <div className="rounded-[4px] border border-gray-300 bg-white">
+            <div className="border-b border-gray-200 p-4">
+              <Heading level={3} className="text-sm text-gray-600 sm:text-base">
+                PENGGUNAAN PESTISIDA
+              </Heading>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-              {/* Semester 1 */}
-              <div className="rounded border border-gray-200 bg-gray-50 p-4">
-                <div className="mb-2 text-sm font-semibold">Semester 1</div>
-                <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-2">
-                  <Select
-                    label="(Sistemik) Waktu Aplikasi"
-                    name="s1_sistemik_waktu"
-                    placeholder="Pilih bulan"
-                    options={MONTH_OPTIONS}
-                    value={formik.values.s1_sistemik_waktu}
-                    onChange={(e) =>
-                      formik.setFieldValue(
-                        's1_sistemik_waktu',
-                        Number(e.target.value)
-                      )
-                    }
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    isRequired
-                  />
-                  <InputText
-                    label="(Sistemik) Jumlah"
-                    name="s1_sistemik_jumlah"
-                    placeholder="0"
-                    value={formik.values.s1_sistemik_jumlah}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    suffix="Liter"
-                    type="string"
-                    formatter={formatLiterInput}
-                    isRequired
-                  />
-                  <Select
-                    label="(Kontak) Waktu Aplikasi"
-                    name="s1_kontak_waktu"
-                    placeholder="Pilih bulan"
-                    options={MONTH_OPTIONS}
-                    value={formik.values.s1_kontak_waktu}
-                    onChange={(e) =>
-                      formik.setFieldValue(
-                        's1_kontak_waktu',
-                        Number(e.target.value)
-                      )
-                    }
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    isRequired
-                  />
-                  <InputText
-                    label="(Kontak) Jumlah"
-                    name="s1_kontak_jumlah"
-                    placeholder="0"
-                    value={formik.values.s1_kontak_jumlah}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    suffix="Liter"
-                    type="string"
-                    formatter={formatLiterInput}
-                    isRequired
-                  />
-                </div>
+            <div className="p-4 sm:p-6">
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-6">
+                <Select
+                  label="Tahun"
+                  name="tahun"
+                  placeholder="Pilih Tahun"
+                  options={yearOptions}
+                  value={formik.values.tahun}
+                  onChange={(e) =>
+                    formik.setFieldValue('tahun', e.target.value)
+                  }
+                  onBlur={formik.handleBlur}
+                  errors={formik.errors}
+                  touched={formik.touched}
+                  isRequired
+                />
               </div>
 
-              {/* Semester 2 */}
-              <div className="rounded border border-gray-200 bg-gray-50 p-4">
-                <div className="mb-2 text-sm font-semibold">Semester 2</div>
-                <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-2">
-                  <Select
-                    label="(Sistemik) Waktu Aplikasi"
-                    name="s2_sistemik_waktu"
-                    placeholder="Pilih bulan"
-                    options={MONTH_OPTIONS}
-                    value={formik.values.s2_sistemik_waktu}
-                    onChange={(e) =>
-                      formik.setFieldValue(
-                        's2_sistemik_waktu',
-                        Number(e.target.value)
-                      )
-                    }
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    isRequired
-                  />
-                  <InputText
-                    label="(Sistemik) Jumlah"
-                    name="s2_sistemik_jumlah"
-                    placeholder="0"
-                    value={formik.values.s2_sistemik_jumlah}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    suffix="Liter"
-                    type="string"
-                    formatter={formatLiterInput}
-                    isRequired
-                  />
-                  <Select
-                    label="(Kontak) Waktu Aplikasi"
-                    name="s2_kontak_waktu"
-                    placeholder="Pilih bulan"
-                    options={MONTH_OPTIONS}
-                    value={formik.values.s2_kontak_waktu}
-                    onChange={(e) =>
-                      formik.setFieldValue(
-                        's2_kontak_waktu',
-                        Number(e.target.value)
-                      )
-                    }
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    isRequired
-                  />
-                  <InputText
-                    label="(Kontak) Jumlah"
-                    name="s2_kontak_jumlah"
-                    placeholder="0"
-                    value={formik.values.s2_kontak_jumlah}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errors={formik.errors}
-                    touched={formik.touched}
-                    suffix="Liter"
-                    type="string"
-                    formatter={formatLiterInput}
-                    isRequired
-                  />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+                {/* Semester 1 */}
+                <div className="rounded border border-gray-200 bg-gray-50 p-4">
+                  <div className="mb-2 text-sm font-semibold">Semester 1</div>
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-2">
+                    <Select
+                      label="(Sistemik) Waktu Aplikasi"
+                      name="s1_sistemik_waktu"
+                      placeholder="Pilih bulan"
+                      options={MONTH_OPTIONS}
+                      value={formik.values.s1_sistemik_waktu}
+                      onChange={(e) =>
+                        formik.setFieldValue(
+                          's1_sistemik_waktu',
+                          Number(e.target.value)
+                        )
+                      }
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      isRequired
+                    />
+                    <InputText
+                      label="(Sistemik) Jumlah"
+                      name="s1_sistemik_jumlah"
+                      placeholder="0"
+                      value={formik.values.s1_sistemik_jumlah}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      suffix="Liter"
+                      type="string"
+                      formatter={formatLiterInput}
+                      isRequired
+                    />
+                    <Select
+                      label="(Kontak) Waktu Aplikasi"
+                      name="s1_kontak_waktu"
+                      placeholder="Pilih bulan"
+                      options={MONTH_OPTIONS}
+                      value={formik.values.s1_kontak_waktu}
+                      onChange={(e) =>
+                        formik.setFieldValue(
+                          's1_kontak_waktu',
+                          Number(e.target.value)
+                        )
+                      }
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      isRequired
+                    />
+                    <InputText
+                      label="(Kontak) Jumlah"
+                      name="s1_kontak_jumlah"
+                      placeholder="0"
+                      value={formik.values.s1_kontak_jumlah}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      suffix="Liter"
+                      type="string"
+                      formatter={formatLiterInput}
+                      isRequired
+                    />
+                  </div>
+                </div>
+
+                {/* Semester 2 */}
+                <div className="rounded border border-gray-200 bg-gray-50 p-4">
+                  <div className="mb-2 text-sm font-semibold">Semester 2</div>
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-2">
+                    <Select
+                      label="(Sistemik) Waktu Aplikasi"
+                      name="s2_sistemik_waktu"
+                      placeholder="Pilih bulan"
+                      options={MONTH_OPTIONS}
+                      value={formik.values.s2_sistemik_waktu}
+                      onChange={(e) =>
+                        formik.setFieldValue(
+                          's2_sistemik_waktu',
+                          Number(e.target.value)
+                        )
+                      }
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      isRequired
+                    />
+                    <InputText
+                      label="(Sistemik) Jumlah"
+                      name="s2_sistemik_jumlah"
+                      placeholder="0"
+                      value={formik.values.s2_sistemik_jumlah}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      suffix="Liter"
+                      type="string"
+                      formatter={formatLiterInput}
+                      isRequired
+                    />
+                    <Select
+                      label="(Kontak) Waktu Aplikasi"
+                      name="s2_kontak_waktu"
+                      placeholder="Pilih bulan"
+                      options={MONTH_OPTIONS}
+                      value={formik.values.s2_kontak_waktu}
+                      onChange={(e) =>
+                        formik.setFieldValue(
+                          's2_kontak_waktu',
+                          Number(e.target.value)
+                        )
+                      }
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      isRequired
+                    />
+                    <InputText
+                      label="(Kontak) Jumlah"
+                      name="s2_kontak_jumlah"
+                      placeholder="0"
+                      value={formik.values.s2_kontak_jumlah}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errors={formik.errors}
+                      touched={formik.touched}
+                      suffix="Liter"
+                      type="string"
+                      formatter={formatLiterInput}
+                      isRequired
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="danger"
-            onClick={handleCancel}
-            disabled={isLoading}
-          >
-            Batalkan
-          </Button>
-          <Button type="submit" isLoading={isLoading}>
-            Simpan
-          </Button>
-        </div>
-      </form>
+          <div className="flex flex-col justify-end gap-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleCancel}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              Batalkan
+            </Button>
+            <Button
+              type="submit"
+              isLoading={isLoading}
+              className="w-full sm:w-auto"
+            >
+              Simpan
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

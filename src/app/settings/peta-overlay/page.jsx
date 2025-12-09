@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { PlusIcon } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
@@ -12,7 +13,12 @@ import ModalConfirmation from '@/components/molecules/ModalConfirmation';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import ModalTambahPetaOverlay from '@/components/organisms/Modal/ModalTambahPetaOverlay';
 import { useMobileScreen } from '@/hooks/useMobileScreen';
-import useStaticLayer from '@/hooks/useStaticLayer';
+import {
+  createPetaOverlay,
+  deletePetaOverlay,
+  getPetaOverlayList,
+  updatePetaOverlay,
+} from '@/services/petaOverlay';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -35,13 +41,33 @@ const PetaOverlayPage = () => {
   const [showModalDeleteConfirmation, setShowModalDeleteConfirmation] =
     useState(false);
   const [layerToDelete, setLayerToDelete] = useState(null);
+  const [showModalEdit, setShowModalEdit] = useState(false);
+  const [layerToEdit, setLayerToEdit] = useState(null);
 
-  const {
-    uploadedStaticLayers,
-    uploadedLoading,
-    addUploadedStaticLayer,
-    removeUploadedStaticLayer,
-  } = useStaticLayer();
+  const [uploadedStaticLayers, setUploadedStaticLayers] = useState([]);
+  const [uploadedLoading, setUploadedLoading] = useState(false);
+
+  const fetchList = useCallback(async () => {
+    setUploadedLoading(true);
+    try {
+      const res = await getPetaOverlayList();
+      const data = res?.data?.data || res?.data || {};
+      const results = data?.results || [];
+      setUploadedStaticLayers(results);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || 'Gagal mengambil daftar layer'
+      );
+      setUploadedStaticLayers([]);
+    } finally {
+      setUploadedLoading(false);
+    }
+  }, []);
+
+  useMemo(() => {
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDeleteLayer = useCallback((data) => {
     setLayerToDelete(data);
@@ -52,13 +78,15 @@ const PetaOverlayPage = () => {
     if (!layerToDelete) return;
 
     try {
-      await removeUploadedStaticLayer(layerToDelete.id);
+      await deletePetaOverlay(layerToDelete.id);
+      toast.success('Layer berhasil dihapus');
       setShowModalDeleteConfirmation(false);
       setLayerToDelete(null);
+      fetchList();
     } catch (error) {
-      console.error('Error deleting layer:', error);
+      toast.error(error?.response?.data?.message || 'Gagal menghapus layer');
     }
-  }, [layerToDelete, removeUploadedStaticLayer]);
+  }, [layerToDelete, fetchList]);
 
   const handleFileDownload = useCallback((fileUrl) => {
     // Open the file URL in a new tab for download
@@ -68,6 +96,11 @@ const PetaOverlayPage = () => {
   const handleViewLayer = useCallback((data) => {
     setSelectedLayerId(data.id);
     setShowModalMapPreview(true);
+  }, []);
+
+  const handleEditLayer = useCallback((data) => {
+    setLayerToEdit(data);
+    setShowModalEdit(true);
   }, []);
 
   const ActionsCellRenderer = useCallback(
@@ -82,6 +115,13 @@ const PetaOverlayPage = () => {
           </div>
           <div className="text-gray-400">|</div>
           <div
+            className="cursor-pointer text-[10px] font-bold uppercase text-blue-500 underline hover:text-blue-600 sm:text-[12px]"
+            onClick={() => handleEditLayer(e.data)}
+          >
+            EDIT
+          </div>
+          <div className="text-gray-400">|</div>
+          <div
             className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
             onClick={() => handleDeleteLayer(e.data)}
           >
@@ -90,7 +130,7 @@ const PetaOverlayPage = () => {
         </div>
       );
     },
-    [handleDeleteLayer, handleViewLayer]
+    [handleDeleteLayer, handleViewLayer, handleEditLayer]
   );
 
   const FileCellRenderer = useCallback(
@@ -113,10 +153,10 @@ const PetaOverlayPage = () => {
       field: 'actions',
       headerName: '',
       cellRenderer: ActionsCellRenderer,
-      width: 80,
-      minWidth: 128,
-      maxWidth: 128,
-      suppressSizeToFit: false,
+      width: 150,
+      minWidth: 150,
+      maxWidth: 165,
+      flex: 1,
     },
     {
       field: 'id',
@@ -169,14 +209,48 @@ const PetaOverlayPage = () => {
 
   const handleSubmitPetaOverlay = async (formData) => {
     try {
-      let payload = {
+      const payload = {
         nama: formData.nama_layer,
         geojson_file: formData.file.value,
       };
-
-      await addUploadedStaticLayer(payload);
+      const res = await createPetaOverlay(payload);
+      const status = res?.data?.status || res?.status;
+      if (status === 'success' || status === 200 || status === 201) {
+        toast.success(res?.data?.message || 'Layer berhasil dibuat');
+        setShowModalTambahPetaOverlay(false);
+        fetchList();
+      } else {
+        toast.error(res?.data?.message || 'Gagal membuat layer');
+      }
     } catch (error) {
-      console.error('Error saving peta overlay:', error);
+      toast.error(error?.response?.data?.message || 'Gagal menyimpan layer');
+      throw error;
+    }
+  };
+
+  const handleSubmitEditPetaOverlay = async (formData) => {
+    try {
+      if (!layerToEdit?.id) return;
+      const payload = {
+        nama: formData.nama_layer,
+      };
+      if (formData.file?.value && !(typeof formData.file.value === 'string')) {
+        payload.geojson_file = formData.file.value;
+      }
+      const res = await updatePetaOverlay(layerToEdit.id, payload);
+      const status = res?.data?.status || res?.status;
+      if (status === 'success' || status === 200) {
+        toast.success(res?.data?.message || 'Layer berhasil diperbarui');
+        setShowModalEdit(false);
+        setLayerToEdit(null);
+        fetchList();
+      } else {
+        toast.error(res?.data?.message || 'Gagal memperbarui layer');
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || 'Gagal menyimpan perubahan layer'
+      );
       throw error;
     }
   };
@@ -190,7 +264,7 @@ const PetaOverlayPage = () => {
             <div>
               <Heading
                 className=" flex flex-1 uppercase tracking-[2px]"
-                level={4}
+                level={3}
               >
                 LAYER PETA STATIS
               </Heading>
@@ -235,6 +309,30 @@ const PetaOverlayPage = () => {
         setOpen={setShowModalTambahPetaOverlay}
         onSubmit={handleSubmitPetaOverlay}
       />
+
+      {layerToEdit && (
+        <ModalTambahPetaOverlay
+          open={showModalEdit}
+          setOpen={setShowModalEdit}
+          onSubmit={handleSubmitEditPetaOverlay}
+          initialValues={{
+            nama_layer: layerToEdit?.nama || '',
+            file: layerToEdit?.geojson_file
+              ? {
+                  name:
+                    layerToEdit.geojson_file.split('/').pop() ||
+                    'File saat ini',
+                  size: 0,
+                  uploadDate: new Date().toISOString(),
+                  value: layerToEdit.geojson_file,
+                }
+              : null,
+          }}
+          title="EDIT LAYER STATIS"
+          requireFile={false}
+          fileUrl={layerToEdit?.geojson_file || ''}
+        />
+      )}
 
       <ModalMapPreview
         open={showModalMapPreview}

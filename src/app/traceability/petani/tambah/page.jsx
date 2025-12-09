@@ -219,12 +219,12 @@ const CreatePetaniTraceability = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
       <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <InputText
                 label="Id Petani"
                 name="id_petani"
@@ -260,7 +260,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <Select
                 label="Kelompok Tani"
                 name="kelompok_tani"
@@ -315,7 +315,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <InputText
                 label="Tempat Lahir"
                 name="tempat_lahir"
@@ -356,7 +356,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <Select
                 label="Status Pernikahan"
                 name="status_pernikahan"
@@ -399,7 +399,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
+            <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <DatePicker
                 label="Tanggal Bergabung"
                 name="tanggal_bergabung"
@@ -446,7 +446,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-3 gap-6 py-4">
+            <div className="grid grid-cols-1 gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
               <Select
                 label="Status Keanggotaan"
                 name="status_keanggotaan"
@@ -465,7 +465,7 @@ const CreatePetaniTraceability = () => {
 
         <Accordion defaultIsOpen title="LAMPIRAN IDENTITAS">
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
+            <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <Upload
                 label="KTP"
                 file={
@@ -529,10 +529,10 @@ const CreatePetaniTraceability = () => {
           </>
         </Accordion>
 
-        <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 px-4 sm:px-0">
+        <div className="mt-4 flex flex-col justify-end gap-2 px-4 sm:flex-row sm:gap-2 sm:px-0">
           <Button
             type="button"
-            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+            className="w-full bg-red-600 hover:bg-red-700 sm:w-auto"
             onClick={() => router.back()}
             isLoading={formik.isSubmitting}
           >

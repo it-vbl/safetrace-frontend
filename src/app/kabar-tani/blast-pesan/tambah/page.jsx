@@ -351,7 +351,7 @@ const PesanBaruPage = () => {
 
   return (
     <div className="relative w-full bg-gray-50">
-      <div className="mx-auto flex h-full max-w-7xl flex-col gap-6 p-2">
+      <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
 
@@ -368,7 +368,7 @@ const PesanBaruPage = () => {
 
             <div className="mb-6 space-y-4 px-6">
               {/* Device Selector */}
-              <div className="flex gap-6">
+              <div className="flex flex-col gap-4 md:flex-row md:gap-6">
                 <div className="flex w-full flex-col gap-1">
                   <Label className="text-[12px] font-bold text-gray-500">
                     Device Pengirim
@@ -405,7 +405,7 @@ const PesanBaruPage = () => {
               <RadioButton
                 label="Penerima"
                 direction="row"
-                containerClassName="flex flex-row gap-2"
+                containerClassName="flex flex-row flex-wrap gap-2"
                 value={activeTile}
                 onChangeValue={(e) => setActiveTile(e)}
                 options={[
@@ -470,7 +470,7 @@ const PesanBaruPage = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="my-6 flex justify-end gap-3">
+          <div className="my-6 flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-3">
             <Button
               type="button"
               onClick={handleCancel}

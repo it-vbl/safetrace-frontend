@@ -232,7 +232,10 @@ const LB3Page = () => {
         <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
           {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
+            <Heading
+              className=" flex flex-1 uppercase tracking-[2px]"
+              level={3}
+            >
               LIMBAH BAHAN BERBAHAYA BERACUN
             </Heading>
 

@@ -208,7 +208,7 @@ const GrupPage = () => {
       <div className="flex h-full flex-col gap-4">
         {/* Header section */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <Heading level={2} className="text-lg sm:text-xl md:text-2xl">
+          <Heading className=" flex flex-1 uppercase tracking-[2px]" level={3}>
             GRUP KONTAK
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
@@ -228,15 +228,19 @@ const GrupPage = () => {
         </div>
 
         {/* Table section */}
-        <div className="relative w-full flex-1">
+        <div className="relative w-full flex-1 overflow-x-auto">
           <SectionLoading loading={loading} />
-          <AgGridReact
-            loading={loading}
-            overlayLoadingTemplate="."
-            autoSizeStrategy={autoSizeStrategy}
-            rowData={kontakData}
-            columnDefs={colDefs}
-          />
+          <div className="min-w-[320px]">
+            <AgGridReact
+              loading={loading}
+              overlayLoadingTemplate="."
+              autoSizeStrategy={autoSizeStrategy}
+              domLayout="autoHeight"
+              rowHeight={36}
+              rowData={kontakData}
+              columnDefs={colDefs}
+            />
+          </div>
         </div>
 
         {/* Pagination section */}

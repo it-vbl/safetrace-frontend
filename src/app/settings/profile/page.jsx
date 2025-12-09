@@ -1,29 +1,28 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
-import Button from '@/components/atoms/Button';
-import BorderBottomColData from '@/components/molecules/BorderBottomColData'; // Importing the new component
-import ModalUbahDataPengguna from '@/components/organisms/Modal/ModalUbahDataPengguna'; // Importing the new modal
-import { getUserDetail, updateUserProfile } from '@/services/user';
+import BorderBottomColData from '@/components/molecules/BorderBottomColData';
+import ModalUbahDataPengguna from '@/components/organisms/Modal/ModalUbahDataPengguna';
+import { getUserProfile, updateUserProfile } from '@/services/user';
 
 const ProfilePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const id = Cookies.get('userId');
-    if (!id) return;
     (async () => {
       try {
-        const res = await getUserDetail(id);
-        if (res.status === 200) {
-          setUser(res.data?.data);
+        const res = await getUserProfile();
+        const status = res?.data?.status || res?.status;
+        if (status === 'success' || status === 200) {
+          setUser(res?.data?.data || res?.data);
         }
       } catch (error) {
-        console.error('Error fetching user detail:', error);
+        toast.error(
+          error?.response?.data?.message || 'Gagal mengambil profil pengguna'
+        );
       }
     })();
   }, []);
@@ -36,19 +35,14 @@ const ProfilePage = () => {
         username: values.username,
       };
       const res = await updateUserProfile(payload);
-      if (res.status === 200) {
-        toast.success('Data pengguna berhasil diperbarui');
-        const id = Cookies.get('userId');
-        if (id) {
-          const detailRes = await getUserDetail(id);
-          if (detailRes.status === 200) {
-            setUser(detailRes.data?.data);
-          }
-        }
+      const status = res?.data?.status || res?.status;
+      if (status === 'success' || status === 200) {
+        toast.success(res?.data?.message || 'Berhasil ubah data profil');
+        const updated = res?.data?.data || res?.data;
+        if (updated) setUser(updated);
         setModalOpen(false);
       }
     } catch (error) {
-      // Re-throw to let modal handle displaying API errors and toasts
       throw error;
     }
   };
@@ -57,7 +51,7 @@ const ProfilePage = () => {
     <div className="flex w-full flex-col">
       <h1 className="text-2xl font-bold">PROFIL</h1>
       <div className="mt-4 flex w-full flex-col gap-4 pb-8">
-        <div className="flex w-full items-start rounded-[4px] border border-gray-300 bg-gray-50 p-4">
+        <div className="flex w-full items-start rounded-[4px] border border-gray-300 bg-white p-4">
           <div className="w-full">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">IDENTITAS</h2>

@@ -157,7 +157,7 @@ const TraceabilityProduksiDetail = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-6 gap-x-6 gap-y-3 text-sm text-gray-700">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-700 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {firstRow.map((m) => (
             <div key={`${yearData.tahun}-${m.name}`} className="">
               <div className="text-gray-500">{m.name}</div>
@@ -165,7 +165,7 @@ const TraceabilityProduksiDetail = () => {
             </div>
           ))}
 
-          <div className="col-span-6 border-b border-dashed border-gray-300" />
+          <div className="col-span-2 border-b border-dashed border-gray-300 sm:col-span-3 md:col-span-4 lg:col-span-6" />
 
           {secondRow.map((m) => (
             <div key={`${yearData.tahun}-${m.name}`} className="">
@@ -179,8 +179,8 @@ const TraceabilityProduksiDetail = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
-      <div className="flex justify-between">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
+      <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
         <Button
           variant="primary"
@@ -193,7 +193,7 @@ const TraceabilityProduksiDetail = () => {
               router.push('/traceability/gap/produksi/tambah');
             }
           }}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap text-xs sm:text-sm"
         >
           Tambah Tahun Produksi
         </Button>
@@ -207,7 +207,7 @@ const TraceabilityProduksiDetail = () => {
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.kebun.id_kebun ?? '-'}

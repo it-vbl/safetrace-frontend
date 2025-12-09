@@ -268,14 +268,20 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
-          <Button type="button" variant="danger" onClick={handleCancel}>
+        <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
+          <Button
+            type="button"
+            variant="danger"
+            onClick={handleCancel}
+            className="w-full sm:w-auto"
+          >
             Batalkan
           </Button>
           <Button
             type="button"
             onClick={formik.handleSubmit}
             disabled={formik.isSubmitting}
+            className="w-full sm:w-auto"
           >
             {formik.isSubmitting ? 'Menyimpan...' : 'Simpan'}
           </Button>
@@ -447,8 +453,8 @@ const TraceabilityPestisidaDetail = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <div className="flex justify-between">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-6">
+      <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
         <Button
           variant="primary"
@@ -463,13 +469,13 @@ const TraceabilityPestisidaDetail = () => {
               router.push('/traceability/gap/pestisida/tambah');
             }
           }}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap text-xs sm:text-sm"
         >
           Tambah Tahun Pestisida
         </Button>
       </div>
 
-      <div className="flex flex-col gap-6 ">
+      <div className="flex flex-col gap-6">
         {/* DETAIL KEBUN Card */}
         {detail && (
           <section className="rounded border border-gray-300 bg-white p-6">
@@ -477,7 +483,7 @@ const TraceabilityPestisidaDetail = () => {
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.id_kebun ?? '-'}
@@ -511,7 +517,7 @@ const TraceabilityPestisidaDetail = () => {
         )}
 
         {/* Year Cards */}
-        <div className="mb-4 flex flex-col gap-4">
+        <div className="mb-4 flex flex-col gap-2">
           {detail?.penggunaan_tahunan?.map((yearData) => (
             <YearCard
               className="mb-4"
