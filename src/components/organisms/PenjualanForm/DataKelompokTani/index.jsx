@@ -1,13 +1,16 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik';
 import { X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
+import { createPenjualanKelompokPenyetorBulk } from '@/services/penjualan';
 import { getListPetani } from '@/services/petani';
 
 const PetaniMemberSelector = ({
@@ -311,10 +314,13 @@ const DataKelompokTani = ({
   onCancel,
   isSubmitting,
 }) => {
+  const searchParams = useSearchParams();
+  const idAngkutan = searchParams.get('idAngkutan');
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [kelompokPenyetorList, setKelompokPenyetorList] = useState([
     { id: Date.now(), kelompok_penyetor: null, anggota_petani: [] },
   ]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchKelompokTani();
@@ -332,6 +338,12 @@ const DataKelompokTani = ({
       label: item.label,
       value: item.value,
     })) || [];
+
+  // Helper function to get kelompok name by ID
+  const getKelompokNameById = (kelompokId) => {
+    const kelompok = kelompokTani?.find((item) => item.value === kelompokId);
+    return kelompok?.label || '';
+  };
 
   const validationSchema = Yup.object().shape({
     kelompokPenyetorList: Yup.array()
@@ -398,7 +410,52 @@ const DataKelompokTani = ({
       return;
     }
 
-    await formik.submitForm();
+    // Check if idAngkutan is available
+    if (!idAngkutan) {
+      toast.error(
+        'ID Angkutan tidak ditemukan. Silakan kembali ke langkah sebelumnya.'
+      );
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Format data for API
+      const kelompokData = kelompokPenyetorList.map((section) => ({
+        nama_kelompok: getKelompokNameById(section.kelompok_penyetor),
+        anggota_petani: section.anggota_petani.map((member) => member.id),
+      }));
+
+      const payload = {
+        angkutan: Number(idAngkutan),
+        kelompok_data: kelompokData,
+      };
+
+      // Call API to create kelompok penyetor
+      const response = await createPenjualanKelompokPenyetorBulk(payload);
+
+      if (
+        response?.status === 200 ||
+        response?.status === 201 ||
+        response?.data?.status === 'success'
+      ) {
+        toast.success('Data kelompok penyetor berhasil disimpan');
+        // Proceed to next step with the form data
+        await onNext(kelompokPenyetorList);
+      } else {
+        toast.error(
+          response?.data?.message || 'Gagal menyimpan data kelompok penyetor'
+        );
+      }
+    } catch (error) {
+      console.error('Error saving kelompok penyetor:', error);
+      toast.error(
+        error?.response?.data?.message ||
+          'Terjadi kesalahan saat menyimpan data kelompok penyetor'
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -443,15 +500,15 @@ const DataKelompokTani = ({
             type="button"
             variant="secondary"
             onClick={onPrevious}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isSaving}
           >
             Kembali
           </Button>
           <Button
             type="button"
             onClick={handleSubmit}
-            isLoading={isSubmitting}
-            isDisabled={isSubmitting}
+            isLoading={isSubmitting || isSaving}
+            isDisabled={isSubmitting || isSaving}
           >
             Selanjutnya
           </Button>
@@ -462,4 +519,3 @@ const DataKelompokTani = ({
 };
 
 export default DataKelompokTani;
-

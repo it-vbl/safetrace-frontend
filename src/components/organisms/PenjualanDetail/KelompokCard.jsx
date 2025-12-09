@@ -1,28 +1,84 @@
 import Link from 'next/link';
 
-import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import SectionCard from '@/components/molecules/SectionCard';
 
-import { getAnggotaNames, getKelompokLink, getKelompokName } from './helpers';
+import {
+  getAnggotaNames,
+  getKelompokLink,
+  getKelompokName,
+  getPetaniLink,
+} from './helpers';
 
 const KelompokItem = ({ kelompok }) => {
   const kelompokName = getKelompokName(
     kelompok?.kelompok_penyetor || kelompok?.kelompok
   );
-  const anggotaNames = getAnggotaNames(
-    kelompok?.anggota_petani || kelompok?.anggota
-  );
+  const anggotaList = kelompok?.anggota_petani || kelompok?.anggota || [];
   const kelompokHref = getKelompokLink(
     kelompok?.kelompok_penyetor || kelompok?.kelompok
   );
 
+  const renderAnggotaValue = () => {
+    if (!Array.isArray(anggotaList) || anggotaList.length === 0) {
+      return '-';
+    }
+
+    const validAnggota = anggotaList.filter(Boolean);
+    if (validAnggota.length === 0) {
+      return '-';
+    }
+
+    return (
+      <div className="flex flex-wrap items-center gap-x-2">
+        {validAnggota.map((anggota, index) => {
+          const petaniName =
+            typeof anggota === 'string'
+              ? anggota
+              : anggota.nama ||
+                anggota.nama_petani ||
+                anggota.label ||
+                anggota.id_petani ||
+                '-';
+
+          const petaniHref = getPetaniLink(anggota);
+
+          return (
+            <span
+              key={anggota.id || index}
+              className="inline-flex items-center"
+            >
+              {petaniHref ? (
+                <Link
+                  href={petaniHref}
+                  className="inline-flex items-center gap-1 text-blue-700 underline hover:text-blue-900"
+                >
+                  {petaniName}
+                  <span aria-hidden className="text-xs">
+                    ↗
+                  </span>
+                </Link>
+              ) : (
+                petaniName
+              )}
+              {index < validAnggota.length - 1 && (
+                <span className="ml-2 text-gray-500">,</span>
+              )}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
-    <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-4">
-      <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
-        <BorderBottomColData
-          label="Kelompok Penyetor"
-          value={
-            kelompokHref ? (
+    <div className="rounded-lg border-b border-dashed border-neutral5 py-4">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-[12px] col-span-2 font-bold text-neutral7">
+            Kelompok Penyetor
+          </span>
+          <div className="text-sm text-gray-900">
+            {kelompokHref ? (
               <Link
                 href={kelompokHref}
                 className="inline-flex items-center gap-1 text-blue-700 underline hover:text-blue-900"
@@ -34,13 +90,15 @@ const KelompokItem = ({ kelompok }) => {
               </Link>
             ) : (
               kelompokName
-            )
-          }
-        />
-        <BorderBottomColData
-          label="Anggota Petani Penyetor"
-          value={anggotaNames}
-        />
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[12px] col-span-2 font-bold text-neutral7">
+            Anggota Petani Penyetor
+          </span>
+          <div className="text-sm text-gray-900">{renderAnggotaValue()}</div>
+        </div>
       </div>
     </div>
   );
@@ -67,4 +125,3 @@ const KelompokCard = ({ data = [], onEdit }) => {
 };
 
 export default KelompokCard;
-

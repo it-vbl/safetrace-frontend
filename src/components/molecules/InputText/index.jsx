@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { cn } from '@/utils/cn';
+import {
+  formatDecimalInput,
+  formatDecimalOnChange,
+  parseDecimalInput,
+} from '@/utils/decimalFormat';
 
 import ErrorOutline from '../../atoms/Icons/ErrorOutline'; // Added import for ErrorOutline
 import RemoveRedEye from '../../atoms/Icons/RemoveRedEye';
@@ -58,6 +63,9 @@ const InputText = ({
     if (isPassword) {
       return isShowPassword ? 'text' : 'password';
     }
+    if (type === 'decimal') {
+      return 'text';
+    }
     return type;
   }, [isPassword, isShowPassword, type]);
 
@@ -82,8 +90,35 @@ const InputText = ({
     if (validateEmoji(value)) return;
 
     if (type === 'number') {
-      e.target.value = value.replace(/^0+(?=\d)/, '');
-      if (validateNumberRange(value, minNumber, maxNumber)) return;
+      let val = value;
+
+      // Allow only numbers, one decimal point, and one negative sign
+      val = val.replace(/(?!^)-|[^0-9.-]/g, '');
+
+      // Allow only one decimal point
+      const dotParts = val.split('.');
+      if (dotParts.length > 2) {
+        val = dotParts[0] + '.' + dotParts.slice(1).join('');
+      }
+
+      // Allow only one negative sign at the beginning
+      const negativeParts = val.split('-');
+      if (negativeParts.length > 2) {
+        val = negativeParts[0] + '-' + negativeParts.slice(1).join('');
+      }
+
+      // Remove leading zeros (but allow "0." or "-0.")
+      if (val !== '0' && val !== '-0' && val !== '0.' && val !== '-0.') {
+        val = val.replace(/^0+(?=\d)/, '');
+      }
+
+      e.target.value = val;
+
+      // Validate number range if the value is a valid number
+      const numValue = parseFloat(val);
+      if (val !== '' && val !== '-' && val !== '.' && !isNaN(numValue)) {
+        if (validateNumberRange(numValue, minNumber, maxNumber)) return;
+      }
     }
 
     if (type === 'string' && formatter) {
@@ -116,6 +151,26 @@ const InputText = ({
       e.target.value = val;
     }
 
+    if (type === 'decimal') {
+      const formatted = formatDecimalOnChange(value);
+      e.target.value = formatted;
+
+      // Validate number range if the value is a valid number (but allow partial input like "1000,")
+      const parsedValue = parseDecimalInput(formatted);
+      // Only validate if we have a complete number (not ending with comma or just a comma)
+      if (
+        parsedValue !== '' &&
+        parsedValue !== '-' &&
+        parsedValue !== ',' &&
+        !formatted.endsWith(',')
+      ) {
+        const numValue = parseFloat(parsedValue);
+        if (!isNaN(numValue)) {
+          if (validateNumberRange(numValue, minNumber, maxNumber)) return;
+        }
+      }
+    }
+
     setInputValue(e.target.value);
     onChange(e);
   };
@@ -125,12 +180,41 @@ const InputText = ({
   };
 
   const handleOnBlur = (e) => {
+    // Format decimal on blur
+    if (type === 'decimal' && e.target.value) {
+      const parsed = parseDecimalInput(e.target.value);
+      if (parsed !== '' && !isNaN(parseFloat(parsed))) {
+        const formatted = formatDecimalInput(parsed);
+        e.target.value = formatted;
+        setInputValue(formatted);
+        // Create a synthetic event with formatted value for onChange
+        const syntheticEvent = {
+          ...e,
+          target: {
+            ...e.target,
+            value: formatted,
+          },
+        };
+        onChange(syntheticEvent);
+      }
+    }
     onBlur(e);
   };
 
   useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+    // Format decimal value when prop changes
+    if (type === 'decimal' && value !== '') {
+      // Check if value ends with comma (user is typing decimal part)
+      const endsWithComma = value.endsWith(',');
+      const hasComma = value.includes(',');
+
+      // Use formatDecimalOnChange to preserve formatting including comma
+      const formatted = formatDecimalOnChange(value);
+      setInputValue(formatted);
+    } else {
+      setInputValue(value);
+    }
+  }, [value, type]);
 
   return (
     <div className={cn('flex w-full min-w-0 flex-col gap-1', containerClassName)}>
@@ -230,7 +314,7 @@ InputText.propTypes = {
   label: PropTypes.string,
   helperText: PropTypes.string,
   isError: PropTypes.bool,
-  type: PropTypes.oneOf(['text', 'password', 'email', 'number']),
+  type: PropTypes.oneOf(['text', 'password', 'email', 'number', 'decimal']),
   prefix: PropTypes.node,
   suffix: PropTypes.node || PropTypes.string,
   className: PropTypes.string,
