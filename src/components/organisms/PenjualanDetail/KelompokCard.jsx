@@ -2,21 +2,27 @@ import Link from 'next/link';
 
 import SectionCard from '@/components/molecules/SectionCard';
 
-import {
-  getAnggotaNames,
-  getKelompokLink,
-  getKelompokName,
-  getPetaniLink,
-} from './helpers';
+import { getAnggotaNames, getKelompokName, getPetaniLink } from './helpers';
 
 const KelompokItem = ({ kelompok }) => {
   const kelompokName = getKelompokName(
     kelompok?.kelompok_penyetor || kelompok?.kelompok
   );
   const anggotaList = kelompok?.anggota_petani || kelompok?.anggota || [];
-  const kelompokHref = getKelompokLink(
-    kelompok?.kelompok_penyetor || kelompok?.kelompok
-  );
+
+  // Build link to root page with query parameters to open Data Kebun Modal with filter
+  const kelompokData = kelompok?.kelompok_penyetor || kelompok?.kelompok;
+  const kelompokNameForUrl =
+    typeof kelompokData === 'string'
+      ? kelompokData
+      : kelompokData?.nama || kelompokName;
+
+  // Create URL with query parameters
+  const kelompokHref = kelompokNameForUrl
+    ? `/?openModal=dataKebun&kelompokName=${encodeURIComponent(
+        kelompokNameForUrl
+      )}`
+    : null;
 
   const renderAnggotaValue = () => {
     if (!Array.isArray(anggotaList) || anggotaList.length === 0) {

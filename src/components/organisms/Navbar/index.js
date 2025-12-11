@@ -50,7 +50,7 @@ const Navbar = () => {
           width={mounted && isMobileScreen ? 16 : 24}
           height={mounted && isMobileScreen ? 16 : 24}
         />
-        <div className="hidden md:block">
+        <div>
           <SipekebunLogo />
         </div>
       </div>
