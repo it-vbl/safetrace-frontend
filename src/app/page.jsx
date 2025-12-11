@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter,useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
@@ -802,4 +802,12 @@ const MapDashboard = () => {
   );
 };
 
-export default MapDashboard;
+const MapDashboardWithSuspense = () => {
+  return (
+    <Suspense fallback={<SectionLoading />}>
+      <MapDashboard />
+    </Suspense>
+  );
+};
+
+export default MapDashboardWithSuspense;
