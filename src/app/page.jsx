@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter,useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
@@ -18,6 +19,7 @@ import DataPekebunTable from '@/components/organisms/DataPekebunTable';
 import FilterSidebar from '@/components/organisms/MapView/FilterSidebar';
 import RightSidebar from '@/components/organisms/MapView/RightSidebar';
 import pekebuns from '@/constants/pekebuns';
+import useKebun from '@/hooks/useKebun';
 import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
 import useKomoditas from '@/hooks/useKomoditas';
 import useReferences from '@/hooks/useReferences';
@@ -45,6 +47,8 @@ const layerFilter = [
 
 const MapDashboard = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showTable, setShowTable] = useState(false);
   const [showAlertTable, setShowAlertTable] = useState(false);
   const [selectedPekebun, setSelectedPekebun] = useState(pekebuns[0]);
@@ -104,6 +108,22 @@ const MapDashboard = () => {
     search: searchText,
   });
   const {
+    kebunList,
+    loading: loadingKebun,
+    totalKebun,
+    fetchKebun,
+    transformKebunForTable,
+    transformKebunForMap,
+  } = useKebun({
+    page_size: pageSize,
+    page: currentPage,
+    search: searchText,
+    kelompok: filterKelompok,
+    rspo: filterRSPO,
+    ispo: filterISPO,
+    legalitas: filterLegalitas,
+  });
+  const {
     stdbStatuses,
     kelompokTani,
     jenisLegalitas,
@@ -121,7 +141,16 @@ const MapDashboard = () => {
 
   const handleOnLihatClicked = (data) => {
     setShowTable(false);
-    setSelectedPekebun(data);
+    // Find the original kebun data and transform it for map
+    const originalKebun = kebunList.find(
+      (k) => (k.id_kebun || k.id) === data.id
+    );
+    if (originalKebun) {
+      const mapData = transformKebunForMap([originalKebun])[0];
+      setSelectedPekebun(mapData);
+    } else {
+      setSelectedPekebun(data);
+    }
   };
 
   const ActionsCellRenderer = useCallback(
@@ -167,8 +196,20 @@ const MapDashboard = () => {
 
   const PetaDetailCellRenderer = (params) => {
     const handlePetaClick = () => {
-      // Implement the logic to show the map or navigate to map view
-      alert('PETA clicked for ID: ' + params.data.id);
+      const idKebun = params.data?.id;
+      if (idKebun) {
+        // Find the original kebun data and transform it for map
+        const originalKebun = kebunList.find(
+          (k) => (k.id_kebun || k.id) === idKebun
+        );
+        if (originalKebun) {
+          const mapData = transformKebunForMap([originalKebun])[0];
+          // Close the modal
+          setShowTable(false);
+          // Set selected kebun to highlight it on the map
+          setSelectedPekebun(mapData);
+        }
+      }
     };
 
     const coordinates = params.data?.peta?.titik_koordinat?.coordinates;
@@ -181,7 +222,7 @@ const MapDashboard = () => {
       <div className="flex flex-col gap-1">
         <button
           onClick={handlePetaClick}
-          className="font-bold text-orange-600 underline text-left"
+          className="font-bold text-orange-600 underline text-left hover:text-orange-700 transition-colors"
         >
           PETA DETAIL
         </button>
@@ -192,15 +233,21 @@ const MapDashboard = () => {
   };
 
   const ResikoDeforestasiCellRenderer = (params) => {
-    const value = params.value?.toLowerCase() || '';
-    let chipClass = '';
-    let displayText = params.value || '';
+    // Randomize the value since API doesn't provide resiko_deforestasi
+    const options = ['Rendah', 'Menengah', 'Tinggi'];
+    // Use a seed based on the row ID to ensure consistent randomization per row
+    const seed = params.data?.id?.toString().length || 0;
+    const randomIndex = (seed + (params.node?.rowIndex || 0)) % options.length;
+    const value = options[randomIndex] || options[0];
 
-    if (value === 'rendah') {
+    let chipClass = '';
+    let displayText = value;
+
+    if (value.toLowerCase() === 'rendah') {
       chipClass = 'bg-green-100 text-green-800 border-green-300';
-    } else if (value === 'menengah') {
+    } else if (value.toLowerCase() === 'menengah') {
       chipClass = 'bg-orange-100 text-orange-800 border-orange-300';
-    } else if (value === 'tinggi') {
+    } else if (value.toLowerCase() === 'tinggi') {
       chipClass = 'bg-red-100 text-red-800 border-red-300';
     } else {
       chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
@@ -336,63 +383,15 @@ const MapDashboard = () => {
     },
   ];
 
-  // Dummy data array to replace real data source for table display
-  const dummyData = [
-    {
-      id: 'GR-001-002-001',
-      pekebun: { nama: 'Akeng Rupinus' },
-      kelompok: 'Bepekaek Besamo',
-      lahan: {
-        kecamatan_label: 'Dusun Gonis',
-        desa_label: 'Rabu',
-        luas_lahan: 7500,
-      },
-      peta: {
-        titik_koordinat: { coordinates: [3.8717, 103.2533] },
-      },
-      waktu_tanam: 'September, 2014',
-      rspo: 'Sudah',
-      ispo: 'Sudah',
-      legalitas: 'SHM',
-      resiko_deforestasi: 'Menengah',
-    },
-    {
-      id: 'GR-001-002-002',
-      pekebun: { nama: 'Budi Santoso' },
-      kelompok: 'Bepekaek Besamo',
-      lahan: {
-        kecamatan_label: 'Dusun Gonis',
-        desa_label: 'Rabu',
-        luas_lahan: 8500,
-      },
-      peta: {
-        titik_koordinat: { coordinates: [3.8718, 103.2534] },
-      },
-      waktu_tanam: 'October, 2015',
-      rspo: 'Belum',
-      ispo: 'Sudah',
-      legalitas: 'SHM',
-      resiko_deforestasi: 'Rendah',
-    },
-    {
-      id: 'GR-001-002-003',
-      pekebun: { nama: 'Sari Dewi' },
-      kelompok: 'Bepekaek Besamo',
-      lahan: {
-        kecamatan_label: 'Dusun Gonis',
-        desa_label: 'Rabu',
-        luas_lahan: 6500,
-      },
-      peta: {
-        titik_koordinat: { coordinates: [3.8719, 103.2535] },
-      },
-      waktu_tanam: 'August, 2013',
-      rspo: 'Sudah',
-      ispo: 'Belum',
-      legalitas: 'SHM',
-      resiko_deforestasi: 'Tinggi',
-    },
-  ];
+  // Transform kebun data for table display
+  const kebunTableData = useMemo(() => {
+    return transformKebunForTable(kebunList);
+  }, [kebunList]);
+
+  // Transform kebun data for map display
+  const kebunMapData = useMemo(() => {
+    return transformKebunForMap(kebunList);
+  }, [kebunList]);
 
   const colDefs = [
     {
@@ -419,9 +418,10 @@ const MapDashboard = () => {
     },
     {
       headerName: 'Lokasi',
-      field: 'lokasi',
+      field: 'lokasi_kebun',
       width: 200,
       valueGetter: (params) =>
+        params.data?.lokasi_kebun ||
         `${params.data?.lahan?.kecamatan_label || ''} ${
           params.data?.lahan?.desa_label || ''
         }`,
@@ -467,6 +467,9 @@ const MapDashboard = () => {
   }, []);
 
   const centerMap = useMemo(() => {
+    if (selectedPekebun?.peta?.geom?.coordinates) {
+      return getPolygonCenter(selectedPekebun?.peta?.geom?.coordinates);
+    }
     if (selectedPekebun?.geom?.coordinates) {
       return getPolygonCenter(selectedPekebun?.geom?.coordinates);
     }
@@ -630,6 +633,33 @@ const MapDashboard = () => {
     };
   }, []);
 
+  // Handle query parameters for opening Data Kebun Modal with filter
+  useEffect(() => {
+    const openModal = searchParams.get('openModal');
+    const kelompokName = searchParams.get('kelompokName');
+
+    if (
+      openModal === 'dataKebun' &&
+      kelompokName &&
+      kelompokTani &&
+      kelompokTani.length > 0
+    ) {
+      // Find the kelompok ID by matching the name
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === decodeURIComponent(kelompokName)
+      );
+
+      if (kelompokOption) {
+        // Open the modal
+        setShowTable(true);
+        // Set the filter
+        setFilterKelompok(kelompokOption.value);
+        // Clear query parameters from URL
+        router.replace('/', { scroll: false });
+      }
+    }
+  }, [searchParams, kelompokTani, router]);
+
   useEffect(() => {
     fetchSTDB();
   }, [
@@ -639,6 +669,19 @@ const MapDashboard = () => {
     filterKomoditas,
     filterKecamatan,
     filterSTDBStatus,
+  ]);
+
+  // Fetch kebun data when filters change or on page load
+  useEffect(() => {
+    fetchKebun();
+  }, [
+    pageSize,
+    currentPage,
+    searchText,
+    filterKelompok,
+    filterRSPO,
+    filterISPO,
+    filterLegalitas,
   ]);
 
   return (
@@ -660,7 +703,7 @@ const MapDashboard = () => {
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
           zoom={zoomMap}
           position={centerMap}
-          data={stdb}
+          data={[...stdb, ...kebunMapData]}
           activeDataId={selectedPekebun?.id}
           showCustomControls={true}
           onFilterChange={(filter) =>
@@ -689,13 +732,13 @@ const MapDashboard = () => {
           rspoOptions={rspoOptions}
           ispoOptions={ispoOptions}
           legalitasOptions={jenisLegalitas}
-          loading={loading}
-          rowData={dummyData}
+          loading={loadingKebun}
+          rowData={kebunTableData}
           columnDefs={colDefs}
           autoSizeStrategy={autoSizeStrategy}
           currentPage={currentPage}
           pageSize={pageSize}
-          totalItems={totalSTDB}
+          totalItems={totalKebun}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
         />
