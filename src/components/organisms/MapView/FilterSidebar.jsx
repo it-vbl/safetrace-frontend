@@ -72,7 +72,7 @@ const FilterSidebar = ({
   return (
     <div
       id="filter-sidebar"
-      className={`absolute !h-[calc(100%-32px)] left-4 top-4 z-[500] w-[250] duration-300 ease-in-out transition-all border border-gray-200 bg-white rounded-[4px] p-4 shadow-lg ${
+      className={`absolute !h-[calc(100%-32px)] left-4 top-4 z-[500] w-[250px] duration-300 ease-in-out transition-all border border-gray-200 bg-white rounded-[4px] p-4 shadow-lg ${
         mapviewFilterSidebarOpen ? 'translate-x-0' : '-translate-x-[200%]'
       }`}
     >

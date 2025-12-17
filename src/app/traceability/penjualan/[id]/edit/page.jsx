@@ -1,9 +1,8 @@
 'use client';
-import { Suspense, useEffect, useRef,useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
-import Button from '@/components/atoms/Button';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import Stepper from '@/components/molecules/Stepper';
 import DataAngkutan from '@/components/organisms/PenjualanForm/DataAngkutan';
@@ -17,6 +16,7 @@ import {
   getDetailPenjualanKelompokPenyetor,
   getDetailPenjualanPabrik,
   updateAngkutanPabrik,
+  updatePenjualanAngkutan,
 } from '@/services/penjualan';
 
 const EditPenjualanContent = () => {
@@ -65,6 +65,8 @@ const EditPenjualanContent = () => {
     }
 
     const fetchDataAndDetermineStep = async () => {
+      // Check for tab parameter from URL
+      const tabFromUrl = searchParams.get('tab');
       if (!idPenjualan) {
         // New penjualan - start at step 1
         setCurrentStep(1);
@@ -178,8 +180,7 @@ const EditPenjualanContent = () => {
                 (pabrikResponse?.data?.status === 'success' ||
                   pabrikResponse?.data?.data)
               ) {
-                pabrikData =
-                  pabrikResponse?.data?.data || pabrikResponse?.data;
+                pabrikData = pabrikResponse?.data?.data || pabrikResponse?.data;
 
                 // Transform the API response to match form structure
                 formattedPabrikData = {
@@ -200,58 +201,112 @@ const EditPenjualanContent = () => {
           }
         }
 
-        // Determine current step based on what data exists (only on initial load)
-        if (angkutanData && formattedKelompokPenyetorData && formattedPabrikData) {
-          // All steps completed - all data exists
-          setCurrentStep(3);
-          setLastStep(3);
-          setCompletedSteps([1, 2, 3]);
-          setFormData({
-            angkutan: angkutanData,
-            kelompokTani: formattedKelompokPenyetorData,
-            pabrik: formattedPabrikData,
-          });
-          setPenjualanData({
-            angkutan: angkutanData,
-            kelompok_tani: formattedKelompokPenyetorData,
-            pabrik: formattedPabrikData,
-          });
-        } else if (angkutanData && formattedKelompokPenyetorData) {
-          // Step 1 and 2 completed, need step 3 (pabrik)
-          setCurrentStep(3);
-          setLastStep(3);
-          setCompletedSteps([1, 2]);
-          setFormData({
-            angkutan: angkutanData,
-            kelompokTani: formattedKelompokPenyetorData,
-            pabrik: null,
-          });
-          setPenjualanData({
-            angkutan: angkutanData,
-            kelompok_tani: formattedKelompokPenyetorData,
-            pabrik: null,
-          });
-        } else if (angkutanData) {
-          // Step 1 completed, need step 2 (kelompok_tani) and step 3 (pabrik)
-          setCurrentStep(2);
-          setLastStep(3);
-          setCompletedSteps([1]);
-          setFormData({
-            angkutan: angkutanData,
-            kelompokTani: null,
-            pabrik: null,
-          });
-          setPenjualanData({
-            angkutan: angkutanData,
-            kelompok_tani: null,
-            pabrik: null,
-          });
-        } else {
-          // No data exists, start from step 1
-          setCurrentStep(1);
-          setLastStep(1);
-          setCompletedSteps([]);
+        // Determine current step based on what data exists and tab parameter
+        let targetStep = 1;
+        let targetLastStep = 1;
+        let targetCompletedSteps = [];
+        const hasKelompokTaniData =
+          formattedKelompokPenyetorData &&
+          Array.isArray(formattedKelompokPenyetorData) &&
+          formattedKelompokPenyetorData.length > 0 &&
+          formattedKelompokPenyetorData.some(
+            (kelompok) =>
+              kelompok.anggota_petani &&
+              Array.isArray(kelompok.anggota_petani) &&
+              kelompok.anggota_petani.length > 0
+          );
+
+        // Check if tab parameter is provided
+        if (tabFromUrl === 'angkutan') {
+          targetStep = 1;
+        } else if (tabFromUrl === 'kelompok_tani') {
+          targetStep = 2;
+        } else if (tabFromUrl === 'pabrik') {
+          // Validate if kelompok tani data exists before allowing pabrik tab
+          if (!hasKelompokTaniData) {
+            toast.error('Mohon lengkapi data kelompok tani terlebih dahulu');
+            // Fall back to step 2 if kelompok tani data is missing
+            targetStep = 2;
+          } else {
+            targetStep = 3;
+          }
         }
+
+        // Determine step based on data existence if no tab parameter or tab is invalid
+        if (
+          !tabFromUrl ||
+          !['angkutan', 'kelompok_tani', 'pabrik'].includes(tabFromUrl)
+        ) {
+          if (
+            angkutanData &&
+            formattedKelompokPenyetorData &&
+            formattedPabrikData &&
+            hasKelompokTaniData
+          ) {
+            // All steps completed - all data exists
+            targetStep = 3;
+            targetLastStep = 3;
+            targetCompletedSteps = [1, 2, 3];
+          } else if (
+            angkutanData &&
+            formattedKelompokPenyetorData &&
+            hasKelompokTaniData
+          ) {
+            // Step 1 and 2 completed, need step 3 (pabrik)
+            targetStep = 3;
+            targetLastStep = 3;
+            targetCompletedSteps = [1, 2];
+          } else if (angkutanData) {
+            // Step 1 completed, need step 2 (kelompok_tani) and step 3 (pabrik)
+            targetStep = 2;
+            targetLastStep = 2;
+            targetCompletedSteps = [1];
+          } else {
+            // No data exists, start from step 1
+            targetStep = 1;
+            targetLastStep = 1;
+            targetCompletedSteps = [];
+          }
+        } else {
+          // Tab parameter provided - determine lastStep and completedSteps based on data
+          if (
+            angkutanData &&
+            formattedKelompokPenyetorData &&
+            formattedPabrikData &&
+            hasKelompokTaniData
+          ) {
+            targetLastStep = 3;
+            targetCompletedSteps = [1, 2, 3];
+          } else if (
+            angkutanData &&
+            formattedKelompokPenyetorData &&
+            hasKelompokTaniData
+          ) {
+            targetLastStep = 3;
+            targetCompletedSteps = [1, 2];
+          } else if (angkutanData) {
+            targetLastStep = 2;
+            targetCompletedSteps = [1];
+          }
+        }
+
+        console.log('targetStep', targetStep);
+        console.log('targetLastStep', targetLastStep);
+        console.log('targetCompletedSteps', targetCompletedSteps);
+
+        setCurrentStep(targetStep);
+        setLastStep(targetLastStep);
+        setCompletedSteps(targetCompletedSteps);
+        setFormData({
+          angkutan: angkutanData,
+          kelompokTani: formattedKelompokPenyetorData,
+          pabrik: formattedPabrikData,
+        });
+        setPenjualanData({
+          angkutan: angkutanData,
+          kelompok_tani: formattedKelompokPenyetorData,
+          pabrik: formattedPabrikData,
+        });
 
         // Mark as initialized after setting initial state
         hasInitialized.current = true;
@@ -277,7 +332,7 @@ const EditPenjualanContent = () => {
       setCompletedSteps([]);
       hasInitialized.current = true;
     }
-  }, [idPenjualan, kelompokTani]);
+  }, [idPenjualan, kelompokTani, searchParams]);
 
   // Function to handle step click
   const handleStepClick = (stepNumber) => {
@@ -342,13 +397,58 @@ const EditPenjualanContent = () => {
             );
           }
         } else {
-          // Editing existing data - just update local state and proceed
-          // TODO: Add update endpoint integration when needed
-          setFormData((prev) => ({ ...prev, angkutan: stepData }));
-          toast.success('Data angkutan berhasil diperbarui');
-          setCompletedSteps((prev) => [...prev, 1]);
-          setCurrentStep(2);
-          setLastStep(2);
+          // Editing existing data - call update API
+          // Get angkutan ID from URL params or form data
+          const angkutanId = id || existingAngkutan;
+
+          if (!angkutanId) {
+            toast.error('ID angkutan tidak ditemukan');
+            return;
+          }
+
+          // Prepare payload for API - convert string numbers to proper numbers
+          const payload = {
+            tanggal_penjualan: stepData.tanggal_penjualan,
+            driver: stepData.driver,
+            no_registrasi: stepData.no_registrasi,
+            no_polisi: stepData.no_polisi,
+            jumlah_tandan: Number(stepData.jumlah_tandan),
+            berat_timbangan: parseFloat(stepData.berat_timbangan),
+            tarra: parseFloat(stepData.tarra),
+            t_potongan_persen: parseFloat(stepData.t_potongan_persen),
+            t_potongan_kg: parseFloat(stepData.t_potongan_kg),
+            berat_bersih: parseFloat(stepData.berat_bersih),
+            harga_per_kilo: parseFloat(stepData.harga_per_kilo),
+            total_penjualan: parseFloat(stepData.total_penjualan),
+          };
+
+          // Update angkutan data via API
+          const response = await updatePenjualanAngkutan(angkutanId, payload);
+
+          if (
+            response?.status === 200 ||
+            response?.status === 201 ||
+            response?.data?.status === 'success'
+          ) {
+            const updatedData = response?.data?.data;
+            toast.success('Data angkutan berhasil diperbarui');
+            // Update local state with updated data
+            setFormData((prev) => ({
+              ...prev,
+              angkutan: updatedData || stepData,
+            }));
+            setPenjualanData((prev) => ({
+              ...prev,
+              angkutan: updatedData || stepData,
+            }));
+            setCompletedSteps((prev) => [...prev, 1]);
+            setCurrentStep(2);
+            setLastStep(Math.max(lastStep, 2));
+          } else {
+            toast.error(
+              response?.data?.message || 'Gagal memperbarui data angkutan'
+            );
+          }
         }
       } else if (currentStep === 2) {
         // Data kelompok tani is already saved via API in DataKelompokTani component
@@ -359,7 +459,7 @@ const EditPenjualanContent = () => {
       } else if (currentStep === 3) {
         // Get idAngkutan from URL params or search params
         const idAngkutanFromUrl = id || searchParams.get('idAngkutan');
-        
+
         if (!idAngkutanFromUrl) {
           toast.error('ID angkutan tidak ditemukan');
           return;

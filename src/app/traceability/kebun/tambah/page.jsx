@@ -96,7 +96,27 @@ const CreateKebunTraceabilityContent = () => {
           }
           break;
         case 2:
-          result = await handleStep2(stepData, idKebun);
+          result = await handleStep2();
+          // After successful pemetaan submission, update kebunData with the submitted geom data
+          if (result.success && stepData?.peta) {
+            // Convert coordinates to GeoJSON format
+            const polygonCoords = stepData.peta.map((coord) => [
+              coord.lng,
+              coord.lat,
+            ]);
+            if (polygonCoords.length > 0) {
+              polygonCoords.push(polygonCoords[0]); // Close the polygon
+            }
+
+            const updatedKebunData = {
+              ...kebunData,
+              geom: {
+                type: 'Polygon',
+                coordinates: [polygonCoords],
+              },
+            };
+            setKebunData(updatedKebunData);
+          }
           break;
         case 3:
           result = await handleStep3(stepData, idKebun);

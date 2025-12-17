@@ -72,7 +72,7 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       nama_petani: data.nama_petani || '',
       kelompok_tani: data.kelompok_tani || '',
       lokasi_kebun: data.lokasi_kebun || '',
-      luas_kebun: data.luas_kebun || '',
+      luas_kebun: data.luas || '',
       luas_peta: data.luas_peta || '',
       waktu_tanam_month: waktuTanamMonth,
       waktu_tanam_year: waktuTanamYear,
@@ -82,7 +82,6 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       nomor_legalitas: data.nomor_legalitas || '',
       pemiliki_legalitas: data.pemiliki_legalitas || '',
       nomor_stdb: data.nomor_stdb || '',
-      jumlah_pokok: data.jumlah_pokok || '',
     };
   };
 
@@ -100,9 +99,6 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     nomor_legalitas: Yup.string().required('Nomor Legalitas wajib diisi'),
     pemiliki_legalitas: Yup.string().required('Pemilik Legalitas wajib diisi'),
     nomor_stdb: Yup.string().required('Nomor STDB wajib diisi'),
-    jumlah_pokok: Yup.number()
-      .required('Jumlah Pokok wajib diisi')
-      .min(1, 'Jumlah pokok harus lebih dari 0'),
   });
 
   const formik = useFormik({
@@ -122,8 +118,8 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
           nama_petani: values.nama_petani,
           lokasi_kebun: values.lokasi_kebun,
           luas: values.luas_kebun,
+          luas_peta: values.luas_peta,
           waktu_tanam: waktuTanam,
-          jumlah_pokok: parseInt(values.jumlah_pokok),
           is_rspo: values.is_rspo === 'sudah',
           is_ispo: values.is_ispo === 'sudah',
           jenis_legalitas: values.jenis_legalitas,
@@ -158,7 +154,7 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     if (isOpen && kebunData) {
       formik.setValues(parseExistingData(kebunData));
     }
-  }, [isOpen, kebunData, formik]);
+  }, [isOpen, kebunData]);
 
   const handleClose = () => {
     formik.resetForm();
@@ -377,22 +373,6 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
               isError={
                 formik.touched.pemiliki_legalitas &&
                 formik.errors.pemiliki_legalitas
-              }
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Jumlah Pokok */}
-            <InputText
-              label="Jumlah Pokok"
-              name="jumlah_pokok"
-              type="number"
-              value={formik.values.jumlah_pokok}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="0"
-              isError={
-                formik.touched.jumlah_pokok && formik.errors.jumlah_pokok
               }
               errors={formik.errors}
               touched={formik.touched}

@@ -9,19 +9,41 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-import { getListKebun } from '@/services/pekebun';
+import useReferences from '@/hooks/useReferences';
+import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
+import {
+  deleteKebun,
+  exportKebunToExcel,
+  getListKebun,
+} from '@/services/pekebun';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-];
+// Helper function to format date as "Month, Year"
+const formatWaktuTanam = (dateString) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const month = date.toLocaleDateString('id-ID', { month: 'long' });
+  const year = date.getFullYear();
+  return `${month.charAt(0).toUpperCase() + month.slice(1)}, ${year}`;
+};
+
+// Helper function to format date as "HH:mm DD-MM-YYYY"
+const formatLastModified = (dateString) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${hours}:${minutes} ${day}-${month}-${year}`;
+};
 
 const rspoOptions = [
   { label: 'Sudah', value: 'sudah' },
@@ -35,6 +57,7 @@ const ispoOptions = [
 
 const KebunPage = () => {
   const router = useRouter();
+  const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
   const [selectedRSPO, setSelectedRSPO] = useState(null);
@@ -44,6 +67,23 @@ const KebunPage = () => {
   const [loading, setLoading] = useState(false);
   const [kebunData, setKebunData] = useState([]);
   const [totalKebun, setTotalKebun] = useState(0);
+  const [showModalConfirmDeleteKebun, setShowModalConfirmDeleteKebun] =
+    useState(false);
+  const [selectedKebunToDelete, setSelectedKebunToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+
+  const kelompokOptions = useMemo(() => {
+    return (
+      kelompokTani?.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })) || []
+    );
+  }, [kelompokTani]);
 
   // Fetch kebun data function
   const fetchKebunData = async ({
@@ -63,29 +103,43 @@ const KebunPage = () => {
       });
 
       if (search) params.append('search', search);
-      if (kelompok) params.append('kelompok', kelompok);
-      if (rspo) params.append('is_rspo', rspo === 'sudah' ? 'true' : 'false');
-      if (ispo) params.append('is_ispo', ispo === 'sudah' ? 'true' : 'false');
+      if (kelompok) params.append('kelompok_tani', kelompok);
+      if (rspo) params.append('rspo', rspo === 'sudah' ? 'true' : 'false');
+      if (ispo) params.append('ispo', ispo === 'sudah' ? 'true' : 'false');
 
       const response = await getListKebun(params.toString());
 
       if (response?.data?.status === 'success') {
         // Map API response to table format
-        const mappedData = response.data.data.results.map((kebun) => ({
-          id: kebun.id,
-          id_kebun: kebun.id_kebun,
-          nama_petani: '-', // Petani name not included in this endpoint
-          kelompok: '-', // Kelompok not included in this endpoint
-          lokasi: kebun.lokasi_kebun,
-          luas_kebun: kebun.luas,
-          waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
-          ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
-        }));
+        const mappedData = response.data.data.results.map((kebun) => {
+          // Format coordinates
+          let titikKoordinat = '-';
+          if (
+            kebun.titik_koordinat?.coordinates &&
+            Array.isArray(kebun.titik_koordinat.coordinates)
+          ) {
+            const [lng, lat] = kebun.titik_koordinat.coordinates;
+            titikKoordinat = convertCoordToDMS(lat, lng);
+          }
+
+          return {
+            id: kebun.id,
+            titik_koordinat: titikKoordinat,
+            id_kebun: kebun.id_kebun || '-',
+            nama_petani: kebun.nama_petani || '-',
+            kelompok: kebun.kelompok_tani || '-',
+            lokasi: kebun.lokasi_kebun || '-',
+            luas_kebun: kebun.luas_kebun || 0,
+            waktu_tanam: formatWaktuTanam(kebun.waktu_tanam),
+            rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
+            ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
+            legalitas: kebun.jenis_legalitas_label || '-',
+            no_legalitas: kebun.nomor_legalitas || '-',
+            pemilik_legalitas: kebun.pemilik_legalitas || '-',
+            stdb: kebun.nomor_stdb || '-',
+            terakhir_diubah: formatLastModified(kebun.updated_at),
+          };
+        });
 
         setKebunData(mappedData);
         setTotalKebun(response.data.data.count);
@@ -152,8 +206,95 @@ const KebunPage = () => {
     setCurrentPage(1);
   };
 
+  const handleExportExcel = async () => {
+    try {
+      setLoading(true);
+
+      // Build query parameters (same as fetchKebunData but without page/page_size)
+      const params = new URLSearchParams();
+
+      if (search) params.append('search', search);
+      if (selectedKelompok) params.append('kelompok_tani', selectedKelompok);
+      if (selectedRSPO)
+        params.append('rspo', selectedRSPO === 'sudah' ? 'true' : 'false');
+      if (selectedISPO)
+        params.append('ispo', selectedISPO === 'sudah' ? 'true' : 'false');
+
+      const response = await exportKebunToExcel(params.toString());
+
+      // Create blob and download
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `kebun_${new Date().toISOString().split('T')[0]}.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Data berhasil diekspor ke Excel');
+    } catch (error) {
+      console.error('Error exporting kebun data:', error);
+      toast.error(error?.response?.data?.message || 'Gagal mengekspor data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLihatClicked = (data) => {
     router.push(`/traceability/kebun/${data?.id}/detail`);
+  };
+
+  const handleDeleteClicked = (data) => {
+    setSelectedKebunToDelete(data);
+    setShowModalConfirmDeleteKebun(true);
+  };
+
+  const handleDeleteKebun = async () => {
+    if (!selectedKebunToDelete?.id) {
+      toast.error('ID kebun tidak ditemukan');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const res = await deleteKebun(selectedKebunToDelete.id);
+      if (
+        res?.data?.status === 'success' ||
+        res?.status === 200 ||
+        res?.status === 204
+      ) {
+        toast.success('Data kebun berhasil dihapus');
+        setShowModalConfirmDeleteKebun(false);
+        setSelectedKebunToDelete(null);
+        fetchKebunData({
+          page: currentPage,
+          page_size: pageSize,
+          search,
+          kelompok: selectedKelompok,
+          rspo: selectedRSPO,
+          ispo: selectedISPO,
+        });
+      } else {
+        toast.error(res?.data?.message || 'Data kebun gagal dihapus');
+      }
+    } catch (error) {
+      console.error('Error deleting kebun:', error);
+      toast.error(error?.response?.data?.message || 'Data kebun gagal dihapus');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowModalConfirmDeleteKebun(false);
+    setSelectedKebunToDelete(null);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -164,6 +305,13 @@ const KebunPage = () => {
           onClick={() => handleLihatClicked(e.data)}
         >
           LIHAT
+        </div>
+        <div className="text-gray-400">|</div>
+        <div
+          className="cursor-pointer text-[10px] font-bold uppercase text-red-600 underline hover:text-red-700 sm:text-[12px]"
+          onClick={() => handleDeleteClicked(e.data)}
+        >
+          HAPUS
         </div>
       </div>
     );
@@ -190,28 +338,35 @@ const KebunPage = () => {
         field: 'actions',
         headerName: '',
         cellRenderer: ActionsCellRenderer,
-        width: 80,
-        minWidth: 70,
-        maxWidth: 100,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 150,
         suppressSizeToFit: false,
+        pinned: 'left',
+      },
+      {
+        field: 'titik_koordinat',
+        headerName: 'Titik Koordinat',
+        flex: 1,
+        minWidth: 180,
       },
       {
         field: 'id_kebun',
         headerName: 'Id Kebun',
         flex: 1,
-        minWidth: 140,
+        minWidth: 164,
       },
       {
         field: 'nama_petani',
-        headerName: 'Nama Petani',
+        headerName: 'Petani',
         flex: 1,
-        minWidth: 140,
+        minWidth: 200,
       },
       {
         field: 'kelompok',
         headerName: 'Kelompok',
         flex: 1,
-        minWidth: 140,
+        minWidth: 200,
       },
       {
         field: 'lokasi',
@@ -225,7 +380,7 @@ const KebunPage = () => {
         flex: 1,
         minWidth: 120,
         cellRenderer: (params) => {
-          return `${params.value}`;
+          return params.value ? params.value.toLocaleString('id-ID') : '-';
         },
       },
       {
@@ -248,6 +403,36 @@ const KebunPage = () => {
         minWidth: 100,
         cellRenderer: StatusCellRenderer,
       },
+      {
+        field: 'legalitas',
+        headerName: 'Legalitas',
+        flex: 1,
+        minWidth: 100,
+      },
+      {
+        field: 'no_legalitas',
+        headerName: 'No Legalitas',
+        flex: 1,
+        minWidth: 200,
+      },
+      {
+        field: 'pemilik_legalitas',
+        headerName: 'Pemilik Legalitas',
+        flex: 1,
+        minWidth: 200,
+      },
+      {
+        field: 'stdb',
+        headerName: 'STDB',
+        flex: 1,
+        minWidth: 156,
+      },
+      {
+        field: 'terakhir_diubah',
+        headerName: 'Terakhir Diubah',
+        flex: 1,
+        minWidth: 160,
+      },
     ],
     [ActionsCellRenderer, StatusCellRenderer]
   );
@@ -261,7 +446,7 @@ const KebunPage = () => {
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
+        <div className="flex flex-col gap-3 py-3 sm:gap-4 sm:py-4">
           {/* === HEADER === */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading
@@ -276,6 +461,7 @@ const KebunPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
+                  onClear={() => setSearch('')}
                   placeholder="Cari..."
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
@@ -311,7 +497,7 @@ const KebunPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
+                  onClick={handleExportExcel}
                 />
                 <Button
                   onClick={() => router.push('/traceability/kebun/tambah')}
@@ -352,6 +538,19 @@ const KebunPage = () => {
           />
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showModalConfirmDeleteKebun}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteKebun}
+        title="HAPUS DATA KEBUN"
+        itemName={selectedKebunToDelete?.id_kebun || 'kebun'}
+        message={`Apakah Anda yakin ingin menghapus data kebun dengan ID ${selectedKebunToDelete?.id_kebun}?`}
+        confirmText="Ya, Hapus"
+        cancelText="Batalkan"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

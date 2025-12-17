@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect,useState } from 'react';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -8,13 +8,20 @@ import Button from '@/components/atoms/Button';
 import DataPemetaan from '@/components/organisms/KebunForm/DataPemetaan';
 import { updateKebunPeta } from '@/services/kebun';
 
-const Pemetaan = ({ idKebun, kebunData, onNext, onPrevious, onCancel, isSubmitting }) => {
+const Pemetaan = ({
+  idKebun,
+  kebunData,
+  onNext,
+  onPrevious,
+  onCancel,
+  isSubmitting,
+}) => {
   // Convert existing coordinate data to the format expected by DataPemetaan
   const getInitialCoordinates = () => {
     if (kebunData?.geom?.coordinates?.[0]) {
-      return kebunData.geom.coordinates[0].map(coord => ({
+      return kebunData.geom.coordinates[0].map((coord) => ({
         lat: coord[1],
-        lng: coord[0]
+        lng: coord[0],
       }));
     }
     return [];
@@ -22,11 +29,12 @@ const Pemetaan = ({ idKebun, kebunData, onNext, onPrevious, onCancel, isSubmitti
 
   // Prepare data structure for DataPemetaan component
   const pemetaanData = {
-    peta: kebunData?.geom ? {
-      geom: kebunData.geom
-    } : null
+    peta: kebunData?.geom
+      ? {
+          geom: kebunData.geom,
+        }
+      : null,
   };
-
 
   const validationSchema = Yup.object().shape({
     peta: Yup.array().min(1, 'Harap tambahkan koordinat untuk pemetaan'),
@@ -37,10 +45,19 @@ const Pemetaan = ({ idKebun, kebunData, onNext, onPrevious, onCancel, isSubmitti
       peta: getInitialCoordinates(),
     },
     validationSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       await handleSubmit(values);
     },
   });
+
+  // Update formik values when kebunData changes (e.g., after successful submission)
+  useEffect(() => {
+    const coordinates = getInitialCoordinates();
+    if (coordinates.length > 0) {
+      formik.setFieldValue('peta', coordinates);
+    }
+  }, [kebunData]);
 
   const handleSubmit = async (values) => {
     try {
@@ -55,7 +72,7 @@ const Pemetaan = ({ idKebun, kebunData, onNext, onPrevious, onCancel, isSubmitti
       }
 
       // Convert coordinates to GeoJSON format
-      const polygonCoords = values.peta.map(coord => [coord.lng, coord.lat]);
+      const polygonCoords = values.peta.map((coord) => [coord.lng, coord.lat]);
       if (polygonCoords.length > 0) {
         polygonCoords.push(polygonCoords[0]); // Close the polygon
       }
@@ -63,14 +80,14 @@ const Pemetaan = ({ idKebun, kebunData, onNext, onPrevious, onCancel, isSubmitti
       const petaData = {
         petani_id: kebunData?.petani_id || 1, // Use petani_id from kebun data
         geom: {
-          type: "Polygon",
-          coordinates: [polygonCoords]
-        }
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
       };
 
       await updateKebunPeta(idKebun, petaData);
       toast.success('Data pemetaan berhasil disimpan');
-      
+
       // Call onNext to proceed to next step
       await onNext(values);
     } catch (error) {
@@ -83,11 +100,7 @@ const Pemetaan = ({ idKebun, kebunData, onNext, onPrevious, onCancel, isSubmitti
     <div className="space-y-6">
       <div className="rounded-lg border border-gray-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">PEMETAAN</h3>
-        <DataPemetaan
-          data={pemetaanData}
-          formik={formik}
-          mode="create"
-        />
+        <DataPemetaan data={pemetaanData} formik={formik} mode="create" />
         <div className="mt-4 flex justify-between gap-2">
           <div className="flex gap-2">
             <Button

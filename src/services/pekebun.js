@@ -12,6 +12,14 @@ export const getDetailKebun = (idKebun) => api.get(`/kebun/detail/${idKebun}/`);
 export const getLampiranKebun = (idKebun) =>
   api.get(`/kebun/lampiran/detail/${idKebun}/`);
 
+export const exportKebunToExcel = (params = '') => {
+  return api.get(`/kebun/list/download/?${params}`, {
+    responseType: 'blob',
+  });
+};
+
+export const deleteKebun = (id) => api.delete(`/kebun/delete/${id}/`);
+
 export const createPekebun = (payload) =>
   api.post(`/pekebun/create/`, null, payload);
 export const editPekebun = (idPekebun, payload) =>

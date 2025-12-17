@@ -87,6 +87,26 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
     }
   };
 
+  // Update coords when data prop changes (e.g., after successful submission)
+  useEffect(() => {
+    if (data?.peta?.geom?.coordinates?.[0]) {
+      const newCoords = data.peta.geom.coordinates[0].map((coord) => ({
+        lat: coord[1],
+        lng: coord[0],
+      }));
+      // Only update if coords are different to avoid unnecessary re-renders
+      const currentCoordsStr = JSON.stringify(coords);
+      const newCoordsStr = JSON.stringify(newCoords);
+      if (currentCoordsStr !== newCoordsStr) {
+        setCoords(newCoords);
+      }
+    } else if (!data?.peta?.geom && coords.length > 0) {
+      // Clear coords if data is cleared
+      setCoords([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.peta?.geom]);
+
   useEffect(() => {
     formik?.setValues({ ...formik.values, peta: coords });
   }, [coords]);

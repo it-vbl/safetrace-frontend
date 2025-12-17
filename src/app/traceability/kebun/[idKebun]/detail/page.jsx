@@ -224,7 +224,7 @@ const DetailKebunPage = () => {
             />
             <BorderBottomColData
               label="Luas Kebun (Ha)"
-              value={kebunData.luas_kebun}
+              value={kebunData.luas}
             />
 
             {/* Row 2 */}
@@ -252,13 +252,13 @@ const DetailKebunPage = () => {
             {/* Row 3 */}
             <BorderBottomColData
               label="No. Legalitas"
-              value={kebunData.no_legalitas}
+              value={kebunData.nomor_legalitas}
             />
             <BorderBottomColData
               label="Pemilik Legalitas"
               value={kebunData.pemilik_legalitas}
             />
-            <BorderBottomColData label="STDB" value={kebunData.stdb} />
+            <BorderBottomColData label="STDB" value={kebunData.nomor_stdb} />
           </div>
         </section>
 
@@ -266,61 +266,79 @@ const DetailKebunPage = () => {
         <section className="rounded border border-gray-300 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">PETA</h3>
-            <div className="flex gap-3">
-              <Link
-                href={`/kebun/${id}/unduh-shp`}
-                className="text-sm font-medium text-green-700 underline hover:text-green-800"
-              >
-                Unduh SHP
-              </Link>
+            {kebunData?.geom && (
+              <div className="flex gap-3">
+                <Link
+                  href={`/kebun/${id}/unduh-shp`}
+                  className="text-sm font-medium text-green-700 underline hover:text-green-800"
+                >
+                  Unduh SHP
+                </Link>
+                <button
+                  onClick={() => setShowEditPetaModal(true)}
+                  className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+                >
+                  Ubah Data
+                </button>
+              </div>
+            )}
+            {!kebunData?.geom && (
               <button
                 onClick={() => setShowEditPetaModal(true)}
                 className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
               >
-                Ubah Data
+                Tambah Data
               </button>
-            </div>
+            )}
           </div>
 
-          <div className="h-96 w-full overflow-hidden rounded border bg-gray-100">
-            <Map
-              mapClassName="h-full w-full"
-              polygons={kebunData?.geom}
-              position={[
-                kebunData?.titik_koordinat?.coordinates[1],
-                kebunData?.titik_koordinat?.coordinates[0],
-              ]}
-              highlightedPolygon={kebunData?.geom?.coordinates?.[0]?.map(
-                (coord) => [coord[1], coord[0]]
-              )}
-              data={[
-                {
-                  id: kebunData.id_kebun,
-                  peta: {
-                    geom: {
-                      coordinates: [
-                        kebunData?.geom?.coordinates?.[0]?.map((coord) => [
-                          coord[1],
-                          coord[0],
-                        ]),
-                      ],
+          {kebunData?.geom ? (
+            <div className="h-96 w-full overflow-hidden rounded border bg-gray-100">
+              <Map
+                mapClassName="h-full w-full"
+                polygons={kebunData?.geom}
+                position={[
+                  kebunData?.titik_koordinat?.coordinates[1],
+                  kebunData?.titik_koordinat?.coordinates[0],
+                ]}
+                highlightedPolygon={kebunData?.geom?.coordinates?.[0]?.map(
+                  (coord) => [coord[1], coord[0]]
+                )}
+                data={[
+                  {
+                    id: kebunData.id_kebun,
+                    peta: {
+                      geom: {
+                        coordinates: [
+                          kebunData?.geom?.coordinates?.[0]?.map((coord) => [
+                            coord[1],
+                            coord[0],
+                          ]),
+                        ],
+                      },
+                      titik_koordinat: kebunData.titik_koordinat,
                     },
-                    titik_koordinat: kebunData.titik_koordinat,
+                    lahan: {
+                      status_lahan_label: 'Milik Sendiri',
+                      luas_lahan: kebunData.luas_kebun,
+                    },
+                    komoditas_info: 'Kelapa Sawit',
+                    pekebun: {
+                      nama: kebunData.nama_petani,
+                    },
                   },
-                  lahan: {
-                    status_lahan_label: 'Milik Sendiri',
-                    luas_lahan: kebunData.luas_kebun,
-                  },
-                  komoditas_info: 'Kelapa Sawit',
-                  pekebun: {
-                    nama: kebunData.nama_petani,
-                  },
-                },
-              ]}
-              showPolygonPopup={true}
-              zoom={15}
-            />
-          </div>
+                ]}
+                showPolygonPopup={true}
+                zoom={15}
+              />
+            </div>
+          ) : (
+            <div className="flex h-96 w-full items-center justify-center rounded border bg-gray-50">
+              <div className="text-center">
+                <p className="text-gray-500">Kebun belum memiliki data peta</p>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* === LAMPIRAN SECTION === */}

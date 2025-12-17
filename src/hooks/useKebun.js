@@ -10,6 +10,7 @@ const useKebun = ({
   rspo = '',
   ispo = '',
   legalitas = '',
+  petani_id = '',
 } = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,6 +28,7 @@ const useKebun = ({
       if (rspo) params.set('is_rspo', rspo === 'sudah');
       if (ispo) params.set('is_ispo', ispo === 'sudah');
       if (legalitas) params.set('jenis_legalitas', legalitas);
+      if (petani_id) params.set('petani_id', petani_id);
 
       const response = await getListKebun(params.toString());
 

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -8,8 +8,7 @@ import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
 import { getListPetani } from '@/services/petani';
-
-// Options will be fetched from useReferences hook
+import getYearOptions from '@/utils/getYearOptions';
 
 const rspoOptions = [
   { label: 'Sudah', value: 'sudah' },
@@ -21,11 +20,20 @@ const ispoOptions = [
   { label: 'Belum', value: 'belum' },
 ];
 
-// Options will be fetched from useReferences hook
-
-const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => {
+const DetailKebun = ({
+  idKebun,
+  kebunData,
+  onNext,
+  onCancel,
+  isSubmitting,
+}) => {
   const [petaniOptions, setPetaniOptions] = useState([]);
-  const { kelompokTani, jenisLegalitas, fetchKelompokTani, fetchJenisLegalitas } = useReferences();
+  const {
+    kelompokTani,
+    jenisLegalitas,
+    fetchKelompokTani,
+    fetchJenisLegalitas,
+  } = useReferences();
 
   // Fetch kelompok tani and jenis legalitas options on component mount
   useEffect(() => {
@@ -35,14 +43,12 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
     if (jenisLegalitas.length === 0) {
       fetchJenisLegalitas();
     }
-  }, [kelompokTani.length, jenisLegalitas.length, fetchKelompokTani, fetchJenisLegalitas]);
-
-  // Debug kelompok tani options
-  useEffect(() => {
-    if (kelompokTani.length > 0) {
-      console.log('Kelompok Tani options:', kelompokTani);
-    }
-  }, [kelompokTani]);
+  }, [
+    kelompokTani.length,
+    jenisLegalitas.length,
+    fetchKelompokTani,
+    fetchJenisLegalitas,
+  ]);
 
   // Fetch petani options when kebunData is loaded (for editing existing kebun)
   useEffect(() => {
@@ -86,15 +92,15 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
         const num = parseFloat(value);
         return !isNaN(num) && num >= 0;
       }),
-    waktu_tanam_month: Yup.string().required('Bulan tanam harus diisi'),
-    waktu_tanam_year: Yup.string().required('Tahun tanam harus diisi'),
-    jumlah_pokok: Yup.string()
-      .required('Jumlah Pokok harus diisi')
-      .test('is-number', 'Jumlah pokok harus berupa angka', (value) => {
+    luas_peta: Yup.string()
+      .required('Luas Peta harus diisi')
+      .test('is-number', 'Luas peta harus berupa angka', (value) => {
         if (!value) return false;
         const num = parseFloat(value);
         return !isNaN(num) && num >= 0;
       }),
+    waktu_tanam_month: Yup.string().required('Bulan tanam harus diisi'),
+    waktu_tanam_year: Yup.string().required('Tahun tanam harus diisi'),
     rspo: Yup.string().required('RSPO harus diisi'),
     ispo: Yup.string().required('ISPO harus diisi'),
     jenis_legalitas: Yup.string().required('Jenis Legalitas harus diisi'),
@@ -110,9 +116,13 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
       petani_id: kebunData?.petani_id?.toString() || '',
       lokasi_kebun: kebunData?.lokasi_kebun || '',
       luas: kebunData?.luas?.toString() || '',
-      waktu_tanam_month: kebunData?.waktu_tanam ? kebunData.waktu_tanam.split('-')[1] : '',
-      waktu_tanam_year: kebunData?.waktu_tanam ? kebunData.waktu_tanam.split('-')[0] : '',
-      jumlah_pokok: kebunData?.jumlah_pokok?.toString() || '',
+      luas_peta: kebunData?.luas_peta?.toString() || '',
+      waktu_tanam_month: kebunData?.waktu_tanam
+        ? kebunData.waktu_tanam.split('-')[1]
+        : '',
+      waktu_tanam_year: kebunData?.waktu_tanam
+        ? kebunData.waktu_tanam.split('-')[0]
+        : '',
       rspo: kebunData?.is_rspo ? 'sudah' : 'belum',
       ispo: kebunData?.is_ispo ? 'sudah' : 'belum',
       jenis_legalitas: kebunData?.jenis_legalitas || '',
@@ -122,7 +132,7 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log("CHECK BEFORE ON NEXT", values);
+      console.log('CHECK BEFORE ON NEXT', values);
       await onNext(values);
     },
   });
@@ -137,9 +147,13 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
         petani_id: kebunData.petani_id?.toString() || '',
         lokasi_kebun: kebunData.lokasi_kebun || '',
         luas: kebunData.luas?.toString() || '',
-        waktu_tanam_month: kebunData.waktu_tanam ? kebunData.waktu_tanam.split('-')[1] : '',
-        waktu_tanam_year: kebunData.waktu_tanam ? kebunData.waktu_tanam.split('-')[0] : '',
-        jumlah_pokok: kebunData.jumlah_pokok?.toString() || '',
+        luas_peta: kebunData.luas_peta?.toString() || '',
+        waktu_tanam_month: kebunData.waktu_tanam
+          ? kebunData.waktu_tanam.split('-')[1]
+          : '',
+        waktu_tanam_year: kebunData.waktu_tanam
+          ? kebunData.waktu_tanam.split('-')[0]
+          : '',
         rspo: kebunData.is_rspo ? 'sudah' : 'belum',
         ispo: kebunData.is_ispo ? 'sudah' : 'belum',
         jenis_legalitas: kebunData.jenis_legalitas || '',
@@ -153,56 +167,44 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
   // Handle kelompok tani change
   const handleKelompokTaniChange = (e) => {
     const value = e.target.value;
-    console.log('Kelompok Tani selected:', value);
-    
+
     // Use setFieldValue to ensure the value is properly set
     formik.setFieldValue('kelompok_tani', value);
     formik.setFieldTouched('kelompok_tani', false);
 
     console.log('Current formik values:', formik.values);
-    
+
     // Reset petani selection and fetch new petani options
     formik.setFieldValue('petani_id', '');
-    // // Clear any existing petani validation errors
-    // if (formik.errors.petani_id) {
-    //   formik.setFieldError('petani_id', '');
-    // }
-    // // Clear kelompok tani validation error
-    // if (formik.errors.kelompok_tani) {
-    //   formik.setFieldError('kelompok_tani', '');
-    // }
-    
+
     fetchPetaniByKelompok(value);
   };
 
   const handleSubmit = async () => {
-    console.log('Form values before validation:', formik.values);
-    console.log('Form errors before validation:', formik.errors);
-    
     // Custom validation for petani field
     const errors = await formik.validateForm();
-    
+
     // If kelompok tani is selected but no petani options are loaded yet, wait a bit
     if (formik.values.kelompok_tani && petaniOptions.length === 0) {
-      console.log('Waiting for petani options to load...');
       return; // Don't submit yet, wait for options to load
     }
-    
+
     // If kelompok tani is selected and petani options are available but no petani selected
-    if (formik.values.kelompok_tani && petaniOptions.length > 0 && !formik.values.petani_id) {
+    if (
+      formik.values.kelompok_tani &&
+      petaniOptions.length > 0 &&
+      !formik.values.petani_id
+    ) {
       formik.setFieldError('petani_id', 'Nama Petani harus diisi');
       return;
     }
-    
+
     if (Object.keys(errors).length === 0) {
-      console.log("CHECK BEFORE ON NEXT", formik.values);
       await onNext(formik.values);
     } else {
       console.log('Validation failed:', errors);
     }
   };
-
-  console.log('Current formik values:', formik.values, formik.errors, formik.touched);
 
   return (
     <div className="space-y-6">
@@ -272,11 +274,12 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
             isRequired
           />
           <InputText
-            label="Jumlah Pokok"
-            name="jumlah_pokok"
-            placeholder="Masukan Jumlah Pokok"
+            label="Luas Kebun (Ha)"
+            name="luas_peta"
+            placeholder="Masukan Luas Kebun"
             type="number"
-            value={formik.values.jumlah_pokok}
+            step="0.01"
+            value={formik.values.luas_peta}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             errors={formik.errors}
@@ -316,13 +319,7 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
               label=""
               name="waktu_tanam_year"
               placeholder="Tahun"
-              options={[
-                { label: '2020', value: '2020' },
-                { label: '2021', value: '2021' },
-                { label: '2022', value: '2022' },
-                { label: '2023', value: '2023' },
-                { label: '2024', value: '2024' },
-              ]}
+              options={getYearOptions(2000).reverse()}
               value={formik.values.waktu_tanam_year}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -407,7 +404,7 @@ const DetailKebun = ({ idKebun, kebunData, onNext, onCancel, isSubmitting }) => 
             isRequired
           />
         </div>
-        
+
         <div className="mt-4 flex justify-between gap-2">
           <Button
             type="button"

@@ -99,7 +99,7 @@ const DataPabrik = ({
   }, []);
 
   // Handle pabrik selection
-  const handlePabrikChange = (e) => {
+  const handlePabrikChange = async (e) => {
     const selectedId = e.target.value;
     setSelectedPabrikId(selectedId);
 
@@ -118,21 +118,34 @@ const DataPabrik = ({
         (p) => p.id === Number(selectedId)
       );
       if (selectedPabrik) {
-        // Prefill form with selected pabrik data
-        formik.setValues({
-          pabrik_penerima: selectedPabrik.nama,
-          provinsi: String(selectedPabrik.provinsi),
-          kabupaten: String(selectedPabrik.kabupaten),
-          kecamatan: String(selectedPabrik.kecamatan),
-          alamat: selectedPabrik.alamat || '',
-        });
+        // Set pabrik name first
+        formik.setFieldValue('pabrik_penerima', selectedPabrik.nama);
+        formik.setFieldValue('alamat', selectedPabrik.alamat || '');
 
-        // Fetch dependent wilayah data
+        // Fetch and set provinsi, then kabupaten, then kecamatan in sequence
         if (selectedPabrik.provinsi) {
-          fetchListKota(selectedPabrik.provinsi);
-        }
-        if (selectedPabrik.kabupaten) {
-          fetchListKecamatan(selectedPabrik.kabupaten);
+          const provinsiValue = String(selectedPabrik.provinsi);
+          formik.setFieldValue('provinsi', provinsiValue);
+
+          // Fetch kabupaten list for the selected provinsi
+          await fetchListKota(selectedPabrik.provinsi);
+
+          // After kabupaten list is loaded, set kabupaten value
+          if (selectedPabrik.kabupaten) {
+            const kabupatenValue = String(selectedPabrik.kabupaten);
+            formik.setFieldValue('kabupaten', kabupatenValue);
+
+            // Fetch kecamatan list for the selected kabupaten
+            await fetchListKecamatan(selectedPabrik.kabupaten);
+
+            // After kecamatan list is loaded, set kecamatan value
+            if (selectedPabrik.kecamatan) {
+              formik.setFieldValue(
+                'kecamatan',
+                String(selectedPabrik.kecamatan)
+              );
+            }
+          }
         }
       }
     } else {
@@ -169,24 +182,47 @@ const DataPabrik = ({
   useEffect(() => {
     if (formik.values.provinsi) {
       fetchListKota(formik.values.provinsi);
-      // Reset kabupaten and kecamatan when provinsi changes
-      if (pabrikData?.provinsi !== formik.values.provinsi) {
+      // Only reset kabupaten and kecamatan if provinsi changed and it's not from selecting an existing pabrik
+      // Check if we have a selected pabrik that matches this provinsi (to avoid resetting during auto-fill)
+      const selectedPabrik =
+        selectedPabrikId && !selectedPabrikId.toString().startsWith('custom_')
+          ? pabrikList.find((p) => p.id === Number(selectedPabrikId))
+          : null;
+
+      if (
+        pabrikData?.provinsi !== formik.values.provinsi &&
+        !(
+          selectedPabrik &&
+          String(selectedPabrik.provinsi) === formik.values.provinsi
+        )
+      ) {
         formik.setFieldValue('kabupaten', '');
         formik.setFieldValue('kecamatan', '');
       }
     }
-  }, [formik.values.provinsi]);
+  }, [formik.values.provinsi, selectedPabrikId, pabrikList, pabrikData]);
 
   // Fetch kecamatan when kabupaten changes
   useEffect(() => {
     if (formik.values.kabupaten) {
       fetchListKecamatan(formik.values.kabupaten);
-      // Reset kecamatan when kabupaten changes
-      if (pabrikData?.kabupaten !== formik.values.kabupaten) {
+      // Only reset kecamatan if kabupaten changed and it's not from selecting an existing pabrik
+      const selectedPabrik =
+        selectedPabrikId && !selectedPabrikId.toString().startsWith('custom_')
+          ? pabrikList.find((p) => p.id === Number(selectedPabrikId))
+          : null;
+
+      if (
+        pabrikData?.kabupaten !== formik.values.kabupaten &&
+        !(
+          selectedPabrik &&
+          String(selectedPabrik.kabupaten) === formik.values.kabupaten
+        )
+      ) {
         formik.setFieldValue('kecamatan', '');
       }
     }
-  }, [formik.values.kabupaten]);
+  }, [formik.values.kabupaten, selectedPabrikId, pabrikList, pabrikData]);
 
   // Update form values when pabrikData changes
   useEffect(() => {

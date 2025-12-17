@@ -68,6 +68,7 @@ const DrawControl = ({
   disableDrawPolygon = true,
   disableEditDeletePath = true,
   polygons = [],
+  isDisplaySidebar = false,
 }) => {
   const editRef = useRef(null);
   const featureGroupRef = useRef(null);
@@ -87,6 +88,22 @@ const DrawControl = ({
       layerContainer.removeLayer(layer);
     });
   }
+
+  useEffect(() => {
+    const leftContainer = document.querySelector('.leaflet-left');
+    const rightContainer = document.querySelector('.leaflet-right');
+    if (leftContainer && rightContainer) {
+      try {
+        if (!isDisplaySidebar) {
+          // Set left to sidebar width (320px) + left padding (16px) = 336px
+          leftContainer.classList.add('leaflet-left-custom');
+          rightContainer.classList.add('leaflet-right-custom');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [isDisplaySidebar]);
 
   useEffect(() => {
     // removeAllEditControlLayers();
@@ -311,6 +328,7 @@ export default function MyMap(props) {
     activeFilter = '',
     tileLayer = 'osm',
     staticLayers = null,
+    isDisplaySidebar = false,
   } = props;
   const [openPopupId, setOpenPopupId] = useState(null);
 
@@ -323,6 +341,9 @@ export default function MyMap(props) {
       zoom={zoom}
       scrollWheelZoom={true}
       ref={mapRef}
+      whenCreated={(mapInstance) => {
+        mapInstanceRef.current = mapInstance;
+      }}
     >
       {showCustomControls && (
         <>
@@ -341,6 +362,7 @@ export default function MyMap(props) {
           onEditPath={onEditPath}
           onDeleted={onDeletePath}
           polygons={polygons}
+          isDisplaySidebar={isDisplaySidebar}
         />
       )}
       <TileLayer
