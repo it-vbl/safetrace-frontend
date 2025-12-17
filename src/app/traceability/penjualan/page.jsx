@@ -22,8 +22,8 @@ import useReferences from '../../../hooks/useReferences';
 import {
   deletePenjualanAngkutan,
   exportPenjualanAngkutanToCSV,
-  getListPenjualanAngkutan,
   getListPabrik,
+  getListPenjualanAngkutan,
 } from '../../../services/penjualan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);

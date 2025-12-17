@@ -6,13 +6,13 @@ import { useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import Cookies from 'js-cookie';
+import { ChevronDown } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import SipekebunLogo from '@/components/atoms/SipekebunLogo';
 import ProfilePopup from '@/components/molecules/ProfilePopup';
 import { setSidebarOpen } from '@/store/slices/app';
 import { ChevronDownIcon, HamburgerMenuIcon } from '@radix-ui/react-icons';
-import { ChevronDown } from 'lucide-react';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
