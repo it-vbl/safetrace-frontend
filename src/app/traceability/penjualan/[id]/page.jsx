@@ -206,10 +206,10 @@ const PenjualanDetailPage = () => {
     fetchDetail();
   }, [id]);
 
-  const handleEditData = () => {
+  const handleEditData = (tab = 'angkutan') => {
     if (!id) return;
-    // Redirect to edit page with angkutan ID
-    router.push(`/traceability/penjualan/${id}/edit`);
+    // Redirect to edit page with angkutan ID and tab parameter
+    router.push(`/traceability/penjualan/${id}/edit?tab=${tab}`);
   };
 
   const handleTambahPenjualan = () => {
@@ -231,15 +231,15 @@ const PenjualanDetailPage = () => {
           <div className="flex flex-col gap-6">
             <PenjualanDetailAngkutanCard
               data={dataToRender?.angkutan}
-              onEdit={handleEditData}
+              onEdit={() => handleEditData('angkutan')}
             />
             <PenjualanDetailKelompokCard
               data={dataToRender?.kelompok_tani}
-              onEdit={handleEditData}
+              onEdit={() => handleEditData('kelompok_tani')}
             />
             <PenjualanDetailPabrikCard
               data={dataToRender?.pabrik}
-              onEdit={handleEditData}
+              onEdit={() => handleEditData('pabrik')}
             />
           </div>
         ) : (

@@ -86,5 +86,6 @@ export const getPetaniLink = (anggota) => {
   if (!anggota || typeof anggota === 'string') return null;
   const petaniId = anggota.id_petani || anggota.id;
   if (!petaniId) return null;
-  return `/traceability/petani/${petaniId}`;
+  // Redirect to root page with petani_id and openModal params to show Data Kebun modal
+  return `/?openModal=dataKebun&petani_id=${petaniId}`;
 };

@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
-import DatePicker from '@/components/molecules/DatePicker';
+import DateRange from '@/components/molecules/DateRange';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
@@ -20,9 +20,10 @@ import Pagination from '@/components/organisms/Pagination';
 
 import useReferences from '../../../hooks/useReferences';
 import {
-  deletePenjualan,
-  exportPenjualanToExcel,
+  deletePenjualanAngkutan,
+  exportPenjualanAngkutanToCSV,
   getListPenjualanAngkutan,
+  getListPabrik,
 } from '../../../services/penjualan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -34,7 +35,10 @@ const PenjualanPage = () => {
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
   const [selectedPabrik, setSelectedPabrik] = useState(null);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDateRange, setSelectedDateRange] = useState({
+    startDate: '',
+    endDate: '',
+  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -47,17 +51,33 @@ const PenjualanPage = () => {
     useState(false);
   const [selectedPenjualanToDelete, setSelectedPenjualanToDelete] =
     useState(null);
-
-  // Mock pabrik options - replace with actual API call if needed
-  const pabrikOptions = [
-    { label: 'Pabrik A', value: 'pabrik-a' },
-    { label: 'Pabrik B', value: 'pabrik-b' },
-    { label: 'Pabrik C', value: 'pabrik-c' },
-  ];
+  const [pabrikOptions, setPabrikOptions] = useState([]);
 
   useEffect(() => {
     fetchKelompokTani();
+    fetchPabrikOptions();
   }, [fetchKelompokTani]);
+
+  const fetchPabrikOptions = async () => {
+    try {
+      const response = await getListPabrik();
+      if (
+        response?.status === 200 &&
+        (response?.data?.status === 'success' || response?.data?.data)
+      ) {
+        const data =
+          response?.data?.data?.results || response?.data?.results || [];
+        const options = data.map((pabrik) => ({
+          label: pabrik.nama,
+          value: pabrik.id?.toString(),
+        }));
+        setPabrikOptions(options);
+      }
+    } catch (error) {
+      console.error('Error fetching pabrik options:', error);
+      setPabrikOptions([]);
+    }
+  };
 
   const kelompokOptions = useMemo(() => {
     return (
@@ -72,7 +92,7 @@ const PenjualanPage = () => {
     page,
     page_size,
     search,
-    kelompok,
+    kelompok_tani,
     pabrik,
     start_date,
     end_date,
@@ -83,7 +103,7 @@ const PenjualanPage = () => {
         page,
         page_size,
         ...(search && { search }),
-        ...(kelompok && { kelompok }),
+        ...(kelompok_tani && { kelompok_tani }),
         ...(pabrik && { pabrik }),
         ...(start_date && { start_date }),
         ...(end_date && { end_date }),
@@ -111,9 +131,7 @@ const PenjualanPage = () => {
           berat_timbangan: item?.berat_timbangan
             ? Number(item.berat_timbangan).toLocaleString('id-ID')
             : '0',
-          tarra: item?.tarra
-            ? Number(item.tarra).toLocaleString('id-ID')
-            : '0',
+          tarra: item?.tarra ? Number(item.tarra).toLocaleString('id-ID') : '0',
           t_potongan_persen: item?.t_potongan_persen || '0',
           t_potongan_kg: item?.t_potongan_kg
             ? Number(item.t_potongan_kg).toLocaleString('id-ID')
@@ -139,8 +157,7 @@ const PenjualanPage = () => {
       setPenjualanData([]);
       setTotalPenjualan(0);
       toast.error(
-        error?.response?.data?.message ||
-          'Gagal memuat data penjualan angkutan'
+        error?.response?.data?.message || 'Gagal memuat data penjualan angkutan'
       );
     } finally {
       setLoading(false);
@@ -148,18 +165,18 @@ const PenjualanPage = () => {
   };
 
   useEffect(() => {
-    const startDate = selectedDate
-      ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+    const startDate = selectedDateRange.startDate
+      ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
       : null;
-    const endDate = selectedDate
-      ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+    const endDate = selectedDateRange.endDate
+      ? moment(selectedDateRange.endDate).format('YYYY-MM-DD')
       : null;
 
     fetchPenjualanData({
       page: currentPage,
       page_size: pageSize,
       search,
-      kelompok: selectedKelompok,
+      kelompok_tani: selectedKelompok,
       pabrik: selectedPabrik,
       start_date: startDate,
       end_date: endDate,
@@ -170,7 +187,8 @@ const PenjualanPage = () => {
     search,
     selectedKelompok,
     selectedPabrik,
-    selectedDate,
+    selectedDateRange.startDate,
+    selectedDateRange.endDate,
   ]);
 
   const handleSearchTextChange = useCallback(
@@ -191,14 +209,8 @@ const PenjualanPage = () => {
     setCurrentPage(1);
   };
 
-  const handleDateChange = (e) => {
-    const dateValue = e.target.value;
-    if (dateValue) {
-      // DatePicker expects value in DD-MM-YYYY format for display
-      setSelectedDate(moment(dateValue, 'YYYY-MM-DD').format('DD-MM-YYYY'));
-    } else {
-      setSelectedDate('');
-    }
+  const handleDateRangeChange = (dateRange) => {
+    setSelectedDateRange(dateRange);
     setCurrentPage(1);
   };
 
@@ -220,17 +232,17 @@ const PenjualanPage = () => {
     setShowModalConfirmDeletePenjualan(true);
   };
 
-  const handleExportExcel = async () => {
+  const handleExportCSV = async () => {
     try {
       setLoading(true);
-      const startDate = selectedDate
-        ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+      const startDate = selectedDateRange.startDate
+        ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
         : null;
-      const endDate = selectedDate
-        ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+      const endDate = selectedDateRange.endDate
+        ? moment(selectedDateRange.endDate).format('YYYY-MM-DD')
         : null;
 
-      const response = await exportPenjualanToExcel({
+      const response = await exportPenjualanAngkutanToCSV({
         search,
         kelompok: selectedKelompok,
         pabrik: selectedPabrik,
@@ -240,21 +252,21 @@ const PenjualanPage = () => {
 
       // Create blob and download
       const blob = new Blob([response.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        type: 'text/csv',
       });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute(
         'download',
-        `penjualan_${moment().format('YYYY-MM-DD')}.xlsx`
+        `penjualan_angkutan_${moment().format('YYYY-MM-DD')}.csv`
       );
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      toast.success('Data berhasil diekspor ke Excel');
+      toast.success('Data berhasil diekspor ke CSV');
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Gagal mengekspor data');
     } finally {
@@ -344,7 +356,7 @@ const PenjualanPage = () => {
     }
 
     try {
-      const res = await deletePenjualan(selectedPenjualanToDelete.id);
+      const res = await deletePenjualanAngkutan(selectedPenjualanToDelete.id);
       if (
         res?.data?.status === 'success' ||
         res?.status === 200 ||
@@ -352,17 +364,18 @@ const PenjualanPage = () => {
       ) {
         toast.success('Data penjualan berhasil dihapus');
         setShowModalConfirmDeletePenjualan(false);
-        const startDate = selectedDate
-          ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+        setSelectedPenjualanToDelete(null);
+        const startDate = selectedDateRange.startDate
+          ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
           : null;
-        const endDate = selectedDate
-          ? moment(selectedDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+        const endDate = selectedDateRange.endDate
+          ? moment(selectedDateRange.endDate).format('YYYY-MM-DD')
           : null;
         fetchPenjualanData({
           page: currentPage,
           page_size: pageSize,
           search,
-          kelompok: selectedKelompok,
+          kelompok_tani: selectedKelompok,
           pabrik: selectedPabrik,
           start_date: startDate,
           end_date: endDate,
@@ -371,6 +384,7 @@ const PenjualanPage = () => {
         toast.error(res?.data?.message || 'Data penjualan gagal dihapus');
       }
     } catch (error) {
+      console.error('Error deleting penjualan:', error);
       toast.error(
         error?.response?.data?.message || 'Data penjualan gagal dihapus'
       );
@@ -421,13 +435,12 @@ const PenjualanPage = () => {
                   onChange={handlePabrikChange}
                 />
 
-                <div className="w-full sm:w-auto lg:w-[152px]">
-                  <DatePicker
-                    placeholder="Custom Date"
-                    name="custom_date"
-                    value={selectedDate}
-                    onChange={handleDateChange}
-                    inputContainerClassName="!h-[42px]"
+                <div className="w-full sm:w-auto lg:w-[280px]">
+                  <DateRange
+                    value={selectedDateRange}
+                    onChange={handleDateRangeChange}
+                    placeholder="Pilih Rentang Tanggal"
+                    className="!h-[42px]"
                   />
                 </div>
               </div>
@@ -435,9 +448,10 @@ const PenjualanPage = () => {
               {/* Action Buttons - Responsive */}
               <div className="flex flex-row items-center justify-end gap-2">
                 <Button
-                  onClick={handleExportExcel}
+                  onClick={handleExportCSV}
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
+                  title="Export CSV"
                 />
                 <Button
                   onClick={() => router.push('/traceability/penjualan/tambah')}

@@ -62,7 +62,8 @@ export const getDetailPenjualanPabrik = (id) =>
 export const getListPabrik = (params = {}) =>
   api.get(`/penjualan/pabrik/list/`, { params });
 
-export const deletePenjualan = (id) => api.delete(`/penjualan/delete/${id}/`);
+export const deletePenjualanAngkutan = (id) =>
+  api.delete(`/penjualan/angkutan/delete/${id}/`);
 
 // *** POST ***
 
@@ -84,13 +85,16 @@ export const updatePenjualan = (id, payload) =>
 export const updateAngkutanPabrik = (idAngkutan, payload) =>
   api.patch(`/penjualan/angkutan/update-pabrik/${idAngkutan}/`, {}, payload);
 
+export const updatePenjualanAngkutan = (id, payload) =>
+  api.post(`/penjualan/angkutan/update/${id}/`, null, payload);
+
 // *** EXPORT ***
 
-export const exportPenjualanToExcel = (params = {}) => {
+export const exportPenjualanAngkutanToCSV = (params = {}) => {
   const formattedParams = {
     ...params,
     ...(params.kelompok && {
-      kelompok: params.kelompok,
+      kelompok_tani: params.kelompok,
     }),
     ...(params.pabrik && {
       pabrik: params.pabrik,
@@ -106,7 +110,7 @@ export const exportPenjualanToExcel = (params = {}) => {
     }),
   };
 
-  return api.get(`/penjualan/export/`, {
+  return api.get(`/penjualan/angkutan/list/download/`, {
     params: formattedParams,
     responseType: 'blob',
   });

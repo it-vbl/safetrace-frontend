@@ -37,14 +37,6 @@ import theme from '@/utils/tailwindTheme';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
-
-const layerFilter = [
-  { label: 'Peta IUP', value: 'peta-iup' },
-  { label: 'Batas Desa', value: 'batas-desa' },
-  { label: 'Batas Kecamatan', value: 'batas-kecamatan' },
-  { label: 'Kawasan Hutan', value: 'kawasan-hutan' },
-];
-
 const MapDashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -67,6 +59,7 @@ const MapDashboard = () => {
   const [filterRSPO, setFilterRSPO] = useState('');
   const [filterISPO, setFilterISPO] = useState('');
   const [filterLegalitas, setFilterLegalitas] = useState('');
+  const [filterPetaniId, setFilterPetaniId] = useState('');
 
   // Alert table states
   const [alertSearchText, setAlertSearchText] = useState('');
@@ -107,6 +100,7 @@ const MapDashboard = () => {
     page: currentPage,
     search: searchText,
   });
+  const petaniIdFromUrl = searchParams.get('petani_id');
   const {
     kebunList,
     loading: loadingKebun,
@@ -122,6 +116,7 @@ const MapDashboard = () => {
     rspo: filterRSPO,
     ispo: filterISPO,
     legalitas: filterLegalitas,
+    petani_id: filterPetaniId || petaniIdFromUrl || '',
   });
   const {
     stdbStatuses,
@@ -481,7 +476,11 @@ const MapDashboard = () => {
   const Map = useMemo(
     () =>
       dynamic(() => import('@/components/organisms/MapView'), {
-        loading: () => <p>A map is loading</p>,
+        loading: () => (
+          <div className="h-[calc(100vh-72px)] w-[100vw] bg-primary/20 flex items-center justify-center">
+            Memuat Peta
+          </div>
+        ),
         ssr: false,
       }),
     []
@@ -637,8 +636,19 @@ const MapDashboard = () => {
   useEffect(() => {
     const openModal = searchParams.get('openModal');
     const kelompokName = searchParams.get('kelompokName');
+    const petaniId = searchParams.get('petani_id');
 
-    if (
+    // Handle petani_id parameter
+    if (openModal === 'dataKebun' && petaniId) {
+      // Open the modal
+      setShowTable(true);
+      // Set the petani_id filter (will be passed to useKebun)
+      setFilterPetaniId(petaniId);
+      // Clear query parameters from URL
+      router.replace('/', { scroll: false });
+    }
+    // Handle kelompokName parameter (existing logic)
+    else if (
       openModal === 'dataKebun' &&
       kelompokName &&
       kelompokTani &&
@@ -682,6 +692,8 @@ const MapDashboard = () => {
     filterRSPO,
     filterISPO,
     filterLegalitas,
+    filterPetaniId,
+    petaniIdFromUrl,
   ]);
 
   return (
@@ -712,6 +724,7 @@ const MapDashboard = () => {
           activeFilter={activeFilter}
           tileLayer={activeTile}
           staticLayers={staticLayersDetail}
+          isDisplaySidebar={true}
         />
         <DataPekebunTable
           showTable={showTable}

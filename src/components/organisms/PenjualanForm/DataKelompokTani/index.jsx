@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -314,8 +314,10 @@ const DataKelompokTani = ({
   onCancel,
   isSubmitting,
 }) => {
+  const params = useParams();
   const searchParams = useSearchParams();
-  const idAngkutan = searchParams.get('idAngkutan');
+  // Get idAngkutan from URL path parameter [id] instead of query params
+  const idAngkutan = params?.id || searchParams.get('idAngkutan');
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [kelompokPenyetorList, setKelompokPenyetorList] = useState([
     { id: Date.now(), kelompok_penyetor: null, anggota_petani: [] },
