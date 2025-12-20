@@ -15,6 +15,7 @@ export const referensiSlice = createSlice({
     eksPlasma: [],
     userRoles: [],
     statusPerkawinan: [],
+    statusPekerja: [],
     kelompokTani: [],
     sumberKontak: [],
     jenisLegalitas: [],
@@ -56,6 +57,9 @@ export const referensiSlice = createSlice({
     setStatusPerkawinan: (state, action) => {
       state.statusPerkawinan = action.payload;
     },
+    setStatusPekerja: (state, action) => {
+      state.statusPekerja = action.payload;
+    },
     setKelompokTani: (state, action) => {
       state.kelompokTani = action.payload;
     },
@@ -81,6 +85,7 @@ export const {
   setEksPlasma,
   setUserRoles,
   setStatusPerkawinan,
+  setStatusPekerja,
   setKelompokTani,
   setSumberKontak,
   setJenisLegalitas,

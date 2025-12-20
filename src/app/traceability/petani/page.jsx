@@ -6,6 +6,7 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
+import moment from 'moment';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -17,7 +18,11 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 
 import useReferences from '../../../hooks/useReferences';
-import { deletePetani, getListPetani } from '../../../services/petani';
+import {
+  deletePetani,
+  downloadListPetani,
+  getListPetani,
+} from '../../../services/petani';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -86,22 +91,27 @@ const PetaniPage = () => {
           id: item?.id,
           id_petani: item?.id_petani,
           nama_petani: item?.nama,
-          jenis_kelamin:
-            item?.jns_kelamin === '1'
-              ? 'Laki - Laki'
-              : item?.jns_kelamin === '2'
-              ? 'Perempuan'
-              : '-',
+          jenis_kelamin: item?.jns_kelamin_label ?? '-',
           kelompok: item?.nama_kelompok ?? '-',
           no_ktp: item?.no_ktp ?? '-',
           no_kk: item?.no_kk ?? '-',
-          status_pernikahan:
-            item?.status_perkawinan === '1'
-              ? 'Belum Kawin'
-              : item?.status_perkawinan === '2'
-              ? 'Kawin'
-              : '-',
+          status_pernikahan: item?.status_perkawinan_label ?? '-',
           no_nib: item?.no_nib ?? '-',
+          tgl_terbit_sppl: item?.tgl_terbit_sppl
+            ? `${item?.tempat ? item.tempat + ', ' : ''}${moment(
+                item.tgl_terbit_sppl
+              ).format('DD-MM-YYYY')}`
+            : '-',
+          tanggal_bergabung: item?.tanggal_bergabung
+            ? moment(item.tanggal_bergabung).format('DD/MM/YYYY')
+            : '-',
+          tanggal_keluar: item?.tanggal_keluar
+            ? moment(item.tanggal_keluar).format('DD/MM/YYYY')
+            : '-',
+          keanggotaan: item?.keanggotaan,
+          updated_at: item?.updated_at
+            ? moment(item.updated_at).format('HH:mm DD-MM-YYYY')
+            : '-',
         }));
 
         setPetaniData(mapped);
@@ -165,6 +175,36 @@ const PetaniPage = () => {
     setShowModalConfirmDeletePetani(true);
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const params = {
+        ...(search && { search }),
+        ...(selectedKeanggotaan !== null &&
+          selectedKeanggotaan !== undefined && {
+            keanggotaan: selectedKeanggotaan,
+          }),
+        ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
+      };
+
+      const response = await downloadListPetani(params);
+
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `data-petani-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      toast.error('Gagal mengunduh data');
+    }
+  };
+
   const ActionsCellRenderer = useCallback((e) => {
     return (
       <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
@@ -194,45 +234,98 @@ const PetaniPage = () => {
         minWidth: 100,
         maxWidth: 150,
         suppressSizeToFit: false,
+        pinned: 'left',
       },
       {
         field: 'id_petani',
         headerName: 'Id Petani',
+        minWidth: 150,
         flex: 1,
       },
       {
         field: 'nama_petani',
         headerName: 'Nama Petani',
+        minWidth: 150,
         flex: 1,
       },
       {
         field: 'jenis_kelamin',
         headerName: 'Jenis Kelamin',
+        minWidth: 120,
         flex: 1,
       },
       {
         field: 'kelompok',
         headerName: 'Kelompok',
+        minWidth: 150,
         flex: 1,
       },
       {
         field: 'no_ktp',
         headerName: 'No. KTP',
+        minWidth: 150,
         flex: 1,
       },
       {
         field: 'no_kk',
         headerName: 'No. KK',
+        minWidth: 150,
         flex: 1,
       },
       {
         field: 'status_pernikahan',
         headerName: 'Status Pernikahan',
+        minWidth: 150,
         flex: 1,
       },
       {
         field: 'no_nib',
         headerName: 'No. NIB',
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: 'tgl_terbit_sppl',
+        headerName: 'Terbit SPPL',
+        minWidth: 180,
+        flex: 1,
+      },
+      {
+        field: 'tanggal_bergabung',
+        headerName: 'Tanggal Bergabung',
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: 'tanggal_keluar',
+        headerName: 'Tanggal Keluar',
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: 'keanggotaan',
+        headerName: 'Keanggotaan',
+        minWidth: 130,
+        cellRenderer: (params) => {
+          const isActive = params.value;
+          return (
+            <div
+              className={`w-fit rounded px-2 py-1 text-center text-xs font-bold ${
+                isActive
+                  ? 'bg-green-100 text-green-600'
+                  : 'bg-red-100 text-red-600'
+              }`}
+            >
+              {isActive ? 'Aktif' : 'Keluar'}
+            </div>
+          );
+        },
+        flex: 1,
+      },
+      {
+        field: 'updated_at',
+        headerName: 'Terakhir Diubah',
+        minWidth: 160,
         flex: 1,
       },
     ],
@@ -336,6 +429,7 @@ const PetaniPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
+                  onClick={handleExportExcel}
                 />
                 <Button
                   onClick={() => router.push('/traceability/petani/tambah')}

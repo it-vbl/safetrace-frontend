@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -51,6 +51,55 @@ const EditLampiranPetaniModal = ({
     enableReinitialize: true,
   });
 
+  const getExistingFile = (url, label) => {
+    if (!url) return null;
+    return {
+      name: url.split('/').pop() || label,
+      size: 0,
+      uploadDate: new Date().toISOString(),
+      value: url,
+    };
+  };
+
+  const ktpFileData = useMemo(
+    () =>
+      ktpFile
+        ? {
+            name: ktpFile.name,
+            size: ktpFile.size,
+            uploadDate: new Date().toISOString(),
+            value: ktpFile,
+          }
+        : getExistingFile(initialValues.file_ktp, 'File KTP saat ini'),
+    [ktpFile, initialValues.file_ktp]
+  );
+
+  const kkFileData = useMemo(
+    () =>
+      kkFile
+        ? {
+            name: kkFile.name,
+            size: kkFile.size,
+            uploadDate: new Date().toISOString(),
+            value: kkFile,
+          }
+        : getExistingFile(initialValues.file_kk, 'File KK saat ini'),
+    [kkFile, initialValues.file_kk]
+  );
+
+  const nibFileData = useMemo(
+    () =>
+      nibFile
+        ? {
+            name: nibFile.name,
+            size: nibFile.size,
+            uploadDate: new Date().toISOString(),
+            value: nibFile,
+          }
+        : getExistingFile(initialValues.file_nib, 'File NIB saat ini'),
+    [nibFile, initialValues.file_nib]
+  );
+
   return (
     <BaseModal
       open={open}
@@ -60,28 +109,10 @@ const EditLampiranPetaniModal = ({
       className="max-w-4xl"
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 py-4 md:grid-cols-2">
+        <div className="flex flex-col gap-6 py-4">
           <Upload
             label="KTP"
-            file={
-              ktpFile
-                ? {
-                    name: ktpFile.name,
-                    size: ktpFile.size, // Gunakan size asli (number)
-                    uploadDate: new Date().toISOString(),
-                    value: ktpFile,
-                  }
-                : initialValues.file_ktp
-                ? {
-                    name:
-                      initialValues.file_ktp.split('/').pop() ||
-                      'File KTP saat ini',
-                    size: 0, // Default 0 untuk file existing
-                    uploadDate: new Date().toISOString(),
-                    value: initialValues.file_ktp,
-                  }
-                : null
-            }
+            file={ktpFileData}
             onChangeValue={(data) => {
               setKtpFile(data.value);
             }}
@@ -95,25 +126,7 @@ const EditLampiranPetaniModal = ({
 
           <Upload
             label="Kartu Keluarga (KK)"
-            file={
-              kkFile
-                ? {
-                    name: kkFile.name,
-                    size: kkFile.size, // Gunakan size asli (number)
-                    uploadDate: new Date().toISOString(),
-                    value: kkFile,
-                  }
-                : initialValues.file_kk
-                ? {
-                    name:
-                      initialValues.file_kk.split('/').pop() ||
-                      'File KK saat ini',
-                    size: 0, // Default 0 untuk file existing
-                    uploadDate: new Date().toISOString(),
-                    value: initialValues.file_kk,
-                  }
-                : null
-            }
+            file={kkFileData}
             onChangeValue={(data) => {
               setKkFile(data.value);
             }}
@@ -124,30 +137,10 @@ const EditLampiranPetaniModal = ({
             name="file_kk"
             url={initialValues.file_kk}
           />
-        </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Upload
             label="NIB"
-            file={
-              nibFile
-                ? {
-                    name: nibFile.name,
-                    size: nibFile.size, // Gunakan size asli (number)
-                    uploadDate: new Date().toISOString(),
-                    value: nibFile,
-                  }
-                : initialValues.file_nib
-                ? {
-                    name:
-                      initialValues.file_nib.split('/').pop() ||
-                      'File NIB saat ini',
-                    size: 0, // Default 0 untuk file existing
-                    uploadDate: new Date().toISOString(),
-                    value: initialValues.file_nib,
-                  }
-                : null
-            }
+            file={nibFileData}
             onChangeValue={(data) => {
               setNibFile(data.value);
             }}
@@ -158,9 +151,6 @@ const EditLampiranPetaniModal = ({
             name="file_nib"
             url={initialValues.file_nib}
           />
-
-          {/* Empty space to maintain grid layout */}
-          <div></div>
         </div>
 
         <div className="flex flex-col justify-end gap-3 border-t border-gray-200 pt-6 sm:flex-row">

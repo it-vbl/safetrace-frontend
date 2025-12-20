@@ -16,5 +16,6 @@ export const getUserRoles = () => api.get(`/referensi/user-roles/`);
 export const getKelompokTani = () => api.get(`/petani/kelompok-tani/list/`);
 export const getStatusPerkawinan = () =>
   api.get(`/referensi/status-perkawinan/`);
+export const getStatusPekerja = () => api.get(`/referensi/status-pekerja/`);
 export const getSumberKontak = () => api.get(`/referensi/sumber-kontak/`);
 export const getJenisLegalitas = () => api.get(`/referensi/jenis-legalitas/`);

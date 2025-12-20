@@ -23,11 +23,21 @@ export default function Pagination({
   const isDisabled = disabled || loading;
 
   return (
-    <div className={cn('flex flex-row items-center justify-between gap-3 sm:gap-4 py-2 px-2 sm:px-0', className)}>
+    <div
+      className={cn(
+        'flex flex-row items-center justify-between gap-3 px-2 py-2 sm:gap-4 sm:px-0 ',
+        className
+      )}
+    >
       {/* Top section for mobile - rows selector and page info */}
-      <div className='flex  sm:flex-row items-center gap-3 sm:gap-6 w-full sm:w-auto'>
+      <div className="flex w-full items-center gap-3 sm:w-auto sm:flex-row sm:gap-6">
         {showRowsPerPage && (
-          <div className={cn('w-full sm:w-auto', isDisabled && 'pointer-events-none opacity-50')}>
+          <div
+            className={cn(
+              'relative z-20 w-full sm:w-auto',
+              isDisabled && 'pointer-events-none opacity-50'
+            )}
+          >
             <RowsPerPageSelector
               value={pageSize}
               onValueChange={onPageSizeChange}
@@ -36,7 +46,7 @@ export default function Pagination({
             />
           </div>
         )}
-        <div className='w-full sm:w-auto text-center sm:text-left'>
+        <div className="w-full text-center sm:w-auto sm:text-left">
           <PageInfo
             currentPage={currentPage}
             pageSize={pageSize}
@@ -49,11 +59,16 @@ export default function Pagination({
       </div>
 
       {/* Bottom section for mobile - navigation controls */}
-      <div className={cn('sm:w-auto flex justify-center sm:justify-end', isDisabled && 'pointer-events-none opacity-50')}>
-        <NavigationControls 
-          currentPage={currentPage} 
-          totalPages={totalPages} 
-          onPageChange={onPageChange} 
+      <div
+        className={cn(
+          'flex justify-center sm:w-auto sm:justify-end',
+          isDisabled && 'pointer-events-none opacity-50'
+        )}
+      >
+        <NavigationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
         />
       </div>
     </div>

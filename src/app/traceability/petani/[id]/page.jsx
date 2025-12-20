@@ -526,9 +526,9 @@ const TraceabilityPetaniDetail = () => {
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">IDENTITAS</h3>
             <button
-              onClick={() => setIsEditLampiranModalOpen(true)}
+              onClick={() => setIsEditModalOpen(true)}
               className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
-              disabled={updateLampiranLoading}
+              disabled={updateLoading}
             >
               Ubah Data
             </button>

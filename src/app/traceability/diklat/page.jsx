@@ -1,13 +1,13 @@
 'use client';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useFormik } from 'formik';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
+import moment from 'moment';
 import { toast } from 'react-toastify';
-import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
@@ -17,74 +17,107 @@ import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 
+import useReferences from '../../../hooks/useReferences';
+import {
+  downloadListDiklat,
+  getDetailDiklat,
+  getListDiklat,
+  getStatistikDiklat,
+  updateDiklat,
+} from '../../../services/petani';
+
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const kelompokOptions = [
-  { label: 'Bepekaek Besamo', value: 'bepekaek_besamo' },
-  { label: 'Kelompok A', value: 'kelompok_a' },
-  { label: 'Kelompok B', value: 'kelompok_b' },
-];
-
 const statusOption = [
-  { label: 'Sudah', value: 'sudah' },
-  { label: 'Belum', value: 'belum' },
+  { label: 'Sudah', value: true },
+  { label: 'Belum', value: false },
 ];
 
 const DiklatPage = () => {
-  const router = useRouter();
+  const { kelompokTani, fetchKelompokTani } = useReferences();
+
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [diklatData, setDiklatData] = useState([]);
   const [totalDiklat, setTotalDiklat] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+
   const [statistik, setStatistik] = useState({
-    sl: 130,
-    pcRspoIspo: 120,
-    pestisida: 74,
-    k3: 122,
+    sl: 0,
+    pcRspoIspo: 0,
+    pestisida: 0,
+    k3: 0,
     sop: 0,
-    fdg: 43,
+    fdg: 0,
   });
 
-  // Fetch diklat data function
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+
+  const kelompokOptions = useMemo(() => {
+    return (
+      kelompokTani?.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })) || []
+    );
+  }, [kelompokTani]);
+
+  const fetchStatistik = async () => {
+    try {
+      const response = await getStatistikDiklat();
+      if (response?.data?.data) {
+        const data = response.data.data;
+        setStatistik({
+          sl: data.sl?.sudah || 0,
+          pcRspoIspo: data.pnc?.sudah || data.pc_rspo_ispo?.sudah || 0,
+          pestisida: data.pestisida?.sudah || 0,
+          k3: data.k3?.sudah || 0,
+          sop: data.sop?.sudah || 0,
+          fdg: data.pdg?.sudah || data.fdg?.sudah || 0,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch statistics', error);
+    }
+  };
+
   const fetchDiklatData = async ({ page, page_size, search, kelompok }) => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const params = {
+        page,
+        page_size,
+        ...(search && { search }),
+        ...(kelompok && { kelompok_tani: kelompok }),
+      };
 
-      const mockData = Array.from({ length: page_size }, (_, i) => {
-        const id = `001-APKS-001-001`;
-        const jenisKelamin = Math.random() > 0.5 ? 'Laki - Laki' : 'Perempuan';
-        const getRandomStatus = () => (Math.random() > 0.3 ? 'Sudah' : 'Belum');
-
-        return {
-          id_petani: id,
-          nama_petani: 'Agustinus Nery',
-          jenis_kelamin: jenisKelamin,
-          kelompok: 'Bepekaek Besamo',
-          sl: getRandomStatus(),
-          pc_rspo_ispo: getRandomStatus(),
-          pestisida: getRandomStatus(),
-          k3: getRandomStatus(),
-          sop: getRandomStatus(),
-          pdg: getRandomStatus(),
-        };
-      });
-
-      setDiklatData(mockData);
-      setTotalDiklat(500);
+      const response = await getListDiklat(params);
+      if (response?.status === 200) {
+        const data = response?.data?.data;
+        setDiklatData(data?.results || []);
+        setTotalDiklat(Number(data?.count || 0));
+      } else {
+        setDiklatData([]);
+        setTotalDiklat(0);
+      }
     } catch (error) {
       toast.error('Gagal memuat data diklat');
+      setDiklatData([]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStatistik();
+  }, []);
 
   useEffect(() => {
     fetchDiklatData({
@@ -108,11 +141,6 @@ const DiklatPage = () => {
     setCurrentPage(1);
   };
 
-  const handleChangeStatus = (e) => {
-    setSelectedKelompok(e.target.value);
-    setCurrentPage(1);
-  };
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -122,10 +150,123 @@ const DiklatPage = () => {
     setCurrentPage(1);
   };
 
-  const handleUbahClicked = (data) => {
-    // Navigate to edit page or show modal
+  const handleExportExcel = async () => {
+    try {
+      const params = {
+        ...(search && { search }),
+        ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
+      };
+
+      const response = await downloadListDiklat(params);
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `data-diklat-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      toast.error('Gagal mengunduh data');
+    }
+  };
+
+  const {
+    handleSubmit,
+    values,
+    setValues,
+    setFieldValue,
+    isSubmitting,
+    resetForm,
+  } = useFormik({
+    initialValues: {
+      sl: null,
+      pnc: null,
+      pestisida: null,
+      k3: null,
+      sop: null,
+      pdg: null,
+    },
+    onSubmit: async (values, { setSubmitting }) => {
+      if (!selectedId) return;
+
+      try {
+        setSubmitting(true);
+        const payload = {
+          sl: values.sl,
+          pnc: values.pnc,
+          pestisida: values.pestisida,
+          k3: values.k3,
+          sop: values.sop,
+          pdg: values.pdg,
+        };
+
+        const response = await updateDiklat(selectedId, payload);
+
+        if (
+          response?.status === 200 ||
+          response?.status === 204 ||
+          response?.data?.status === 'success'
+        ) {
+          toast.success('Berhasil mengubah data diklat');
+
+          setDiklatData((prev) =>
+            prev.map((item) =>
+              item.id === selectedId ? { ...item, ...payload } : item
+            )
+          );
+
+          setIsOpen(false);
+          resetForm();
+          setSelectedId(null);
+          fetchDiklatData({
+            page: currentPage,
+            page_size: pageSize,
+            search,
+            kelompok: selectedKelompok,
+          });
+          fetchStatistik();
+        } else {
+          toast.error(response?.data?.message || 'Gagal mengubah data');
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || 'Terjadi kesalahan');
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
+
+  const handleUbahClicked = async (data) => {
+    setSelectedId(data.id);
     setIsOpen(true);
-    console.log('Ubah clicked for:', data);
+
+    try {
+      const res = await getDetailDiklat(data.id);
+      if (res?.data?.data) {
+        const detail = res.data.data;
+        setValues({
+          sl: detail.sl,
+          pnc: detail.pnc ?? detail.pc_rspo_ispo,
+          pestisida: detail.pestisida,
+          k3: detail.k3,
+          sop: detail.sop,
+          pdg: detail.pdg ?? detail.fgd,
+        });
+      }
+    } catch (error) {
+      toast.error('Gagal memuat detail data');
+    }
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    resetForm();
+    setSelectedId(null);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -143,7 +284,16 @@ const DiklatPage = () => {
 
   const StatusCellRenderer = useCallback((params) => {
     const status = params.value;
-    const isSuccess = status === 'Sudah';
+    let isSuccess = false;
+    let label = '-';
+
+    if (typeof status === 'boolean') {
+      isSuccess = status;
+      label = status ? 'Sudah' : 'Belum';
+    } else if (typeof status === 'string') {
+      isSuccess = status.toLowerCase() === 'sudah';
+      label = status;
+    }
 
     return (
       <span
@@ -151,7 +301,7 @@ const DiklatPage = () => {
           isSuccess ? 'text-green-600' : 'text-red-600'
         }`}
       >
-        {status}
+        {label}
       </span>
     );
   }, []);
@@ -166,6 +316,7 @@ const DiklatPage = () => {
         minWidth: 70,
         maxWidth: 100,
         suppressSizeToFit: false,
+        pinned: 'left',
       },
       {
         field: 'id_petani',
@@ -199,7 +350,7 @@ const DiklatPage = () => {
         cellRenderer: StatusCellRenderer,
       },
       {
-        field: 'pc_rspo_ispo',
+        field: 'pnc',
         headerName: 'P&C (RSPO/ISPO)',
         flex: 1,
         minWidth: 130,
@@ -253,67 +404,6 @@ const DiklatPage = () => {
     []
   );
 
-  const schemaValidation = Yup.object().shape({
-    nama_device: Yup.string().required('Nama device harus diisi'),
-    no_handphone: Yup.string().required('No handphone harus diisi'),
-  });
-
-  const {
-    handleSubmit,
-    values,
-    touched,
-    errors,
-    handleBlur,
-    handleChange,
-    isSubmitting,
-    resetForm,
-  } = useFormik({
-    initialValues: {
-      nama_device: '',
-      no_handphone: '',
-    },
-    validationSchema: schemaValidation,
-    onSubmit: async (values, { setSubmitting }) => {
-      try {
-        setSubmitting(true);
-        const deviceData = {
-          nama_device: values.nama_device,
-          no_handphone: values.no_handphone,
-        };
-        console.log('Saving device:', deviceData);
-
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Add new device to the list
-        const newDevice = {
-          id: Date.now(),
-          id_device: `DV-${String(deviceData.length + 1).padStart(4, '0')}`,
-          nama_device: deviceData.nama_device,
-          no_handphone: deviceData.no_handphone,
-          status: 'Tidak Terhubung',
-        };
-
-        setDeviceData((prev) => [newDevice, ...prev]);
-        setTotalDevice((prev) => prev + 1);
-
-        setIsOpen(false);
-        resetForm();
-        toast.success('Berhasil menambahkan device');
-      } catch (error) {
-        toast.error(error?.response?.data?.message || 'Terjadi kesalahan');
-        console.error(error);
-      } finally {
-        setSubmitting(false);
-      }
-    },
-  });
-
-  const handleCancel = () => {
-    setIsOpen(false);
-    resetForm();
-  };
-
   const StatCard = ({
     title,
     value,
@@ -349,24 +439,24 @@ const DiklatPage = () => {
                 containerClassName="w-full sm:w-auto lg:w-full"
                 placeholder="Pilih SL"
                 options={statusOption}
-                value={selectedStatus}
-                onChange={handleKelompokChange}
+                value={values.sl}
+                onChange={(e) => setFieldValue('sl', e.target.value)}
               />
               <Select
                 label="Pestisida"
                 containerClassName="w-full sm:w-auto lg:w-full"
                 placeholder="Pilih pestisida"
                 options={statusOption}
-                value={selectedStatus}
-                onChange={handleKelompokChange}
+                value={values.pestisida}
+                onChange={(e) => setFieldValue('pestisida', e.target.value)}
               />
               <Select
                 label="SOP"
                 containerClassName="w-full sm:w-auto lg:w-full"
                 placeholder="Pilih SOP"
                 options={statusOption}
-                value={selectedStatus}
-                onChange={handleKelompokChange}
+                value={values.sop}
+                onChange={(e) => setFieldValue('sop', e.target.value)}
               />
             </div>
 
@@ -376,24 +466,24 @@ const DiklatPage = () => {
                 containerClassName="w-full sm:w-auto lg:w-full"
                 placeholder="Pilih P&C (RSPO/ISPO)"
                 options={statusOption}
-                value={selectedStatus}
-                onChange={handleKelompokChange}
+                value={values.pnc}
+                onChange={(e) => setFieldValue('pnc', e.target.value)}
               />
               <Select
                 label="K3"
                 containerClassName="w-full sm:w-auto lg:w-full"
                 placeholder="Pilih K3"
                 options={statusOption}
-                value={selectedStatus}
-                onChange={handleKelompokChange}
+                value={values.k3}
+                onChange={(e) => setFieldValue('k3', e.target.value)}
               />
               <Select
                 label="FGD"
                 containerClassName="w-full sm:w-auto lg:w-full"
                 placeholder="Pilih FGD"
                 options={statusOption}
-                value={selectedStatus}
-                onChange={handleKelompokChange}
+                value={values.pdg}
+                onChange={(e) => setFieldValue('pdg', e.target.value)}
               />
             </div>
           </div>
@@ -443,7 +533,7 @@ const DiklatPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
+                  onClick={handleExportExcel}
                 />
               </div>
             </div>
@@ -460,7 +550,7 @@ const DiklatPage = () => {
           </div>
         </div>
 
-        <div className="relative flex max-h-[60vh] min-h-[300px] w-full flex-col overflow-hidden">
+        <div className="relative flex max-h-[60vh] min-h-[350px] w-full flex-col overflow-hidden">
           <div className="flex-1 overflow-x-auto overflow-y-auto">
             <SectionLoading loading={loading} />
             <AgGridReact
