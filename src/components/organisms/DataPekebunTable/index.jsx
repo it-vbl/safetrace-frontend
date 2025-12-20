@@ -1,6 +1,7 @@
 'use client';
 
 import { AgGridReact } from 'ag-grid-react';
+import { X } from 'lucide-react';
 
 import Close from '@/components/atoms/Icons/Close';
 import Heading from '@/components/atoms/Typography/Heading';
@@ -22,6 +23,9 @@ const DataPekebunTable = ({
   onFilterISPOChange,
   filterLegalitas,
   onFilterLegalitasChange,
+  filterPetaniId,
+  petaniName,
+  onRemoveFilterPetani,
   kelompokOptions,
   rspoOptions,
   ispoOptions,
@@ -43,46 +47,66 @@ const DataPekebunTable = ({
       } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
     >
       <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-row items-center justify-between">
-          <Heading level={2}>Data Kebun</Heading>
-          <div className="flex flex-row items-center gap-8">
-            <div className="flex flex-row items-center gap-2">
-              <SearchBar
-                placeholder="Cari..."
-                value={searchText}
-                onChange={onSearchTextChange}
-              />
-              <Select
-                value={filterKelompok}
-                onChange={onFilterKelompokChange}
-                containerClassName="w-[150px]"
-                placeholder="Kelompok"
-                options={kelompokOptions}
-              />
-              <Select
-                value={filterRSPO}
-                onChange={onFilterRSPOChange}
-                containerClassName="w-[120px]"
-                placeholder="RSPO"
-                options={rspoOptions}
-              />
-              <Select
-                value={filterISPO}
-                onChange={onFilterISPOChange}
-                containerClassName="w-[120px]"
-                placeholder="ISPO"
-                options={ispoOptions}
-              />
-              <Select
-                value={filterLegalitas}
-                onChange={onFilterLegalitasChange}
-                containerClassName="w-[150px]"
-                placeholder="Legalitas"
-                options={legalitasOptions}
-              />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-row items-center justify-between">
+            <Heading level={2}>Data Kebun</Heading>
+            <div className="flex flex-row items-center gap-8">
+              <div className="flex flex-row items-center gap-2">
+                <SearchBar
+                  placeholder="Cari..."
+                  value={searchText}
+                  onChange={onSearchTextChange}
+                />
+                <Select
+                  value={filterKelompok}
+                  onChange={onFilterKelompokChange}
+                  containerClassName="w-[150px]"
+                  placeholder="Kelompok"
+                  options={kelompokOptions}
+                />
+                <Select
+                  value={filterRSPO}
+                  onChange={onFilterRSPOChange}
+                  containerClassName="w-[120px]"
+                  placeholder="RSPO"
+                  options={rspoOptions}
+                />
+                <Select
+                  value={filterISPO}
+                  onChange={onFilterISPOChange}
+                  containerClassName="w-[120px]"
+                  placeholder="ISPO"
+                  options={ispoOptions}
+                />
+                <Select
+                  value={filterLegalitas}
+                  onChange={onFilterLegalitasChange}
+                  containerClassName="w-[150px]"
+                  placeholder="Legalitas"
+                  options={legalitasOptions}
+                />
+              </div>
+              <Close onClick={onClose} />
             </div>
-            <Close onClick={onClose} />
           </div>
+          {/* Filter Petani Badge */}
+          {filterPetaniId && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Filter petani:</span>
+              <div className="inline-flex items-center gap-2 rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm text-blue-800 shadow-sm">
+                <span className="font-medium">
+                  Petani: {petaniName || `ID: ${filterPetaniId}`}
+                </span>
+                <button
+                  onClick={onRemoveFilterPetani}
+                  className="ml-1 rounded-full p-0.5 text-blue-600 transition-colors duration-200 hover:bg-blue-100 hover:text-blue-800"
+                  title="Hapus filter petani"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <div className="w-full flex-1">
           <SectionLoading loading={loading} />
