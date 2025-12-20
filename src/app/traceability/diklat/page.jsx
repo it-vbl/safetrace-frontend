@@ -337,7 +337,7 @@ const DiklatPage = () => {
         minWidth: 120,
       },
       {
-        field: 'kelompok',
+        field: 'nama_kelompok',
         headerName: 'Kelompok',
         flex: 1,
         minWidth: 140,
