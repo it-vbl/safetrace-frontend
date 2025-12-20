@@ -383,6 +383,16 @@ const MapDashboard = () => {
     return transformKebunForTable(kebunList);
   }, [kebunList]);
 
+  // Get petani name from kebunList when filterPetaniId or petaniIdFromUrl is set
+  const petaniName = useMemo(() => {
+    const activePetaniId = filterPetaniId || petaniIdFromUrl;
+    if (activePetaniId && kebunList.length > 0) {
+      const firstKebun = kebunList[0];
+      return firstKebun?.nama_petani || '';
+    }
+    return '';
+  }, [filterPetaniId, petaniIdFromUrl, kebunList]);
+
   // Transform kebun data for map display
   const kebunMapData = useMemo(() => {
     return transformKebunForMap(kebunList);
@@ -581,6 +591,15 @@ const MapDashboard = () => {
     []
   );
 
+  const handleRemoveFilterPetani = useCallback(() => {
+    setFilterPetaniId('');
+    setCurrentPage(1);
+    // Clear petani_id from URL if it exists
+    if (petaniIdFromUrl) {
+      router.replace('/', { scroll: false });
+    }
+  }, [petaniIdFromUrl, router]);
+
   // Alert table handlers
   const handleAlertSearchTextChange = useCallback(
     debounce((e) => {
@@ -741,6 +760,9 @@ const MapDashboard = () => {
           onFilterISPOChange={handleFilterISPOChange}
           filterLegalitas={filterLegalitas}
           onFilterLegalitasChange={handleFilterLegalitasChange}
+          filterPetaniId={filterPetaniId || petaniIdFromUrl || ''}
+          petaniName={petaniName}
+          onRemoveFilterPetani={handleRemoveFilterPetani}
           kelompokOptions={kelompokTani}
           rspoOptions={rspoOptions}
           ispoOptions={ispoOptions}
