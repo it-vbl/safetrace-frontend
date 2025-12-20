@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import moment from 'moment';
 import { toast } from 'react-toastify';
@@ -15,12 +15,11 @@ import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
-import { createPekerja } from '@/services/pekerja';
+import { getPekerjaById, updatePekerja } from '@/services/pekerja';
 
 const validationSchema = Yup.object({
   nama: Yup.string().required('Nama wajib diisi'),
   jenisKelamin: Yup.string().required('Jenis kelamin wajib dipilih'),
-  // kelompokTani: Yup.string().required('Kelompok tani wajib dipilih'),
   alamat: Yup.string().required('Alamat wajib diisi'),
   noKTP: Yup.string().required('No. KTP wajib diisi'),
   tempatLahir: Yup.string().required('Tempat lahir wajib diisi'),
@@ -28,10 +27,9 @@ const validationSchema = Yup.object({
   noKK: Yup.string().required('No. KK wajib diisi'),
   statusPekerja: Yup.string().required('Status pekerja wajib dipilih'),
   noWA: Yup.string(),
-  // petaniId: Yup.string().required('Petani wajib dipilih'),
 });
 
-export default function TambahPekerjaPage() {
+export default function UbahPekerjaPage() {
   return (
     <Suspense
       fallback={
@@ -40,48 +38,40 @@ export default function TambahPekerjaPage() {
         </div>
       }
     >
-      <TambahPekerjaContent />
+      <UbahPekerjaContent />
     </Suspense>
   );
 }
 
-function TambahPekerjaContent() {
+function UbahPekerjaContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const petaniParam = searchParams.get('petani');
+  const params = useParams();
+  const { id } = params;
+
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  
+  // State for files
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
+  
+  // State for existing file URLs
+  const [existingKtpUrl, setExistingKtpUrl] = useState(null);
+  const [existingKkUrl, setExistingKkUrl] = useState(null);
 
   const { jenisKelamin, fetchJenisKelamin, statusPekerja, fetchStatusPekerja } =
     useReferences();
 
-  useEffect(() => {
-    fetchJenisKelamin();
-    fetchStatusPekerja();
-  }, [fetchJenisKelamin, fetchStatusPekerja]);
-
-  useEffect(() => {
-    const prefillData = async () => {
-      if (petaniParam) {
-        formik.setFieldValue('petaniId', petaniParam);
-      }
-    };
-
-    prefillData();
-  }, [petaniParam]);
-
   const crumbs = [
     { label: 'HOME', href: '/' },
     { label: 'PEKERJA', href: '/traceability/pekerja' },
-    { label: 'TAMBAH PEKERJA' },
+    { label: 'UBAH PEKERJA' },
   ];
 
   const formik = useFormik({
     initialValues: {
       nama: '',
       jenisKelamin: '',
-      // kelompokTani: '',
       alamat: '',
       noKTP: '',
       tempatLahir: '',
@@ -89,14 +79,14 @@ function TambahPekerjaContent() {
       noKK: '',
       statusPekerja: '',
       noWA: '',
-      petaniId: petaniParam || '',
+      petaniId: '',
     },
     validationSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
         const formData = {
-          petani_id: petaniParam || values.petaniId,
+          petani_id: values.petaniId,
           nama: values.nama,
           jns_kelamin: values.jenisKelamin,
           alamat: values.alamat,
@@ -106,23 +96,31 @@ function TambahPekerjaContent() {
           no_kk: values.noKK,
           no_wa: values.noWA,
           status_pekerja: values.statusPekerja,
-          file_ktp: ktpFile,
-          file_kk: kkFile,
         };
 
-        const response = await createPekerja(formData);
+        // Only append files if they are new/changed
+        // If ktpFile is not null, it means user selected a new file
+        if (ktpFile) {
+          formData.file_ktp = ktpFile;
+        }
+
+        if (kkFile) {
+          formData.file_kk = kkFile;
+        }
+
+        const response = await updatePekerja(id, formData);
 
         if (response?.data?.status === 'success') {
-          toast.success('Data pekerja berhasil disimpan');
+          toast.success('Data pekerja berhasil diperbarui');
           router.push('/traceability/pekerja');
         } else {
           toast.error(
-            response?.data?.message || 'Gagal menyimpan data pekerja'
+            response?.data?.message || 'Gagal memperbarui data pekerja'
           );
         }
       } catch (error) {
         toast.error(
-          error?.response?.data?.message || 'Gagal menyimpan data pekerja'
+          error?.response?.data?.message || 'Gagal memperbarui data pekerja'
         );
       } finally {
         setIsLoading(false);
@@ -130,9 +128,60 @@ function TambahPekerjaContent() {
     },
   });
 
+  useEffect(() => {
+    fetchJenisKelamin();
+    fetchStatusPekerja();
+  }, [fetchJenisKelamin, fetchStatusPekerja]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      
+      setIsFetching(true);
+      try {
+        const response = await getPekerjaById(id);
+        if (response?.data?.status === 'success') {
+          const data = response.data.data;
+          
+          formik.setValues({
+            nama: data.nama || '',
+            jenisKelamin: data.jns_kelamin || '',
+            alamat: data.alamat || '',
+            noKTP: data.no_ktp || '',
+            tempatLahir: data.tempat_lahir || '',
+            tanggalLahir: data.tanggal_lahir || '',
+            noKK: data.no_kk || '',
+            statusPekerja: data.status_pekerja || '',
+            noWA: data.no_wa || '',
+            petaniId: data.petani || '',
+          });
+
+          // Set existing file URLs
+          if (data.file_ktp) setExistingKtpUrl(data.file_ktp);
+          if (data.file_kk) setExistingKkUrl(data.file_kk);
+        }
+      } catch (error) {
+        toast.error('Gagal memuat data pekerja');
+        console.error(error);
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchData();
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleCancel = () => {
-    router.push('/traceability/pekerja');
+    router.back();
   };
+
+  if (isFetching) {
+    return (
+      <div className="flex w-full items-center justify-center py-20">
+        <div className="text-gray-500">Memuat data pekerja...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -177,38 +226,8 @@ function TambahPekerjaContent() {
                 touched={formik.touched}
                 isRequired
               />
-              {/* <Select
-                label="Kelompok Tani"
-                name="kelompokTani"
-                placeholder="Bepekaek Besamo"
-                options={kelompokTani}
-                value={formik.values.kelompokTani}
-                onChange={(e) => {
-                  formik.setFieldValue('kelompokTani', e.target.value);
-                  fetchPetaniList(e.target.value);
-                }}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-              /> */}
             </div>
             <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
-              {/* <Select
-                label="Petani Pemilik"
-                name="petaniId"
-                placeholder="Pilih Petani"
-                options={petaniOptions}
-                value={formik.values.petaniId}
-                onChange={(e) =>
-                  formik.setFieldValue('petaniId', e.target.value)
-                }
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-                disabled={!formik.values.kelompokTani}
-              /> */}
               <InputText
                 label="No. KTP"
                 name="noKTP"
@@ -296,12 +315,19 @@ function TambahPekerjaContent() {
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: ktpFile,
                       }
+                    : existingKtpUrl
+                    ? {
+                        name: 'Dokumen KTP Tersimpan',
+                        value: new Blob(), // Dummy blob to satisfy prop types/logic if needed
+                        // But actually we are relying on 'url' prop
+                      }
                     : null
                 }
+                url={ktpFile ? null : existingKtpUrl}
                 onChangeValue={(data) => setKtpFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
                 maxSize={10}
-                isRequired
+                isRequired={!existingKtpUrl} // Required only if not already existing
                 keyField="ktp"
                 name="file_ktp"
               />
@@ -316,12 +342,18 @@ function TambahPekerjaContent() {
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: kkFile,
                       }
+                    : existingKkUrl
+                    ? {
+                        name: 'Dokumen KK Tersimpan',
+                        value: new Blob(),
+                      }
                     : null
                 }
+                url={kkFile ? null : existingKkUrl}
                 onChangeValue={(data) => setKkFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
                 maxSize={10}
-                isRequired
+                isRequired={!existingKkUrl}
                 keyField="kk"
                 name="file_kk"
               />
@@ -339,7 +371,7 @@ function TambahPekerjaContent() {
             Batalkan
           </Button>
           <Button type="submit" isLoading={isLoading}>
-            Simpan
+            Simpan Perubahan
           </Button>
         </div>
       </form>

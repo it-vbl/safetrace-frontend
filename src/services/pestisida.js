@@ -24,3 +24,8 @@ export const createPestisida = (payload) =>
 
 export const updatePestisida = (id, payload) =>
   api.post(`/gap/pestisida/update/${id}/`, null, payload);
+
+export const downloadListPestisida = (params = undefined) => {
+  const config = params ? { params, responseType: 'blob' } : { responseType: 'blob' };
+  return api.get('/gap/pestisida/list/download/', config);
+};

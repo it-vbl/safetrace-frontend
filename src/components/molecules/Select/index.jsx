@@ -265,6 +265,8 @@ const Select = ({
       (touched?.[name] && errors?.[name]) || isError ? 'text-error5' : '',
   };
 
+  const hasValue = (val) => val !== null && val !== undefined && val !== '';
+
   return (
     <div
       className={cn(
@@ -298,12 +300,12 @@ const Select = ({
               'hover:border-blue6 focus:border-blue6 focus:outline-none':
                 !disabled,
               'border-neutral6':
-                selectedValue &&
+                hasValue(selectedValue) &&
                 !disabled &&
                 !(touched?.[name] && errors?.[name]) &&
                 !isError,
               'border-neutral5':
-                !selectedValue &&
+                !hasValue(selectedValue) &&
                 !disabled &&
                 !(touched?.[name] && errors?.[name]) &&
                 !isError,
@@ -315,17 +317,15 @@ const Select = ({
           <Paragraph
             data-testid="selected-value"
             className={cn('w-full overflow-hidden text-[14px]', {
-              '': selectedValue && !disabled,
-              'text-neutral6': !selectedValue && !disabled,
+              '': hasValue(selectedValue) && !disabled,
+              'text-neutral6': !hasValue(selectedValue) && !disabled,
               'text-neutral7': disabled,
             })}
             level={2}
           >
-            {selectedValue && selectedValue !== ''
-              ? selectedOption?.label
-              : placeholder}
+            {hasValue(selectedValue) ? selectedOption?.label : placeholder}
           </Paragraph>
-          {selectedValue && (
+          {hasValue(selectedValue) && (
             <CrossCircledIcon
               onClick={(e) => {
                 handleOptionChange('');
@@ -362,7 +362,7 @@ const Select = ({
                 maxHeight: '300px',
               }}
               className={cn(
-                'rounded-[6px] flex flex-col border bg-white p-2 shadow-lg',
+                'flex flex-col rounded-[6px] border bg-white p-2 shadow-lg',
                 isCustomScrollBar && 'custom-scrollbar'
               )}
             >
@@ -379,7 +379,7 @@ const Select = ({
                 </div>
               )}
 
-              <div className="flex flex-col h-full flex-shrink flex-1 overflow-y-auto">
+              <div className="flex h-full flex-1 flex-shrink flex-col overflow-y-auto">
                 {filteredOptions?.length > 0 ? (
                   filteredOptions?.map((option) => (
                     <Cascader
@@ -408,7 +408,7 @@ const Select = ({
                 <form
                   ref={formAddOptionRef}
                   onSubmit={handleSubmitNewOption}
-                  className="flex  flex-1 h-full w-full mt-2 "
+                  className="mt-2  flex h-full w-full flex-1 "
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex w-full flex-col gap-2">
@@ -420,7 +420,7 @@ const Select = ({
                         name="newOption"
                         placeholder={allowAddOption.placeholder}
                         onClick={(e) => e.stopPropagation()}
-                        className="!text-[12px] !h-[32px]"
+                        className="!h-[32px] !text-[12px]"
                         containerClassName="mb-0"
                         isError={
                           formik.touched.newOption && formik.errors.newOption
@@ -445,7 +445,7 @@ const Select = ({
                         </Button>
                       )}
                       {isAddOption && (
-                        <div className="w-full flex flex-row gap-2">
+                        <div className="flex w-full flex-row gap-2">
                           <Button
                             onClick={handleCancelClick}
                             variant="secondary"

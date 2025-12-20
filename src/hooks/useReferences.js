@@ -13,6 +13,7 @@ import {
   getPendidikanTerakhir,
   getPolaTanam,
   getStatusLahan,
+  getStatusPekerja,
   getStatusPerkawinan,
   getSTDBStatuses,
   getSumberKontak,
@@ -30,6 +31,7 @@ import {
   setPendidikanTerakhir,
   setPolaTanam,
   setStatusLahan,
+  setStatusPekerja,
   setStatusPerkawinan,
   setSTDBStatuses,
   setSumberKontak,
@@ -55,6 +57,7 @@ const useReferences = () => {
     eksPlasma,
     userRoles,
     statusPerkawinan,
+    statusPekerja,
     kelompokTani,
     sumberKontak,
     jenisLegalitas,
@@ -130,6 +133,10 @@ const useReferences = () => {
     () => fetchData(getStatusPerkawinan, setStatusPerkawinan),
     []
   );
+  const fetchStatusPekerja = useCallback(
+    () => fetchData(getStatusPekerja, setStatusPekerja),
+    []
+  );
   const fetchKelompokTani = useCallback(
     () => fetchData(getKelompokTani, setKelompokTani),
     []
@@ -158,6 +165,7 @@ const useReferences = () => {
     eksPlasma,
     userRoles,
     statusPerkawinan,
+    statusPekerja,
     kelompokTani,
     sumberKontak,
     jenisLegalitas,
@@ -173,6 +181,7 @@ const useReferences = () => {
     fetchEksPlasma,
     fetchUserRoles,
     fetchStatusPerkawinan,
+    fetchStatusPekerja,
     fetchKelompokTani,
     fetchSumberKontak,
     fetchJenisLegalitas,

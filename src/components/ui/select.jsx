@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 import { cn } from '@/libs/utils';
 
@@ -9,6 +10,7 @@ export function Select({ value, onValueChange, children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value);
   const selectRef = useRef(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     setSelectedValue(value);
@@ -17,6 +19,11 @@ export function Select({ value, onValueChange, children }) {
   useEffect(() => {
     function handleClickOutside(event) {
       if (selectRef.current && !selectRef.current.contains(event.target)) {
+        // We need to check if the click is inside the portal content as well
+        const portalContent = document.getElementById('select-portal-content');
+        if (portalContent && portalContent.contains(event.target)) {
+          return;
+        }
         setIsOpen(false);
       }
     }
@@ -32,16 +39,30 @@ export function Select({ value, onValueChange, children }) {
   };
 
   return (
-    <div className='relative' ref={selectRef}>
-      {children({ isOpen, selectedValue, handleSelect, setIsOpen })}
+    <div className="relative" ref={selectRef}>
+      {children({
+        isOpen,
+        selectedValue,
+        handleSelect,
+        setIsOpen,
+        triggerRef,
+      })}
     </div>
   );
 }
 
-export function SelectTrigger({ children, className, ...props }) {
+export function SelectTrigger({
+  children,
+  className,
+  onClick,
+  triggerRef,
+  ...props
+}) {
   return (
     <button
-      type='button'
+      ref={triggerRef}
+      type="button"
+      onClick={onClick}
       className={cn(
         'flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
         'focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2',
@@ -59,26 +80,52 @@ export function SelectValue({ placeholder }) {
   return <span>{placeholder}</span>;
 }
 
-export function SelectContent({ children, isOpen }) {
-  const contentRef = useRef(null);
+export function SelectContent({ children, isOpen, triggerRef }) {
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+  const [placement, setPlacement] = useState('bottom');
 
   useEffect(() => {
-    if (contentRef.current) {
-      const { height } = contentRef.current.getBoundingClientRect();
-      contentRef.current.style.top = `-${height + 10}px`;
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const spaceBelow = windowHeight - rect.bottom;
+      const dropdownHeight = 200; // Approximate max height
+
+      const newPlacement = spaceBelow < dropdownHeight ? 'top' : 'bottom';
+      setPlacement(newPlacement);
+
+      setCoords({
+        top:
+          newPlacement === 'bottom'
+            ? rect.bottom + window.scrollY + 4
+            : rect.top + window.scrollY - 4,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
     }
-  }, [isOpen]);
+  }, [isOpen, triggerRef]);
 
   if (!isOpen) return null;
 
-  return (
+  const content = (
     <div
-      ref={contentRef}
-      className='absolute left-0 z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg'
+      id="select-portal-content"
+      style={{
+        position: 'absolute',
+        top: coords.top,
+        left: coords.left,
+        width: coords.width,
+        transform: placement === 'top' ? 'translateY(-100%)' : 'none',
+      }}
+      className="z-[9999] max-h-60 overflow-auto rounded-md border border-gray-300 bg-white shadow-lg"
     >
       {children}
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(content, document.body)
+    : null;
 }
 
 export function SelectItem({ value, children, onSelect, selectedValue }) {
@@ -99,18 +146,33 @@ export function SelectItem({ value, children, onSelect, selectedValue }) {
 }
 
 // Wrapper component to make it work like shadcn Select
-export function SimpleSelect({ value, onValueChange, options, placeholder, className }) {
+export function SimpleSelect({
+  value,
+  onValueChange,
+  options,
+  placeholder,
+  className,
+}) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      {({ isOpen, selectedValue, handleSelect, setIsOpen }) => (
+      {({ isOpen, selectedValue, handleSelect, setIsOpen, triggerRef }) => (
         <>
-          <SelectTrigger className={className} onClick={() => setIsOpen(!isOpen)}>
+          <SelectTrigger
+            className={className}
+            onClick={() => setIsOpen(!isOpen)}
+            triggerRef={triggerRef}
+          >
             <span>{selectedValue || placeholder}</span>
-            <ChevronDown className='h-4 w-4 opacity-50' />
+            <ChevronDown className="h-4 w-4 opacity-50" />
           </SelectTrigger>
-          <SelectContent isOpen={isOpen}>
+          <SelectContent isOpen={isOpen} triggerRef={triggerRef}>
             {options.map((option) => (
-              <SelectItem key={option.value} value={option.value} onSelect={handleSelect} selectedValue={selectedValue}>
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                onSelect={handleSelect}
+                selectedValue={selectedValue}
+              >
                 {option.label}
               </SelectItem>
             ))}

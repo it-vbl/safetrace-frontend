@@ -6,6 +6,7 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
+import moment from 'moment';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -15,7 +16,10 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
-import { getListPestisida } from '@/services/pestisida';
+import {
+  downloadListPestisida,
+  getListPestisida,
+} from '@/services/pestisida';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -60,6 +64,7 @@ const PestisidaPage = () => {
         if (selectedKelompok) params.kelompok = selectedKelompok;
         if (search) params.search = search;
         if (selectedYear) params.tahun = selectedYear;
+        
         const res = Object.keys(params).length
           ? await getListPestisida(params)
           : await getListPestisida();
@@ -74,7 +79,7 @@ const PestisidaPage = () => {
             typeof item?.luas_kebun === 'string'
               ? Number(item.luas_kebun)
               : item?.luas_kebun ?? null,
-          tahun: item?.tahun ?? null,
+          tahunTanam: item?.tahun_tanam ?? null,
           umurTanaman: item?.umur_tanaman ?? null,
           totalPestisida:
             typeof item?.total_pestisida === 'number'
@@ -109,6 +114,31 @@ const PestisidaPage = () => {
   const handleYearChange = (e) => {
     setSelectedYear(e?.target?.value ?? '');
     setCurrentPage(1);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const params = {};
+      if (selectedKelompok) params.kelompok = selectedKelompok;
+      if (search) params.search = search;
+      if (selectedYear) params.tahun = selectedYear;
+
+      const response = await downloadListPestisida(params);
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `data-pestisida-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      toast.error('Gagal mengunduh data');
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -152,7 +182,7 @@ const PestisidaPage = () => {
       { field: 'namaPetani', headerName: 'Nama Petani', flex: 1 },
       { field: 'kelompok', headerName: 'Kelompok', flex: 1 },
       { field: 'luasKebunHa', headerName: 'Luas Kebun (Ha)', flex: 1 },
-      { field: 'tahun', headerName: 'Tahun', flex: 1 },
+      { field: 'tahunTanam', headerName: 'Tahun Tanam', flex: 1 },
       {
         field: 'umurTanaman',
         headerName: 'Umur Tanaman',
@@ -189,32 +219,9 @@ const PestisidaPage = () => {
   );
 
   const filteredData = useMemo(() => {
-    let filtered = pestisidaData;
-
-    if (search) {
-      filtered = filtered.filter(
-        (item) =>
-          item.namaPetani.toLowerCase().includes(search.toLowerCase()) ||
-          item.idKebun.toLowerCase().includes(search.toLowerCase()) ||
-          item.kelompok.toLowerCase().includes(search.toLowerCase()) ||
-          (item?.luasKebunHa + '')?.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (selectedKelompok) {
-      filtered = filtered.filter((item) =>
-        item.kelompok.toLowerCase().includes(selectedKelompok.toLowerCase())
-      );
-    }
-
-    if (selectedYear) {
-      filtered = filtered.filter(
-        (item) => String(item?.tahun) === String(selectedYear)
-      );
-    }
-
-    return filtered;
-  }, [pestisidaData, search, selectedKelompok, selectedYear]);
+    // Backend filtering covers search, kelompok, and year.
+    return pestisidaData;
+  }, [pestisidaData]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -271,7 +278,7 @@ const PestisidaPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
+                  onClick={handleExportExcel}
                 />
               </div>
             </div>

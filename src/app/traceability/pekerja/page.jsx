@@ -14,7 +14,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
-import PekerjaService from '@/services/pekerja';
+import { downloadListPekerja, getListPekerja } from '@/services/pekerja';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -34,44 +34,39 @@ const PekerjaPage = () => {
   const fetchPekerjaData = async ({ page, page_size, search, kelompok }) => {
     setLoading(true);
     try {
-      // Build query parameters
-      const params = new URLSearchParams({
+      const params = {
         page,
         page_size,
-      });
+        ...(search && { search }),
+        ...(kelompok && { kelompok_tani: kelompok }),
+      };
 
-      if (search) params.append('search', search);
-      if (kelompok) params.append('kelompok', kelompok);
+      const response = await getListPekerja(params);
 
-      const response = await PekerjaService.getListPekerja(params.toString());
+      if (response?.status === 200) {
+        const data = response?.data?.data;
+        const results = data?.results || [];
 
-      if (response?.data?.status === 'success') {
-        // Map API response to table format
-        const mappedData = response.data.data.results.map((pekerja) => ({
+        const mappedData = results.map((pekerja) => ({
           id: pekerja.id,
           id_petani: pekerja.id_petani || '-',
           nama_petani: pekerja.nama_petani || '-',
-          jenis_kelamin: pekerja.jenis_kelamin || '-',
-          kelompok: pekerja.kelompok || '-',
+          jenis_kelamin: pekerja.jenis_kelamin_label || '-',
+          kelompok: pekerja.nama_kelompok || '-',
           no_ktp: pekerja.no_ktp || '-',
           no_kk: pekerja.no_kk || '-',
           luas_kebun: pekerja.luas_kebun || '0',
           jumlah_pekerja: pekerja.jumlah_pekerja || 0,
           terakhir_diubah: pekerja.updated_at
-            ? new Date(pekerja.updated_at).toLocaleString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })
+            ? moment(pekerja.updated_at).format('DD/MM/YYYY HH:mm')
             : '-',
         }));
 
         setPekerjaData(mappedData);
-        setTotalPekerja(response.data.data.count);
+        setTotalPekerja(data.count || 0);
       } else {
-        throw new Error('Invalid response format');
+        setPekerjaData([]);
+        setTotalPekerja(0);
       }
     } catch (error) {
       console.error('Error fetching pekerja data:', error);
@@ -83,7 +78,31 @@ const PekerjaPage = () => {
     }
   };
 
-  // Fetch kelompok data on component mount
+  const handleExportExcel = async () => {
+    try {
+      const params = {
+        ...(search && { search }),
+        ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
+      };
+
+      const response = await downloadListPekerja(params);
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `data-pekerja-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      toast.error('Gagal mengunduh data');
+    }
+  };
+
   useEffect(() => {
     if (kelompokTani.length === 0) {
       fetchKelompokTani();
@@ -247,7 +266,7 @@ const PekerjaPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
+                  onClick={handleExportExcel}
                 />
               </div>
             </div>
