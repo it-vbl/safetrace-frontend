@@ -43,6 +43,26 @@ export const deleteLB3 = (lb3Id) => {
   return api.get(`/gap/lb3/delete/${lb3Id}/`);
 };
 
+export const downloadListLB3 = (params = {}) => {
+  const formattedParams = {
+    ...params,
+    ...(params.search && {
+      search: params.search,
+    }),
+    ...(params.kelompok && {
+      kelompok: params.kelompok,
+    }),
+    ...(params.tahun && {
+      tahun: params.tahun,
+    }),
+  };
+
+  return api.get(`/gap/lb3/list/download/`, {
+    params: formattedParams,
+    responseType: 'blob',
+  });
+};
+
 export const getLB3Detail = async (id) => {
   try {
     const response = await api.get(`/lb3/${id}`);

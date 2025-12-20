@@ -5,6 +5,7 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
+import moment from 'moment';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -14,7 +15,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
-import { getListPupuk } from '@/services/pupuk';
+import { downloadListPupuk, getListPupuk } from '@/services/pupuk';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -61,7 +62,7 @@ const PupukPage = () => {
             luas_kebun: item?.luas_kebun || 0,
             tahun_tanam: item?.tahun_tanam || '-',
             umur_tanaman: item?.umur_tanaman || '-',
-            jumlah_pokok: '-', // Not available in API response
+            jumlah_pokok: item?.jumlah_pokok || '-',
             total_pupuk: item?.total_pupuk || '-',
           }));
 
@@ -126,6 +127,31 @@ const PupukPage = () => {
   const handleTahunChange = (e) => {
     setSelectedTahun(e.target.value);
     setCurrentPage(1);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const params = {};
+      if (selectedKelompok) params.kelompok = selectedKelompok;
+      if (search) params.search = search;
+      if (selectedTahun) params.tahun = selectedTahun;
+
+      const response = await downloadListPupuk(params);
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `data-pupuk-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      toast.error('Gagal mengunduh data');
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -278,7 +304,7 @@ const PupukPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
+                  onClick={handleExportExcel}
                 />
               </div>
             </div>

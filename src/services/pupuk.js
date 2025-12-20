@@ -42,3 +42,23 @@ export const updatePupuk = (pupukId, payload) => {
 export const deletePupuk = (pupukId) => {
   return api.delete(`/gap/pupuk/delete/${pupukId}/`);
 };
+
+export const downloadListPupuk = (params = {}) => {
+  const formattedParams = {
+    ...params,
+    ...(params.search && {
+      search: params.search,
+    }),
+    ...(params.kelompok && {
+      kelompok: params.kelompok,
+    }),
+    ...(params.tahun && {
+      tahun: params.tahun,
+    }),
+  };
+
+  return api.get(`/gap/pupuk/list/download/`, {
+    params: formattedParams,
+    responseType: 'blob',
+  });
+};

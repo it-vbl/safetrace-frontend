@@ -234,7 +234,7 @@ const TambahTahunPupukPage = () => {
             level={4}
             className="text-sm font-semibold text-gray-800 md:text-base"
           >
-            LIMBAH BAHAN BERBAHAYA BERACUN
+            PEMUPUKAN
           </Heading>
         </div>
 

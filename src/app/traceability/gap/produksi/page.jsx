@@ -6,6 +6,7 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
+import moment from 'moment';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -15,7 +16,10 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
-import { getListProduksi } from '@/services/produksi';
+import {
+  downloadListProduksi,
+  getListProduksi,
+} from '@/services/produksi';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -74,7 +78,8 @@ const ProduksiPage = () => {
         idKebun: item?.id_kebun ?? '-',
         namaPetani: item?.nama_petani ?? '-',
         kelompok: item?.kelompok_tani ?? '-',
-        tahun: item?.tahun_tanam ?? item?.tahun ?? '-',
+        tahunTanam: item?.tahun_tanam ?? '-',
+        tahun: item?.tahun ?? '-',
         umurTanaman: item?.umur_tanaman ?? '-',
         totalProduksi: item?.total_produksi ?? 0,
         produksiPerHaPerTahun: item?.prod_ha_th ?? 0,
@@ -112,6 +117,31 @@ const ProduksiPage = () => {
     const val = e?.target?.value ?? '';
     setSelectedYear(val);
     setCurrentPage(1);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const params = {};
+      if (selectedKelompok) params.kelompok = selectedKelompok;
+      if (search) params.search = search;
+      if (selectedYear) params.tahun = selectedYear;
+
+      const response = await downloadListProduksi(params);
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `data-produksi-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      toast.error('Gagal mengunduh data');
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -154,7 +184,7 @@ const ProduksiPage = () => {
       { field: 'idKebun', headerName: 'Id Kebun', flex: 1 },
       { field: 'namaPetani', headerName: 'Nama Petani', flex: 1 },
       { field: 'kelompok', headerName: 'Kelompok Tani', flex: 1 },
-      { field: 'tahun', headerName: 'Tahun', flex: 1 },
+      { field: 'tahunTanam', headerName: 'Tahun Tanam', flex: 1 },
       {
         field: 'umurTanaman',
         headerName: 'Umur Tanaman',
@@ -194,39 +224,8 @@ const ProduksiPage = () => {
   );
 
   const filteredData = useMemo(() => {
-    let data = [...produksiData];
-
-    if (search) {
-      const q = search.toLowerCase();
-      data = data.filter(
-        (item) =>
-          String(item?.namaPetani || '')
-            ?.toLowerCase()
-            .includes(q) ||
-          String(item?.idKebun || '')
-            ?.toLowerCase()
-            .includes(q) ||
-          String(item?.kelompok || '')
-            ?.toLowerCase()
-            .includes(q)
-      );
-    }
-
-    if (selectedKelompok) {
-      const k = String(selectedKelompok).toLowerCase();
-      data = data.filter((item) =>
-        (item?.kelompok || '')?.toLowerCase().includes(k)
-      );
-    }
-
-    if (selectedYear) {
-      data = data.filter(
-        (item) => String(item?.tahun) === String(selectedYear)
-      );
-    }
-
-    return data;
-  }, [produksiData, search, selectedKelompok, selectedYear]);
+    return produksiData;
+  }, [produksiData]);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -284,7 +283,7 @@ const ProduksiPage = () => {
                   className="!px-2 sm:!px-3"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={() => toast.info('Export Excel clicked')}
+                  onClick={handleExportExcel}
                 />
               </div>
             </div>
