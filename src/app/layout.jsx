@@ -68,13 +68,14 @@ export default function Layout({ children }) {
     '/forgot-password/reset-password',
   ];
   const noSidebarRoutes = [
+    '/',
     '/login',
     '/forgot-password',
     '/forgot-password/verify-otp',
     '/forgot-password/reset-password',
     '/register',
   ];
-  const noPaddingRoutes = [...noSidebarRoutes, '/', '/stdb/ringkasan'];
+  const noPaddingRoutes = [...noSidebarRoutes, , '/stdb/ringkasan'];
 
   const publicRoutes = [
     '/login',
