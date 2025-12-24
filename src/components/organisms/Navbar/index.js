@@ -80,12 +80,14 @@ const Navbar = () => {
       {/* logo */}
 
       <div className="flex w-auto items-center md:flex-1">
-        <HamburgerMenuIcon
-          onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
-          className="mr-4 cursor-pointer"
-          width={mounted && isMobileScreen ? 16 : 24}
-          height={mounted && isMobileScreen ? 16 : 24}
-        />
+        {pathname !== '/' && (
+          <HamburgerMenuIcon
+            onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
+            className="mr-4 cursor-pointer"
+            width={mounted && isMobileScreen ? 16 : 24}
+            height={mounted && isMobileScreen ? 16 : 24}
+          />
+        )}
         <div>
           <SipekebunLogo />
         </div>

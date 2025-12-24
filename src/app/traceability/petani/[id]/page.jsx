@@ -67,6 +67,24 @@ const TraceabilityPetaniDetail = () => {
     { label: 'PETANI', href: '/traceability/petani' },
     { label: 'DETAIL PETANI' },
   ];
+  
+  const fetchLampiran = async (isRetry = false) => {
+      setLampiranLoading(true);
+      setLampiranError(null);
+      try {
+        const res = await getDetailLampiranPetani(id);
+        const data = res?.data?.data || res?.data;
+        setLampiran(data);
+        if (isRetry) {
+          setRetryCount(0);
+        }
+      } catch (err) {
+        console.error('Error fetching lampiran:', err);
+        setLampiranError(err);
+      } finally {
+        setLampiranLoading(false);
+      }
+    };
 
   useEffect(() => {
     fetchJenisKelamin();
@@ -86,24 +104,6 @@ const TraceabilityPetaniDetail = () => {
         setError(err);
       } finally {
         setLoading(false);
-      }
-    };
-
-    const fetchLampiran = async (isRetry = false) => {
-      setLampiranLoading(true);
-      setLampiranError(null);
-      try {
-        const res = await getDetailLampiranPetani(id);
-        const data = res?.data?.data || res?.data;
-        setLampiran(data);
-        if (isRetry) {
-          setRetryCount(0);
-        }
-      } catch (err) {
-        console.error('Error fetching lampiran:', err);
-        setLampiranError(err);
-      } finally {
-        setLampiranLoading(false);
       }
     };
 
