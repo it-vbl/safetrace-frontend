@@ -5,14 +5,17 @@ import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
 
+import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import EditLampiranPetaniModal from '@/components/molecules/EditLampiranPetaniModal';
 import EditPetaniModal from '@/components/molecules/EditPetaniModal';
+import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
 
 import {
+  createLampiranPetani,
   getDetailLampiranPetani,
   getDetailPetani,
   updateLampiranPetani,
@@ -56,6 +59,12 @@ const TraceabilityPetaniDetail = () => {
   const [isEditLampiranModalOpen, setIsEditLampiranModalOpen] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateLampiranLoading, setUpdateLampiranLoading] = useState(false);
+  
+  // States for creating new lampiran
+  const [ktpFile, setKtpFile] = useState(null);
+  const [kkFile, setKkFile] = useState(null);
+  const [nibFile, setNibFile] = useState(null);
+  const [createLampiranLoading, setCreateLampiranLoading] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     type: '',
@@ -214,6 +223,72 @@ const TraceabilityPetaniDetail = () => {
     }
   };
 
+  const handleCreateLampiran = async () => {
+    setCreateLampiranLoading(true);
+    setNotification({ show: false, type: '', message: '' });
+
+    if (!ktpFile || !kkFile || !nibFile) {
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Mohon lengkapi semua file lampiran (KTP, KK, dan NIB)',
+      });
+
+      // Auto hide error notification
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 5000);
+
+      setCreateLampiranLoading(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        petani_id: id,
+        file_ktp: ktpFile,
+        file_kk: kkFile,
+        file_nib: nibFile,
+      };
+
+      await createLampiranPetani(payload);
+
+      // Refresh lampiran data
+      await fetchLampiran();
+
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Lampiran berhasil diunggah!',
+      });
+
+      // Reset file states
+      setKtpFile(null);
+      setKkFile(null);
+      setNibFile(null);
+
+      // Auto hide notification
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 3000);
+    } catch (error) {
+      console.error('Error creating lampiran:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message:
+          'Gagal mengunggah lampiran: ' +
+          (error?.response?.data?.message || error.message),
+      });
+
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 5000);
+    } finally {
+      setCreateLampiranLoading(false);
+    }
+  };
+
   const handleRetryLampiran = async () => {
     const newRetryCount = retryCount + 1;
     setRetryCount(newRetryCount);
@@ -332,42 +407,82 @@ const TraceabilityPetaniDetail = () => {
     }
 
     // Handle other error types (404, network errors, etc.)
+    // Handle other error types (404, network errors, etc.)
     if (errorStatus === 404) {
       return (
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 sm:p-6">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg
-                className="h-6 w-6 text-yellow-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+        <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+              <Upload
+                label="KTP"
+                file={
+                  ktpFile
+                    ? {
+                        name: ktpFile.name,
+                        size: (ktpFile.size / 1048576).toFixed(1),
+                        uploadDate: new Date().toLocaleDateString('en-US'),
+                        value: ktpFile,
+                      }
+                    : null
+                }
+                onChangeValue={(data) => setKtpFile(data.value)}
+                allowedFiles={['application/pdf']}
+                maxSize={10}
+                isRequired
+                keyField="ktp"
+                name="file_ktp"
+              />
+
+              <Upload
+                label="Kartu Keluarga (KK)"
+                file={
+                  kkFile
+                    ? {
+                        name: kkFile.name,
+                        size: (kkFile.size / 1048576).toFixed(1),
+                        uploadDate: new Date().toLocaleDateString('en-US'),
+                        value: kkFile,
+                      }
+                    : null
+                }
+                onChangeValue={(data) => setKkFile(data.value)}
+                allowedFiles={['application/pdf']}
+                maxSize={10}
+                isRequired
+                keyField="kk"
+                name="file_kk"
+              />
+
+              <Upload
+                label="NIB"
+                file={
+                  nibFile
+                    ? {
+                        name: nibFile.name,
+                        size: (nibFile.size / 1048576).toFixed(1),
+                        uploadDate: new Date().toLocaleDateString('en-US'),
+                        value: nibFile,
+                      }
+                    : null
+                }
+                onChangeValue={(data) => setNibFile(data.value)}
+                allowedFiles={['application/pdf']}
+                maxSize={10}
+                isRequired
+                keyField="nib"
+                name="file_nib"
+              />
             </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-yellow-800 sm:text-base">
-                Data Lampiran Tidak Ditemukan
-              </h4>
-              <p className="mt-1 text-xs text-yellow-700 sm:text-sm">
-                Data lampiran untuk petani ini belum tersedia atau telah
-                dihapus.
-              </p>
-              <button
-                onClick={handleRetryLampiran}
-                disabled={lampiranLoading}
-                className="mt-3 inline-flex items-center rounded-md bg-yellow-600 px-3 py-2 text-xs font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
-              >
-                {lampiranLoading ? 'Mencoba lagi...' : 'Coba Lagi'}
-              </button>
+            
+            <div className="flex justify-start">
+                 <Button
+                    type="button"
+                    className="w-full sm:w-auto"
+                    onClick={handleCreateLampiran}
+                    isLoading={createLampiranLoading}
+                  >
+                    Simpan Lampiran
+                  </Button>
             </div>
-          </div>
         </div>
       );
     }
@@ -635,13 +750,16 @@ const TraceabilityPetaniDetail = () => {
         <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN IDENTITAS</h3>
-            <button
-              onClick={() => setIsEditLampiranModalOpen(true)}
-              className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
-              disabled={updateLampiranLoading}
-            >
-              Ubah Data
-            </button>
+
+            {lampiran && (
+              <button
+                onClick={() => setIsEditLampiranModalOpen(true)}
+                className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+                disabled={updateLampiranLoading}
+              >
+                Ubah Data
+              </button>
+            )}
           </div>
 
           {lampiranLoading && <LoadingSpinner />}
