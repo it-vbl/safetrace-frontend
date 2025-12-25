@@ -80,12 +80,14 @@ const Navbar = () => {
       {/* logo */}
 
       <div className="flex w-auto items-center md:flex-1">
-        <HamburgerMenuIcon
-          onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
-          className="mr-4 cursor-pointer"
-          width={mounted && isMobileScreen ? 16 : 24}
-          height={mounted && isMobileScreen ? 16 : 24}
-        />
+        {pathname !== '/' && (
+          <HamburgerMenuIcon
+            onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
+            className="mr-4 cursor-pointer"
+            width={mounted && isMobileScreen ? 16 : 24}
+            height={mounted && isMobileScreen ? 16 : 24}
+          />
+        )}
         <div>
           <SipekebunLogo />
         </div>
@@ -154,7 +156,10 @@ const Navbar = () => {
       </div>
 
       {/* Mobile center menu */}
-      <div className="ml-auto flex flex-1 flex-row items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] uppercase md:hidden">
+      <div
+        className="ml-auto flex flex-1 flex-row items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] uppercase md:hidden"
+        suppressHydrationWarning
+      >
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/kabar-tani/'
@@ -178,7 +183,7 @@ const Navbar = () => {
             <ChevronDown size={12} />
           </div>
           {isTraceabilityDropdownOpenMobile && (
-            <div className="absolute left-0 top-full mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-50">
+            <div className="absolute left-0 top-full mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-[9999]">
               <div
                 className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
                   pathname === '/' ? 'text-primary font-bold' : 'text-black'
