@@ -59,8 +59,6 @@ const TraceabilityPetaniDetail = () => {
   const [isEditLampiranModalOpen, setIsEditLampiranModalOpen] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateLampiranLoading, setUpdateLampiranLoading] = useState(false);
-  
-  // States for creating new lampiran
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
@@ -138,7 +136,6 @@ const TraceabilityPetaniDetail = () => {
         message: 'Lampiran berhasil diperbarui!',
       });
 
-      // Auto hide notification after 3 seconds
       setTimeout(() => {
         setNotification({ show: false, type: '', message: '' });
       }, 3000);
@@ -152,7 +149,6 @@ const TraceabilityPetaniDetail = () => {
           (error?.response?.data?.message || error.message),
       });
 
-      // Auto hide error notification after 5 seconds
       setTimeout(() => {
         setNotification({ show: false, type: '', message: '' });
       }, 5000);
@@ -166,7 +162,6 @@ const TraceabilityPetaniDetail = () => {
     setNotification({ show: false, type: '', message: '' });
 
     try {
-      // Map form data to API format
       const updateData = {
         id_petani: formData.id,
         nama: formData.nama,
@@ -188,7 +183,6 @@ const TraceabilityPetaniDetail = () => {
 
       await updatePetani(id, updateData);
 
-      // Refresh data after successful update
       const res = await getDetailPetani(id);
       const data = res?.data?.data || res?.data;
       setPetani(data);
@@ -200,7 +194,6 @@ const TraceabilityPetaniDetail = () => {
         message: 'Data petani berhasil diperbarui!',
       });
 
-      // Auto hide notification after 3 seconds
       setTimeout(() => {
         setNotification({ show: false, type: '', message: '' });
       }, 3000);
@@ -214,7 +207,6 @@ const TraceabilityPetaniDetail = () => {
           (error?.response?.data?.message || error.message),
       });
 
-      // Auto hide error notification after 5 seconds
       setTimeout(() => {
         setNotification({ show: false, type: '', message: '' });
       }, 5000);
@@ -234,7 +226,6 @@ const TraceabilityPetaniDetail = () => {
         message: 'Mohon lengkapi semua file lampiran (KTP, KK, dan NIB)',
       });
 
-      // Auto hide error notification
       setTimeout(() => {
         setNotification({ show: false, type: '', message: '' });
       }, 5000);
@@ -253,7 +244,6 @@ const TraceabilityPetaniDetail = () => {
 
       await createLampiranPetani(payload);
 
-      // Refresh lampiran data
       await fetchLampiran();
 
       setNotification({
@@ -262,12 +252,9 @@ const TraceabilityPetaniDetail = () => {
         message: 'Lampiran berhasil diunggah!',
       });
 
-      // Reset file states
       setKtpFile(null);
       setKkFile(null);
       setNibFile(null);
-
-      // Auto hide notification
       setTimeout(() => {
         setNotification({ show: false, type: '', message: '' });
       }, 3000);
@@ -406,8 +393,6 @@ const TraceabilityPetaniDetail = () => {
       );
     }
 
-    // Handle other error types (404, network errors, etc.)
-    // Handle other error types (404, network errors, etc.)
     if (errorStatus === 404) {
       return (
         <div className="flex flex-col gap-6">
@@ -486,8 +471,7 @@ const TraceabilityPetaniDetail = () => {
         </div>
       );
     }
-
-    // Generic error handling
+    
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
         <div className="flex items-start space-x-3">
