@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -101,7 +101,7 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
       open={isOpen}
       setOpen={handleClose}
       label="UBAH PETA"
-      className="max-w-6xl"
+      className="max-w-[75vw]"
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* DataPemetaan Component */}

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -6,7 +5,6 @@ import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
 import Modal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
-import useReferences from '@/hooks/useReferences';
 
 const ModalCreateLembagaTani = ({ open, setOpen, onSubmit, onCancel }) => {
   const handleOnClose = () => setOpen(false);
@@ -15,8 +13,6 @@ const ModalCreateLembagaTani = ({ open, setOpen, onSubmit, onCancel }) => {
     onSubmit(data);
     setOpen(false);
   };
-
-  const { komoditasKelembagaan, fetchKomoditasKelembagaan } = useReferences();
 
   const { values, handleChange, handleBlur, handleSubmit, touched, errors } = useFormik({
     initialValues: {
@@ -36,9 +32,6 @@ const ModalCreateLembagaTani = ({ open, setOpen, onSubmit, onCancel }) => {
     },
   });
 
-  useEffect(() => {
-    fetchKomoditasKelembagaan();
-  }, []);
 
   return (
     <Modal
@@ -71,7 +64,7 @@ const ModalCreateLembagaTani = ({ open, setOpen, onSubmit, onCancel }) => {
           selectClassName='!min-h-[30px] h-[30px]'
           label='Komoditas'
           placeholder='Pilih Komoditas'
-          options={komoditasKelembagaan}
+          options={[]}
           name='komoditas'
           value={values.komoditas}
           onChange={handleChange}

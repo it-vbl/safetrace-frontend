@@ -38,10 +38,7 @@ const MapDashboard = () => {
     fetchPolaTanamStatistik,
     fetchEksPlasmaStatistik,
   } = useAnalisis();
-  const { komoditasKelembagaan, fetchKomoditasKelembagaan } = useReferences();
-
   useEffect(() => {
-    fetchKomoditasKelembagaan();
     fetchInitialData();
   }, []);
 
@@ -176,7 +173,7 @@ const MapDashboard = () => {
           </Heading>
           <div className="flex sm:flex-row sm:items-end sm:justify-end gap-3 sm:gap-4 w-full lg:w-auto">
             <Select
-              options={komoditasKelembagaan}
+              options={[]}
               value={komoditas}
               onChange={(e) => setKomoditas(e.target.value)}
               placeholder="Pilih Komoditas"

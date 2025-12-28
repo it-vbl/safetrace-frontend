@@ -55,7 +55,6 @@ const DOCUMENT_CONFIGS = [
 
 const DetailKebunPage = () => {
   const { idKebun: id } = useParams();
-  const router = useRouter();
   const [kebunData, setKebunData] = useState(null);
   const [lampiranData, setLampiranData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -246,7 +245,7 @@ const DetailKebunPage = () => {
             />
             <BorderBottomColData
               label="Jenis Legalitas"
-              value={kebunData.jenis_legalitas}
+              value={kebunData.jenis_legalitas_label}
             />
 
             {/* Row 3 */}

@@ -3,14 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 export const referensiSlice = createSlice({
   name: 'referensi',
   initialState: {
-    stdbStatuses: [],
     pendidikanTerakhir: [],
     statusLahan: [],
     jenisLahan: [],
     jenisPupuk: [],
     asalBenih: [],
     polaTanam: [],
-    komoditasKelembagaan: [],
     jenisKelamin: [],
     eksPlasma: [],
     userRoles: [],
@@ -21,9 +19,6 @@ export const referensiSlice = createSlice({
     jenisLegalitas: [],
   },
   reducers: {
-    setSTDBStatuses: (state, action) => {
-      state.stdbStatuses = action.payload;
-    },
     setPendidikanTerakhir: (state, action) => {
       state.pendidikanTerakhir = action.payload;
     },
@@ -41,9 +36,6 @@ export const referensiSlice = createSlice({
     },
     setPolaTanam: (state, action) => {
       state.polaTanam = action.payload;
-    },
-    setKomoditasKelembagaan: (state, action) => {
-      state.komoditasKelembagaan = action.payload;
     },
     setJenisKelamin: (state, action) => {
       state.jenisKelamin = action.payload;
@@ -73,14 +65,12 @@ export const referensiSlice = createSlice({
 });
 
 export const {
-  setSTDBStatuses,
   setPendidikanTerakhir,
   setStatusLahan,
   setJenisLahan,
   setJenisPupuk,
   setAsalBenih,
   setPolaTanam,
-  setKomoditasKelembagaan,
   setJenisKelamin,
   setEksPlasma,
   setUserRoles,

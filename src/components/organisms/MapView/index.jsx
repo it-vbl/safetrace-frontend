@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import L from 'leaflet';
-import { ArrowRightIcon } from 'lucide-react';
+import { ArrowRightIcon, FileWarningIcon } from 'lucide-react';
 import {
   FeatureGroup,
   MapContainer,
@@ -15,7 +15,6 @@ import { EditControl } from 'react-leaflet-draw';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Close from '@/components/atoms/Icons/Close';
-import STDBStatusChip from '@/components/atoms/STDBStatusChip';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import convertCoordsToDMS from '@/libs/utils/convertCoordToDMS';
 import { setMapviewFilterSidebarOpen } from '@/store/slices/app';
@@ -68,7 +67,6 @@ const DrawControl = ({
   disableDrawPolygon = true,
   disableEditDeletePath = true,
   polygons = [],
-  isDisplaySidebar = false,
 }) => {
   const editRef = useRef(null);
   const featureGroupRef = useRef(null);
@@ -83,27 +81,10 @@ const DrawControl = ({
       layer;
 
     layer_ids.forEach((id) => {
-      console.log('LAYER ID', id);
       layer = layers[id];
       layerContainer.removeLayer(layer);
     });
   }
-
-  useEffect(() => {
-    const leftContainer = document.querySelector('.leaflet-left');
-    const rightContainer = document.querySelector('.leaflet-right');
-    if (leftContainer && rightContainer) {
-      try {
-        if (!isDisplaySidebar) {
-          // Set left to sidebar width (320px) + left padding (16px) = 336px
-          leftContainer.classList.add('leaflet-left-custom');
-          rightContainer.classList.add('leaflet-right-custom');
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }, [isDisplaySidebar]);
 
   useEffect(() => {
     // removeAllEditControlLayers();
@@ -334,6 +315,66 @@ export default function MyMap(props) {
 
   const finalPosition = position ? position : [-0.5, 114.9];
 
+  useEffect(() => {
+    let intervalId;
+
+    const applyCustomClasses = () => {
+      const leftContainers = document.querySelectorAll('.leaflet-left');
+      const rightContainers = document.querySelectorAll('.leaflet-right');
+
+      if (leftContainers.length > 0 && rightContainers.length > 0) {
+        try {
+          if (!isDisplaySidebar) {
+            // Set left to sidebar width (320px) + left padding (16px) = 336px
+            // Apply to all leaflet-left and leaflet-right elements (for multiple maps)
+            leftContainers.forEach((container) => {
+              container.classList.add('leaflet-left-custom');
+            });
+            rightContainers.forEach((container) => {
+              container.classList.add('leaflet-right-custom');
+            });
+          } else {
+            // Remove custom classes when sidebar is displayed
+            leftContainers.forEach((container) => {
+              container.classList.remove('leaflet-left-custom');
+            });
+            rightContainers.forEach((container) => {
+              container.classList.remove('leaflet-right-custom');
+            });
+          }
+          return true; // Elements found and classes applied
+        } catch (error) {
+          console.error(error);
+          return false;
+        }
+      }
+      return false; // Elements not found
+    };
+
+    // Use do-while pattern with setInterval
+    let found = false;
+    do {
+      found = applyCustomClasses();
+      if (!found) {
+        // If not found, set up interval to retry every 1 second
+        intervalId = setInterval(() => {
+          const success = applyCustomClasses();
+          if (success) {
+            clearInterval(intervalId);
+          }
+        }, 1000);
+        break; // Exit do-while, interval will continue checking
+      }
+    } while (!found);
+
+    // Cleanup interval on unmount or dependency change
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isDisplaySidebar]);
+
   return (
     <MapContainer
       className={`h-[calc(100dvh-72px)] w-full ${mapClassName}`}
@@ -341,9 +382,6 @@ export default function MyMap(props) {
       zoom={zoom}
       scrollWheelZoom={true}
       ref={mapRef}
-      whenCreated={(mapInstance) => {
-        mapInstanceRef.current = mapInstance;
-      }}
     >
       {showCustomControls && (
         <>
@@ -362,7 +400,6 @@ export default function MyMap(props) {
           onEditPath={onEditPath}
           onDeleted={onDeletePath}
           polygons={polygons}
-          isDisplaySidebar={isDisplaySidebar}
         />
       )}
       <TileLayer
@@ -388,112 +425,210 @@ export default function MyMap(props) {
             {showPolygonPopup ? (
               <Popup closeButton={false}>
                 <div className="w-full">
-                  <div className="flex h-[32px] items-center justify-between ">
-                    <Paragraph className="font-bold " level={2}>
-                      DETAIL
+                  <div className="flex h-[32px] items-center justify-between mb-2">
+                    <Paragraph className="font-bold" level={2}>
+                      INFORMASI KEBUN
                     </Paragraph>
                     <ClosePopupButton />
                   </div>
-                  <div className="w-[500px]">
-                    <div className="grid grid-cols-3">
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-4">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Titik koordinat
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[16px]">
-                          {convertCoordsToDMS(
-                            data?.peta?.titik_koordinat?.coordinates[0],
-                            data?.peta?.titik_koordinat?.coordinates[1]
-                          )}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          ID Kebun
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.id}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Status Lahan
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.lahan?.status_lahan_label}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Komoditas
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.komoditas_info}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Luas Lahan (m2)
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.lahan?.luas_lahan}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Kecamatan
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.lahan?.kecamatan_label}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Kelurahan
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.lahan?.desa_label}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Data Peta
-                        </Paragraph>
-                        <Paragraph
-                          className={`!m-0 text-[14px] font-bold ${
-                            data?.peta?.geom?.coordinates?.length > 0
-                              ? 'text-primary'
-                              : ' text-red-900'
-                          }`}
-                        >
-                          {data?.peta?.geom?.coordinates?.length > 0
-                            ? 'Ada'
-                            : 'Tidak Ada'}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          Pekebun
-                        </Paragraph>
-                        <Paragraph className="!m-0 text-[14px]">
-                          {data?.pekebun?.nama}
-                        </Paragraph>
-                      </div>
-                      <div className="border-b-1 flex flex-col items-start gap-1 border-b border-dashed py-4 pr-8">
-                        <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                          STDB Terbit
-                        </Paragraph>
-                        <STDBStatusChip
-                          value={data?.status_stdb}
-                          label={data?.status_stdb_label}
-                        />
-                      </div>
+                  <div className="w-[600px]">
+                    {/* Resiko Deforestasi Banner */}
+                    <div className="bg-orange-300  px-3 py-2 rounded mb-4 flex items-center justify-center gap-2">
+                      <FileWarningIcon size={16} />
+                      <Paragraph className="!m-0 text-[14px] font-semibold">
+                        Resiko Deforestasi : {data?.resiko_deforestasi || '-'}
+                      </Paragraph>
                     </div>
-                    <div className="absolute bottom-6 right-6">
-                      <Link href={`/`}>
-                        <div className="flex flex-row items-center gap-2 self-end text-primary">
-                          Lihat selengkapnya
-                          <ArrowRightIcon size={12} />
+
+                    {/* Helper function to format waktu_tanam */}
+                    {(() => {
+                      const formatWaktuTanam = (dateString) => {
+                        if (!dateString) return '-';
+                        try {
+                          const date = new Date(dateString);
+                          const month = date.toLocaleDateString('id-ID', {
+                            month: 'long',
+                          });
+                          const year = date.getFullYear();
+                          return `${
+                            month.charAt(0).toUpperCase() + month.slice(1)
+                          }, ${year}`;
+                        } catch {
+                          return dateString || '-';
+                        }
+                      };
+
+                      // Helper to convert m2 to Ha
+                      const convertToHa = (luasM2) => {
+                        if (!luasM2) return '0';
+                        const ha = parseFloat(luasM2) / 10000;
+                        return ha.toFixed(2);
+                      };
+
+                      return (
+                        <div className="grid grid-cols-3 gap-x-4">
+                          {/* Column 1 */}
+                          <div className="flex flex-col">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Titik Koordinat
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.peta?.titik_koordinat?.coordinates
+                                  ? convertCoordsToDMS(
+                                      data.peta.titik_koordinat.coordinates[0],
+                                      data.peta.titik_koordinat.coordinates[1]
+                                    )
+                                  : '-'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Kelompok
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.kelompok || data?.kelompok_tani || '-'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Waktu Tanam
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {formatWaktuTanam(data?.waktu_tanam)}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Legalitas
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.jenis_legalitas_label ||
+                                  data?.legalitas ||
+                                  '-'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                STDB
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.nomor_stdb || data?.stdb || '-'}
+                              </Paragraph>
+                            </div>
+                          </div>
+
+                          {/* Column 2 */}
+                          <div className="flex flex-col">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Id Kebun
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.id_kebun || '-'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Lokasi
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.lokasi_kebun ||
+                                  data?.lahan?.desa_label ||
+                                  '-'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                RSPO
+                              </Paragraph>
+                              <Paragraph
+                                className={`!m-0 text-[14px] ${
+                                  data?.is_rspo || data?.rspo === 'Sudah'
+                                    ? 'text-green-600 font-semibold'
+                                    : ''
+                                }`}
+                              >
+                                {data?.is_rspo
+                                  ? 'Sudah'
+                                  : data?.rspo || 'Belum'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                No Legalitas
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.nomor_legalitas ||
+                                  data?.no_legalitas ||
+                                  '-'}
+                              </Paragraph>
+                            </div>
+                          </div>
+
+                          {/* Column 3 */}
+                          <div className="flex flex-col">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Petani
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.pekebun?.nama ||
+                                  data?.nama_petani ||
+                                  '-'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Luas Kebun (Ha)
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.luas_kebun
+                                  ? parseFloat(data.luas_kebun).toFixed(2)
+                                  : data?.lahan?.luas_lahan
+                                  ? convertToHa(data.lahan.luas_lahan)
+                                  : '0.00'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                ISPO
+                              </Paragraph>
+                              <Paragraph
+                                className={`!m-0 text-[14px] ${
+                                  data?.is_ispo || data?.ispo === 'Sudah'
+                                    ? 'text-green-600 font-semibold'
+                                    : ''
+                                }`}
+                              >
+                                {data?.is_ispo
+                                  ? 'Sudah'
+                                  : data?.ispo || 'Belum'}
+                              </Paragraph>
+                            </div>
+                            <div className="flex flex-col gap-1 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                                Pemilik Legalitas
+                              </Paragraph>
+                              <Paragraph className="!m-0 text-[14px]">
+                                {data?.pemiliki_legalitas ||
+                                  data?.pemilik_legalitas ||
+                                  '-'}
+                              </Paragraph>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Lihat Selengkapnya Link */}
+                    <div className="mt-4 flex justify-end">
+                      <Link href={`/traceability/kebun/${data?.id}/detail`}>
+                        <div className="flex flex-row items-center gap-2 text-primary hover:underline cursor-pointer">
+                          <Paragraph className="!m-0 text-[14px]">
+                            Lihat Selengkapnya
+                          </Paragraph>
+                          <ArrowRightIcon size={14} />
                         </div>
                       </Link>
                     </div>

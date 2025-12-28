@@ -18,7 +18,7 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
   const [activeKomoditasIndex, setActiveKomoditasIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const komoditasOptions = useSelector((state) => state.referensi.komoditasKelembagaan);
+  const komoditasOptions = [];
   const asalBenihOptions = useSelector((state) => state.referensi.asalBenih);
   const jenisLahanOptions = useSelector((state) => state.referensi.jenisLahan);
 

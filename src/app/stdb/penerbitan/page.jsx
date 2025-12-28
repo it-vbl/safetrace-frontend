@@ -33,11 +33,6 @@ const ListVerifikasi = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const { listPenerbitan: stdbList, fetchPenerbitan, totalSTDB, loading } = useSTDB();
-  const { komoditasKelembagaan, fetchKomoditasKelembagaan } = useReferences();
-
-  useEffect(() => {
-    fetchKomoditasKelembagaan();
-  }, []);
 
   useEffect(() => {
     fetchPenerbitan(
@@ -121,10 +116,7 @@ const ListVerifikasi = () => {
               <Select
                 value={selectedKomoditas}
                 onChange={handleKomoditasChange}
-                options={komoditasKelembagaan.map((item) => ({
-                  label: item.label,
-                  value: item.value,
-                }))}
+                options={[]}
                 placeholder='Semua Komoditas'
               />
               <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />

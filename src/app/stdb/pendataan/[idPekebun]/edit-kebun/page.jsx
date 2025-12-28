@@ -270,12 +270,10 @@ const TambahKebun = () => {
 
   /*************  ✨ Windsurf Command 🌟  *************/
   const {
-    fetchSTDBStatuses,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
     fetchPolaTanam,
     fetchJenisPupuk,
-    fetchKomoditasKelembagaan,
     fetchEksPlasma,
     fetchAsalBenih,
     fetchJenisLahan,
@@ -288,12 +286,10 @@ const TambahKebun = () => {
     const params = { user_id: idPekebun };
     fetchListKebun(new URLSearchParams(params).toString());
 
-    fetchSTDBStatuses();
     fetchPendidikanTerakhir();
     fetchStatusLahan();
     fetchPolaTanam();
     fetchJenisPupuk();
-    fetchKomoditasKelembagaan();
     fetchEksPlasma();
     fetchAsalBenih();
     fetchJenisLahan();

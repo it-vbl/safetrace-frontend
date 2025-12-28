@@ -1,9 +1,7 @@
-import { useEffect,useState } from 'react';
+import { useState } from 'react';
 import { useDispatch,useSelector } from 'react-redux';
 
 import { setKomoditas } from '@/store/slices/komoditas';
-
-import { getListKomoditas } from '../services/komoditas';
 
 const useKomoditas = () => {
   const [loading, setLoading] = useState(false);
@@ -18,23 +16,6 @@ const useKomoditas = () => {
     return find;
   };
 
-  const fetchKomoditas = async () => {
-    setLoading(true);
-    try {
-      const response = await getListKomoditas();
-      const komoditas = response.data.data;
-      dispatch(setKomoditas(komoditas));
-    } catch (error) {
-      console.error(error);
-      setError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchKomoditas();
-  }, []);
 
   return { komoditas, loading, error, search };
 };

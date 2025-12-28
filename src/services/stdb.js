@@ -1,8 +1,6 @@
 import api from './api';
 
 //list STDB
-export const getSTDBList = (params) =>
-  api.get(`/pekebun/kebun/list/?${params}`);
 export const getPenerbitanList = (params) =>
   api.get(`/stdb/penerbitan/list/?${params}`);
 export const getVerifikasiList = (params) =>
