@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { setSTDB } from '@/store/slices/stdb';
-
 import {
   getDataBerakhirList,
   getDataTerbitList,
   getListKebunSTDB,
   getPenerbitanList,
-  getRingkasanList,
   getStatusVerifikasiKebun,
-  getSTDBList,
   getTidakTerbitList,
   getVerifikasiList,
 } from '../services/stdb';
@@ -26,49 +22,8 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
   const [listTerbit, setListTerbit] = useState([]);
   const [listDataBerakhir, setListDataBerakhir] = useState([]);
 
-  const dispatch = useDispatch();
-
-  const { stdb, filterKomoditas, filterKecamatan, filterSTDBStatus } = useSelector((state) => state.stdb);
-
-  const fetchSTDB = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (page_size) params.set('page_size', page_size);
-      if (page) params.set('page', page);
-      filterKomoditas.forEach((komoditas) => params.append('komoditas', komoditas));
-      filterKecamatan.forEach((kecamatan) => params.append('kecamatan', kecamatan));
-      if (filterSTDBStatus) params.set('status_stdb', filterSTDBStatus);
-      if (search) params.set('search', search);
-      const response = await getSTDBList(params);
-      const stdb = response.data.data.results;
-      setTotalSTDB(response.data.data.count);
-      dispatch(
-        setSTDB(
-          stdb.map((data) => {
-            const geom = {
-              type: 'Polygon',
-              coordinates: data?.peta?.geom?.coordinates?.[0]?.map((coord) => [coord[1], coord[0]]),
-            };
-            return {
-              ...data,
-              value: data?.value,
-              label: data?.name,
-              peta: {
-                ...data?.peta,
-                geom,
-              },
-            };
-          })
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      setError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { stdb, filterKomoditas, filterKecamatan, filterSTDBStatus } =
+    useSelector((state) => state.stdb);
 
   const fetchStatusVerifikasiKebun = async (pekebunId, kebunId) => {
     try {
@@ -159,7 +114,6 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
     listDataBerakhir,
     fetchStatusVerifikasiKebun,
     fetchListVerifikasi,
-    fetchSTDB,
     fetchListKebunSTDB,
     fetchTidakTerbit,
     fetchPenerbitan,

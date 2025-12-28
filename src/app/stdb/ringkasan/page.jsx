@@ -22,7 +22,6 @@ const RingkasanPage = () => {
   const [komoditas, setKomoditas] = useState('');
   const [periode, setPeriode] = useState('1month');
   
-  const { komoditasKelembagaan, fetchKomoditasKelembagaan } = useReferences();
   const { 
     loading, 
     error, 
@@ -33,7 +32,6 @@ const RingkasanPage = () => {
   } = useRingkasan();
 
   useEffect(() => {
-    fetchKomoditasKelembagaan();
     fetchInitialData();
   }, []);
 
@@ -210,7 +208,7 @@ const RingkasanPage = () => {
         <div className="flex flex-col md:flex-row md:items-end md:justify-end gap-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <Select
-              options={komoditasKelembagaan}
+              options={[]}
               value={komoditas}
               onChange={(e) => setKomoditas(e.target.value)}
               placeholder="Pilih Komoditas"

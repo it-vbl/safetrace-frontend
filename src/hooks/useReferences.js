@@ -9,13 +9,11 @@ import {
   getJenisLegalitas,
   getJenisPupuk,
   getKelompokTani,
-  getKomoditasKelembagaan,
   getPendidikanTerakhir,
   getPolaTanam,
   getStatusLahan,
   getStatusPekerja,
   getStatusPerkawinan,
-  getSTDBStatuses,
   getSumberKontak,
   getUserRoles,
 } from '../services/referensi';
@@ -27,13 +25,11 @@ import {
   setJenisLegalitas,
   setJenisPupuk,
   setKelompokTani,
-  setKomoditasKelembagaan,
   setPendidikanTerakhir,
   setPolaTanam,
   setStatusLahan,
   setStatusPekerja,
   setStatusPerkawinan,
-  setSTDBStatuses,
   setSumberKontak,
   setUserRoles,
 } from '../store/slices/referensi';
@@ -45,14 +41,12 @@ const useReferences = () => {
   const dispatch = useDispatch();
 
   const {
-    stdbStatuses,
     pendidikanTerakhir,
     statusLahan,
     jenisLahan,
     jenisPupuk,
     asalBenih,
     polaTanam,
-    komoditasKelembagaan,
     jenisKelamin,
     eksPlasma,
     userRoles,
@@ -85,10 +79,6 @@ const useReferences = () => {
     }
   };
 
-  const fetchSTDBStatuses = useCallback(
-    () => fetchData(getSTDBStatuses, setSTDBStatuses),
-    []
-  );
   const fetchPendidikanTerakhir = useCallback(
     () => fetchData(getPendidikanTerakhir, setPendidikanTerakhir),
     []
@@ -111,10 +101,6 @@ const useReferences = () => {
   );
   const fetchJenisPupuk = useCallback(
     () => fetchData(getJenisPupuk, setJenisPupuk),
-    []
-  );
-  const fetchKomoditasKelembagaan = useCallback(
-    () => fetchData(getKomoditasKelembagaan, setKomoditasKelembagaan),
     []
   );
   const fetchJenisKelamin = useCallback(
@@ -153,14 +139,12 @@ const useReferences = () => {
   return {
     loading,
     error,
-    stdbStatuses,
     pendidikanTerakhir,
     statusLahan,
     jenisLahan,
     jenisPupuk,
     asalBenih,
     polaTanam,
-    komoditasKelembagaan,
     jenisKelamin,
     eksPlasma,
     userRoles,
@@ -169,14 +153,12 @@ const useReferences = () => {
     kelompokTani,
     sumberKontak,
     jenisLegalitas,
-    fetchSTDBStatuses,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
     fetchPolaTanam,
     fetchAsalBenih,
     fetchJenisLahan,
     fetchJenisPupuk,
-    fetchKomoditasKelembagaan,
     fetchJenisKelamin,
     fetchEksPlasma,
     fetchUserRoles,

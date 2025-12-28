@@ -8,11 +8,6 @@ import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
 
 import Button from '@/components/atoms/Button';
-import Checkbox from '@/components/atoms/Checkbox';
-import Statistic from '@/components/atoms/Icons/Statistic';
-import STDBStatusChip from '@/components/atoms/STDBStatusChip';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
-import RadioButton from '@/components/molecules/RadioButton';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import DataAlertDeforestasi from '@/components/organisms/DataAlertDeforestasi';
 import DataPekebunTable from '@/components/organisms/DataPekebunTable';
@@ -33,7 +28,6 @@ import {
   setFilterSTDBStatus,
 } from '@/store/slices/stdb';
 import getPolygonCenter from '@/utils/getPolygonCenter';
-import theme from '@/utils/tailwindTheme';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -88,13 +82,11 @@ const MapDashboard = () => {
   const { komoditas } = useKomoditas();
   const { kecamatanSanggau } = useKecamatanSanggau();
   const {
-    stdb,
     loading,
     filterKomoditas,
     filterKecamatan,
     totalSTDB,
     filterSTDBStatus,
-    fetchSTDB,
   } = useSTDB({
     page_size: pageSize,
     page: currentPage,
@@ -119,10 +111,8 @@ const MapDashboard = () => {
     petani_id: filterPetaniId || petaniIdFromUrl || '',
   });
   const {
-    stdbStatuses,
     kelompokTani,
     jenisLegalitas,
-    fetchSTDBStatuses,
     fetchKelompokTani,
     fetchJenisLegalitas,
   } = useReferences();
@@ -134,69 +124,13 @@ const MapDashboard = () => {
     loading: loadingDetailStaticLayer,
   } = useStaticLayer();
 
-  const handleOnLihatClicked = (data) => {
-    setShowTable(false);
-    // Find the original kebun data and transform it for map
-    const originalKebun = kebunList.find(
-      (k) => (k.id_kebun || k.id) === data.id
-    );
-    if (originalKebun) {
-      const mapData = transformKebunForMap([originalKebun])[0];
-      setSelectedPekebun(mapData);
-    } else {
-      setSelectedPekebun(data);
-    }
-  };
-
-  const ActionsCellRenderer = useCallback(
-    (e) => {
-      return (
-        <Button
-          label="Lihat"
-          size={'small'}
-          onClick={() => handleOnLihatClicked(e.data)}
-        />
-      );
-    },
-    [stdb]
-  );
-
-  const STDBStatusCellRenderer = useCallback(
-    (e) => {
-      return (
-        <STDBStatusChip
-          value={e.data?.status_stdb}
-          label={e.data?.status_stdb_label}
-        />
-      );
-    },
-    [stdb]
-  );
-
-  const PetaAvailabilityCellRenderer = useCallback(
-    (e) => {
-      console.log('Check ', e);
-      return (
-        <div
-          className={` font-bold ${
-            e.data?.peta?.geom?.coordinates ? 'text-green-400' : 'text-red-400'
-          }`}
-        >
-          {e.data?.peta?.geom?.coordinates ? 'Ada' : 'Belum Ada'}
-        </div>
-      );
-    },
-    [stdb]
-  );
-
   const PetaDetailCellRenderer = (params) => {
     const handlePetaClick = () => {
       const idKebun = params.data?.id;
+      console.log('CHECK idKEbun');
       if (idKebun) {
         // Find the original kebun data and transform it for map
-        const originalKebun = kebunList.find(
-          (k) => (k.id_kebun || k.id) === idKebun
-        );
+        const originalKebun = kebunList.find((k) => k.id === idKebun);
         if (originalKebun) {
           const mapData = transformKebunForMap([originalKebun])[0];
           // Close the modal
@@ -207,22 +141,27 @@ const MapDashboard = () => {
       }
     };
 
-    const coordinates = params.data?.peta?.titik_koordinat?.coordinates;
-    const coordText = coordinates
-      ? convertCoordToDMS(coordinates[0], coordinates[1])
-      : '';
-    const idKebun = params.data?.id || '';
+    const handleDetailClick = () => {
+      const idKebun = params.data?.id;
+      if (idKebun) {
+        router.push(`/traceability/kebun/${idKebun}/detail`);
+      }
+    };
 
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-row gap-2">
         <button
           onClick={handlePetaClick}
           className="font-bold text-orange-600 underline text-left hover:text-orange-700 transition-colors"
         >
-          PETA DETAIL
+          PETA
         </button>
-        {coordText && <div className="text-sm text-gray-600">{coordText}</div>}
-        {idKebun && <div className="text-sm text-gray-600">{idKebun}</div>}
+        <button
+          onClick={handleDetailClick}
+          className="font-bold text-blue-600 underline text-left hover:text-blue-700 transition-colors"
+        >
+          DETAIL
+        </button>
       </div>
     );
   };
@@ -400,12 +339,23 @@ const MapDashboard = () => {
 
   const colDefs = [
     {
-      headerName: 'Titik Koordinat',
+      headerName: '',
       field: 'peta.titik_koordinat.coordinates',
       cellRenderer: PetaDetailCellRenderer,
-      width: 200,
+      width: 128,
       pinned: 'left',
       suppressMenu: true,
+      sortable: false,
+      filter: false,
+    },
+    {
+      headerName: 'Titik Koordinat',
+      field: 'peta.titik_koordinat.coordinates',
+      valueFormatter: (params) => {
+        if (params.value == null) return '-';
+        return convertCoordToDMS(params.value[0], params.value[1]);
+      },
+      width: 200,
       sortable: false,
       filter: false,
     },
@@ -496,26 +446,6 @@ const MapDashboard = () => {
     []
   );
 
-  const handleFilterKomoditasChange = (value, komoditas) => {
-    let temp = [...filterKomoditas];
-    if (value.target.checked) {
-      temp.push(komoditas.value);
-    } else {
-      temp = filterKomoditas.filter((fk) => fk !== komoditas.value);
-    }
-    dispatch(setFilterKomoditas(temp));
-  };
-
-  const handleFilterKecamatanChange = (value, komoditas) => {
-    let temp = [...filterKecamatan];
-    if (value.target.checked) {
-      temp.push(komoditas.value);
-    } else {
-      temp = filterKecamatan.filter((fk) => fk !== komoditas.value);
-    }
-    dispatch(setFilterKecamatan(temp));
-  };
-
   const handleStaticLayerChange = (v, data) => {
     if (v.target.checked == true) {
       fetchStaticLayersDetail(data?.slug);
@@ -539,27 +469,6 @@ const MapDashboard = () => {
     debounce((e) => {
       setSearchText(e.target.value);
     }, 300),
-    []
-  );
-
-  const handleFilterKomoditasMultipleSelectChange = useCallback(
-    debounce((e) => {
-      dispatch(setFilterKomoditas(e.target.value));
-    }, 500),
-    []
-  );
-
-  const handleFilterKecamatanMultipleSelectChange = useCallback(
-    debounce((e) => {
-      dispatch(setFilterKecamatan(e.target.value));
-    }, 500),
-    []
-  );
-
-  const handleFilterSTDBStatusChange = useCallback(
-    debounce((e) => {
-      dispatch(setFilterSTDBStatus(e.target.value));
-    }, 500),
     []
   );
 
@@ -639,7 +548,6 @@ const MapDashboard = () => {
   );
 
   useEffect(() => {
-    fetchSTDBStatuses();
     fetchStaticLayerList();
     fetchKelompokTani();
     fetchJenisLegalitas();
@@ -689,17 +597,6 @@ const MapDashboard = () => {
     }
   }, [searchParams, kelompokTani, router]);
 
-  useEffect(() => {
-    fetchSTDB();
-  }, [
-    pageSize,
-    currentPage,
-    searchText,
-    filterKomoditas,
-    filterKecamatan,
-    filterSTDBStatus,
-  ]);
-
   // Fetch kebun data when filters change or on page load
   useEffect(() => {
     fetchKebun();
@@ -734,7 +631,7 @@ const MapDashboard = () => {
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
           zoom={zoomMap}
           position={centerMap}
-          data={[...stdb, ...kebunMapData]}
+          data={kebunMapData}
           activeDataId={selectedPekebun?.id}
           showCustomControls={true}
           onFilterChange={(filter) =>

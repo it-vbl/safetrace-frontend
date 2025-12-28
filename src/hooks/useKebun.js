@@ -57,7 +57,7 @@ const useKebun = ({
       ]);
 
       return {
-        id: kebun.id_kebun || kebun.id,
+        ...kebun,
         pekebun: { nama: kebun.nama_petani || '' },
         kelompok: kebun.kelompok_tani || '',
         lahan: {
@@ -99,7 +99,7 @@ const useKebun = ({
       ]);
 
       return {
-        id: kebun.id_kebun || kebun.id,
+        ...kebun,
         peta: {
           geom:
             kebun.geom && geomCoordinates
@@ -124,7 +124,6 @@ const useKebun = ({
         status_stdb_label: '', // Not available in API response
         kelompok_tani: kebun.kelompok_tani || '',
         lokasi_kebun: kebun.lokasi_kebun || '',
-        id_kebun: kebun.id_kebun || '',
       };
     });
   }, []);

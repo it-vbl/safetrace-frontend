@@ -16,13 +16,11 @@ import Paragraph from '@/components/atoms/Typography/Paragraph';
 import RadioButton from '@/components/molecules/RadioButton';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
-import Select from '@/components/molecules/Select';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
 import Pagination from '@/components/organisms/Pagination';
 import pekebuns from '@/constants/pekebuns';
 import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
 import useKomoditas from '@/hooks/useKomoditas';
-import useReferences from '@/hooks/useReferences';
 import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
@@ -39,13 +37,6 @@ import theme from '@/utils/tailwindTheme';
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const layerFilter = [
-  { label: 'Peta IUP', value: 'peta-iup' },
-  { label: 'Batas Desa', value: 'batas-desa' },
-  { label: 'Batas Kecamatan', value: 'batas-kecamatan' },
-  { label: 'Kawasan Hutan', value: 'kawasan-hutan' },
-];
-
 const MapDashboard = () => {
   const dispatch = useDispatch();
   const [showTable, setShowTable] = useState(false);
@@ -60,20 +51,12 @@ const MapDashboard = () => {
 
   const { komoditas } = useKomoditas();
   const { kecamatanSanggau } = useKecamatanSanggau();
-  const {
-    stdb,
-    filterKomoditas,
-    filterKecamatan,
-    totalSTDB,
-    filterSTDBStatus,
-    fetchSTDB,
-    loading,
-  } = useSTDB({
-    page_size: pageSize,
-    page: currentPage,
-    search: searchText,
-  });
-  const { stdbStatuses, fetchSTDBStatuses } = useReferences();
+  const { stdb, filterKomoditas, filterKecamatan, totalSTDB, loading } =
+    useSTDB({
+      page_size: pageSize,
+      page: currentPage,
+      search: searchText,
+    });
   const {
     staticLayerList,
     staticLayersDetail,
@@ -224,15 +207,7 @@ const MapDashboard = () => {
     []
   );
 
-  const handleFilterSTDBStatusChange = useCallback(
-    debounce((e) => {
-      dispatch(setFilterSTDBStatus(e.target.value));
-    }, 500),
-    []
-  );
-
   useEffect(() => {
-    fetchSTDBStatuses();
     fetchStaticLayerList();
 
     return () => {
@@ -241,17 +216,6 @@ const MapDashboard = () => {
       dispatch(setFilterKecamatan([]));
     };
   }, []);
-
-  useEffect(() => {
-    fetchSTDB();
-  }, [
-    pageSize,
-    currentPage,
-    searchText,
-    filterKomoditas,
-    filterKecamatan,
-    filterSTDBStatus,
-  ]);
 
   return (
     <div className=" h-full w-full">
@@ -311,13 +275,6 @@ const MapDashboard = () => {
                     containerClassName="w-[200px]"
                     placeholder="Pilih Kecamatan"
                     options={kecamatanSanggau}
-                  />
-                  <Select
-                    value={filterSTDBStatus}
-                    onChange={handleFilterSTDBStatusChange}
-                    containerClassName="w-[200px]"
-                    placeholder="Pilih STDB"
-                    options={stdbStatuses}
                   />
                 </div>
                 <Close onClick={() => setShowTable(false)} />
