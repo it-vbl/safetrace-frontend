@@ -11,6 +11,8 @@ const useKebun = ({
   ispo = '',
   legalitas = '',
   petani_id = '',
+  start_date = '',
+  end_date = '',
 } = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -29,6 +31,8 @@ const useKebun = ({
       if (ispo) params.set('is_ispo', ispo === 'sudah');
       if (legalitas) params.set('jenis_legalitas', legalitas);
       if (petani_id) params.set('petani_id', petani_id);
+      if (start_date) params.set('start_date', start_date);
+      if (end_date) params.set('end_date', end_date);
 
       const response = await getListKebun(params.toString());
 
@@ -78,7 +82,7 @@ const useKebun = ({
         rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
         ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
         legalitas: kebun.jenis_legalitas_label || '',
-        resiko_deforestasi: '', // Not available in API response
+        risiko_deforestasi: kebun.risiko_deforestasi || '',
         lokasi_kebun: kebun.lokasi_kebun || '',
         luas_kebun: kebun.luas_kebun || 0,
       };

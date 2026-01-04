@@ -127,7 +127,7 @@ const DetailKebun = ({
       ispo: kebunData?.is_ispo ? 'sudah' : 'belum',
       jenis_legalitas: kebunData?.jenis_legalitas || '',
       no_legalitas: kebunData?.nomor_legalitas || '',
-      pemilik_legalitas: kebunData?.pemiliki_legalitas || '',
+      pemilik_legalitas: kebunData?.pemilik_legalitas || '',
       stdb: kebunData?.nomor_stdb || '',
     },
     validationSchema,
@@ -158,7 +158,7 @@ const DetailKebun = ({
         ispo: kebunData.is_ispo ? 'sudah' : 'belum',
         jenis_legalitas: kebunData.jenis_legalitas || '',
         no_legalitas: kebunData.nomor_legalitas || '',
-        pemilik_legalitas: kebunData.pemiliki_legalitas || '',
+        pemilik_legalitas: kebunData.pemilik_legalitas || '',
         stdb: kebunData.nomor_stdb || '',
       });
     }

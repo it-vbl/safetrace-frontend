@@ -26,7 +26,7 @@ export const handleStep1 = async (values, idKebun) => {
           ? '2'
           : '3',
       nomor_legalitas: values.no_legalitas,
-      pemiliki_legalitas: values.pemilik_legalitas,
+      pemilik_legalitas: values.pemilik_legalitas,
       nomor_stdb: values.stdb,
       jumlah_pokok: values.jumlah_pokok || 0,
     };
@@ -53,7 +53,7 @@ export const handleStep1 = async (values, idKebun) => {
           ? '2'
           : '3',
       nomor_legalitas: values.no_legalitas,
-      pemiliki_legalitas: values.pemilik_legalitas,
+      pemilik_legalitas: values.pemilik_legalitas,
       nomor_stdb: values.stdb,
       jumlah_pokok: values.jumlah_pokok || 0,
     };

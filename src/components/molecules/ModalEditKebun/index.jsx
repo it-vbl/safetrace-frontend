@@ -11,12 +11,19 @@ import BaseModal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
 import { updateKebun } from '@/services/kebun';
+import { getListPetani } from '@/services/petani';
 
 const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [petaniOptions, setPetaniOptions] = useState([]);
 
   // Get references for dropdown options
-  const { jenisLegalitas, fetchJenisLegalitas } = useReferences();
+  const {
+    jenisLegalitas,
+    kelompokTani,
+    fetchJenisLegalitas,
+    fetchKelompokTani,
+  } = useReferences();
 
   // Month options for waktu_tanam
   const monthOptions = [
@@ -47,12 +54,46 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     { value: 'belum', label: 'Belum' },
   ];
 
-  // Fetch jenis legalitas options when modal opens
+  // Function to fetch petani options based on kelompok tani
+  const fetchPetaniByKelompok = async (kelompokTaniValue) => {
+    if (kelompokTaniValue) {
+      try {
+        const response = await getListPetani({
+          kelompok_tani: kelompokTaniValue,
+          page_size: 100,
+        });
+        if (response?.data?.data?.results) {
+          const options = response.data.data.results.map((item) => ({
+            label: item.nama || item.petani_id || '-',
+            value: item.id?.toString() || item.nama || item.petani_id || '',
+          }));
+          setPetaniOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching petani list:', error);
+        setPetaniOptions([]);
+      }
+    } else {
+      setPetaniOptions([]);
+    }
+  };
+
+  // Fetch jenis legalitas and kelompok tani options when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchJenisLegalitas();
+      fetchKelompokTani();
+      // Fetch petani if kebunData has kelompok_tani
+      if (kebunData?.kelompok_tani) {
+        fetchPetaniByKelompok(kebunData.kelompok_tani);
+      }
     }
-  }, [isOpen, fetchJenisLegalitas]);
+  }, [
+    isOpen,
+    fetchJenisLegalitas,
+    fetchKelompokTani,
+    kebunData?.kelompok_tani,
+  ]);
 
   // Parse existing data for form initialization
   const parseExistingData = (data) => {
@@ -67,9 +108,17 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       waktuTanamYear = date.getFullYear().toString();
     }
 
+    // Handle petani - prefer petani_id if available, otherwise use petani_id
+    let petaniValue = '';
+    if (data.petani_id) {
+      petaniValue = data.petani_id.toString();
+    } else if (data.petani_id) {
+      petaniValue = data.petani_id;
+    }
+
     return {
       id_kebun: data.id_kebun || '',
-      nama_petani: data.nama_petani || '',
+      petani_id: petaniValue,
       kelompok_tani: data.kelompok_tani || '',
       lokasi_kebun: data.lokasi_kebun || '',
       luas_kebun: data.luas || '',
@@ -80,14 +129,14 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       is_ispo: data.is_ispo ? 'sudah' : 'belum',
       jenis_legalitas: data.jenis_legalitas || '',
       nomor_legalitas: data.nomor_legalitas || '',
-      pemiliki_legalitas: data.pemiliki_legalitas || '',
+      pemilik_legalitas: data.pemilik_legalitas || '',
       nomor_stdb: data.nomor_stdb || '',
     };
   };
 
   const validationSchema = Yup.object({
     id_kebun: Yup.string().required('Id Kebun wajib diisi'),
-    nama_petani: Yup.string().required('Nama Petani wajib diisi'),
+    petani_id: Yup.string().required('Nama Petani wajib diisi'),
     lokasi_kebun: Yup.string().required('Lokasi Kebun wajib diisi'),
     luas_kebun: Yup.string().required('Luas Kebun wajib diisi'),
     luas_peta: Yup.string().required('Luas Peta wajib diisi'),
@@ -97,7 +146,7 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     is_ispo: Yup.string().required('Status ISPO wajib dipilih'),
     jenis_legalitas: Yup.string().required('Jenis Legalitas wajib dipilih'),
     nomor_legalitas: Yup.string().required('Nomor Legalitas wajib diisi'),
-    pemiliki_legalitas: Yup.string().required('Pemilik Legalitas wajib diisi'),
+    pemilik_legalitas: Yup.string().required('Pemilik Legalitas wajib diisi'),
     nomor_stdb: Yup.string().required('Nomor STDB wajib diisi'),
   });
 
@@ -115,7 +164,7 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
         // Prepare API payload
         const payload = {
           id_kebun: values.id_kebun,
-          nama_petani: values.nama_petani,
+          petani_id: values.petani_id,
           lokasi_kebun: values.lokasi_kebun,
           luas: values.luas_kebun,
           luas_peta: values.luas_peta,
@@ -124,12 +173,13 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
           is_ispo: values.is_ispo === 'sudah',
           jenis_legalitas: values.jenis_legalitas,
           nomor_legalitas: values.nomor_legalitas,
-          pemiliki_legalitas: values.pemiliki_legalitas,
+          pemilik_legalitas: values.pemilik_legalitas,
           nomor_stdb: values.nomor_stdb,
+          jumlah_pokok: values?.jumlah_pokok || 0,
         };
 
         // Call API
-        const response = await updateKebun(kebunData?.id_kebun, payload);
+        const response = await updateKebun(kebunData?.id, payload);
 
         if (response?.data?.status === 'success') {
           toast.success('Data kebun berhasil diperbarui');
@@ -153,8 +203,19 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
   useEffect(() => {
     if (isOpen && kebunData) {
       formik.setValues(parseExistingData(kebunData));
+      // Fetch petani options if kelompok_tani is set
+      if (kebunData.kelompok_tani) {
+        fetchPetaniByKelompok(kebunData.kelompok_tani);
+      }
     }
   }, [isOpen, kebunData]);
+
+  // Fetch petani options when kelompok_tani changes (for programmatic changes)
+  useEffect(() => {
+    if (isOpen && formik.values.kelompok_tani) {
+      fetchPetaniByKelompok(formik.values.kelompok_tani);
+    }
+  }, [isOpen, formik.values.kelompok_tani]);
 
   const handleClose = () => {
     formik.resetForm();
@@ -186,13 +247,15 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
             />
 
             {/* Nama Petani */}
-            <InputText
+            <Select
               label="Nama Petani"
-              name="nama_petani"
-              value={formik.values.nama_petani}
+              name="petani_id"
+              value={formik.values.petani_id}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              isError={formik.touched.nama_petani && formik.errors.nama_petani}
+              options={petaniOptions}
+              placeholder="Pilih Nama Petani"
+              isError={formik.touched.petani_id && formik.errors.petani_id}
               errors={formik.errors}
               touched={formik.touched}
             />
@@ -292,12 +355,21 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
           {/* Right Column */}
           <div className="space-y-4">
             {/* Kelompok Tani */}
-            <InputText
+            <Select
               label="Kelompok Tani"
               name="kelompok_tani"
               value={formik.values.kelompok_tani}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                formik.handleChange(e);
+                const newKelompokTani = e.target.value;
+                // Reset petani when kelompok tani changes
+                formik.setFieldValue('petani_id', '');
+                // Fetch petani options for the new kelompok tani
+                fetchPetaniByKelompok(newKelompokTani);
+              }}
               onBlur={formik.handleBlur}
+              options={kelompokTani}
+              placeholder="Pilih Kelompok Tani"
               isError={
                 formik.touched.kelompok_tani && formik.errors.kelompok_tani
               }
@@ -366,13 +438,13 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
             {/* Pemilik Legalitas */}
             <InputText
               label="Pemilik Legalitas"
-              name="pemiliki_legalitas"
-              value={formik.values.pemiliki_legalitas}
+              name="pemilik_legalitas"
+              value={formik.values.pemilik_legalitas}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               isError={
-                formik.touched.pemiliki_legalitas &&
-                formik.errors.pemiliki_legalitas
+                formik.touched.pemilik_legalitas &&
+                formik.errors.pemilik_legalitas
               }
               errors={formik.errors}
               touched={formik.touched}

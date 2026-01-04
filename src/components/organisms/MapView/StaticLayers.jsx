@@ -1,53 +1,21 @@
 'use client'; // if using App Router
 
 import { useEffect, useState } from 'react';
-import { Polygon, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { GeoJSON, useMap } from 'react-leaflet';
 
-import Close from '@/components/atoms/Icons/Close';
-import Paragraph from '@/components/atoms/Typography/Paragraph';
+import useStaticLayer from '@/hooks/useStaticLayer';
+import { getPopupHtml } from '@/utils/popupUtils';
 
 import { getColorOptions, registerPatterns } from './colorConfig';
 
 import 'leaflet.pattern';
 
-function cleanCoordinates(multiPolygon) {
-  if (!Array.isArray(multiPolygon)) return [];
-
-  return multiPolygon
-    .map((polygon) =>
-      Array.isArray(polygon)
-        ? polygon
-            .map(
-              (ring) =>
-                ring
-                  .filter(
-                    (coord) =>
-                      Array.isArray(coord) &&
-                      coord.length >= 2 &&
-                      typeof coord[0] === 'number' &&
-                      typeof coord[1] === 'number'
-                  )
-                  .map((coord) => [coord[0], coord[1]]) // convert [lng, lat] → [lat, lng]
-            )
-            .filter((ring) => ring.length > 2) // valid ring
-        : []
-    )
-    .filter((polygon) => polygon.length > 0); // valid polygon
-}
-
-function ClosePopupButton() {
-  const map = useMap();
-
-  const handleClose = () => {
-    map.closePopup(); // closes the currently opened popup
-  };
-
-  return <Close onClick={handleClose} />;
-}
-
-export default function IupMap({ data }) {
+export default function IupMap() {
   const [polygons, setPolygons] = useState([]);
   const map = useMap();
+
+  const { staticLayersDetail: data } = useStaticLayer();
 
   useEffect(() => {
     registerPatterns(map); // ✅ ensure patterns are added once
@@ -55,114 +23,70 @@ export default function IupMap({ data }) {
 
   useEffect(() => {
     if (typeof data !== 'object' || data == null) return;
-    const tempArray = [];
-    Object?.keys(data).map((params, idx, array) => {
-      tempArray.push({
-        ...data[params],
-      });
-    });
+    const tempArray = Object.values(data);
+    setPolygons(tempArray);
 
-    const tempPolygons = [];
-    tempArray.map((staticLayer, idx) => {
-      const features = staticLayer?.geom?.features || [];
+    // Set view and fit bounds for the last static layer
+    if (tempArray.length > 0) {
+      const latestPolygon = tempArray[tempArray.length - 1];
 
-      const parsedPolygons = features
-        .filter((feature) => feature?.geometry)
-        .flatMap((feature) => {
-          const geometry = feature.geometry;
-          if (
-            geometry?.type === 'MultiPolygon' &&
-            Array.isArray(geometry.coordinates)
-          ) {
-            const filteredCoordinates = geometry.coordinates.filter((coord) =>
-              Array.isArray(coord)
-            );
-            return {
-              coordinates: cleanCoordinates(filteredCoordinates),
-              properties: feature.properties,
-            };
-          }
-          return [];
-        });
+      if (latestPolygon?.geom) {
+        try {
+          const layer = L.geoJSON(latestPolygon.geom);
+          const bounds = layer.getBounds();
 
-      tempPolygons.push({
-        polygons: parsedPolygons,
-        id: staticLayer.id,
-      });
-    });
-    setPolygons(tempPolygons);
-  }, [data]);
+          // Get center coordinates
+          const center = bounds.getCenter();
+
+          // Set view to center
+          map.setView([center.lat, center.lng], map.getZoom());
+
+          // Fit bounds to the polygon
+          map.fitBounds(bounds);
+        } catch (error) {
+          console.error('Error setting view and fitting bounds:', error);
+        }
+      }
+    }
+  }, [data, map]);
 
   return (
     <>
-      {polygons.map((staticLayer, idx) =>
-        staticLayer?.polygons?.map((polygon) => {
-          return polygon?.coordinates?.map((ring, ringIdx) => {
-            return (
-              <Polygon
-                key={`${idx}-${ringIdx}`}
-                pathOptions={getColorOptions(staticLayer.id).pathOptions}
-                positions={ring?.[0]?.map((coords) => [coords[1], [coords[0]]])}
-              >
-                <Popup closeButton={false}>
-                  <div className="w-full">
-                    <div className="flex h-[32px] items-center justify-between ">
-                      <Paragraph className="font-bold " level={2}>
-                        DETAIL
-                      </Paragraph>
-                      <ClosePopupButton />
-                    </div>
-                    <div className="w-[500px]">
-                      <div className="grid grid-cols-3">
-                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                            Nama
-                          </Paragraph>
-                          <Paragraph className="!m-0 text-[14px]">
-                            {polygon?.properties?.nama || '-'}
-                          </Paragraph>
-                        </div>
-                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                            Nomor SK
-                          </Paragraph>
-                          <Paragraph className="!m-0 text-[14px]">
-                            {polygon?.properties?.NOMORSK || '-'}
-                          </Paragraph>
-                        </div>
-                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                            Komoditas
-                          </Paragraph>
-                          <Paragraph className="!m-0 text-[14px]">
-                            {polygon?.properties?.KOMODITAS || '-'}
-                          </Paragraph>
-                        </div>
-                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                            Luas Lahan (m2)
-                          </Paragraph>
-                          <Paragraph className="!m-0 text-[14px]">
-                            {polygon?.properties?.ha || '-'}
-                          </Paragraph>
-                        </div>
-                        <div className="border-b-1 flex flex-col gap-1 border-b border-dashed py-4 pr-8">
-                          <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
-                            Kecamatan
-                          </Paragraph>
-                          <Paragraph className="!m-0 text-[14px]">
-                            {polygon?.properties?.disctrict_id || '-'}
-                          </Paragraph>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Popup>
-              </Polygon>
+      {polygons.map((staticLayer, idx) => (
+        <GeoJSON
+          key={staticLayer?.id}
+          data={staticLayer?.geom}
+          // Remove style prop or use as fallback - styles will be set in onEachFeature
+          style={() =>
+            getColorOptions(staticLayer?.id, staticLayer?.properties)
+              ?.pathOptions
+          }
+          pointToLayer={(feature, latlng) =>
+            L.circleMarker(latlng, {
+              radius: 4,
+              color: 'red',
+              fillColor: 'black',
+              weight: 0.5,
+              fillOpacity: 0,
+              opacity: 1,
+            })
+          }
+          onEachFeature={(feature, layer) => {
+            // Get pathOptions based on feature properties
+            const colorOptions = getColorOptions(
+              staticLayer?.id,
+              feature.properties
             );
-          });
-        })
-      )}
+            const pathOptions = colorOptions?.pathOptions || {};
+
+            // Apply style to the layer based on feature properties
+            layer.setStyle(pathOptions);
+
+            const popupHtml = getPopupHtml(staticLayer.id, feature.properties);
+            layer.bindPopup(popupHtml);
+          }}
+        />
+      ))}
     </>
   );
 }

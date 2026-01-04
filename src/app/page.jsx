@@ -109,6 +109,8 @@ const MapDashboard = () => {
     ispo: filterISPO,
     legalitas: filterLegalitas,
     petani_id: filterPetaniId || petaniIdFromUrl || '',
+    start_date: dateRange.startDate || '',
+    end_date: dateRange.endDate || '',
   });
   const {
     kelompokTani,
@@ -167,24 +169,28 @@ const MapDashboard = () => {
   };
 
   const ResikoDeforestasiCellRenderer = (params) => {
-    // Randomize the value since API doesn't provide resiko_deforestasi
-    const options = ['Rendah', 'Menengah', 'Tinggi'];
-    // Use a seed based on the row ID to ensure consistent randomization per row
-    const seed = params.data?.id?.toString().length || 0;
-    const randomIndex = (seed + (params.node?.rowIndex || 0)) % options.length;
-    const value = options[randomIndex] || options[0];
+    const risikoValue = params.data?.risiko_deforestasi || params.value || '';
 
-    let chipClass = '';
-    let displayText = value;
+    // Map API values to display text
+    let displayText = '-';
+    let chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
 
-    if (value.toLowerCase() === 'rendah') {
-      chipClass = 'bg-green-100 text-green-800 border-green-300';
-    } else if (value.toLowerCase() === 'menengah') {
-      chipClass = 'bg-orange-100 text-orange-800 border-orange-300';
-    } else if (value.toLowerCase() === 'tinggi') {
-      chipClass = 'bg-red-100 text-red-800 border-red-300';
-    } else {
-      chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
+    if (risikoValue) {
+      const lowerValue = risikoValue.toLowerCase();
+      if (lowerValue === 'low') {
+        displayText = 'Rendah';
+        chipClass = 'bg-green-100 text-green-800 border-green-300';
+      } else if (lowerValue === 'medium') {
+        displayText = 'Menengah';
+        chipClass = 'bg-orange-100 text-orange-800 border-orange-300';
+      } else if (lowerValue === 'high') {
+        displayText = 'Tinggi';
+        chipClass = 'bg-red-100 text-red-800 border-red-300';
+      } else {
+        // If value doesn't match expected values, show as-is
+        displayText = risikoValue;
+        chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
+      }
     }
 
     return (
@@ -361,7 +367,7 @@ const MapDashboard = () => {
     },
     {
       headerName: 'Resiko Deforestasi',
-      field: 'resiko_deforestasi',
+      field: 'risiko_deforestasi',
       cellRenderer: ResikoDeforestasiCellRenderer,
       width: 160,
     },
@@ -610,6 +616,8 @@ const MapDashboard = () => {
     filterLegalitas,
     filterPetaniId,
     petaniIdFromUrl,
+    dateRange.startDate,
+    dateRange.endDate,
   ]);
 
   return (
@@ -625,6 +633,7 @@ const MapDashboard = () => {
           }}
           activeBasemap={activeTile}
           onBasemapChange={setActiveTile}
+          loading={loadingDetailStaticLayer}
         />
         <RightSidebar />
         <Map
