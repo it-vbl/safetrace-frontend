@@ -12,7 +12,7 @@ const Toggle = ({
   const [isActive, setIsActive] = useState(value);
 
   useEffect(() => {
-    setIsActive(true);
+    setIsActive(value);
   }, [value]);
 
   const handleOnChange = (e) => {

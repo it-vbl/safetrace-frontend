@@ -436,7 +436,7 @@ export default function MyMap(props) {
                     <div className="bg-orange-300  px-3 py-2 rounded mb-4 flex items-center justify-center gap-2">
                       <FileWarningIcon size={16} />
                       <Paragraph className="!m-0 text-[14px] font-semibold">
-                        Resiko Deforestasi : {data?.resiko_deforestasi || '-'}
+                        Resiko Deforestasi : {data?.risiko_deforestasi || '-'}
                       </Paragraph>
                     </div>
 
@@ -611,9 +611,7 @@ export default function MyMap(props) {
                                 Pemilik Legalitas
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
-                                {data?.pemiliki_legalitas ||
-                                  data?.pemilik_legalitas ||
-                                  '-'}
+                                {data?.pemilik_legalitas || '-'}
                               </Paragraph>
                             </div>
                           </div>

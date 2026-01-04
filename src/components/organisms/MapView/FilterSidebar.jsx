@@ -8,6 +8,7 @@ import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import DateRange from '@/components/molecules/DateRange';
 import RadioButton from '@/components/molecules/RadioButton';
+import SectionLoading from '@/components/molecules/SectionLoading';
 
 const FilterSidebar = ({
   dateRange = { startDate: '', endDate: '' },
@@ -17,6 +18,7 @@ const FilterSidebar = ({
   onStaticLayerChange = () => {},
   activeBasemap = 'osm',
   onBasemapChange = () => {},
+  loading = false,
 }) => {
   const { mapviewFilterSidebarOpen } = useSelector((state) => state.app);
   const handleDateRangeChange = (newDateRange) => {
@@ -76,6 +78,8 @@ const FilterSidebar = ({
         mapviewFilterSidebarOpen ? 'translate-x-0' : '-translate-x-[200%]'
       }`}
     >
+      <SectionLoading loading={loading} />
+
       <div className="flex flex-col gap-6">
         {/* PERIODE Section */}
         <div className="flex flex-col gap-3">

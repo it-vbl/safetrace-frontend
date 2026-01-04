@@ -2,8 +2,14 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
-import { getStaticLayerData, getStaticLayerList } from '../services/staticLayer';
-import { setStaticLayerDetail, setStaticLayerList } from '../store/slices/staticLayer';
+import {
+  getStaticLayerData,
+  getStaticLayerList,
+} from '../services/staticLayer';
+import {
+  setStaticLayerDetail,
+  setStaticLayerList,
+} from '../store/slices/staticLayer';
 
 const useStaticLayer = () => {
   const dispatch = useDispatch();
@@ -11,14 +17,15 @@ const useStaticLayer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { staticLayerList, staticLayersDetail } = useSelector((state) => state.staticLayer);
+  const { staticLayerList, staticLayersDetail } = useSelector(
+    (state) => state.staticLayer
+  );
 
   const fetchData = async (fetchFunction, setAction, callback = null) => {
     setLoading(true);
     try {
       const response = await fetchFunction();
       if (callback) {
-        console.log('callback');
         callback(response);
       } else {
         const references = response.data.data;
@@ -40,7 +47,8 @@ const useStaticLayer = () => {
     }
   };
 
-  const fetchStaticLayerList = () => fetchData(getStaticLayerList, setStaticLayerList);
+  const fetchStaticLayerList = () =>
+    fetchData(getStaticLayerList, setStaticLayerList);
   const fetchStaticLayersDetail = (staticLayerType) =>
     fetchData(
       () => getStaticLayerData(staticLayerType),
@@ -53,6 +61,7 @@ const useStaticLayer = () => {
           dispatch(setStaticLayerDetail(tempStaticLayersDetail));
         } catch (err) {
           console.log(err);
+        } finally {
         }
       }
     );

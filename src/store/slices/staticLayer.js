@@ -2,7 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const staticLayerSlice = createSlice({
   name: 'staticSlayer',
-  initialState: { staticLayerList: [], staticLayersDetail: {} },
+  initialState: {
+    staticLayerList: [],
+    staticLayersDetail: {},
+  },
   reducers: {
     setStaticLayerList: (state, action) => {
       state.staticLayerList = action.payload;
@@ -13,5 +16,6 @@ export const staticLayerSlice = createSlice({
   },
 });
 
-export const { setStaticLayerList, setStaticLayerDetail } = staticLayerSlice.actions;
+export const { setStaticLayerList, setStaticLayerDetail } =
+  staticLayerSlice.actions;
 export default staticLayerSlice.reducer;
