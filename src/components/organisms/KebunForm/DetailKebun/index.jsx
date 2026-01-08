@@ -274,9 +274,9 @@ const DetailKebun = ({
             isRequired
           />
           <InputText
-            label="Luas Kebun (Ha)"
+            label="Luas Peta (Ha)"
             name="luas_peta"
-            placeholder="Masukan Luas Kebun"
+            placeholder="Masukan Luas Peta"
             type="number"
             step="0.01"
             value={formik.values.luas_peta}
