@@ -77,6 +77,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
         setCoords(newCoords);
       };
       reader.readAsText(blobFile);
+      setIsManual(true);
     } else if (fileType === 'shp') {
       const arrayBuffer = await blobFile.arrayBuffer();
       const json = await shp(arrayBuffer);
