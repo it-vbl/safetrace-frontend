@@ -550,7 +550,7 @@ const DiklatPage = () => {
           </div>
         </div>
 
-        <div className="relative flex max-h-[60vh] min-h-[350px] w-full flex-col overflow-hidden">
+        <div className="relative flex min-h-[350px] w-full flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-x-auto overflow-y-auto">
             <SectionLoading loading={loading} />
             <AgGridReact
