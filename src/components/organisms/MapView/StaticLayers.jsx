@@ -56,29 +56,26 @@ export default function IupMap() {
         <GeoJSON
           key={staticLayer?.id}
           data={staticLayer?.geom}
-          // Remove style prop or use as fallback - styles will be set in onEachFeature
-          style={() =>
-            getColorOptions(staticLayer?.id, staticLayer?.properties)
-              ?.pathOptions
-          }
+          // // Remove style prop or use as fallback - styles will be set in onEachFeature
+          style={() => getColorOptions(staticLayer?.geom?.name)?.pathOptions}
           pointToLayer={(feature, latlng) =>
             L.circleMarker(latlng, {
               radius: 4,
-              color: 'red',
+              color: 'black',
               fillColor: 'black',
-              weight: 0.5,
-              fillOpacity: 0,
+              weight: 1,
+              fillOpacity: 1,
               opacity: 1,
             })
           }
           onEachFeature={(feature, layer) => {
             // Get pathOptions based on feature properties
             const colorOptions = getColorOptions(
-              staticLayer?.id,
-              feature.properties
+              staticLayer?.geom?.name,
+              feature?.properties
             );
             const pathOptions = colorOptions?.pathOptions || {};
-
+            console.log(pathOptions);
             // Apply style to the layer based on feature properties
             layer.setStyle(pathOptions);
 

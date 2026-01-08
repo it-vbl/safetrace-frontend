@@ -145,14 +145,14 @@ const Navbar = () => {
             </div>
           )}
         </div>
-        <div
+        {/* <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/koperasi'
           )}`}
           onClick={() => handleMenuClick('/koperasi')}
         >
           Koperasi
-        </div>
+        </div> */}
       </div>
 
       {/* Mobile center menu */}
