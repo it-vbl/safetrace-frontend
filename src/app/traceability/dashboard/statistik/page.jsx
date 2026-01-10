@@ -2,7 +2,6 @@
 
 import Heading from '@/components/atoms/Typography/Heading';
 import TraceabilitySummaryCard from '@/components/molecules/TraceabilitySummaryCard';
-import SankeyDiagramCard from '@/components/organisms/SankeyDiagramCard';
 
 const TraceabilityDashboard = () => {
   const dataAnggota = {
