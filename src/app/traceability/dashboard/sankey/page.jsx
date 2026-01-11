@@ -14,10 +14,18 @@ import { ChevronRight, DownloadCloudIcon } from 'lucide-react';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Select from '@/components/molecules/Select';
+import { Check } from 'lucide-react';
 
 const SankeyPage = () => {
   const [selectedYear, setSelectedYear] = useState('2024');
-  const [selectedColumn, setSelectedColumn] = useState('all');
+  const [selectedColumns, setSelectedColumns] = useState([
+    'petani',
+    'agen',
+    'koperasi',
+    'pabrik',
+  ]);
+  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const columnDropdownRef = useRef(null);
 
   const yearOptions = [
     { value: '2020', label: '2020' },
@@ -27,13 +35,57 @@ const SankeyPage = () => {
     { value: '2024', label: '2024' },
   ];
 
+  const allColumnValues = ['petani', 'agen', 'koperasi', 'pabrik'];
   const columnOptions = [
-    { value: 'all', label: 'Semua' },
     { value: 'petani', label: 'Petani' },
     { value: 'agen', label: 'Agen' },
     { value: 'koperasi', label: 'Koperasi' },
     { value: 'pabrik', label: 'Pabrik' },
   ];
+
+  const isAllSelected = selectedColumns.length === allColumnValues.length;
+
+  const handleColumnToggle = (value) => {
+    if (value === 'all') {
+      if (isAllSelected) {
+        setSelectedColumns([]);
+      } else {
+        setSelectedColumns([...allColumnValues]);
+      }
+    } else {
+      if (selectedColumns.includes(value)) {
+        setSelectedColumns(selectedColumns.filter((col) => col !== value));
+      } else {
+        setSelectedColumns([...selectedColumns, value]);
+      }
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        columnDropdownRef.current &&
+        !columnDropdownRef.current.contains(event.target)
+      ) {
+        setIsColumnDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getFilterLabel = () => {
+    if (isAllSelected) return 'Semua';
+    if (selectedColumns.length === 0) return 'Pilih Filter';
+    if (selectedColumns.length === 1) {
+      return (
+        columnOptions.find((opt) => opt.value === selectedColumns[0])?.label ||
+        ''
+      );
+    }
+    return `${selectedColumns.length} dipilih`;
+  };
 
   const baseNodes = [
     { id: 'Agung Nugraha', category: 'petani' },
@@ -195,7 +247,8 @@ const SankeyPage = () => {
 
     const multiplier = yearMultiplier[selectedYear] || 1;
 
-    if (selectedColumn === 'all') {
+    // If all columns selected or empty, show all data
+    if (isAllSelected || selectedColumns.length === 0) {
       return {
         nodes: baseNodes,
         links: baseLinks.map((link) => ({
@@ -212,9 +265,10 @@ const SankeyPage = () => {
       const sourceNode = baseNodes.find((n) => n.id === link.source);
       const targetNode = baseNodes.find((n) => n.id === link.target);
 
+      // Check if either source or target is in selected columns
       if (
-        sourceNode?.category === selectedColumn ||
-        targetNode?.category === selectedColumn
+        selectedColumns.includes(sourceNode?.category) ||
+        selectedColumns.includes(targetNode?.category)
       ) {
         relevantNodes.add(link.source);
         relevantNodes.add(link.target);
@@ -233,7 +287,7 @@ const SankeyPage = () => {
       nodes: filteredNodes,
       links: filteredLinks,
     };
-  }, [selectedColumn, selectedYear]);
+  }, [selectedColumns, selectedYear, isAllSelected]);
 
   return (
     <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
@@ -246,14 +300,84 @@ const SankeyPage = () => {
           SANKEY DIAGRAM
         </Heading>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="w-28 sm:w-36">
-            <Select
-              placeholder="Filter"
-              options={columnOptions}
-              value={selectedColumn}
-              onChange={(e) => setSelectedColumn(e.target.value)}
-              containerClassName="!mb-0"
-            />
+          <div className="relative w-28 sm:w-36" ref={columnDropdownRef}>
+            <div
+              onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+              className="flex min-h-[40px] w-full cursor-pointer items-center justify-between rounded-[6px] border border-neutral5 bg-white px-3 py-2 text-[14px] hover:border-blue6"
+            >
+              <span
+                className={
+                  selectedColumns.length === 0 ? 'text-neutral6' : 'text-black'
+                }
+              >
+                {getFilterLabel()}
+              </span>
+              <svg
+                className={`h-4 w-4 transition-transform ${
+                  isColumnDropdownOpen ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            {isColumnDropdownOpen && (
+              <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-[6px] border bg-white p-2 shadow-lg">
+                {/* Semua Option */}
+                <div
+                  onClick={() => handleColumnToggle('all')}
+                  className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] hover:bg-gray-100 ${
+                    isAllSelected ? 'bg-blue-50 text-blue-600' : ''
+                  }`}
+                >
+                  <div
+                    className={`flex h-4 w-4 items-center justify-center rounded border ${
+                      isAllSelected
+                        ? 'border-blue-600 bg-blue-600'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    {isAllSelected && (
+                      <Check size={12} className="text-white" />
+                    )}
+                  </div>
+                  <span>Semua</span>
+                </div>
+                <div className="my-1 border-t border-gray-100" />
+                {/* Individual Options */}
+                {columnOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    onClick={() => handleColumnToggle(option.value)}
+                    className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] hover:bg-gray-100 ${
+                      selectedColumns.includes(option.value)
+                        ? 'bg-blue-50 text-blue-600'
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`flex h-4 w-4 items-center justify-center rounded border ${
+                        selectedColumns.includes(option.value)
+                          ? 'border-blue-600 bg-blue-600'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      {selectedColumns.includes(option.value) && (
+                        <Check size={12} className="text-white" />
+                      )}
+                    </div>
+                    <span>{option.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="w-24 sm:w-36">
             <Select
@@ -283,27 +407,64 @@ const SankeyPage = () => {
       <div className="rounded-[8px] border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
         {/* Stage Headers - Vertical on mobile, horizontal on desktop */}
         <div className="hidden sm:mb-6 sm:flex sm:items-center sm:justify-between">
-          <StageHeader label="Petani" />
-          <ArrowSpacer />
-          <StageHeader label="Agen" />
-          <ArrowSpacer />
-          <StageHeader label="Koperasi" />
-          <ArrowSpacer />
-          <StageHeader label="Pabrik" />
+          {allColumnValues.map((col, index) => {
+            const isVisible = isAllSelected || selectedColumns.includes(col);
+            const label =
+              columnOptions.find((opt) => opt.value === col)?.label || col;
+            const isLast = index === allColumnValues.length - 1;
+            const nextColVisible =
+              !isLast &&
+              (isAllSelected ||
+                selectedColumns.includes(allColumnValues[index + 1]));
+
+            if (!isVisible) return null;
+
+            return (
+              <React.Fragment key={col}>
+                <StageHeader label={label} />
+                {!isLast && nextColVisible && <ArrowSpacer />}
+              </React.Fragment>
+            );
+          })}
         </div>
 
         {/* Mobile: Vertical stage headers */}
         <div className="mb-3 flex flex-col gap-1 sm:hidden">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-[10px] text-gray-500">
+            <div className="flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
               <span className="font-semibold text-gray-700">Alur:</span>
-              <StageHeaderMobile label="Petani" />
-              <span>→</span>
-              <StageHeaderMobile label="Agen" />
-              <span>→</span>
-              <StageHeaderMobile label="Koperasi" />
-              <span>→</span>
-              <StageHeaderMobile label="Pabrik" />
+              {allColumnValues.map((col, index) => {
+                const isVisible =
+                  isAllSelected || selectedColumns.includes(col);
+                const label =
+                  columnOptions.find((opt) => opt.value === col)?.label || col;
+
+                // Find the next visible column
+                let hasNextVisible = false;
+                for (let i = index + 1; i < allColumnValues.length; i++) {
+                  if (
+                    isAllSelected ||
+                    selectedColumns.includes(allColumnValues[i])
+                  ) {
+                    hasNextVisible = true;
+                    break;
+                  }
+                }
+
+                if (!isVisible) return null;
+
+                return (
+                  <React.Fragment key={col}>
+                    <StageHeaderMobile label={label} />
+                    {hasNextVisible && <span>→</span>}
+                  </React.Fragment>
+                );
+              })}
+              {selectedColumns.length === 0 && (
+                <span className="italic text-gray-400">
+                  Pilih filter untuk melihat alur
+                </span>
+              )}
             </div>
           </div>
           <p className="text-[9px] italic text-gray-400">
