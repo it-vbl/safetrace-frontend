@@ -85,17 +85,6 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const menuConfig = {
     traceability: [
       {
-        label: 'Statistik',
-        icon: PieChart,
-        subMenu: [
-          { label: 'Anggota', path: '/traceability/statistik/anggota' },
-          {
-            label: 'Traceability',
-            path: '/traceability/statistik/traceability',
-          },
-        ],
-      },
-      {
         label: 'Petani',
         icon: UserCircle2Icon,
         path: '/traceability/petani',
@@ -104,6 +93,14 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         label: 'Kebun',
         icon: MapIcon,
         path: '/traceability/kebun',
+      },
+      {
+        label: 'Dashboard',
+        icon: PieChart,
+        subMenu: [
+          { label: 'Statistik', path: '/traceability/dashboard/statistik' },
+          { label: 'Sankey', path: '/traceability/dashboard/sankey' },
+        ],
       },
       {
         label: 'Penjualan',
@@ -246,8 +243,8 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
           isMobileClient ? 'shadow-lg' : 'relative'
         } ${
           (isMobileClient && !sidebarOpen) || !sidebarOpen
-            ? 'opacity-0 pointer-events-none overflow-hidden'
-            : 'opacity-100 overflow-visible'
+            ? 'pointer-events-none overflow-hidden opacity-0'
+            : 'overflow-visible opacity-100'
         }`}
       >
         <div
