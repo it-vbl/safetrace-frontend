@@ -20,9 +20,14 @@ export function getPopupHtml(layerId, featureProperties) {
   ];
 
   // Generate grid items for each field mapping
+  // Filter out fields where data doesn't exist, then map to HTML
   const gridItems = fieldMappings
+    .filter(({ key }) => {
+      const value = featureProperties?.[key];
+      return value !== null && value !== undefined && value !== '';
+    })
     .map(({ displayText, key }) => {
-      const value = featureProperties?.[key] || '-';
+      const value = featureProperties[key];
       return `
         <div class="border-b border-dashed pr-6 !mb-2">
           <p class="!m-0 !mb-2 !p-0 text-[12px] font-bold text-gray-400">${displayText}</p>
@@ -37,8 +42,8 @@ export function getPopupHtml(layerId, featureProperties) {
       <div class="flex h-[32px] items-center justify-between mb-2">
         <p class="font-bold text-lg">DETAIL</p>
       </div>
-      <div class="w-[600px]">
-        <div class="grid grid-cols-3 gap-0">
+      <div class="w-[400px]">
+        <div class="grid grid-cols-2 gap-0">
           ${gridItems}
         </div>
       </div>
