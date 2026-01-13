@@ -14,6 +14,7 @@ import {
   createPenjualanPabrik,
   getDetailPenjualan,
 } from '@/services/penjualan';
+import { formatApiErrorMessage } from '@/utils/errorFormatter';
 
 const TambahPenjualanContent = () => {
   const router = useRouter();
@@ -159,9 +160,9 @@ const TambahPenjualanContent = () => {
             // Fallback if no ID (shouldn't happen)
             toast.error('ID angkutan tidak ditemukan dalam response');
           } else {
-            toast.error(
-              response?.data?.message || 'Gagal menyimpan data angkutan'
-            );
+            // Handle error response with proper formatting
+            const errorMessage = formatApiErrorMessage(response?.data);
+            toast.error(errorMessage);
           }
         } else {
           // Editing existing data - just update local state and proceed
@@ -203,15 +204,17 @@ const TambahPenjualanContent = () => {
           router.push('/traceability/penjualan');
           return;
         } else {
-          toast.error(response?.data?.message || 'Gagal menyimpan data pabrik');
+          // Handle error response with proper formatting
+          const errorMessage = formatApiErrorMessage(response?.data);
+          toast.error(errorMessage);
         }
       }
     } catch (error) {
       console.error('Error in step:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Terjadi kesalahan saat menyimpan data'
-      );
+      // Handle error response with proper formatting
+      const errorData = error?.response?.data || error?.data;
+      const errorMessage = formatApiErrorMessage(errorData);
+      toast.error(errorMessage || 'Terjadi kesalahan saat menyimpan data');
     } finally {
       setIsSubmitting(false);
     }

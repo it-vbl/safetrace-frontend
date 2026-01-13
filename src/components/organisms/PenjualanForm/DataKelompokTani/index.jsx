@@ -12,6 +12,7 @@ import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
 import { createPenjualanKelompokPenyetorBulk } from '@/services/penjualan';
 import { getListPetani } from '@/services/petani';
+import { formatApiErrorMessage } from '@/utils/errorFormatter';
 
 const PetaniMemberSelector = ({
   selectedMembers = [],
@@ -445,16 +446,16 @@ const DataKelompokTani = ({
         // Proceed to next step with the form data
         await onNext(kelompokPenyetorList);
       } else {
-        toast.error(
-          response?.data?.message || 'Gagal menyimpan data kelompok penyetor'
-        );
+        // Handle error response with proper formatting
+        const errorMessage = formatApiErrorMessage(response?.data);
+        toast.error(errorMessage || 'Gagal menyimpan data kelompok penyetor');
       }
     } catch (error) {
       console.error('Error saving kelompok penyetor:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Terjadi kesalahan saat menyimpan data kelompok penyetor'
-      );
+      // Handle error response with proper formatting
+      const errorData = error?.response?.data || error?.data;
+      const errorMessage = formatApiErrorMessage(errorData);
+      toast.error(errorMessage || 'Terjadi kesalahan saat menyimpan data kelompok penyetor');
     } finally {
       setIsSaving(false);
     }
