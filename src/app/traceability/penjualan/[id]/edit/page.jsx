@@ -18,6 +18,7 @@ import {
   updateAngkutanPabrik,
   updatePenjualanAngkutan,
 } from '@/services/penjualan';
+import { formatApiErrorMessage } from '@/utils/errorFormatter';
 
 const EditPenjualanContent = () => {
   const router = useRouter();
@@ -392,9 +393,9 @@ const EditPenjualanContent = () => {
             // Fallback if no ID (shouldn't happen)
             toast.error('ID angkutan tidak ditemukan dalam response');
           } else {
-            toast.error(
-              response?.data?.message || 'Gagal menyimpan data angkutan'
-            );
+            // Handle error response with proper formatting
+            const errorMessage = formatApiErrorMessage(response?.data);
+            toast.error(errorMessage || 'Gagal menyimpan data angkutan');
           }
         } else {
           // Editing existing data - call update API
@@ -445,9 +446,9 @@ const EditPenjualanContent = () => {
             setCurrentStep(2);
             setLastStep(Math.max(lastStep, 2));
           } else {
-            toast.error(
-              response?.data?.message || 'Gagal memperbarui data angkutan'
-            );
+            // Handle error response with proper formatting
+            const errorMessage = formatApiErrorMessage(response?.data);
+            toast.error(errorMessage || 'Gagal memperbarui data angkutan');
           }
         }
       } else if (currentStep === 2) {
@@ -495,9 +496,9 @@ const EditPenjualanContent = () => {
               return;
             }
           } else {
-            toast.error(
-              createResponse?.data?.message || 'Gagal membuat data pabrik'
-            );
+            // Handle error response with proper formatting
+            const errorMessage = formatApiErrorMessage(createResponse?.data);
+            toast.error(errorMessage || 'Gagal membuat data pabrik');
             return;
           }
         } else {
@@ -532,17 +533,17 @@ const EditPenjualanContent = () => {
           router.push('/traceability/penjualan');
           return;
         } else {
-          toast.error(
-            updateResponse?.data?.message || 'Gagal menyimpan data pabrik'
-          );
+          // Handle error response with proper formatting
+          const errorMessage = formatApiErrorMessage(updateResponse?.data);
+          toast.error(errorMessage || 'Gagal menyimpan data pabrik');
         }
       }
     } catch (error) {
       console.error('Error in step:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Terjadi kesalahan saat menyimpan data'
-      );
+      // Handle error response with proper formatting
+      const errorData = error?.response?.data || error?.data;
+      const errorMessage = formatApiErrorMessage(errorData);
+      toast.error(errorMessage || 'Terjadi kesalahan saat menyimpan data');
     } finally {
       setIsSubmitting(false);
     }
