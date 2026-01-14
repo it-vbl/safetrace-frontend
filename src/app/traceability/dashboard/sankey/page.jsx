@@ -10,11 +10,11 @@ import React, {
 import * as d3 from 'd3';
 import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { ChevronRight, DownloadCloudIcon } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Select from '@/components/molecules/Select';
-import { Check } from 'lucide-react';
 
 const SankeyPage = () => {
   const [selectedYear, setSelectedYear] = useState('2024');
