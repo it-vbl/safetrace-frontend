@@ -105,7 +105,9 @@ const KirimPesanPage = () => {
     setIsDeleting(true);
     try {
       const res = await deletePesan(selectedItem.id);
-      const success = res?.data?.status === 'success' || res?.status === 200;
+      const success =
+        res?.data?.status === 'success' ||
+        (res?.status >= 200 && res?.status < 300);
 
       if (success) {
         toast.success(res?.data?.message || 'Berhasil menghapus pesan');
