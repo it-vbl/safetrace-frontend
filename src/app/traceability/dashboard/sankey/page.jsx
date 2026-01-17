@@ -1,12 +1,6 @@
 'use client';
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { ChevronRight, DownloadCloudIcon } from 'lucide-react';
@@ -16,41 +10,31 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Select from '@/components/molecules/Select';
 
+import { getSankeyData } from '@/services/penjualan';
+import { toast } from 'react-toastify';
+import useYearOptions from '@/hooks/useYearOptions';
+import { ALL_COLUMN_VALUES, COLUMN_OPTIONS } from '@/constants/columns';
+
 const SankeyPage = () => {
+  const yearOptions = useYearOptions();
   const [selectedYear, setSelectedYear] = useState('2024');
   const [selectedColumns, setSelectedColumns] = useState([
-    'petani',
-    'agen',
-    'koperasi',
-    'pabrik',
+    ...ALL_COLUMN_VALUES,
   ]);
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [data, setData] = useState({ nodes: [], links: [] });
   const columnDropdownRef = useRef(null);
 
-  const yearOptions = [
-    { value: '2020', label: '2020' },
-    { value: '2021', label: '2021' },
-    { value: '2022', label: '2022' },
-    { value: '2023', label: '2023' },
-    { value: '2024', label: '2024' },
-  ];
-
-  const allColumnValues = ['petani', 'agen', 'koperasi', 'pabrik'];
-  const columnOptions = [
-    { value: 'petani', label: 'Petani' },
-    { value: 'agen', label: 'Agen' },
-    { value: 'koperasi', label: 'Koperasi' },
-    { value: 'pabrik', label: 'Pabrik' },
-  ];
-
-  const isAllSelected = selectedColumns.length === allColumnValues.length;
+  const isAllSelected = selectedColumns.length === ALL_COLUMN_VALUES.length;
 
   const handleColumnToggle = (value) => {
     if (value === 'all') {
       if (isAllSelected) {
         setSelectedColumns([]);
       } else {
-        setSelectedColumns([...allColumnValues]);
+        setSelectedColumns([...ALL_COLUMN_VALUES]);
       }
     } else {
       if (selectedColumns.includes(value)) {
@@ -61,7 +45,6 @@ const SankeyPage = () => {
     }
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -75,219 +58,46 @@ const SankeyPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setIsError(false);
+      try {
+        const params = {
+          year: selectedYear,
+          columns: selectedColumns,
+        };
+        const response = await getSankeyData(params);
+
+        if (response?.data?.data) {
+          const { nodes, links } = response.data.data;
+          setData({ nodes: nodes || [], links: links || [] });
+        } else {
+          setData({ nodes: [], links: [] });
+        }
+      } catch (error) {
+        console.error('Failed to fetch sankey data:', error);
+        toast.error('Gagal memuat data diagram');
+        setIsError(true);
+        setData({ nodes: [], links: [] });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [selectedYear, selectedColumns]);
+
   const getFilterLabel = () => {
     if (isAllSelected) return 'Semua';
     if (selectedColumns.length === 0) return 'Pilih Filter';
     if (selectedColumns.length === 1) {
       return (
-        columnOptions.find((opt) => opt.value === selectedColumns[0])?.label ||
+        COLUMN_OPTIONS.find((opt) => opt.value === selectedColumns[0])?.label ||
         ''
       );
     }
     return `${selectedColumns.length} dipilih`;
   };
-
-  const baseNodes = [
-    { id: 'Agung Nugraha', category: 'petani' },
-    { id: 'Fajar Willy', category: 'petani' },
-    { id: 'Toto Sutejo', category: 'petani' },
-    { id: 'Ryan Desril', category: 'petani' },
-    { id: 'Filbert Kusuma', category: 'petani' },
-    { id: 'Willy Ahn', category: 'petani' },
-    { id: 'Suparto W', category: 'petani' },
-    { id: 'Ridwan Harahap', category: 'petani' },
-    { id: 'Gusti Wulandari', category: 'petani' },
-    { id: 'Rendi Anugrah', category: 'petani' },
-    { id: 'Siti Sulastri', category: 'petani' },
-    { id: 'Reni Wulandari', category: 'petani' },
-    { id: 'Rosida Sukno', category: 'petani' },
-    { id: 'Agatha Jung', category: 'petani' },
-    { id: 'Hana Halda', category: 'petani' },
-    { id: 'Supri Supro', category: 'petani' },
-    { id: 'Bambang Sutrisno', category: 'petani' },
-    { id: 'Eko Prasetyo', category: 'petani' },
-    { id: 'Dewi Lestari', category: 'petani' },
-    { id: 'Ahmad Fauzi', category: 'petani' },
-    { id: 'Sri Wahyuni', category: 'petani' },
-    { id: 'Joko Widodo', category: 'petani' },
-    { id: 'Ratna Sari', category: 'petani' },
-    { id: 'Budi Santoso', category: 'petani' },
-    { id: 'Agen Sawit', category: 'agen' },
-    { id: 'Agen Biru Bersamo', category: 'agen' },
-    { id: 'Tara Rusly', category: 'agen' },
-    { id: 'Agen Sawit Merdeka', category: 'agen' },
-    { id: 'Rully Sutisna', category: 'agen' },
-    { id: 'Agen Makmur Jaya', category: 'agen' },
-    { id: 'Agen Sejahtera', category: 'agen' },
-    { id: 'Agen Subur Mandiri', category: 'agen' },
-    { id: 'Koperasi Merah', category: 'koperasi' },
-    { id: 'Koperasi Kumpul Jaya', category: 'koperasi' },
-    { id: 'Koperasi Sawit Muda', category: 'koperasi' },
-    { id: 'Koperasi Hijau Lestari', category: 'koperasi' },
-    { id: 'Koperasi Tani Makmur', category: 'koperasi' },
-    { id: 'Koperasi Bersatu', category: 'koperasi' },
-    { id: 'Andes Agro Indonesia', category: 'pabrik' },
-    { id: 'Tebo Plasma Bersama', category: 'pabrik' },
-    { id: 'Tasik Raja Jaya', category: 'pabrik' },
-    { id: 'Perkebunan Nusantara', category: 'pabrik' },
-    { id: 'Mitrasari Prima', category: 'pabrik' },
-    { id: 'Bumi Mekar Sari', category: 'pabrik' },
-    { id: 'Bina Sawit Bahagia', category: 'pabrik' },
-    { id: 'Sawit Mas Sejahtera', category: 'pabrik' },
-    { id: 'Agro Lestari Mandiri', category: 'pabrik' },
-    { id: 'Palm Oil Industries', category: 'pabrik' },
-  ];
-
-  const baseLinks = [
-    { source: 'Agung Nugraha', target: 'Agen Sawit', value: 12 },
-    { source: 'Agung Nugraha', target: 'Agen Makmur Jaya', value: 8 },
-    { source: 'Fajar Willy', target: 'Agen Sawit', value: 15 },
-    { source: 'Toto Sutejo', target: 'Agen Sawit', value: 10 },
-    { source: 'Toto Sutejo', target: 'Agen Biru Bersamo', value: 5 },
-    { source: 'Ryan Desril', target: 'Agen Biru Bersamo', value: 12 },
-    { source: 'Filbert Kusuma', target: 'Agen Biru Bersamo', value: 10 },
-    { source: 'Filbert Kusuma', target: 'Agen Sejahtera', value: 8 },
-    { source: 'Willy Ahn', target: 'Agen Biru Bersamo', value: 10 },
-    { source: 'Suparto W', target: 'Tara Rusly', value: 12 },
-    { source: 'Suparto W', target: 'Agen Subur Mandiri', value: 6 },
-    { source: 'Ridwan Harahap', target: 'Tara Rusly', value: 14 },
-    { source: 'Gusti Wulandari', target: 'Tara Rusly', value: 10 },
-    { source: 'Rendi Anugrah', target: 'Agen Sawit Merdeka', value: 12 },
-    { source: 'Rendi Anugrah', target: 'Agen Makmur Jaya', value: 6 },
-    { source: 'Siti Sulastri', target: 'Agen Sawit Merdeka', value: 10 },
-    { source: 'Reni Wulandari', target: 'Agen Sawit Merdeka', value: 10 },
-    { source: 'Rosida Sukno', target: 'Rully Sutisna', value: 12 },
-    { source: 'Agatha Jung', target: 'Rully Sutisna', value: 10 },
-    { source: 'Agatha Jung', target: 'Agen Sejahtera', value: 5 },
-    { source: 'Hana Halda', target: 'Rully Sutisna', value: 10 },
-    { source: 'Supri Supro', target: 'Rully Sutisna', value: 12 },
-    { source: 'Bambang Sutrisno', target: 'Agen Makmur Jaya', value: 18 },
-    { source: 'Eko Prasetyo', target: 'Agen Makmur Jaya', value: 14 },
-    { source: 'Eko Prasetyo', target: 'Agen Sejahtera', value: 6 },
-    { source: 'Dewi Lestari', target: 'Agen Sejahtera', value: 16 },
-    { source: 'Ahmad Fauzi', target: 'Agen Sejahtera', value: 12 },
-    { source: 'Sri Wahyuni', target: 'Agen Subur Mandiri', value: 18 },
-    { source: 'Joko Widodo', target: 'Agen Subur Mandiri', value: 20 },
-    { source: 'Ratna Sari', target: 'Agen Subur Mandiri', value: 14 },
-    { source: 'Budi Santoso', target: 'Agen Subur Mandiri', value: 12 },
-    { source: 'Budi Santoso', target: 'Rully Sutisna', value: 8 },
-    { source: 'Agen Sawit', target: 'Koperasi Merah', value: 20 },
-    { source: 'Agen Sawit', target: 'Koperasi Kumpul Jaya', value: 15 },
-    { source: 'Agen Sawit', target: 'Koperasi Hijau Lestari', value: 7 },
-    { source: 'Agen Biru Bersamo', target: 'Koperasi Merah', value: 25 },
-    { source: 'Agen Biru Bersamo', target: 'Koperasi Bersatu', value: 12 },
-    { source: 'Tara Rusly', target: 'Koperasi Kumpul Jaya', value: 20 },
-    { source: 'Tara Rusly', target: 'Koperasi Tani Makmur', value: 16 },
-    { source: 'Agen Sawit Merdeka', target: 'Koperasi Kumpul Jaya', value: 15 },
-    { source: 'Agen Sawit Merdeka', target: 'Koperasi Sawit Muda', value: 17 },
-    { source: 'Rully Sutisna', target: 'Koperasi Sawit Muda', value: 30 },
-    { source: 'Rully Sutisna', target: 'Koperasi Tani Makmur', value: 22 },
-    { source: 'Agen Makmur Jaya', target: 'Koperasi Hijau Lestari', value: 28 },
-    { source: 'Agen Makmur Jaya', target: 'Koperasi Bersatu', value: 18 },
-    { source: 'Agen Sejahtera', target: 'Koperasi Tani Makmur', value: 25 },
-    { source: 'Agen Sejahtera', target: 'Koperasi Hijau Lestari', value: 22 },
-    { source: 'Agen Subur Mandiri', target: 'Koperasi Bersatu', value: 35 },
-    { source: 'Agen Subur Mandiri', target: 'Koperasi Sawit Muda', value: 35 },
-    { source: 'Koperasi Merah', target: 'Andes Agro Indonesia', value: 18 },
-    { source: 'Koperasi Merah', target: 'Tebo Plasma Bersama', value: 15 },
-    { source: 'Koperasi Merah', target: 'Tasik Raja Jaya', value: 12 },
-    { source: 'Koperasi Kumpul Jaya', target: 'Tasik Raja Jaya', value: 15 },
-    {
-      source: 'Koperasi Kumpul Jaya',
-      target: 'Perkebunan Nusantara',
-      value: 18,
-    },
-    { source: 'Koperasi Kumpul Jaya', target: 'Mitrasari Prima', value: 17 },
-    { source: 'Koperasi Sawit Muda', target: 'Bumi Mekar Sari', value: 30 },
-    { source: 'Koperasi Sawit Muda', target: 'Bina Sawit Bahagia', value: 28 },
-    { source: 'Koperasi Sawit Muda', target: 'Sawit Mas Sejahtera', value: 24 },
-    {
-      source: 'Koperasi Hijau Lestari',
-      target: 'Agro Lestari Mandiri',
-      value: 25,
-    },
-    {
-      source: 'Koperasi Hijau Lestari',
-      target: 'Palm Oil Industries',
-      value: 20,
-    },
-    {
-      source: 'Koperasi Hijau Lestari',
-      target: 'Andes Agro Indonesia',
-      value: 12,
-    },
-    {
-      source: 'Koperasi Tani Makmur',
-      target: 'Palm Oil Industries',
-      value: 28,
-    },
-    {
-      source: 'Koperasi Tani Makmur',
-      target: 'Sawit Mas Sejahtera',
-      value: 20,
-    },
-    {
-      source: 'Koperasi Tani Makmur',
-      target: 'Perkebunan Nusantara',
-      value: 15,
-    },
-    { source: 'Koperasi Bersatu', target: 'Agro Lestari Mandiri', value: 30 },
-    { source: 'Koperasi Bersatu', target: 'Mitrasari Prima', value: 18 },
-    { source: 'Koperasi Bersatu', target: 'Tebo Plasma Bersama', value: 17 },
-  ];
-
-  const data = useMemo(() => {
-    const yearMultiplier = {
-      2020: 0.6,
-      2021: 0.75,
-      2022: 0.85,
-      2023: 0.95,
-      2024: 1.0,
-    };
-
-    const multiplier = yearMultiplier[selectedYear] || 1;
-
-    // If all columns selected or empty, show all data
-    if (isAllSelected || selectedColumns.length === 0) {
-      return {
-        nodes: baseNodes,
-        links: baseLinks.map((link) => ({
-          ...link,
-          value: Math.round(link.value * multiplier),
-        })),
-      };
-    }
-
-    const relevantNodes = new Set();
-    const filteredLinks = [];
-
-    baseLinks.forEach((link) => {
-      const sourceNode = baseNodes.find((n) => n.id === link.source);
-      const targetNode = baseNodes.find((n) => n.id === link.target);
-
-      // Check if either source or target is in selected columns
-      if (
-        selectedColumns.includes(sourceNode?.category) ||
-        selectedColumns.includes(targetNode?.category)
-      ) {
-        relevantNodes.add(link.source);
-        relevantNodes.add(link.target);
-        filteredLinks.push({
-          ...link,
-          value: Math.round(link.value * multiplier),
-        });
-      }
-    });
-
-    const filteredNodes = baseNodes.filter((node) =>
-      relevantNodes.has(node.id)
-    );
-
-    return {
-      nodes: filteredNodes,
-      links: filteredLinks,
-    };
-  }, [selectedColumns, selectedYear, isAllSelected]);
 
   return (
     <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
@@ -352,7 +162,7 @@ const SankeyPage = () => {
                 </div>
                 <div className="my-1 border-t border-gray-100" />
                 {/* Individual Options */}
-                {columnOptions.map((option) => (
+                {COLUMN_OPTIONS.map((option) => (
                   <div
                     key={option.value}
                     onClick={() => handleColumnToggle(option.value)}
@@ -405,79 +215,148 @@ const SankeyPage = () => {
 
       {/* Main Content - Responsive */}
       <div className="rounded-[8px] border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
-        {/* Stage Headers - Vertical on mobile, horizontal on desktop */}
-        <div className="hidden sm:mb-6 sm:flex sm:items-center sm:justify-between">
-          {allColumnValues.map((col, index) => {
-            const isVisible = isAllSelected || selectedColumns.includes(col);
-            const label =
-              columnOptions.find((opt) => opt.value === col)?.label || col;
-            const isLast = index === allColumnValues.length - 1;
-            const nextColVisible =
-              !isLast &&
-              (isAllSelected ||
-                selectedColumns.includes(allColumnValues[index + 1]));
-
-            if (!isVisible) return null;
-
-            return (
-              <React.Fragment key={col}>
-                <StageHeader label={label} />
-                {!isLast && nextColVisible && <ArrowSpacer />}
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {/* Mobile: Vertical stage headers */}
-        <div className="mb-3 flex flex-col gap-1 sm:hidden">
-          <div className="flex items-center gap-2">
-            <div className="flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
-              <span className="font-semibold text-gray-700">Alur:</span>
-              {allColumnValues.map((col, index) => {
+        {isError ? (
+          <div className="flex h-[300px] w-full flex-col items-center justify-center gap-3 rounded bg-gray-50 text-center sm:h-[400px]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div className="max-w-[300px]">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Gagal Memuat Data
+              </h3>
+              <p className="mt-1 text-xs text-gray-500">
+                Terjadi kesalahan saat mengambil data diagram. Silakan coba
+                sabarata lagi beberapa saat lagi.
+              </p>
+            </div>
+          </div>
+        ) : !isLoading && data.nodes.length === 0 ? (
+          <div className="flex h-[300px] w-full flex-col items-center justify-center gap-3 rounded bg-gray-50 text-center sm:h-[400px]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="2" y1="20" x2="22" y2="20" />
+                <line x1="6" y1="16" x2="6" y2="10" />
+                <line x1="10" y1="16" x2="10" y2="4" />
+                <line x1="14" y1="16" x2="14" y2="12" />
+                <line x1="18" y1="16" x2="18" y2="8" />
+              </svg>
+            </div>
+            <div className="max-w-[300px]">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Data Tidak Tersedia
+              </h3>
+              <p className="mt-1 text-xs text-gray-500">
+                Tidak ada data aliran yang ditemukan untuk periode atau filter
+                yang dipilih.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Stage Headers - Vertical on mobile, horizontal on desktop */}
+            <div className="hidden sm:mb-6 sm:flex sm:items-center sm:justify-between">
+              {ALL_COLUMN_VALUES.map((col, index) => {
                 const isVisible =
                   isAllSelected || selectedColumns.includes(col);
                 const label =
-                  columnOptions.find((opt) => opt.value === col)?.label || col;
-
-                // Find the next visible column
-                let hasNextVisible = false;
-                for (let i = index + 1; i < allColumnValues.length; i++) {
-                  if (
-                    isAllSelected ||
-                    selectedColumns.includes(allColumnValues[i])
-                  ) {
-                    hasNextVisible = true;
-                    break;
-                  }
-                }
+                  COLUMN_OPTIONS.find((opt) => opt.value === col)?.label || col;
+                const isLast = index === ALL_COLUMN_VALUES.length - 1;
+                const nextColVisible =
+                  !isLast &&
+                  (isAllSelected ||
+                    selectedColumns.includes(ALL_COLUMN_VALUES[index + 1]));
 
                 if (!isVisible) return null;
 
                 return (
                   <React.Fragment key={col}>
-                    <StageHeaderMobile label={label} />
-                    {hasNextVisible && <span>→</span>}
+                    <StageHeader label={label} />
+                    {!isLast && nextColVisible && <ArrowSpacer />}
                   </React.Fragment>
                 );
               })}
-              {selectedColumns.length === 0 && (
-                <span className="italic text-gray-400">
-                  Pilih filter untuk melihat alur
-                </span>
-              )}
             </div>
-          </div>
-          <p className="text-[9px] italic text-gray-400">
-            Geser ke kanan untuk melihat selengkapnya
-          </p>
-        </div>
 
-        {/* Sankey Diagram Container - Responsive with horizontal scroll on mobile */}
-        <div className="w-full overflow-x-auto">
-          <div className="min-w-[600px] sm:min-w-0">
-            <D3Sankey data={data} />
-          </div>
-        </div>
+            {/* Mobile: Vertical stage headers */}
+            <div className="mb-3 flex flex-col gap-1 sm:hidden">
+              <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
+                  <span className="font-semibold text-gray-700">Alur:</span>
+                  {ALL_COLUMN_VALUES.map((col, index) => {
+                    const isVisible =
+                      isAllSelected || selectedColumns.includes(col);
+                    const label =
+                      COLUMN_OPTIONS.find((opt) => opt.value === col)?.label ||
+                      col;
+
+                    let hasNextVisible = false;
+                    for (let i = index + 1; i < ALL_COLUMN_VALUES.length; i++) {
+                      if (
+                        isAllSelected ||
+                        selectedColumns.includes(ALL_COLUMN_VALUES[i])
+                      ) {
+                        hasNextVisible = true;
+                        break;
+                      }
+                    }
+
+                    if (!isVisible) return null;
+
+                    return (
+                      <React.Fragment key={col}>
+                        <StageHeaderMobile label={label} />
+                        {hasNextVisible && <span>→</span>}
+                      </React.Fragment>
+                    );
+                  })}
+                  {selectedColumns.length === 0 && (
+                    <span className="italic text-gray-400">
+                      Pilih filter untuk melihat alur
+                    </span>
+                  )}
+                </div>
+              </div>
+              <p className="text-[9px] italic text-gray-400">
+                Geser ke kanan untuk melihat selengkapnya
+              </p>
+            </div>
+
+            {/* Sankey Diagram Container - Responsive with horizontal scroll on mobile */}
+            <div
+              className={`w-full overflow-x-auto ${
+                isLoading ? 'opacity-50' : ''
+              }`}
+            >
+              <div className="min-w-[600px] sm:min-w-0">
+                <D3Sankey data={data} />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -724,7 +603,6 @@ const D3Sankey = ({ data }) => {
         setTooltip({ visible: false, x: 0, y: 0, content: null });
       });
 
-    // --- Text Labels (centered, dark text) - Responsive ---
     const isMobile = dimensions.width < 640;
     const fontSize = isMobile ? '8px' : '11px';
     const maxChars = isMobile ? 10 : 18;
