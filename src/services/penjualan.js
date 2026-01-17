@@ -59,6 +59,9 @@ export const getDetailPenjualanKelompokPenyetor = (id) =>
 export const getDetailPenjualanPabrik = (id) =>
   api.get(`/penjualan/pabrik/detail/${id}/`);
 
+export const getSankeyData = (params = {}) =>
+  api.get(`/penjualan/sankey-diagram/`, { params });
+
 export const getListPabrik = (params = {}) =>
   api.get(`/penjualan/pabrik/list/`, { params });
 
