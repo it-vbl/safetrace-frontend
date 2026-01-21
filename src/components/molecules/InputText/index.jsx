@@ -34,7 +34,7 @@ const InputText = ({
   maxChar = null,
   errors,
   touched,
-  onBlur,
+  onBlur = () => {},
   name,
   ...props
 }) => {
@@ -217,7 +217,9 @@ const InputText = ({
   }, [value, type]);
 
   return (
-    <div className={cn('flex w-full min-w-0 flex-col gap-1', containerClassName)}>
+    <div
+      className={cn('flex w-full min-w-0 flex-col gap-1', containerClassName)}
+    >
       {label && (
         <Label
           isRequired={isRequired}

@@ -63,12 +63,11 @@ const BlastPesanPage = () => {
           const pengirimNama = item?.device_data?.nama;
           const pengirimNo = item?.device_data?.no_wa;
 
-          const statusLabel =
-            item?.terkirim === true
-              ? 'Terkirim'
-              : item?.gagal === true
-              ? 'Gagal'
-              : 'Dalam Antrian';
+          const statusLabel = item?.terkirim
+            ? 'Terkirim'
+            : item?.gagal === true
+            ? 'Gagal'
+            : 'Dalam Antrian';
 
           return {
             id: item?.id,
@@ -79,11 +78,7 @@ const BlastPesanPage = () => {
               pengirimNama && pengirimNo
                 ? `${pengirimNama} - ${pengirimNo}`
                 : item?.no_pengirim || '-',
-            grup_penerima:
-              item?.grup_penerima ||
-              (item?.jenis_penerima === 'grup'
-                ? item?.grup_nama
-                : 'Kontak Individu'),
+            grup_penerima: item?.jenis_penerima_label,
             jumlah_penerima: jumlahPenerima,
             waktu_pengiriman: waktuPengiriman,
             status: statusLabel,
@@ -188,14 +183,26 @@ const BlastPesanPage = () => {
     );
   };
 
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      minWidth: 100,
+      wrapText: true,
+      autoHeight: true,
+    }),
+    []
+  );
+
   const colDefs = [
     {
       headerName: '',
       cellRenderer: actionsCellRenderer,
       flex: 1,
-      minWidth: 100,
+      minWidth: 30,
       sortable: false,
       filter: false,
+      suppressSizeToFit: false,
+      pinned: 'left',
     },
     {
       field: 'id_pesan',
@@ -217,7 +224,7 @@ const BlastPesanPage = () => {
     },
     {
       field: 'grup_penerima',
-      headerName: 'Grup Penerima',
+      headerName: 'Jenis Penerima',
       flex: 2,
       minWidth: 200,
     },
@@ -289,6 +296,7 @@ const BlastPesanPage = () => {
               columnDefs={colDefs}
               overlayLoadingTemplate="."
               autoSizeStrategy={autoSizeStrategy}
+              defaultColDef={defaultColDef}
               domLayout="autoHeight"
               rowHeight={36}
               rowData={kontakData}

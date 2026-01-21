@@ -12,6 +12,7 @@ const MemberSelector = ({
   loading = false,
   showSearch = true,
   searchPlaceholder = 'Cari kontak',
+  type = 'member',
 }) => {
   const [checkedMembers, setCheckedMembers] = useState({});
   const [internalMembers, setInternalMembers] = useState([]);
@@ -110,10 +111,14 @@ const MemberSelector = ({
             >
               <User className="h-3.5 w-3.5 text-gray-500" />
               <span className="font-medium">{member.name ?? member.nama}</span>
-              <span className="text-gray-500">-</span>
-              <span className="text-gray-600">
-                {member.phone ?? member.no_wa}
-              </span>
+              {type === 'member' && (
+                <>
+                  <span className="text-gray-500">-</span>
+                  <span className="text-gray-600">
+                    {member.phone ?? member.no_wa}
+                  </span>
+                </>
+              )}
               <button
                 onClick={() => handleRemoveSelectedMember(member.id)}
                 className="ml-1 rounded-full p-0.5 text-gray-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
@@ -171,12 +176,16 @@ const MemberSelector = ({
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {member.phone}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {member.gender}
-                    </td>
+                    {type === 'member' && (
+                      <>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {member.phone}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {member.gender}
+                        </td>
+                      </>
+                    )}
                   </tr>
                 );
               })}

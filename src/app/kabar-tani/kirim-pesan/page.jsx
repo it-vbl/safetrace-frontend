@@ -151,14 +151,26 @@ const KirimPesanPage = () => {
     );
   };
 
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      minWidth: 100,
+      wrapText: true,
+      autoHeight: true,
+    }),
+    []
+  );
+
   const colDefs = [
     {
       headerName: '',
       cellRenderer: actionsCellRenderer,
       flex: 0.8,
-      minWidth: 100,
+      minWidth: 30,
       sortable: false,
       filter: false,
+      suppressSizeToFit: false,
+      pinned: 'left',
     },
     { field: 'id_pesan', headerName: 'Id Pesan', flex: 1, minWidth: 120 },
     {
@@ -218,6 +230,7 @@ const KirimPesanPage = () => {
               loading={loading}
               overlayLoadingTemplate="."
               autoSizeStrategy={autoSizeStrategy}
+              defaultColDef={defaultColDef}
               domLayout="autoHeight"
               rowHeight={36}
               rowData={rows}

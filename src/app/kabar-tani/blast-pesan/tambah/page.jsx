@@ -16,6 +16,7 @@ import RadioButton from '@/components/molecules/RadioButton';
 import Select from '@/components/molecules/Select';
 import { createBroadcast } from '@/services/broadcast';
 import { getDeviceList } from '@/services/device';
+import { getGrupKontakDetail, getGrupKontakList } from '@/services/grup';
 import { getKontakList } from '@/services/kontak';
 import WhatsAppService from '@/services/whatsapp';
 import { formatPhoneNumber } from '@/utils/whatsapp';
@@ -26,14 +27,53 @@ const PesanBaruPage = () => {
   const [noPengirim, setNoPengirim] = useState('');
   const [activeTile, setActiveTile] = useState('personal');
   const [selectedMembers, setSelectedMembers] = useState([]);
+  const [selectedGroups, setSelectedGroups] = useState([]);
   const [availableMembers, setAvailableMembers] = useState([]);
   const [deviceOptions, setDeviceOptions] = useState([]);
   const [deviceData, setDeviceData] = useState([]);
+  const [groupOptions, setGroupOptions] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchGroups = async () => {
+      try {
+        const params = { page: 1, limit: 100 };
+        const response = await getGrupKontakList(params);
+        const dataReference =
+          response?.data?.data?.results ||
+          response?.data?.data ||
+          response?.data ||
+          [];
+        const groups = Array.isArray(dataReference) ? dataReference : [];
+
+        const options = groups
+          .map((g) => ({
+            id: g.id,
+            name: g.nama_grup || g.nama || g.name || 'Unnamed Group',
+            phone: '-',
+            gender: '-',
+          }))
+          .filter((o) => o.id);
+
+        if (mounted) {
+          setGroupOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching internal groups:', error);
+        if (mounted) setGroupOptions([]);
+      }
+    };
+
+    fetchGroups();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleMembersChange = (newMembers) => {
     setSelectedMembers(newMembers);
   };
-
   const breadcrumbItems = [
     { label: 'BLAST PESAN', href: '/kabar-tani/blast-pesan' },
     { label: 'PESAN BARU' },
@@ -76,8 +116,6 @@ const PesanBaruPage = () => {
     }
   };
 
-  // Removed: group expansion and per-member sending. Whacenter group send is used directly.
-
   const schemaValidation = Yup.object().shape({
     no_pengirim: Yup.string().required('No pengirim harus diisi'),
     nama_pesan: Yup.string().required('Nama pesan harus diisi'),
@@ -98,7 +136,7 @@ const PesanBaruPage = () => {
       no_pengirim: '',
       nama_pesan: '',
       isi_pesan: 'Lorem Ipsum Dolor Sit Amet',
-      nama_grup: '',
+      nama_grup: [],
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
@@ -110,10 +148,9 @@ const PesanBaruPage = () => {
           return;
         }
 
-        // Validasi penerima sesuai skema
         if (activeTile === 'group') {
-          if (!values.nama_grup || !values.nama_grup.trim()) {
-            toast.error('Nama grup WhatsApp tidak boleh kosong');
+          if (selectedGroups.length === 0) {
+            toast.error('Pilih minimal satu grup WhatsApp');
             setSubmitting(false);
             return;
           }
@@ -147,42 +184,20 @@ const PesanBaruPage = () => {
           return;
         }
 
-        // Skema grup: Kirim pesan ke grup berdasarkan nama (Whacenter) saja
-        if (jenisPenerima === '2') {
-          // Kirim ke grup via Whacenter
-          try {
-            const waSend = await WhatsAppService.sendGroupMessage(
-              values.no_pengirim,
-              values.nama_grup.trim(),
-              values.isi_pesan
-            );
-            const waStatus = waSend?.data?.status ?? waSend?.status;
-            const ok =
-              waStatus === true ||
-              String(waStatus || '').toLowerCase() === 'success';
-            toast[ok ? 'success' : 'info'](
-              ok
-                ? `Pesan WhatsApp terkirim ke grup "${values.nama_grup.trim()}"`
-                : `Status pengiriman ke grup belum pasti`
-            );
-          } catch (waError) {
-            console.error('Gagal kirim WhatsApp ke grup:', waError);
-            toast.error(
-              'Terjadi kesalahan saat mengirim pesan ke grup WhatsApp'
-            );
-          }
-          router.push('/kabar-tani/blast-pesan');
-          setSubmitting(false);
-          return; // Selesai untuk skema grup (Whacenter only)
-        }
-
-        // Skema individu (tetap seperti sebelumnya)
         const payload = {
           nama_pesan: values.nama_pesan,
           pesan: values.isi_pesan,
           jenis_penerima: jenisPenerima,
           device: selectedDevice?.id,
           kontak: recipientIds,
+          terkirim: true,
+          ...(jenisPenerima === '2' && {
+            grup: selectedGroups
+              .map((g) => {
+                return g.id;
+              })
+              .filter((g) => typeof g === 'number' || typeof g === 'string'),
+          }),
         };
 
         const response = await createBroadcast(payload);
@@ -191,6 +206,114 @@ const PesanBaruPage = () => {
           response?.status === 201 ||
           response?.data?.status === 'success'
         ) {
+          if (jenisPenerima === '2') {
+            try {
+              let successCount = 0;
+              let failureCount = 0;
+              let totalMembers = 0;
+
+              const allMembers = [];
+              for (const group of selectedGroups) {
+                try {
+                  const groupDetail = await getGrupKontakDetail(group.id, {
+                    limit: 1000,
+                    page_size: 1000,
+                  });
+
+                  const responseData =
+                    groupDetail?.data?.data || groupDetail?.data || {};
+                  const members = responseData?.anggota || [];
+
+                  allMembers.push(...members);
+                } catch (err) {
+                  console.error(
+                    `Gagal mengambil anggota grup ${group.name}:`,
+                    err
+                  );
+                }
+              }
+
+              const uniqueMembers = allMembers.reduce((acc, member) => {
+                const phone = member?.no_wa;
+                if (phone && !acc.find((m) => m.no_wa === phone)) {
+                  acc.push(member);
+                }
+                return acc;
+              }, []);
+
+              totalMembers = uniqueMembers.length;
+
+              if (totalMembers === 0) {
+                toast.error('Tidak ada anggota dalam grup yang dipilih');
+                router.push('/kabar-tani/blast-pesan');
+                setSubmitting(false);
+                return;
+              }
+
+              const delay = (ms) =>
+                new Promise((resolve) => setTimeout(resolve, ms));
+
+              const STAGGER_DELAY = 500;
+
+              const results = await Promise.all(
+                uniqueMembers.map(async (member, i) => {
+                  const phone = member?.no_wa;
+                  if (!phone) {
+                    console.log(
+                      `Anggota ${
+                        i + 1
+                      }: Tidak memiliki nomor WhatsApp, dilewati`
+                    );
+                    return { success: false, skipped: true };
+                  }
+
+                  await delay(i * STAGGER_DELAY);
+
+                  try {
+                    console.log(
+                      `Mengirim pesan ${i + 1}/${totalMembers} ke ${phone}...`
+                    );
+                    await sendWhatsAppMessage(
+                      values.no_pengirim,
+                      phone,
+                      values.isi_pesan
+                    );
+                    console.log(`✓ Berhasil kirim ke ${phone}`);
+                    return { success: true, phone };
+                  } catch (err) {
+                    console.error(`✗ Gagal kirim ke ${phone}:`, err);
+                    return { success: false, phone, error: err };
+                  }
+                })
+              );
+
+              successCount = results.filter((r) => r.success).length;
+              failureCount = results.filter(
+                (r) => !r.success && !r.skipped
+              ).length;
+
+              if (successCount > 0) {
+                toast.success(
+                  `Pesan WhatsApp terkirim ke ${successCount} dari ${totalMembers} anggota grup${
+                    failureCount ? `, gagal ${failureCount}` : ''
+                  }`
+                );
+              } else {
+                toast.error(
+                  'Gagal mengirim pesan WhatsApp ke semua anggota grup'
+                );
+              }
+            } catch (waError) {
+              console.error('Gagal kirim WhatsApp ke anggota grup:', waError);
+              toast.error(
+                'Terjadi kesalahan saat mengirim pesan ke anggota grup'
+              );
+            }
+            router.push('/kabar-tani/blast-pesan');
+            setSubmitting(false);
+            return;
+          }
+
           toast.success(
             'Berhasil membuat campaign. Mengirim pesan WhatsApp ke penerima...'
           );
@@ -213,20 +336,12 @@ const PesanBaruPage = () => {
 
             if (successCount > 0) {
               toast.success(
-                jenisPenerima === '2'
-                  ? `Pesan WhatsApp terkirim ke ${successCount} kontak dalam grup${
-                      failureCount ? `, gagal ${failureCount}` : ''
-                    }`
-                  : `Pesan WhatsApp terkirim ke ${successCount} kontak${
-                      failureCount ? `, gagal ${failureCount}` : ''
-                    }`
+                `Pesan WhatsApp terkirim ke ${successCount} kontak${
+                  failureCount ? `, gagal ${failureCount}` : ''
+                }`
               );
             } else {
-              toast.error(
-                jenisPenerima === '2'
-                  ? 'Gagal mengirim pesan WhatsApp ke grup'
-                  : 'Gagal mengirim pesan WhatsApp ke semua penerima'
-              );
+              toast.error('Gagal mengirim pesan WhatsApp ke semua penerima');
             }
           } catch (waError) {
             console.error('Gagal kirim WhatsApp:', waError);
@@ -342,10 +457,7 @@ const PesanBaruPage = () => {
     };
   }, []);
 
-  // Remove grup fetching; Whacenter is the only endpoint for group messaging
-
   useEffect(() => {
-    // Reset selected recipients when switching mode
     setSelectedMembers([]);
   }, [activeTile]);
 
@@ -423,17 +535,13 @@ const PesanBaruPage = () => {
                 />
               ) : (
                 <div className="flex w-full flex-col gap-1">
-                  <Label className="text-[12px] font-bold text-gray-500">
-                    Grup Kontak
-                  </Label>
-                  <InputText
-                    name="nama_grup"
-                    placeholder="Masukkan nama grup yang sesuai"
-                    value={values.nama_grup}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    errors={errors}
-                    touched={touched}
+                  <MemberSelector
+                    selectedMembers={selectedGroups}
+                    availableMembers={groupOptions}
+                    onMembersChange={setSelectedGroups}
+                    label="Grup Kontak"
+                    searchPlaceholder="Cari grup..."
+                    type="group"
                   />
                 </div>
               )}
@@ -484,7 +592,7 @@ const PesanBaruPage = () => {
               disabled={
                 isSubmitting ||
                 (activeTile === 'group'
-                  ? !values.nama_grup || !values.nama_grup.trim()
+                  ? selectedGroups.length === 0
                   : selectedMembers.length === 0)
               }
               className={isSubmitting ? 'opacity-75' : ''}
@@ -495,7 +603,7 @@ const PesanBaruPage = () => {
                   Mengirim...
                 </div>
               ) : activeTile === 'group' ? (
-                `Kirim Pesan (Grup)`
+                `Kirim Pesan (${selectedGroups.length})`
               ) : (
                 `Kirim Pesan (${selectedMembers.length})`
               )}

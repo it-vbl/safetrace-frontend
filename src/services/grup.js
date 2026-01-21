@@ -5,9 +5,11 @@ import api from './api';
 export const getGrupKontakList = (params = {}) =>
   api.get(`/kabar-tani/grup-kontak/list/`, { params });
 
-export const getGrupKontakDetail = (id) => api.get(`/kabar-tani/grup-kontak/detail/${id}/`);
+export const getGrupKontakDetail = (id, params = {}) =>
+  api.get(`/kabar-tani/grup-kontak/detail/${id}/`, { params });
 
-export const deleteGrupKontak = (id) => api.delete(`/kabar-tani/grup-kontak/delete/${id}/`);
+export const deleteGrupKontak = (id) =>
+  api.delete(`/kabar-tani/grup-kontak/delete/${id}/`);
 
 // *** POST ***
 
