@@ -18,64 +18,12 @@ import {
   getDetailPenjualanPabrik,
 } from '@/services/penjualan';
 
-const mockDetailPenjualan = {
-  angkutan: {
-    tanggal_penjualan: '2025-10-25',
-    driver: 'Welly',
-    no_registrasi: '186591-P08-231025',
-    no_polisi: 'KB9194AG',
-    jumlah_tandan: 546,
-    berat_timbangan: 12520,
-    tarra: 4280,
-    t_potongan_persen: 3,
-    t_potongan_kg: 247,
-    berat_bersih: 4280,
-    harga_per_kilo: 3602,
-    total_penjualan: 28790786,
-  },
-  kelompok_tani: [
-    {
-      id: 'kelompok-1',
-      kelompok_penyetor: {
-        id: 'kel-01',
-        nama: 'Bepekaek Besamo',
-      },
-      anggota_petani: [
-        { id: 'petani-1', nama: 'Akeng Rupinus' },
-        { id: 'petani-2', nama: 'Fajar Sukmara' },
-        { id: 'petani-3', nama: 'Dedy Junaidi' },
-        { id: 'petani-4', nama: 'Risto Kristo' },
-      ],
-    },
-    {
-      id: 'kelompok-2',
-      kelompok_penyetor: {
-        id: 'kel-02',
-        nama: 'Bepekaek Besamo',
-      },
-      anggota_petani: [
-        { id: 'petani-5', nama: 'Akeng Rupinus' },
-        { id: 'petani-6', nama: 'Fajar Sukmara' },
-        { id: 'petani-7', nama: 'Dedy Junaidi' },
-        { id: 'petani-8', nama: 'Risto Kristo' },
-      ],
-    },
-  ],
-  pabrik: {
-    pabrik_penerima: 'PT Jaya Bersama Selalu',
-    provinsi: 'Akeng Rupinus',
-    kabupaten: 'Bepekaek Besamo',
-    kecamatan: 'Dusun Gonis Rabu',
-    alamat: '0.78',
-  },
-};
-
 const PenjualanDetailPage = () => {
   const { id } = useParams();
   const router = useRouter();
 
   const [detailData, setDetailData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const crumbs = useMemo(
     () => [
@@ -115,7 +63,9 @@ const PenjualanDetailPage = () => {
                 (kelompokPenyetorResponse?.data?.status === 'success' ||
                   kelompokPenyetorResponse?.data?.data)
               ) {
+                // Support paginated and non-paginated responses
                 const kelompokPenyetorRaw =
+                  kelompokPenyetorResponse?.data?.data?.results ||
                   kelompokPenyetorResponse?.data?.data ||
                   kelompokPenyetorResponse?.data;
 
@@ -212,11 +162,7 @@ const PenjualanDetailPage = () => {
     router.push(`/traceability/penjualan/${id}/edit?tab=${tab}`);
   };
 
-  const handleTambahPenjualan = () => {
-    router.push('/traceability/penjualan/tambah');
-  };
-
-  const dataToRender = detailData || mockDetailPenjualan;
+  const dataToRender = detailData;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -224,7 +170,7 @@ const PenjualanDetailPage = () => {
         <BreadcrumbDetail items={crumbs} />
       </div>
 
-      <div className="relative min-h-[320px]">
+      <div className="relative min-h-[70vh]">
         <SectionLoading loading={loading} />
 
         {dataToRender ? (
@@ -242,11 +188,11 @@ const PenjualanDetailPage = () => {
               onEdit={() => handleEditData('pabrik')}
             />
           </div>
-        ) : (
+        ) : !loading ? (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white p-10 text-gray-500">
             Data detail penjualan tidak ditemukan.
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

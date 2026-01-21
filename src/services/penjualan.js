@@ -54,7 +54,9 @@ export const getDetailPenjualanAngkutan = (id) =>
   api.get(`/penjualan/angkutan/detail/${id}/`);
 
 export const getDetailPenjualanKelompokPenyetor = (id) =>
-  api.get(`/penjualan/kelompok-penyetor/detail/${id}/`);
+  api.get(`/penjualan/kelompok-penyetor/list/`, {
+    params: { angkutan: id },
+  });
 
 export const getDetailPenjualanPabrik = (id) =>
   api.get(`/penjualan/pabrik/detail/${id}/`);
