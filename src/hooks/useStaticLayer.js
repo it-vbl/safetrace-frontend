@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
+import { getPetaOverlayDetail } from '@/services/petaOverlay';
+
 import {
   getStaticLayerData,
   getStaticLayerList,
@@ -10,7 +12,6 @@ import {
   setStaticLayerDetail,
   setStaticLayerList,
 } from '../store/slices/staticLayer';
-import { getPetaOverlayDetail } from '@/services/petaOverlay';
 
 const useStaticLayer = () => {
   const dispatch = useDispatch();
