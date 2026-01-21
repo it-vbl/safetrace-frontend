@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
@@ -10,12 +10,15 @@ import {
   setStaticLayerDetail,
   setStaticLayerList,
 } from '../store/slices/staticLayer';
+import { getPetaOverlayDetail } from '@/services/petaOverlay';
 
 const useStaticLayer = () => {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [uploadedLoading, setUploadedLoading] = useState(false);
 
   const { staticLayerList, staticLayersDetail } = useSelector(
     (state) => state.staticLayer
@@ -66,13 +69,47 @@ const useStaticLayer = () => {
       }
     );
 
+  const fetchUploadedStaticLayerDetail = useCallback(
+    async (id) => {
+      setUploadedLoading(true);
+      try {
+        const response = await getPetaOverlayDetail(id);
+        const data = response.data?.data;
+        const tempStaticLayersDetail = { ...staticLayersDetail };
+        const layerData = {
+          active: true,
+          ...data,
+          id: `uploaded_${id}`,
+        };
+        tempStaticLayersDetail[`uploaded_${id}`] = layerData;
+        dispatch(setStaticLayerDetail(tempStaticLayersDetail));
+        return layerData;
+      } catch (err) {
+        console.error(err);
+        toast.error('Gagal memuat detail layer statis');
+        throw err;
+      } finally {
+        setUploadedLoading(false);
+      }
+    },
+    [staticLayersDetail, dispatch]
+  );
+
+  useEffect(() => {
+    return () => {
+      dispatch(setStaticLayerDetail({}));
+    };
+  }, []);
+
   return {
     loading,
     error,
+    uploadedLoading,
     staticLayerList,
     staticLayersDetail,
     fetchStaticLayerList,
     fetchStaticLayersDetail,
+    fetchUploadedStaticLayerDetail,
   };
 };
 

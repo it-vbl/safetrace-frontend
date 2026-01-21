@@ -16,6 +16,9 @@ const FilterSidebar = ({
   staticLayers = [],
   activeStaticLayers = {},
   onStaticLayerChange = () => {},
+  petaOverlays = [],
+  activePetaOverlays = {},
+  onPetaOverlayChange = () => {},
   activeBasemap = 'osm',
   onBasemapChange = () => {},
   loading = false,
@@ -74,7 +77,7 @@ const FilterSidebar = ({
   return (
     <div
       id="filter-sidebar"
-      className={`absolute !h-[calc(100%-32px)] left-4 top-4 z-[500] w-[250px] duration-300 ease-in-out transition-all border border-gray-200 bg-white rounded-[4px] p-4 shadow-lg ${
+      className={`absolute !h-[calc(100%-32px)] left-4 top-4 z-[500] w-[250px] duration-300 ease-in-out transition-all border border-gray-200 bg-white overflow-x-auto rounded-[4px] p-4 shadow-lg ${
         mapviewFilterSidebarOpen ? 'translate-x-0' : '-translate-x-[200%]'
       }`}
     >
@@ -101,7 +104,7 @@ const FilterSidebar = ({
           <Heading level={6} className="text-[14px] font-bold text-gray-800">
             STATIK LAYER
           </Heading>
-          <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto">
+          <div className="flex flex-col gap-3">
             {layersToDisplay.map((layer) => {
               const isActive = activeStaticLayers[layer.value]?.active || false;
               return (
@@ -123,6 +126,37 @@ const FilterSidebar = ({
             })}
           </div>
         </div>
+
+        {/* PETA OVERLAY Section */}
+        {petaOverlays.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={6} className="text-[14px] font-bold text-gray-800">
+              PETA OVERLAY
+            </Heading>
+            <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto">
+              {petaOverlays.map((layer) => {
+                const isActive =
+                  activePetaOverlays[layer.value]?.active || false;
+                return (
+                  <div key={layer.value} className="flex items-center gap-3">
+                    <Toggle
+                      value={isActive}
+                      onChange={(value) => onPetaOverlayChange(layer, value)}
+                    />
+                    <Paragraph
+                      level={3}
+                      className={`text-[14px] ${
+                        isActive ? 'font-semibold text-primary' : 'text-black'
+                      }`}
+                    >
+                      {layer.label}
+                    </Paragraph>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* BASEMAP Section */}
         <div className="flex flex-col gap-3">

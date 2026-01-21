@@ -118,7 +118,9 @@ const EditPenjualanContent = () => {
                 (kelompokPenyetorResponse?.data?.status === 'success' ||
                   kelompokPenyetorResponse?.data?.data)
               ) {
+                // Support paginated and non-paginated responses
                 kelompokPenyetorData =
+                  kelompokPenyetorResponse?.data?.data?.results ||
                   kelompokPenyetorResponse?.data?.data ||
                   kelompokPenyetorResponse?.data;
 

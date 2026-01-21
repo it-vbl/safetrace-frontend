@@ -230,6 +230,7 @@ const PetaniMemberSelector = ({
 const KelompokPenyetorSection = ({
   index,
   kelompokOptions,
+  filteredKelompokOptions,
   value,
   onChange,
   onRemove,
@@ -275,7 +276,7 @@ const KelompokPenyetorSection = ({
             label="Kelompok Penyetor"
             name={`kelompok_penyetor_${index}`}
             placeholder="Pilih Kelompok Penyetor"
-            options={kelompokOptions}
+            options={filteredKelompokOptions}
             value={selectedKelompok}
             onChange={handleKelompokChange}
             isRequired
@@ -348,6 +349,33 @@ const DataKelompokTani = ({
     return kelompok?.label || '';
   };
 
+  // Helper function to get filtered kelompok options for a specific section
+  // This filters out kelompok that are already selected in other sections
+  const getFilteredKelompokOptions = (currentIndex) => {
+    // Get all selected kelompok IDs from other sections
+    const selectedKelompokIds = kelompokPenyetorList
+      .map((section, idx) => {
+        // Skip current section - always include its selected kelompok
+        if (idx === currentIndex) return null;
+        return section.kelompok_penyetor;
+      })
+      .filter((id) => id !== null && id !== undefined);
+
+    // Filter options: include all options except those already selected in other sections
+    // But always include the currently selected kelompok for this section
+    const currentSectionSelectedKelompok =
+      kelompokPenyetorList[currentIndex]?.kelompok_penyetor;
+
+    return kelompokOptions.filter((option) => {
+      // Always include the option if it's selected in the current section
+      if (option.value === currentSectionSelectedKelompok) {
+        return true;
+      }
+      // Exclude if it's selected in any other section
+      return !selectedKelompokIds.includes(option.value);
+    });
+  };
+
   const validationSchema = Yup.object().shape({
     kelompokPenyetorList: Yup.array()
       .of(
@@ -413,6 +441,21 @@ const DataKelompokTani = ({
       return;
     }
 
+    // Validate that no duplicate kelompok penyetor is selected
+    const selectedKelompokIds = kelompokPenyetorList
+      .map((section) => section.kelompok_penyetor)
+      .filter((id) => id !== null && id !== undefined);
+    const uniqueKelompokIds = [...new Set(selectedKelompokIds)];
+
+    if (selectedKelompokIds.length !== uniqueKelompokIds.length) {
+      formik.setFieldError(
+        'kelompokPenyetorList',
+        'Kelompok Penyetor tidak boleh duplikat. Setiap kelompok hanya bisa dipilih sekali.'
+      );
+      toast.error('Kelompok Penyetor tidak boleh duplikat');
+      return;
+    }
+
     // Check if idAngkutan is available
     if (!idAngkutan) {
       toast.error(
@@ -455,7 +498,10 @@ const DataKelompokTani = ({
       // Handle error response with proper formatting
       const errorData = error?.response?.data || error?.data;
       const errorMessage = formatApiErrorMessage(errorData);
-      toast.error(errorMessage || 'Terjadi kesalahan saat menyimpan data kelompok penyetor');
+      toast.error(
+        errorMessage ||
+          'Terjadi kesalahan saat menyimpan data kelompok penyetor'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -472,6 +518,7 @@ const DataKelompokTani = ({
               key={section.id || index}
               index={index}
               kelompokOptions={kelompokOptions}
+              filteredKelompokOptions={getFilteredKelompokOptions(index)}
               value={section}
               onChange={(data) => handleSectionChange(index, data)}
               onRemove={() => handleRemoveKelompokPenyetor(index)}
@@ -494,6 +541,45 @@ const DataKelompokTani = ({
           <div className="mt-2 text-sm text-red-500">
             {typeof formik.errors.kelompokPenyetorList === 'string'
               ? formik.errors.kelompokPenyetorList
+              : Array.isArray(formik.errors.kelompokPenyetorList)
+              ? formik.errors.kelompokPenyetorList.map((item, idx) => {
+                  if (!item) return null;
+                  if (typeof item === 'string')
+                    return <div key={idx}>{item}</div>; // fallback
+
+                  const kelompokErr =
+                    typeof item.kelompok_penyetor === 'string' ? (
+                      <div key={idx + '-kelompok'}>
+                        Kelompok Penyetor: {item.kelompok_penyetor}
+                      </div>
+                    ) : null;
+
+                  let anggotaErr = null;
+                  if (item?.anggota_petani) {
+                    // If the value is a string, show as error only (for minimal validation)
+                    if (typeof item.anggota_petani === 'string') {
+                      anggotaErr = (
+                        <div key={idx + '-anggota'}>{item.anggota_petani}</div>
+                      );
+                    } else if (Array.isArray(item.anggota_petani)) {
+                      anggotaErr = (
+                        <div key={idx + '-anggota'}>
+                          Anggota Petani:{' '}
+                          {item.anggota_petani
+                            .map((petani) => petani?.nama || '-')
+                            .join(', ')}
+                        </div>
+                      );
+                    }
+                  }
+
+                  return (
+                    <div key={idx}>
+                      {kelompokErr}
+                      {anggotaErr}
+                    </div>
+                  );
+                })
               : 'Terdapat kesalahan pada data kelompok penyetor'}
           </div>
         )}

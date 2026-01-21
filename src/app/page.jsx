@@ -21,6 +21,7 @@ import useReferences from '@/hooks/useReferences';
 import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
+import { getPetaOverlayDetail, getPetaOverlayList } from '@/services/petaOverlay';
 import { setStaticLayerDetail } from '@/store/slices/staticLayer';
 import {
   setFilterKecamatan,
@@ -44,6 +45,10 @@ const MapDashboard = () => {
     startDate: '',
     endDate: '',
   });
+
+  const [petaOverlays, setPetaOverlays] = useState([]);
+  const [activePetaOverlays, setActivePetaOverlays] = useState({});
+  const [loadingPetaOverlays, setLoadingPetaOverlays] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -462,6 +467,41 @@ const MapDashboard = () => {
     }
   };
 
+  const handlePetaOverlayChange = async (layer, value) => {
+    const key = `peta_overlay_${layer.id}`;
+
+    setActivePetaOverlays((prev) => {
+      const next = { ...prev };
+      if (value) {
+        next[layer.value] = { ...(next[layer.value] || {}), active: true };
+      } else {
+        next[layer.value] = { ...(next[layer.value] || {}), active: false };
+      }
+      return next;
+    });
+
+    if (value) {
+      try {
+        setLoadingPetaOverlays(true);
+        const res = await getPetaOverlayDetail(layer.id);
+        const data = res?.data?.data || res?.data;
+        if (data) {
+          const tempStaticLayersDetail = { ...staticLayersDetail };
+          tempStaticLayersDetail[key] = { active: true, ...data };
+          dispatch(setStaticLayerDetail(tempStaticLayersDetail));
+        }
+      } catch (error) {
+        console.error('Failed to fetch peta overlay detail', error);
+      } finally {
+        setLoadingPetaOverlays(false);
+      }
+    } else {
+      const tempStaticLayersDetail = { ...staticLayersDetail };
+      tempStaticLayersDetail[key] = null;
+      dispatch(setStaticLayerDetail(tempStaticLayersDetail));
+    }
+  };
+
   const handlePageChange = useCallback((newPage) => {
     setCurrentPage(newPage);
   }, []);
@@ -565,6 +605,32 @@ const MapDashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchPetaOverlays = async () => {
+      setLoadingPetaOverlays(true);
+      try {
+        const res = await getPetaOverlayList();
+        const data = res?.data?.data || res?.data || {};
+        const results = data?.results || data || [];
+        const formatted = (Array.isArray(results) ? results : []).map(
+          (item) => ({
+            ...item,
+            value: item.slug || item.id,
+            label: item.nama || item.name || `Layer ${item.id}`,
+          })
+        );
+        setPetaOverlays(formatted);
+      } catch (error) {
+        console.error('Failed to fetch peta overlay list', error);
+        setPetaOverlays([]);
+      } finally {
+        setLoadingPetaOverlays(false);
+      }
+    };
+
+    fetchPetaOverlays();
+  }, []);
+
   // Handle query parameters for opening Data Kebun Modal with filter
   useEffect(() => {
     const openModal = searchParams.get('openModal');
@@ -628,12 +694,15 @@ const MapDashboard = () => {
           onDateRangeChange={setDateRange}
           staticLayers={staticLayerList}
           activeStaticLayers={staticLayersDetail}
+          petaOverlays={petaOverlays}
+          activePetaOverlays={activePetaOverlays}
           onStaticLayerChange={(layer, value) => {
             handleStaticLayerChange({ target: { checked: value } }, layer);
           }}
+          onPetaOverlayChange={handlePetaOverlayChange}
           activeBasemap={activeTile}
           onBasemapChange={setActiveTile}
-          loading={loadingDetailStaticLayer}
+          loading={loadingDetailStaticLayer || loadingPetaOverlays}
         />
         <RightSidebar />
         <Map
