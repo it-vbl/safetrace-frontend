@@ -250,42 +250,39 @@ const PesanBaruPage = () => {
                 return;
               }
 
-              const delay = (ms) =>
-                new Promise((resolve) => setTimeout(resolve, ms));
-
-              const STAGGER_DELAY = 500;
-
-              const results = await Promise.all(
-                uniqueMembers.map(async (member, i) => {
-                  const phone = member?.no_wa;
-                  if (!phone) {
-                    console.log(
-                      `Anggota ${
-                        i + 1
-                      }: Tidak memiliki nomor WhatsApp, dilewati`
-                    );
-                    return { success: false, skipped: true };
-                  }
-
-                  await delay(i * STAGGER_DELAY);
-
-                  try {
-                    console.log(
-                      `Mengirim pesan ${i + 1}/${totalMembers} ke ${phone}...`
-                    );
-                    await sendWhatsAppMessage(
-                      values.no_pengirim,
-                      phone,
-                      values.isi_pesan
-                    );
-                    console.log(`✓ Berhasil kirim ke ${phone}`);
-                    return { success: true, phone };
-                  } catch (err) {
-                    console.error(`✗ Gagal kirim ke ${phone}:`, err);
-                    return { success: false, phone, error: err };
-                  }
-                })
+              toast.info(
+                `Sedang mengirim pesan ke ${totalMembers} anggota grup...`
               );
+
+              const results = [];
+              for (let i = 0; i < uniqueMembers.length; i++) {
+                const member = uniqueMembers[i];
+                const phone = member?.no_wa;
+
+                if (!phone) {
+                  console.log(
+                    `Anggota ${i + 1}: Tidak memiliki nomor WhatsApp, dilewati`
+                  );
+                  results.push({ success: false, skipped: true });
+                  continue;
+                }
+
+                try {
+                  console.log(
+                    `Mengirim pesan ${i + 1}/${totalMembers} ke ${phone}...`
+                  );
+                  await sendWhatsAppMessage(
+                    values.no_pengirim,
+                    phone,
+                    values.isi_pesan
+                  );
+                  console.log(`✓ Berhasil kirim ke ${phone}`);
+                  results.push({ success: true, phone });
+                } catch (err) {
+                  console.error(`✗ Gagal kirim ke ${phone}:`, err);
+                  results.push({ success: false, phone, error: err });
+                }
+              }
 
               successCount = results.filter((r) => r.success).length;
               failureCount = results.filter(
