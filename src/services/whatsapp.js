@@ -9,6 +9,10 @@ const WhatsAppService = {
     return wa.get('/relogDevice', { params: { device_id: deviceId } }, false);
   },
 
+  getWhacenterGroups: (deviceId) => {
+    return wa.get('/getGroup', { params: { device_id: deviceId } }, false);
+  },
+
   getWhacenterQRCodeUrl: (deviceId) => {
     let base =
       process.env.NEXT_PUBLIC_WHATSAPP_API_URL ||

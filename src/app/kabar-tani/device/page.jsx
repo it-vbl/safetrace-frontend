@@ -121,10 +121,18 @@ const DevicePage = () => {
     setSelectedItem(null);
   };
 
+  const getDeviceId = (device) => {
+    return device?.device_id || device?.id_device;
+  };
+
   const generateQRCode = async (deviceData) => {
     setIsGeneratingQR(true);
     try {
-      const whacenterId = deviceData?.id_device;
+      const whacenterId = getDeviceId(deviceData);
+      if (!whacenterId) {
+        toast.error('Device ID tidak ditemukan');
+        return;
+      }
       const qrUrl = WhatsAppService.getWhacenterQRCodeUrl(whacenterId);
       setQrCodeDataUrl(qrUrl);
       setSelectedItem(deviceData);
@@ -137,7 +145,9 @@ const DevicePage = () => {
     }
   };
 
-  const checkDeviceStatusWhacenter = async (deviceId) => {
+  const checkDeviceStatusWhacenter = async (device) => {
+    const deviceId = getDeviceId(device);
+    if (!deviceId) return;
     try {
       const res = await WhatsAppService.getWhacenterDeviceStatus(deviceId);
       const data = res?.data || res;
@@ -150,9 +160,22 @@ const DevicePage = () => {
         statusVal ? 'Perangkat terhubung' : 'Perangkat belum terhubung'
       );
 
+      try {
+        const payload = {
+          nama: device.nama_device,
+          no_wa: device.no_handphone,
+          id_device: device.id_device,
+          device_id: device.device_id,
+          terhubung: statusVal,
+        };
+        await updateDeviceService(device.id, payload);
+      } catch (updateError) {
+        console.error('Gagal update status di database:', updateError);
+      }
+
       setDeviceData((prev) =>
         prev.map((d) =>
-          d.device_id === deviceId || d.id_device === deviceId
+          d.id === device.id
             ? { ...d, status: statusVal ? 'Terhubung' : 'Tidak Terhubung' }
             : d
         )
@@ -164,7 +187,7 @@ const DevicePage = () => {
   };
 
   const relogDeviceWhacenter = async (device) => {
-    const whacenterId = device?.device_id || device?.id_device;
+    const whacenterId = getDeviceId(device);
     if (!whacenterId) {
       toast.error('ID device tidak ditemukan');
       return;
@@ -206,11 +229,7 @@ const DevicePage = () => {
         </button>
         <button
           className="py-1 text-xs font-bold text-primaryDark1 underline"
-          onClick={() =>
-            checkDeviceStatusWhacenter(
-              params.data.device_id || params.data.id_device
-            )
-          }
+          onClick={() => checkDeviceStatusWhacenter(params.data)}
         >
           CEK STATUS
         </button>
@@ -494,17 +513,6 @@ const DevicePage = () => {
                 touched={detailTouched}
                 disabled={!isEditMode}
               />
-              <InputText
-                label={'Id Device'}
-                name="id_device"
-                placeholder="id device"
-                value={detailValues.id_device}
-                onChange={handleDetailChange}
-                onBlur={handleDetailBlur}
-                errors={detailErrors}
-                touched={detailTouched}
-                disabled={true}
-              />
             </div>
           )}
 
@@ -536,6 +544,7 @@ const DevicePage = () => {
           </div>
         </form>
       </BaseModal>
+
       {/* Add Device Modal */}
       <BaseModal
         open={isOpen}

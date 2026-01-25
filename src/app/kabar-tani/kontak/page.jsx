@@ -220,6 +220,7 @@ const KontakPage = () => {
         minWidth: isMobileScreen ? 70 : 100,
         maxWidth: 150,
         suppressSizeToFit: false,
+        pinned: 'left',
       },
       {
         field: 'nama',
@@ -509,6 +510,16 @@ const KontakPage = () => {
       handleEditOpen();
     }
   }, [isEditOpen, selectedKontakToEdit]);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      minWidth: 100,
+      wrapText: true,
+      autoHeight: true,
+    }),
+    []
+  );
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -828,6 +839,7 @@ const KontakPage = () => {
                 loading={loading}
                 overlayLoadingTemplate="."
                 autoSizeStrategy={autoSizeStrategy}
+                defaultColDef={defaultColDef}
                 domLayout="autoHeight"
                 rowHeight={isMobileScreen ? 36 : 40}
                 rowData={kontakData}

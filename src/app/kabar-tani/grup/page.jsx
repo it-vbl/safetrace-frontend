@@ -152,6 +152,16 @@ const GrupPage = () => {
     );
   };
 
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      minWidth: 100,
+      wrapText: true,
+      autoHeight: true,
+    }),
+    []
+  );
+
   const colDefs = [
     {
       headerName: '',
@@ -160,6 +170,8 @@ const GrupPage = () => {
       minWidth: 100,
       sortable: false,
       filter: false,
+      suppressSizeToFit: false,
+      pinned: 'left',
     },
     {
       field: 'id_group',
@@ -235,6 +247,7 @@ const GrupPage = () => {
               loading={loading}
               overlayLoadingTemplate="."
               autoSizeStrategy={autoSizeStrategy}
+              defaultColDef={defaultColDef}
               domLayout="autoHeight"
               rowHeight={36}
               rowData={kontakData}
