@@ -103,3 +103,8 @@ export const downloadListDiklat = (params = {}) => {
     responseType: 'blob',
   });
 };
+
+export const getStatistikGender = () => api.get('/petani/statistik/gender/');
+
+export const getStatistikDokumenPetani = () =>
+  api.get('/petani/statistik/dokumen/');
