@@ -6,17 +6,19 @@ import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { ChevronRight, DownloadCloudIcon } from 'lucide-react';
 import { Check } from 'lucide-react';
 import { toast } from 'react-toastify';
+import moment from 'moment';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
-import Select from '@/components/molecules/Select';
+import DatePicker from '@/components/molecules/DatePicker';
 import { ALL_COLUMN_VALUES, COLUMN_OPTIONS } from '@/constants/columns';
-import useYearOptions from '@/hooks/useYearOptions';
 import { getSankeyData } from '@/services/penjualan';
 
 const SankeyPage = () => {
-  const yearOptions = useYearOptions();
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [startDate, setStartDate] = useState(
+    moment().subtract(30, 'days').format('DD-MM-YYYY')
+  );
+  const [endDate, setEndDate] = useState(moment().format('DD-MM-YYYY'));
   const [selectedColumns, setSelectedColumns] = useState([
     ...ALL_COLUMN_VALUES,
   ]);
@@ -57,13 +59,34 @@ const SankeyPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const validateDateRange = (start, end) => {
+    const s = moment(start, 'DD-MM-YYYY');
+    const e = moment(end, 'DD-MM-YYYY');
+    const diffDays = e.diff(s, 'days');
+
+    if (diffDays > 31) {
+      toast.error('Rentang tanggal maksimal 31 hari');
+      return false;
+    }
+    if (diffDays < 0) {
+      toast.error('Tanggal selesai harus setelah tanggal mulai');
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
+      if (!validateDateRange(startDate, endDate)) {
+        return;
+      }
+
       setIsLoading(true);
       setIsError(false);
       try {
         const params = {
-          year: selectedYear,
+          start_date: startDate,
+          end_date: endDate,
           columns: selectedColumns,
         };
         const response = await getSankeyData(params);
@@ -84,7 +107,7 @@ const SankeyPage = () => {
       }
     };
     fetchData();
-  }, [selectedYear, selectedColumns]);
+  }, [startDate, endDate, selectedColumns]);
 
   const getFilterLabel = () => {
     if (isAllSelected) return 'Semua';
@@ -96,6 +119,14 @@ const SankeyPage = () => {
       );
     }
     return `${selectedColumns.length} dipilih`;
+  };
+
+  const handleChangeStartDate = (e) => {
+    setStartDate(moment(e.target.value).format('DD-MM-YYYY'));
+  };
+
+  const handleChangeEndDate = (e) => {
+    setEndDate(moment(e.target.value).format('DD-MM-YYYY'));
   };
 
   return (
@@ -188,13 +219,23 @@ const SankeyPage = () => {
               </div>
             )}
           </div>
-          <div className="w-24 sm:w-36">
-            <Select
-              placeholder="Periode"
-              options={yearOptions}
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              containerClassName="!mb-0"
+          <div className="w-28 sm:w-36">
+            <DatePicker
+              placeholder="Tanggal Mulai"
+              name="start_date"
+              value={startDate}
+              onChange={handleChangeStartDate}
+              inputContainerClassName="!h-[40px]"
+            />
+          </div>
+          <div className="w-28 sm:w-36">
+            <DatePicker
+              placeholder="Tanggal Selesai"
+              name="end_date"
+              value={endDate}
+              onChange={handleChangeEndDate}
+              inputContainerClassName="!h-[40px]"
+              minDate={moment(startDate, 'DD-MM-YYYY').format('YYYY-MM-DD')}
             />
           </div>
           <Button
