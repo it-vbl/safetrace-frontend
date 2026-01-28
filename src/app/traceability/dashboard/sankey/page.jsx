@@ -3,15 +3,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
-import { ChevronRight, DownloadCloudIcon } from 'lucide-react';
-import { Check } from 'lucide-react';
+import { DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DatePicker from '@/components/molecules/DatePicker';
-import { ALL_COLUMN_VALUES, COLUMN_OPTIONS } from '@/constants/columns';
+import { ALL_COLUMN_VALUES } from '@/constants/columns';
 import { getSankeyData } from '@/services/penjualan';
 
 const SankeyPage = () => {
@@ -19,45 +18,9 @@ const SankeyPage = () => {
     moment().subtract(30, 'days').format('DD-MM-YYYY')
   );
   const [endDate, setEndDate] = useState(moment().format('DD-MM-YYYY'));
-  const [selectedColumns, setSelectedColumns] = useState([
-    ...ALL_COLUMN_VALUES,
-  ]);
-  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState({ nodes: [], links: [] });
-  const columnDropdownRef = useRef(null);
-
-  const isAllSelected = selectedColumns.length === ALL_COLUMN_VALUES.length;
-
-  const handleColumnToggle = (value) => {
-    if (value === 'all') {
-      if (isAllSelected) {
-        setSelectedColumns([]);
-      } else {
-        setSelectedColumns([...ALL_COLUMN_VALUES]);
-      }
-    } else {
-      if (selectedColumns.includes(value)) {
-        setSelectedColumns(selectedColumns.filter((col) => col !== value));
-      } else {
-        setSelectedColumns([...selectedColumns, value]);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        columnDropdownRef.current &&
-        !columnDropdownRef.current.contains(event.target)
-      ) {
-        setIsColumnDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const validateDateRange = (start, end) => {
     const s = moment(start, 'DD-MM-YYYY');
@@ -87,7 +50,7 @@ const SankeyPage = () => {
         const params = {
           start_date: startDate,
           end_date: endDate,
-          columns: selectedColumns,
+          columns: ALL_COLUMN_VALUES,
         };
         const response = await getSankeyData(params);
 
@@ -107,19 +70,7 @@ const SankeyPage = () => {
       }
     };
     fetchData();
-  }, [startDate, endDate, selectedColumns]);
-
-  const getFilterLabel = () => {
-    if (isAllSelected) return 'Semua';
-    if (selectedColumns.length === 0) return 'Pilih Filter';
-    if (selectedColumns.length === 1) {
-      return (
-        COLUMN_OPTIONS.find((opt) => opt.value === selectedColumns[0])?.label ||
-        ''
-      );
-    }
-    return `${selectedColumns.length} dipilih`;
-  };
+  }, [startDate, endDate]);
 
   const handleChangeStartDate = (e) => {
     setStartDate(moment(e.target.value).format('DD-MM-YYYY'));
@@ -140,85 +91,6 @@ const SankeyPage = () => {
           SANKEY DIAGRAM
         </Heading>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-28 sm:w-36" ref={columnDropdownRef}>
-            <div
-              onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
-              className="flex min-h-[40px] w-full cursor-pointer items-center justify-between rounded-[6px] border border-neutral5 bg-white px-3 py-2 text-[14px] hover:border-blue6"
-            >
-              <span
-                className={
-                  selectedColumns.length === 0 ? 'text-neutral6' : 'text-black'
-                }
-              >
-                {getFilterLabel()}
-              </span>
-              <svg
-                className={`h-4 w-4 transition-transform ${
-                  isColumnDropdownOpen ? 'rotate-180' : ''
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-            {isColumnDropdownOpen && (
-              <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-[6px] border bg-white p-2 shadow-lg">
-                {/* Semua Option */}
-                <div
-                  onClick={() => handleColumnToggle('all')}
-                  className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] hover:bg-gray-100 ${
-                    isAllSelected ? 'bg-blue-50 text-blue-600' : ''
-                  }`}
-                >
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded border ${
-                      isAllSelected
-                        ? 'border-blue-600 bg-blue-600'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    {isAllSelected && (
-                      <Check size={12} className="text-white" />
-                    )}
-                  </div>
-                  <span>Semua</span>
-                </div>
-                <div className="my-1 border-t border-gray-100" />
-                {/* Individual Options */}
-                {COLUMN_OPTIONS.map((option) => (
-                  <div
-                    key={option.value}
-                    onClick={() => handleColumnToggle(option.value)}
-                    className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] hover:bg-gray-100 ${
-                      selectedColumns.includes(option.value)
-                        ? 'bg-blue-50 text-blue-600'
-                        : ''
-                    }`}
-                  >
-                    <div
-                      className={`flex h-4 w-4 items-center justify-center rounded border ${
-                        selectedColumns.includes(option.value)
-                          ? 'border-blue-600 bg-blue-600'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      {selectedColumns.includes(option.value) && (
-                        <Check size={12} className="text-white" />
-                      )}
-                    </div>
-                    <span>{option.label}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
           <div className="w-28 sm:w-36">
             <DatePicker
               placeholder="Tanggal Mulai"
@@ -317,74 +189,6 @@ const SankeyPage = () => {
           </div>
         ) : (
           <>
-            {/* Stage Headers - Vertical on mobile, horizontal on desktop */}
-            <div className="hidden sm:mb-6 sm:flex sm:items-center sm:justify-between">
-              {ALL_COLUMN_VALUES.map((col, index) => {
-                const isVisible =
-                  isAllSelected || selectedColumns.includes(col);
-                const label =
-                  COLUMN_OPTIONS.find((opt) => opt.value === col)?.label || col;
-                const isLast = index === ALL_COLUMN_VALUES.length - 1;
-                const nextColVisible =
-                  !isLast &&
-                  (isAllSelected ||
-                    selectedColumns.includes(ALL_COLUMN_VALUES[index + 1]));
-
-                if (!isVisible) return null;
-
-                return (
-                  <React.Fragment key={col}>
-                    <StageHeader label={label} />
-                    {!isLast && nextColVisible && <ArrowSpacer />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            {/* Mobile: Vertical stage headers */}
-            <div className="mb-3 flex flex-col gap-1 sm:hidden">
-              <div className="flex items-center gap-2">
-                <div className="flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
-                  <span className="font-semibold text-gray-700">Alur:</span>
-                  {ALL_COLUMN_VALUES.map((col, index) => {
-                    const isVisible =
-                      isAllSelected || selectedColumns.includes(col);
-                    const label =
-                      COLUMN_OPTIONS.find((opt) => opt.value === col)?.label ||
-                      col;
-
-                    let hasNextVisible = false;
-                    for (let i = index + 1; i < ALL_COLUMN_VALUES.length; i++) {
-                      if (
-                        isAllSelected ||
-                        selectedColumns.includes(ALL_COLUMN_VALUES[i])
-                      ) {
-                        hasNextVisible = true;
-                        break;
-                      }
-                    }
-
-                    if (!isVisible) return null;
-
-                    return (
-                      <React.Fragment key={col}>
-                        <StageHeaderMobile label={label} />
-                        {hasNextVisible && <span>→</span>}
-                      </React.Fragment>
-                    );
-                  })}
-                  {selectedColumns.length === 0 && (
-                    <span className="italic text-gray-400">
-                      Pilih filter untuk melihat alur
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-[9px] italic text-gray-400">
-                Geser ke kanan untuk melihat selengkapnya
-              </p>
-            </div>
-
             {/* Sankey Diagram Container - Responsive with horizontal scroll on mobile */}
             <div
               className={`w-full overflow-x-auto ${
@@ -765,27 +569,5 @@ const Tooltip = ({ x, y, content, containerRef }) => {
     </div>
   );
 };
-
-const StageHeader = ({ label }) => (
-  <div className="flex min-w-[60px] items-center justify-center rounded-[4px] bg-[#D5E2F6] px-2 py-1.5 sm:min-w-[120px] sm:px-6 sm:py-2.5">
-    <span className="text-[10px] font-semibold text-black sm:text-[13px]">
-      {label}
-    </span>
-  </div>
-);
-
-const ArrowSpacer = () => (
-  <div className="flex flex-1 items-center justify-center px-1 sm:px-3">
-    <div className="h-[1px] flex-1 bg-gray-300"></div>
-    <ChevronRight size={12} className="text-gray-400 sm:hidden" />
-    <ChevronRight size={16} className="hidden text-gray-400 sm:block" />
-  </div>
-);
-
-const StageHeaderMobile = ({ label }) => (
-  <span className="rounded bg-[#D5E2F6] px-1.5 py-0.5 text-[9px] font-semibold text-gray-700">
-    {label}
-  </span>
-);
 
 export default SankeyPage;
