@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo,useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { LogOutIcon, Users2Icon } from 'lucide-react';
@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import ModalConfirmation from '@/components/molecules/ModalConfirmation';
 import ModalGantiKataSandi from '@/components/organisms/Modal/ModalGantiKataSandi';
 import useTouchOutside from '@/hooks/useTouchOutside';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import { logout as logoutService } from '@/services/auth';
 import { changePassword } from '@/services/user';
 import { StackIcon } from '@radix-ui/react-icons';
@@ -22,6 +23,7 @@ const ProfilePopup = ({ children }) => {
   const popupRef = useRef(null);
   const triggerRef = useRef(null);
   const [fullName, setFullName] = useState('');
+  const [roles, setRoles] = useState([]);
 
   useTouchOutside(popupRef, () => setIsOpen(false));
   useEffect(() => {
@@ -39,6 +41,31 @@ const ProfilePopup = ({ children }) => {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    const currentRoles = getCurrentUserRoles();
+    setRoles(currentRoles);
+  }, []);
+
+  const canSeeUsers = useMemo(
+    () => hasPermission(roles, 'pengguna.view'),
+    [roles]
+  );
+
+  const canSeePetaOverlay = useMemo(
+    () => hasPermission(roles, 'peta.view'),
+    [roles]
+  );
+
+  const canSeeProfile = useMemo(
+    () => hasPermission(roles, 'profil.view'),
+    [roles]
+  );
+
+  const canChangePassword = useMemo(
+    () => hasPermission(roles, 'password.update'),
+    [roles]
+  );
 
   // Handle click on trigger element
   const handleTriggerClick = () => {
@@ -137,34 +164,42 @@ const ProfilePopup = ({ children }) => {
                 {fullName || 'Pengguna'}
               </div>
               <div className="py-1">
-                <button
-                  onClick={handleUsersClick}
-                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <Users2Icon size={18} className="mr-2" />
-                  <span>Pengguna</span>
-                </button>
-                <button
-                  onClick={handlePetaOverlayClick}
-                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <StackIcon size={18} className="mr-2" />
-                  <span>Peta Overlay</span>
-                </button>
-                <button
-                  onClick={handleProfileClick}
-                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <UserIcon size={18} className="mr-2" />
-                  <span>Profile</span>
-                </button>
-                <button
-                  onClick={handleGantiKataSandiClick}
-                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <LockIcon size={18} className="mr-2" />
-                  <span>Ganti Kata Sandi</span>
-                </button>
+                {canSeeUsers && (
+                  <button
+                    onClick={handleUsersClick}
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <Users2Icon size={18} className="mr-2" />
+                    <span>Pengguna</span>
+                  </button>
+                )}
+                {canSeePetaOverlay && (
+                  <button
+                    onClick={handlePetaOverlayClick}
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <StackIcon size={18} className="mr-2" />
+                    <span>Peta Overlay</span>
+                  </button>
+                )}
+                {canSeeProfile && (
+                  <button
+                    onClick={handleProfileClick}
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <UserIcon size={18} className="mr-2" />
+                    <span>Profile</span>
+                  </button>
+                )}
+                {canChangePassword && (
+                  <button
+                    onClick={handleGantiKataSandiClick}
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <LockIcon size={18} className="mr-2" />
+                    <span>Ganti Kata Sandi</span>
+                  </button>
+                )}
                 <button
                   onClick={handleLogoutClick}
                   className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

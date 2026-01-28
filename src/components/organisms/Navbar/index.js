@@ -1,8 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import Cookies from 'js-cookie';
@@ -11,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import SipekebunLogo from '@/components/atoms/SipekebunLogo';
 import ProfilePopup from '@/components/molecules/ProfilePopup';
+import { getCurrentUserRoles, hasAnyPermission } from '@/libs/permissions';
 import { setSidebarOpen } from '@/store/slices/app';
 import { ChevronDownIcon, HamburgerMenuIcon } from '@radix-ui/react-icons';
 
@@ -23,6 +22,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
 
   const [name, setName] = useState('');
+  const [roles, setRoles] = useState([]);
   const [mounted, setMounted] = useState(false);
   const [isTraceabilityDropdownOpen, setIsTraceabilityDropdownOpen] =
     useState(false);
@@ -46,8 +46,34 @@ const Navbar = () => {
 
   useEffect(() => {
     setName(Cookies.get('fullName'));
+    const currentRoles = getCurrentUserRoles();
+    setRoles(currentRoles);
     setMounted(true);
   }, []);
+
+  const canSeeKabarTani = hasAnyPermission(roles, [
+    'kontak.view',
+    'grup.view',
+    'blastpesan.view',
+    'kirimpesan.view',
+    'device.view',
+  ]);
+
+  const canSeeTraceability = hasAnyPermission(roles, [
+    'petani.view',
+    'kebun.view',
+    'produksi.view',
+    'pestisida.view',
+    'pupuk.view',
+    'limbah.view',
+    'diklat.view',
+    'pekerja.view',
+    'pengguna.view',
+    'peta.view',
+    'statistik.view',
+    'sankey.view',
+    'penjualan.view',
+  ]);
 
   // Handle click outside dropdown
   useEffect(() => {
@@ -93,58 +119,62 @@ const Navbar = () => {
         </div>
       </div>
       <div className="ml-auto hidden flex-1  flex-row items-center justify-center gap-4 uppercase md:!flex">
-        <div
-          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-            '/kabar-tani/'
-          )} `}
-          onClick={() => handleMenuClick('/kabar-tani/kontak')}
-        >
-          Kabar Tani
-        </div>
-        <div
-          className="relative overflow-y-visible"
-          ref={traceabilityDropdownRef}
-        >
+        {canSeeKabarTani && (
           <div
-            className={`cursor-pointer flex flex-row items-center gap-2 tracking-[1px] ${getMenuClassName(
-              '/traceability'
-            )} ${pathname == '/' ? 'text-primary font-bold' : 'text-black'}`}
-            onClick={() =>
-              setIsTraceabilityDropdownOpen(!isTraceabilityDropdownOpen)
-            }
+            className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+              '/kabar-tani/'
+            )} `}
+            onClick={() => handleMenuClick('/kabar-tani/kontak')}
           >
-            <span>Traceability</span>
-            <ChevronDown size={16} />
+            Kabar Tani
           </div>
-          {isTraceabilityDropdownOpen && (
-            <div className="absolute left-0 top-full left-[50%] -translate-x-[50%] z-[999] mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg z-50">
-              <div
-                className={`cursor-pointer px-4 py-2 text-sm hover:bg-gray-100 ${
-                  pathname === '/' ? 'text-primary font-bold' : 'text-black'
-                }`}
-                onClick={() => {
-                  handleMenuClick('/');
-                  setIsTraceabilityDropdownOpen(false);
-                }}
-              >
-                MapView
-              </div>
-              <div
-                className={`cursor-pointer px-4 py-2 text-sm hover:bg-gray-100 ${
-                  pathname.startsWith('/traceability')
-                    ? 'text-primary font-bold'
-                    : 'text-black'
-                }`}
-                onClick={() => {
-                  handleMenuClick('/traceability/petani');
-                  setIsTraceabilityDropdownOpen(false);
-                }}
-              >
-                Traceability
-              </div>
+        )}
+        {canSeeTraceability && (
+          <div
+            className="relative overflow-y-visible"
+            ref={traceabilityDropdownRef}
+          >
+            <div
+              className={`cursor-pointer flex flex-row items-center gap-2 tracking-[1px] ${getMenuClassName(
+                '/traceability'
+              )} ${pathname == '/' ? 'text-primary font-bold' : 'text-black'}`}
+              onClick={() =>
+                setIsTraceabilityDropdownOpen(!isTraceabilityDropdownOpen)
+              }
+            >
+              <span>Traceability</span>
+              <ChevronDown size={16} />
             </div>
-          )}
-        </div>
+            {isTraceabilityDropdownOpen && (
+              <div className="absolute left-0 top-full left-[50%] -translate-x-[50%] z-[999] mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg z-50">
+                <div
+                  className={`cursor-pointer px-4 py-2 text-sm hover:bg-gray-100 ${
+                    pathname === '/' ? 'text-primary font-bold' : 'text-black'
+                  }`}
+                  onClick={() => {
+                    handleMenuClick('/');
+                    setIsTraceabilityDropdownOpen(false);
+                  }}
+                >
+                  MapView
+                </div>
+                <div
+                  className={`cursor-pointer px-4 py-2 text-sm hover:bg-gray-100 ${
+                    pathname.startsWith('/traceability')
+                      ? 'text-primary font-bold'
+                      : 'text-black'
+                  }`}
+                  onClick={() => {
+                    handleMenuClick('/traceability/petani');
+                    setIsTraceabilityDropdownOpen(false);
+                  }}
+                >
+                  Traceability
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         {/* <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/koperasi'
@@ -160,57 +190,63 @@ const Navbar = () => {
         className="ml-auto flex flex-1 flex-row items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] uppercase md:hidden"
         suppressHydrationWarning
       >
-        <div
-          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-            '/kabar-tani/'
-          )}`}
-          onClick={() => handleMenuClick('/kabar-tani/kontak')}
-        >
-          Kabar Tani
-        </div>
-        <div className="relative" ref={traceabilityDropdownRefMobile}>
+        {canSeeKabarTani && (
           <div
-            className={`cursor-pointer tracking-[1px] flex flex-row items-center gap-1 ${getMenuClassName(
-              '/traceability'
-            )} ${pathname == '/' ? 'text-primary font-bold' : 'text-black'}`}
-            onClick={() =>
-              setIsTraceabilityDropdownOpenMobile(
-                !isTraceabilityDropdownOpenMobile
-              )
-            }
+            className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+              '/kabar-tani/'
+            )}`}
+            onClick={() => handleMenuClick('/kabar-tani/kontak')}
           >
-            <span>Traceability</span>
-            <ChevronDown size={12} />
+            Kabar Tani
           </div>
-          {isTraceabilityDropdownOpenMobile && (
-            <div className="absolute left-0 top-full mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-[9999]">
-              <div
-                className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
-                  pathname === '/' ? 'text-primary font-bold' : 'text-black'
-                }`}
-                onClick={() => {
-                  handleMenuClick('/');
-                  setIsTraceabilityDropdownOpenMobile(false);
-                }}
-              >
-                MapView
-              </div>
-              <div
-                className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
-                  pathname.startsWith('/traceability')
-                    ? 'text-primary font-bold'
-                    : 'text-black'
-                }`}
-                onClick={() => {
-                  handleMenuClick('/traceability/petani');
-                  setIsTraceabilityDropdownOpenMobile(false);
-                }}
-              >
-                Traceability
-              </div>
+        )}
+        {canSeeTraceability && (
+          <div className="relative" ref={traceabilityDropdownRefMobile}>
+            <div
+              className={`cursor-pointer tracking-[1px] flex flex-row items-center gap-1 ${getMenuClassName(
+                '/traceability'
+              )} ${pathname == '/' ? 'text-primary font-bold' : 'text-black'}`}
+              onClick={() =>
+                setIsTraceabilityDropdownOpenMobile(
+                  !isTraceabilityDropdownOpenMobile
+                )
+              }
+            >
+              <span>Traceability</span>
+              <ChevronDown size={12} />
             </div>
-          )}
-        </div>
+            {isTraceabilityDropdownOpenMobile && (
+              <div className="absolute left-0 top-full mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-[9999]">
+                <div
+                  className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
+                    pathname === '/'
+                      ? 'text-primary font-bold'
+                      : 'text-black'
+                  }`}
+                  onClick={() => {
+                    handleMenuClick('/');
+                    setIsTraceabilityDropdownOpenMobile(false);
+                  }}
+                >
+                  MapView
+                </div>
+                <div
+                  className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
+                    pathname.startsWith('/traceability')
+                      ? 'text-primary font-bold'
+                      : 'text-black'
+                  }`}
+                  onClick={() => {
+                    handleMenuClick('/traceability/petani');
+                    setIsTraceabilityDropdownOpenMobile(false);
+                  }}
+                >
+                  Traceability
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/koperasi'

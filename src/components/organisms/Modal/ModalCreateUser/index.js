@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -6,14 +7,7 @@ import InputText from '@/components/molecules/InputText';
 import Modal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
-
-const rolesOptions = [
-  { label: 'Admin', value: '1' },
-  { label: 'Tim Pendataan', value: '2' },
-  { label: 'Tim Verifikasi', value: '3' },
-  { label: 'Tim Penerbitan', value: '4' },
-  { label: 'Tim Monitoring', value: '5' },
-];
+import useReferences from '@/hooks/useReferences';
 
 const statusOptions = [
   { label: 'Aktif', value: '1' },
@@ -21,6 +15,12 @@ const statusOptions = [
 ];
 
 const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
+  const { userRoles, fetchUserRoles } = useReferences();
+
+  useEffect(() => {
+    fetchUserRoles();
+  }, [fetchUserRoles]);
+
   const { values, handleChange, handleBlur, handleSubmit, touched, errors, isSubmitting } = useFormik({
     initialValues: {
       nama: '',
@@ -93,7 +93,7 @@ const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
           label='Roles'
           name='roles'
           placeholder='Pilih role'
-          options={rolesOptions}
+          options={userRoles}
           value={values.roles}
           onChange={handleChange}
           onBlur={handleBlur}
