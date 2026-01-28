@@ -46,16 +46,34 @@ const LoginPage = () => {
         });
 
         if (res.status === 200 && res?.data?.status === 'success') {
-          Cookies.set('token', res?.data?.data?.access);
-          Cookies.set('refreshToken', res?.data?.data?.refresh);
-          Cookies.set('fullName', res?.data?.data?.full_name);
-          Cookies.set('userId', res?.data?.data?.id.toString());
-          Cookies.set('username', res?.data?.data?.username);
-          Cookies.set('email', res?.data?.data?.email);
-          Cookies.set('roles', JSON.stringify(res?.data?.data?.roles));
+          const data = res?.data?.data || {};
+          const roles = Array.isArray(data?.roles) ? data.roles : [];
+
+          Cookies.set('token', data?.access);
+          Cookies.set('refreshToken', data?.refresh);
+          Cookies.set('fullName', data?.full_name);
+          Cookies.set('userId', data?.id?.toString());
+          Cookies.set('username', data?.username);
+          Cookies.set('email', data?.email);
+          Cookies.set('roles', JSON.stringify(roles));
 
           toast.success('Login berhasil');
-          router.push('/');
+
+          // Normalize roles to numbers for comparison
+          const normalizedRoles = roles
+            .map((r) =>
+              typeof r === 'number' ? r : parseInt(r, 10)
+            )
+            .filter((r) => !Number.isNaN(r));
+
+          const onlyRole2 =
+            normalizedRoles.length === 1 && normalizedRoles[0] === 2;
+
+          if (onlyRole2) {
+            router.push('/kabar-tani/kontak');
+          } else {
+            router.push('/');
+          }
         } else {
           toast.error('Login gagal, silakan coba lagi');
         }

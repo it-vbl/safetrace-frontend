@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import LogoLembaga from '@/components/atoms/LogoLembaga';
 import size from '@/constants/size';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import { setSidebarCollapsed, setSidebarOpen } from '@/store/slices/app';
 import {
   ChevronDownIcon,
@@ -40,6 +41,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const dispatch = useDispatch();
 
   const [mounted, setMounted] = useState(false);
+  const [roles, setRoles] = useState([]);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -82,47 +84,77 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  useEffect(() => {
+    const currentRoles = getCurrentUserRoles();
+    setRoles(currentRoles);
+  }, []);
+
+  const canAccess = (permissionKey) => {
+    if (!permissionKey) return true;
+    return hasPermission(roles, permissionKey);
+  };
+
   const menuConfig = {
     traceability: [
       {
         label: 'Petani',
         icon: UserCircle2Icon,
         path: '/traceability/petani',
+        permission: 'petani.view',
       },
       {
         label: 'Kebun',
         icon: MapIcon,
         path: '/traceability/kebun',
+        permission: 'kebun.view',
       },
       {
         label: 'Dashboard',
         icon: PieChart,
+        permission: null,
         subMenu: [
-          { label: 'Statistik', path: '/traceability/dashboard/statistik' },
-          { label: 'Sankey', path: '/traceability/dashboard/sankey' },
+          {
+            label: 'Statistik',
+            path: '/traceability/dashboard/statistik',
+            permission: 'statistik.view',
+          },
+          {
+            label: 'Sankey',
+            path: '/traceability/dashboard/sankey',
+            permission: 'sankey.view',
+          },
         ],
       },
       {
         label: 'Penjualan',
         icon: TrendingUp,
         path: '/traceability/penjualan',
+        permission: 'penjualan.view',
       },
       {
         label: 'GAP',
         icon: Flag,
+        permission: null,
         subMenu: [
-          { label: 'PRODUKSI', path: '/traceability/gap/produksi' },
+          {
+            label: 'PRODUKSI',
+            path: '/traceability/gap/produksi',
+            permission: 'produksi.view',
+          },
           {
             label: 'PESTISIDA',
             path: '/traceability/gap/pestisida',
+            permission: 'pestisida.view',
           },
           {
             label: 'PUPUK',
             path: '/traceability/gap/pupuk',
+            permission: 'pupuk.view',
           },
           {
             label: 'LB3',
             path: '/traceability/gap/lb3',
+            permission: 'limbah.view',
           },
         ],
       },
@@ -130,11 +162,13 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         label: 'Diklat',
         icon: MedalIcon,
         path: '/traceability/diklat',
+        permission: 'diklat.view',
       },
       {
         label: 'Pekerja',
         icon: UsersIcon,
         path: '/traceability/pekerja',
+        permission: 'pekerja.view',
       },
     ],
     'kabar-tani': [
@@ -142,26 +176,31 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         label: 'Kontak',
         icon: ContactIcon,
         path: '/kabar-tani/kontak',
+        permission: 'kontak.view',
       },
       {
         label: 'Grup',
         icon: FolderIcon,
         path: '/kabar-tani/grup',
+        permission: 'grup.view',
       },
       {
         label: 'Blast Pesan',
         icon: MegaphoneIcon,
         path: '/kabar-tani/blast-pesan',
+        permission: 'blastpesan.view',
       },
       {
         label: 'Kirim Pesan',
         icon: MessageSquareIcon,
         path: '/kabar-tani/kirim-pesan',
+        permission: 'kirimpesan.view',
       },
       {
         label: 'Device',
         icon: Smartphone,
         path: '/kabar-tani/device',
+        permission: 'device.view',
       },
     ],
     koperasi: [
@@ -190,7 +229,30 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
     return 'traceability';
   }, [pathname]);
 
-  const menuItems = menuConfig[currentMainMenu] || [];
+  const rawMenuItems = menuConfig[currentMainMenu] || [];
+
+  const menuItems = useMemo(() => {
+    // Filter main items by permission
+    const filtered = rawMenuItems
+      .map((item) => {
+        // Handle items with submenus: filter submenus too
+        if (item.subMenu && Array.isArray(item.subMenu)) {
+          const filteredSub = item.subMenu.filter((sub) =>
+            canAccess(sub.permission)
+          );
+          if (!filteredSub.length) {
+            return null;
+          }
+          return { ...item, subMenu: filteredSub };
+        }
+
+        // Simple item: check its permission (if any)
+        return canAccess(item.permission) ? item : null;
+      })
+      .filter(Boolean);
+
+    return filtered;
+  }, [rawMenuItems, roles]);
 
   const handleCollapse = () => {
     dispatch(setSidebarCollapsed(!sidebarCollapsed));

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -20,6 +20,7 @@ import useKomoditas from '@/hooks/useKomoditas';
 import useReferences from '@/hooks/useReferences';
 import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
 import { getPetaOverlayDetail, getPetaOverlayList } from '@/services/petaOverlay';
 import { setStaticLayerDetail } from '@/store/slices/staticLayer';
@@ -36,6 +37,8 @@ const MapDashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [roles, setRoles] = useState([]);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const [showAlertTable, setShowAlertTable] = useState(false);
   const [selectedPekebun, setSelectedPekebun] = useState(pekebuns[0]);
@@ -130,6 +133,17 @@ const MapDashboard = () => {
     fetchStaticLayersDetail,
     loading: loadingDetailStaticLayer,
   } = useStaticLayer();
+
+  useEffect(() => {
+    const currentRoles = getCurrentUserRoles();
+    setRoles(currentRoles);
+    setRolesLoaded(true);
+  }, []);
+
+  const canViewMap = useMemo(
+    () => hasPermission(roles, 'peta.dashboard'),
+    [roles]
+  );
 
   const PetaDetailCellRenderer = (params) => {
     const handlePetaClick = () => {
@@ -685,6 +699,20 @@ const MapDashboard = () => {
     dateRange.startDate,
     dateRange.endDate,
   ]);
+
+  if (!rolesLoaded) {
+    return null;
+  }
+
+  if (!canViewMap) {
+    return (
+      <div className="flex h-[calc(100vh-72px)] w-full items-center justify-center">
+        <p className="text-sm text-gray-600">
+          Anda tidak memiliki akses untuk melihat MapView.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full w-full max-w-full max-h-full overflow-y-hidden overflow-x-hidden">
