@@ -10,6 +10,7 @@ import { ToastContainer } from 'react-toastify';
 import Navbar from '@/components/organisms/Navbar';
 import Sidebar from '@/components/organisms/Sidebar';
 import { MobileScreenProvider } from '@/components/providers/MobileScreenProvider';
+import ChunkErrorBoundary from '@/components/providers/ChunkErrorBoundary';
 import size from '@/constants/size';
 import { ReduxProvider } from '@/libs/redux/provider';
 
@@ -121,18 +122,20 @@ export default function Layout({ children }) {
         />
       </head>
       <body>
-        <ReduxProvider>
-          <MobileScreenProvider>
-            <LayoutContent
-              hideNavbar={hideNavbar}
-              hideSidebar={hideSidebar}
-              noPadding={noPadding}
-            >
-              {children}
-            </LayoutContent>
-            <ToastContainer />
-          </MobileScreenProvider>
-        </ReduxProvider>
+        <ChunkErrorBoundary>
+          <ReduxProvider>
+            <MobileScreenProvider>
+              <LayoutContent
+                hideNavbar={hideNavbar}
+                hideSidebar={hideSidebar}
+                noPadding={noPadding}
+              >
+                {children}
+              </LayoutContent>
+              <ToastContainer />
+            </MobileScreenProvider>
+          </ReduxProvider>
+        </ChunkErrorBoundary>
       </body>
     </html>
   );
