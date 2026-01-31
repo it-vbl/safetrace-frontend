@@ -8,6 +8,36 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['cukk-be.buatin.com'],
   },
+  // Generate unique build ID to prevent chunk loading errors
+  generateBuildId: async () => {
+    // Use timestamp to ensure each build has a unique ID
+    return `build-${Date.now()}`;
+  },
+  // Configure output to avoid cache issues
+  output: 'standalone',
+  // Add cache control headers
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
