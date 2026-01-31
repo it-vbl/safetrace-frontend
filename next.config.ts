@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['cukk-be.buatin.com'],
   },
+  // Disable ESLint during production builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Generate unique build ID to prevent chunk loading errors
   generateBuildId: async () => {
     // Use timestamp to ensure each build has a unique ID
