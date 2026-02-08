@@ -1,3 +1,4 @@
+import querystring from 'qs';
 import api from './api';
 
 // *** GET ***
@@ -62,7 +63,12 @@ export const getDetailPenjualanPabrik = (id) =>
   api.get(`/penjualan/pabrik/detail/${id}/`);
 
 export const getSankeyData = (params = {}) =>
-  api.get(`/penjualan/sankey-diagram/`, { params });
+  api.get(`/penjualan/sankey-diagram/`, {
+    params,
+    paramsSerializer: (params) => {
+      return querystring.stringify(params, { arrayFormat: 'repeat' });
+    },
+  });
 
 export const getListPabrik = (params = {}) =>
   api.get(`/penjualan/pabrik/list/`, { params });
