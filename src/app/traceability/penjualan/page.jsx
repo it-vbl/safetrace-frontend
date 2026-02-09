@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import Cookies from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
@@ -57,6 +58,29 @@ const PenjualanPage = () => {
     fetchKelompokTani();
     fetchPabrikOptions();
   }, [fetchKelompokTani]);
+
+  // Auto-apply kelompok tani filter based on logged-in user
+  const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
+  const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const ketuaKelompokTani = Cookies.get('ketua_kelompok_tani');
+    if (ketuaKelompokTani && kelompokTani && kelompokTani.length > 0) {
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === ketuaKelompokTani
+      );
+      if (kelompokOption) {
+        setSelectedKelompok(kelompokOption.value);
+        setIsKetuaKelompokTani(true);
+        setTimeout(() => setIsKelompokFilterInitialized(true), 100);
+      } else {
+        setIsKelompokFilterInitialized(true);
+      }
+    } else {
+      setIsKelompokFilterInitialized(true);
+    }
+  }, [kelompokTani]);
 
   const fetchPabrikOptions = async () => {
     try {
@@ -165,23 +189,26 @@ const PenjualanPage = () => {
   };
 
   useEffect(() => {
-    const startDate = selectedDateRange.startDate
-      ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
-      : null;
-    const endDate = selectedDateRange.endDate
-      ? moment(selectedDateRange.endDate).format('YYYY-MM-DD')
-      : null;
+    if (isKelompokFilterInitialized) {
+      const startDate = selectedDateRange.startDate
+        ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
+        : null;
+      const endDate = selectedDateRange.endDate
+        ? moment(selectedDateRange.endDate).format('YYYY-MM-DD')
+        : null;
 
-    fetchPenjualanData({
-      page: currentPage,
-      page_size: pageSize,
-      search,
-      kelompok_tani: selectedKelompok,
-      pabrik: selectedPabrik,
-      start_date: startDate,
-      end_date: endDate,
-    });
+      fetchPenjualanData({
+        page: currentPage,
+        page_size: pageSize,
+        search,
+        kelompok_tani: selectedKelompok,
+        pabrik: selectedPabrik,
+        start_date: startDate,
+        end_date: endDate,
+      });
+    }
   }, [
+    isKelompokFilterInitialized,
     currentPage,
     pageSize,
     search,
@@ -425,6 +452,7 @@ const PenjualanPage = () => {
                   options={kelompokOptions}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
+                  disabled={isKetuaKelompokTani}
                 />
 
                 <Select

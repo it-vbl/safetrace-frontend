@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import Cookies from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
@@ -16,10 +17,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
-import {
-  downloadListProduksi,
-  getListProduksi,
-} from '@/services/produksi';
+import { downloadListProduksi, getListProduksi } from '@/services/produksi';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -43,6 +41,29 @@ const ProduksiPage = () => {
   useEffect(() => {
     fetchKelompokTani();
   }, []);
+
+  // Auto-apply kelompok tani filter based on logged-in user
+  const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
+  const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const ketuaKelompokTani = Cookies.get('ketua_kelompok_tani');
+    if (ketuaKelompokTani && kelompokTani && kelompokTani.length > 0) {
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === ketuaKelompokTani
+      );
+      if (kelompokOption) {
+        setSelectedKelompok(kelompokOption.label); // Uses label as value
+        setIsKetuaKelompokTani(true);
+        setTimeout(() => setIsKelompokFilterInitialized(true), 100);
+      } else {
+        setIsKelompokFilterInitialized(true);
+      }
+    } else {
+      setIsKelompokFilterInitialized(true);
+    }
+  }, [kelompokTani]);
 
   const kelompokOptions = useMemo(() => {
     return (
@@ -95,9 +116,18 @@ const ProduksiPage = () => {
   };
 
   useEffect(() => {
-    fetchProduksiList();
+    if (isKelompokFilterInitialized) {
+      fetchProduksiList();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, pageSize, search, selectedKelompok, selectedYear]);
+  }, [
+    isKelompokFilterInitialized,
+    currentPage,
+    pageSize,
+    search,
+    selectedKelompok,
+    selectedYear,
+  ]);
 
   const handleSearchTextChange = useCallback(
     debounce((value) => {
@@ -266,6 +296,7 @@ const ProduksiPage = () => {
                   options={kelompokOptions}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
+                  disabled={isKetuaKelompokTani}
                 />
 
                 <Select

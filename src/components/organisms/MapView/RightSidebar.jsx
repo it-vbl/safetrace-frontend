@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  ArcElement,
   BarElement,
   CategoryScale,
   Chart as ChartJS,
@@ -11,25 +12,102 @@ import {
   Tooltip,
 } from 'chart.js';
 import { ChevronLeft } from 'lucide-react';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Heading from '@/components/atoms/Typography/Heading';
+import DateRange from '@/components/molecules/DateRange';
 import numberFormat from '@/libs/utils/numberFormat';
+import {
+  getBarChartBeratTimbangan,
+  getBarChartTotalPenjualan,
+  getDonutChartBeratTimbanganPabrik,
+} from '@/services/penjualan';
 import { setMapviewRightSidebarOpen } from '@/store/slices/app';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
 );
 
-const RightSidebar = () => {
+const RightSidebar = ({
+  dateRange = {
+    startDate: new Date(new Date().getFullYear(), 0, 1)
+      .toISOString()
+      .split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+  },
+  onDateRangeChange = () => {},
+}) => {
   const dispatch = useDispatch();
   const { mapviewRightSidebarOpen } = useSelector((state) => state.app);
+
+  // Chart data states
+  const [totalPenjualanData, setTotalPenjualanData] = useState({
+    labels: [],
+    data: [],
+  });
+  const [beratTimbanganData, setBeratTimbanganData] = useState({
+    labels: [],
+    data: [],
+  });
+  const [beratTimbanganPabrikData, setBeratTimbanganPabrikData] = useState({
+    labels: [],
+    data: [],
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Handle date range change
+  const handleDateRangeChange = (newDateRange) => {
+    onDateRangeChange(newDateRange);
+  };
+
+  // Fetch chart data
+  const fetchChartData = async () => {
+    // Use current year as default date range if not provided
+    const startDate =
+      dateRange.startDate ||
+      new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
+    const endDate = dateRange.endDate || new Date().toISOString().split('T')[0];
+
+    setLoading(true);
+    try {
+      const [totalPenjualanRes, beratTimbanganRes, beratTimbanganPabrikRes] =
+        await Promise.all([
+          getBarChartTotalPenjualan({
+            start_date: startDate,
+            end_date: endDate,
+          }),
+          getBarChartBeratTimbangan({
+            start_date: startDate,
+            end_date: endDate,
+          }),
+          getDonutChartBeratTimbanganPabrik({
+            start_date: startDate,
+            end_date: endDate,
+          }),
+        ]);
+
+      if (totalPenjualanRes?.data?.data) {
+        setTotalPenjualanData(totalPenjualanRes.data.data);
+      }
+      if (beratTimbanganRes?.data?.data) {
+        setBeratTimbanganData(beratTimbanganRes.data.data);
+      }
+      if (beratTimbanganPabrikRes?.data?.data) {
+        setBeratTimbanganPabrikData(beratTimbanganPabrikRes.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const rightContainer = document.querySelector('.leaflet-right');
@@ -42,7 +120,6 @@ const RightSidebar = () => {
     }
   }, [mapviewRightSidebarOpen]);
 
-  // Statistics data
   const statistics = useMemo(
     () => [
       {
@@ -69,160 +146,83 @@ const RightSidebar = () => {
     []
   );
 
-  // Chart 1: Perubahan Area Deforestasi (Years)
-  const deforestationAreaChartData = useMemo(
+  // Fetch chart data when component mounts
+  useEffect(() => {
+    fetchChartData();
+  }, []);
+
+  // Fetch chart data when date range changes
+  useEffect(() => {
+    if (dateRange.startDate && dateRange.endDate) {
+      fetchChartData();
+    }
+  }, [dateRange.startDate, dateRange.endDate]);
+
+  // Chart 1: Total Penjualan
+  const totalPenjualanChartData = useMemo(
     () => ({
-      labels: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+      labels: totalPenjualanData.labels || [],
       datasets: [
         {
-          label: 'Area Deforestasi',
-          data: [1200000, 1700000, 1850000, 2100000, 1800000, 1300000, 500000],
-          backgroundColor: '#8B4513',
-          borderColor: '#8B4513',
+          label: 'Total Penjualan',
+          data: totalPenjualanData.data || [],
+          backgroundColor: '#3B82F6',
+          borderColor: '#3B82F6',
           borderWidth: 1,
         },
       ],
     }),
-    []
+    [totalPenjualanData]
   );
 
-  // Chart 2: Perubahan Total Alert (Years)
-  const totalAlertChartData = useMemo(
+  // Chart 2: Berat Timbangan
+  const beratTimbanganChartData = useMemo(
     () => ({
-      labels: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+      labels: beratTimbanganData.labels || [],
       datasets: [
         {
-          label: 'Total Alert',
-          data: [1200000, 1800000, 1900000, 2100000, 1800000, 1200000, 500000],
-          backgroundColor: '#8B4513',
-          borderColor: '#8B4513',
+          label: 'Berat Timbangan',
+          data: beratTimbanganData.data || [],
+          backgroundColor: '#10B981',
+          borderColor: '#10B981',
           borderWidth: 1,
         },
       ],
     }),
-    []
+    [beratTimbanganData]
   );
 
-  // Chart 3: Perubahan Area Deforestasi (Months by Year)
-  const monthlyDeforestationChartData = useMemo(
-    () => ({
-      labels: [
-        '01',
-        '02',
-        '03',
-        '04',
-        '05',
-        '06',
-        '07',
-        '08',
-        '09',
-        '10',
-        '11',
-        '12',
-      ],
+  // Chart 3: Berat Timbangan per Pabrik (Donut)
+  const beratTimbanganPabrikChartData = useMemo(() => {
+    const colors = [
+      '#3B82F6',
+      '#10B981',
+      '#F59E0B',
+      '#EF4444',
+      '#8B5CF6',
+      '#EC4899',
+      '#14B8A6',
+      '#F97316',
+    ];
+
+    return {
+      labels: beratTimbanganPabrikData.labels || [],
       datasets: [
         {
-          label: '2019',
-          data: [
-            80000, 90000, 100000, 110000, 120000, 130000, 140000, 130000,
-            120000, 110000, 100000, 90000,
-          ],
-          backgroundColor: '#8B4513',
-          borderColor: '#8B4513',
-          borderWidth: 1,
-        },
-        {
-          label: '2020',
-          data: [
-            340000, 150000, 140000, 140000, 150000, 210000, 180000, 160000,
-            180000, 160000, 130000, 150000,
-          ],
-          backgroundColor: '#2F4F4F',
-          borderColor: '#2F4F4F',
-          borderWidth: 1,
-        },
-        {
-          label: '2021',
-          data: [
-            120000, 190000, 170000, 130000, 140000, 150000, 330000, 200000,
-            150000, 120000, 110000, 100000,
-          ],
-          backgroundColor: '#20B2AA',
-          borderColor: '#20B2AA',
-          borderWidth: 1,
-        },
-        {
-          label: '2022',
-          data: [
-            150000, 160000, 200000, 180000, 270000, 250000, 220000, 300000,
-            240000, 130000, 120000, 130000,
-          ],
-          backgroundColor: '#FF8C00',
-          borderColor: '#FF8C00',
-          borderWidth: 1,
-        },
-        {
-          label: '2023',
-          data: [
-            150000, 110000, 100000, 230000, 230000, 160000, 180000, 260000,
-            200000, 140000, 120000, 110000,
-          ],
-          backgroundColor: '#32CD32',
-          borderColor: '#32CD32',
-          borderWidth: 1,
-        },
-        {
-          label: '2024',
-          data: [
-            100000, 90000, 80000, 120000, 140000, 130000, 120000, 110000,
-            100000, 90000, 80000, 70000,
-          ],
-          backgroundColor: '#556B2F',
-          borderColor: '#556B2F',
-          borderWidth: 1,
-        },
-        {
-          label: '2025',
-          data: [
-            60000, 50000, 40000, 50000, 60000, 50000, 40000, 30000, 20000,
-            10000, 5000, 0,
-          ],
-          backgroundColor: '#DAA520',
-          borderColor: '#DAA520',
-          borderWidth: 1,
+          label: 'Berat Timbangan',
+          data: beratTimbanganPabrikData.data || [],
+          backgroundColor: colors.slice(
+            0,
+            beratTimbanganPabrikData.labels?.length || 0
+          ),
+          borderColor: '#fff',
+          borderWidth: 2,
         },
       ],
-    }),
-    []
-  );
+    };
+  }, [beratTimbanganPabrikData]);
 
-  const chartOptions = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          grid: { display: false },
-        },
-        y: {
-          grid: { display: true },
-          beginAtZero: true,
-        },
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          display: true,
-        },
-        title: {
-          display: false,
-        },
-      },
-    }),
-    []
-  );
-
-  const singleBarChartOptions = useMemo(
+  const barChartOptions = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
@@ -231,7 +231,7 @@ const RightSidebar = () => {
           grid: { display: false },
           ticks: {
             font: {
-              size: 8,
+              size: 10,
             },
           },
         },
@@ -240,7 +240,7 @@ const RightSidebar = () => {
           beginAtZero: true,
           ticks: {
             font: {
-              size: 8,
+              size: 10,
             },
             callback: function (value) {
               return numberFormat(value);
@@ -257,10 +257,15 @@ const RightSidebar = () => {
         },
         tooltip: {
           titleFont: {
-            size: 8,
+            size: 10,
           },
           bodyFont: {
-            size: 8,
+            size: 10,
+          },
+          callbacks: {
+            label: function (context) {
+              return numberFormat(context.parsed.y);
+            },
           },
         },
       },
@@ -268,40 +273,19 @@ const RightSidebar = () => {
     []
   );
 
-  const monthlyChartOptions = useMemo(
+  const donutChartOptions = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            font: {
-              size: 8,
-            },
-          },
-        },
-        y: {
-          grid: { display: true },
-          beginAtZero: true,
-          ticks: {
-            font: {
-              size: 8,
-            },
-            callback: function (value) {
-              return numberFormat(value);
-            },
-          },
-        },
-      },
       plugins: {
         legend: {
           position: 'bottom',
           display: true,
           labels: {
             font: {
-              size: 8,
+              size: 10,
             },
+            padding: 10,
           },
         },
         title: {
@@ -309,10 +293,17 @@ const RightSidebar = () => {
         },
         tooltip: {
           titleFont: {
-            size: 8,
+            size: 10,
           },
           bodyFont: {
-            size: 8,
+            size: 10,
+          },
+          callbacks: {
+            label: function (context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              return `${label}: ${numberFormat(value)}`;
+            },
           },
         },
       },
@@ -344,7 +335,21 @@ const RightSidebar = () => {
         }`}
       >
         <div className="flex flex-col gap-6">
-          {/* STATISTIK Section */}
+          {/* PERIODE Section */}
+          <div className="flex flex-col gap-3">
+            <Heading level={6} className="text-[14px] font-bold text-gray-800">
+              PERIODE
+            </Heading>
+            <DateRange
+              value={{
+                startDate: dateRange.startDate || '',
+                endDate: dateRange.endDate || '',
+              }}
+              onChange={handleDateRangeChange}
+              placeholder="Pilih Periode"
+            />
+          </div>
+
           <div className="flex flex-col gap-3">
             <Heading level={6} className="text-[14px] font-bold text-gray-800">
               STATISTIK
@@ -365,48 +370,63 @@ const RightSidebar = () => {
             </div>
           </div>
 
-          {/* Chart 1: Perubahan Area Deforestasi (Years) */}
+          {/* Chart 1: Total Penjualan */}
           <div className="flex flex-col gap-2">
             <Heading
               level={6}
               className="text-[12px] font-semibold text-gray-800"
             >
-              Perubahan Area Deforestasi
+              Total Penjualan
             </Heading>
             <div className="h-[200px] w-full">
-              <Bar
-                data={deforestationAreaChartData}
-                options={singleBarChartOptions}
-              />
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-xs text-gray-500">Loading...</span>
+                </div>
+              ) : (
+                <Bar data={totalPenjualanChartData} options={barChartOptions} />
+              )}
             </div>
           </div>
 
-          {/* Chart 2: Perubahan Total Alert (Years) */}
+          {/* Chart 2: Berat Timbangan */}
           <div className="flex flex-col gap-2">
             <Heading
               level={6}
               className="text-[12px] font-semibold text-gray-800"
             >
-              Perubahan Total Alert
+              Berat Timbangan
             </Heading>
             <div className="h-[200px] w-full">
-              <Bar data={totalAlertChartData} options={singleBarChartOptions} />
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-xs text-gray-500">Loading...</span>
+                </div>
+              ) : (
+                <Bar data={beratTimbanganChartData} options={barChartOptions} />
+              )}
             </div>
           </div>
 
-          {/* Chart 3: Perubahan Area Deforestasi (Months) */}
+          {/* Chart 3: Berat Timbangan per Pabrik (Donut) */}
           <div className="flex flex-col gap-2">
             <Heading
               level={6}
               className="text-[12px] font-semibold text-gray-800"
             >
-              Perubahan Area Deforestasi
+              Berat Timbangan per Pabrik
             </Heading>
             <div className="h-[250px] w-full">
-              <Bar
-                data={monthlyDeforestationChartData}
-                options={monthlyChartOptions}
-              />
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-xs text-gray-500">Loading...</span>
+                </div>
+              ) : (
+                <Doughnut
+                  data={beratTimbanganPabrikChartData}
+                  options={donutChartOptions}
+                />
+              )}
             </div>
           </div>
         </div>
