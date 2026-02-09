@@ -26,11 +26,11 @@ import IupMap from './StaticLayers';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet.pm/dist/leaflet.pm.css';
+import '@/styles/globals.css';
+import './map.css';
 
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet.pm';
-import '@/styles/globals.css';
-import './map.css';
 
 const tileLayers = {
   osm: {
