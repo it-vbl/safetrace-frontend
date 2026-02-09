@@ -3,60 +3,90 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
-import { ChevronRight, DownloadCloudIcon } from 'lucide-react';
-import { Check } from 'lucide-react';
+import { Calendar, ChevronRight, DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DatePicker from '@/components/molecules/DatePicker';
+import SelectMultiple from '@/components/molecules/SelectMultiple';
 import { ALL_COLUMN_VALUES, COLUMN_OPTIONS } from '@/constants/columns';
-import { getSankeyData } from '@/services/penjualan';
+import { getListPabrik, getSankeyData } from '@/services/penjualan';
+import { getKelompokTani } from '@/services/referensi';
 
 const SankeyPage = () => {
   const [startDate, setStartDate] = useState(
     moment().subtract(30, 'days').format('DD-MM-YYYY')
   );
   const [endDate, setEndDate] = useState(moment().format('DD-MM-YYYY'));
-  const [selectedColumns, setSelectedColumns] = useState([
-    ...ALL_COLUMN_VALUES,
-  ]);
-  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState({ nodes: [], links: [] });
-  const columnDropdownRef = useRef(null);
+  const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
 
-  const isAllSelected = selectedColumns.length === ALL_COLUMN_VALUES.length;
+  const dateDropdownRef = useRef(null);
 
-  const handleColumnToggle = (value) => {
-    if (value === 'all') {
-      if (isAllSelected) {
-        setSelectedColumns([]);
-      } else {
-        setSelectedColumns([...ALL_COLUMN_VALUES]);
+  const [kelompokOptions, setKelompokOptions] = useState([]);
+  const [pabrikOptions, setPabrikOptions] = useState([]);
+  const [selectedKelompok, setSelectedKelompok] = useState([]);
+  const [selectedPabrik, setSelectedPabrik] = useState([]);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [kelompokRes, pabrikRes] = await Promise.all([
+          getKelompokTani(),
+          getListPabrik(),
+        ]);
+
+        if (kelompokRes?.data?.data) {
+          const kelompokData =
+            kelompokRes.data.data.results || kelompokRes.data.data || [];
+          setKelompokOptions(
+            kelompokData.map((item) => ({
+              label: item.label,
+              value: item.value,
+            }))
+          );
+        }
+
+        if (pabrikRes?.data?.data) {
+          const pabrikData =
+            pabrikRes.data.data.results || pabrikRes.data.data || [];
+
+          const uniquePabrikData = Array.from(
+            new Map(
+              pabrikData.map((item) => {
+                const name = item.nama_pabrik || item.nama;
+                return [name, { label: name, value: name }];
+              })
+            ).values()
+          );
+
+          setPabrikOptions(uniquePabrikData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch filter options:', error);
       }
-    } else {
-      if (selectedColumns.includes(value)) {
-        setSelectedColumns(selectedColumns.filter((col) => col !== value));
-      } else {
-        setSelectedColumns([...selectedColumns, value]);
-      }
-    }
-  };
+    };
+    fetchOptions();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        columnDropdownRef.current &&
-        !columnDropdownRef.current.contains(event.target)
+        dateDropdownRef.current &&
+        !dateDropdownRef.current.contains(event.target)
       ) {
-        setIsColumnDropdownOpen(false);
+        setIsDateDropdownOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const validateDateRange = (start, end) => {
@@ -87,8 +117,17 @@ const SankeyPage = () => {
         const params = {
           start_date: startDate,
           end_date: endDate,
-          columns: selectedColumns,
+          start_date: startDate,
+          end_date: endDate,
+          columns: ALL_COLUMN_VALUES,
+          ...(selectedKelompok.length > 0 && {
+            kelompok_tani: selectedKelompok,
+          }),
+          ...(selectedPabrik.length > 0 && {
+            pabrik: selectedPabrik,
+          }),
         };
+
         const response = await getSankeyData(params);
 
         if (response?.data?.data) {
@@ -107,19 +146,8 @@ const SankeyPage = () => {
       }
     };
     fetchData();
-  }, [startDate, endDate, selectedColumns]);
-
-  const getFilterLabel = () => {
-    if (isAllSelected) return 'Semua';
-    if (selectedColumns.length === 0) return 'Pilih Filter';
-    if (selectedColumns.length === 1) {
-      return (
-        COLUMN_OPTIONS.find((opt) => opt.value === selectedColumns[0])?.label ||
-        ''
-      );
-    }
-    return `${selectedColumns.length} dipilih`;
-  };
+    fetchData();
+  }, [startDate, endDate, selectedKelompok, selectedPabrik]);
 
   const handleChangeStartDate = (e) => {
     setStartDate(moment(e.target.value).format('DD-MM-YYYY'));
@@ -140,103 +168,70 @@ const SankeyPage = () => {
           SANKEY DIAGRAM
         </Heading>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-28 sm:w-36" ref={columnDropdownRef}>
-            <div
-              onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
-              className="flex min-h-[40px] w-full cursor-pointer items-center justify-between rounded-[6px] border border-neutral5 bg-white px-3 py-2 text-[14px] hover:border-blue6"
+          <div className="w-48">
+            <SelectMultiple
+              placeholder="Pilih Kelompok Tani"
+              options={kelompokOptions}
+              value={selectedKelompok}
+              onChange={(e) => setSelectedKelompok(e.target.value)}
+              selectClassName="!h-[40px] bg-white"
+              selectAll="Pilih Semua"
+              withCheckbox
+            />
+          </div>
+          <div className="w-48">
+            <SelectMultiple
+              placeholder="Pilih Pabrik"
+              options={pabrikOptions}
+              value={selectedPabrik}
+              onChange={(e) => setSelectedPabrik(e.target.value)}
+              selectClassName="!h-[40px] bg-white"
+              selectAll="Pilih Semua"
+              withCheckbox
+            />
+          </div>
+          <div className="relative" ref={dateDropdownRef}>
+            <button
+              onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
+              className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none"
             >
-              <span
-                className={
-                  selectedColumns.length === 0 ? 'text-neutral6' : 'text-black'
-                }
-              >
-                {getFilterLabel()}
+              <Calendar size={18} />
+              <span>
+                {startDate} - {endDate}
               </span>
-              <svg
-                className={`h-4 w-4 transition-transform ${
-                  isColumnDropdownOpen ? 'rotate-180' : ''
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-            {isColumnDropdownOpen && (
-              <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-[6px] border bg-white p-2 shadow-lg">
-                {/* Semua Option */}
-                <div
-                  onClick={() => handleColumnToggle('all')}
-                  className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] hover:bg-gray-100 ${
-                    isAllSelected ? 'bg-blue-50 text-blue-600' : ''
-                  }`}
-                >
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded border ${
-                      isAllSelected
-                        ? 'border-blue-600 bg-blue-600'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    {isAllSelected && (
-                      <Check size={12} className="text-white" />
-                    )}
-                  </div>
-                  <span>Semua</span>
+            </button>
+
+            {isDateDropdownOpen && (
+              <div className="absolute right-0 z-10 mt-2 flex w-72 flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-gray-600">
+                    Tanggal Mulai
+                  </label>
+                  <DatePicker
+                    placeholder="Tanggal Mulai"
+                    name="start_date"
+                    value={startDate}
+                    onChange={handleChangeStartDate}
+                    inputContainerClassName="!h-[40px]"
+                  />
                 </div>
-                <div className="my-1 border-t border-gray-100" />
-                {/* Individual Options */}
-                {COLUMN_OPTIONS.map((option) => (
-                  <div
-                    key={option.value}
-                    onClick={() => handleColumnToggle(option.value)}
-                    className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] hover:bg-gray-100 ${
-                      selectedColumns.includes(option.value)
-                        ? 'bg-blue-50 text-blue-600'
-                        : ''
-                    }`}
-                  >
-                    <div
-                      className={`flex h-4 w-4 items-center justify-center rounded border ${
-                        selectedColumns.includes(option.value)
-                          ? 'border-blue-600 bg-blue-600'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      {selectedColumns.includes(option.value) && (
-                        <Check size={12} className="text-white" />
-                      )}
-                    </div>
-                    <span>{option.label}</span>
-                  </div>
-                ))}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-gray-600">
+                    Tanggal Selesai
+                  </label>
+                  <DatePicker
+                    placeholder="Tanggal Selesai"
+                    name="end_date"
+                    value={endDate}
+                    onChange={handleChangeEndDate}
+                    inputContainerClassName="!h-[40px]"
+                    minDate={moment(startDate, 'DD-MM-YYYY').format(
+                      'YYYY-MM-DD'
+                    )}
+                  />
+                </div>
               </div>
             )}
-          </div>
-          <div className="w-28 sm:w-36">
-            <DatePicker
-              placeholder="Tanggal Mulai"
-              name="start_date"
-              value={startDate}
-              onChange={handleChangeStartDate}
-              inputContainerClassName="!h-[40px]"
-            />
-          </div>
-          <div className="w-28 sm:w-36">
-            <DatePicker
-              placeholder="Tanggal Selesai"
-              name="end_date"
-              value={endDate}
-              onChange={handleChangeEndDate}
-              inputContainerClassName="!h-[40px]"
-              minDate={moment(startDate, 'DD-MM-YYYY').format('YYYY-MM-DD')}
-            />
           </div>
           <Button
             className="!px-2 sm:!px-3"
@@ -255,6 +250,22 @@ const SankeyPage = () => {
 
       {/* Main Content - Responsive */}
       <div className="rounded-[8px] border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
+        {/* Column Labels */}
+        <div className="mb-6 flex w-full items-center overflow-x-auto">
+          {COLUMN_OPTIONS.map((column, index) => (
+            <React.Fragment key={column.value}>
+              <div className="flex min-w-[120px] items-center justify-center rounded-md bg-indigo-100 px-6 py-2 text-sm font-bold text-gray-700">
+                {column.label}
+              </div>
+              {index < COLUMN_OPTIONS.length - 1 && (
+                <div className="flex min-w-[40px] flex-1 items-center px-2 text-gray-300">
+                  <div className="h-[2px] w-full bg-gray-300"></div>
+                  <ChevronRight size={20} className="-ml-3" />
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
         {isError ? (
           <div className="flex h-[300px] w-full flex-col items-center justify-center gap-3 rounded bg-gray-50 text-center sm:h-[400px]">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
@@ -317,74 +328,6 @@ const SankeyPage = () => {
           </div>
         ) : (
           <>
-            {/* Stage Headers - Vertical on mobile, horizontal on desktop */}
-            <div className="hidden sm:mb-6 sm:flex sm:items-center sm:justify-between">
-              {ALL_COLUMN_VALUES.map((col, index) => {
-                const isVisible =
-                  isAllSelected || selectedColumns.includes(col);
-                const label =
-                  COLUMN_OPTIONS.find((opt) => opt.value === col)?.label || col;
-                const isLast = index === ALL_COLUMN_VALUES.length - 1;
-                const nextColVisible =
-                  !isLast &&
-                  (isAllSelected ||
-                    selectedColumns.includes(ALL_COLUMN_VALUES[index + 1]));
-
-                if (!isVisible) return null;
-
-                return (
-                  <React.Fragment key={col}>
-                    <StageHeader label={label} />
-                    {!isLast && nextColVisible && <ArrowSpacer />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            {/* Mobile: Vertical stage headers */}
-            <div className="mb-3 flex flex-col gap-1 sm:hidden">
-              <div className="flex items-center gap-2">
-                <div className="flex flex-wrap items-center gap-1 text-[10px] text-gray-500">
-                  <span className="font-semibold text-gray-700">Alur:</span>
-                  {ALL_COLUMN_VALUES.map((col, index) => {
-                    const isVisible =
-                      isAllSelected || selectedColumns.includes(col);
-                    const label =
-                      COLUMN_OPTIONS.find((opt) => opt.value === col)?.label ||
-                      col;
-
-                    let hasNextVisible = false;
-                    for (let i = index + 1; i < ALL_COLUMN_VALUES.length; i++) {
-                      if (
-                        isAllSelected ||
-                        selectedColumns.includes(ALL_COLUMN_VALUES[i])
-                      ) {
-                        hasNextVisible = true;
-                        break;
-                      }
-                    }
-
-                    if (!isVisible) return null;
-
-                    return (
-                      <React.Fragment key={col}>
-                        <StageHeaderMobile label={label} />
-                        {hasNextVisible && <span>→</span>}
-                      </React.Fragment>
-                    );
-                  })}
-                  {selectedColumns.length === 0 && (
-                    <span className="italic text-gray-400">
-                      Pilih filter untuk melihat alur
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-[9px] italic text-gray-400">
-                Geser ke kanan untuk melihat selengkapnya
-              </p>
-            </div>
-
             {/* Sankey Diagram Container - Responsive with horizontal scroll on mobile */}
             <div
               className={`w-full overflow-x-auto ${
@@ -437,6 +380,8 @@ const D3Sankey = ({ data }) => {
 
     return () => resizeObserver.disconnect();
   }, []);
+
+  // Close dropdown when clicking outside
 
   const getConnectedNodes = useCallback((nodeId, links) => {
     const connected = new Set([nodeId]);
@@ -765,27 +710,5 @@ const Tooltip = ({ x, y, content, containerRef }) => {
     </div>
   );
 };
-
-const StageHeader = ({ label }) => (
-  <div className="flex min-w-[60px] items-center justify-center rounded-[4px] bg-[#D5E2F6] px-2 py-1.5 sm:min-w-[120px] sm:px-6 sm:py-2.5">
-    <span className="text-[10px] font-semibold text-black sm:text-[13px]">
-      {label}
-    </span>
-  </div>
-);
-
-const ArrowSpacer = () => (
-  <div className="flex flex-1 items-center justify-center px-1 sm:px-3">
-    <div className="h-[1px] flex-1 bg-gray-300"></div>
-    <ChevronRight size={12} className="text-gray-400 sm:hidden" />
-    <ChevronRight size={16} className="hidden text-gray-400 sm:block" />
-  </div>
-);
-
-const StageHeaderMobile = ({ label }) => (
-  <span className="rounded bg-[#D5E2F6] px-1.5 py-0.5 text-[9px] font-semibold text-gray-700">
-    {label}
-  </span>
-);
 
 export default SankeyPage;
