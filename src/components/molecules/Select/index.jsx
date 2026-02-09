@@ -328,13 +328,22 @@ const Select = ({
           {hasValue(selectedValue) && (
             <CrossCircledIcon
               onClick={(e) => {
-                handleOptionChange('');
-                e.stopPropagation();
+                if (!disabled) {
+                  handleOptionChange('');
+                  e.stopPropagation();
+                }
               }}
               size={20}
               width={20}
               height={20}
-              className="mr-2 scale-100 text-red-500 transition-all duration-300 hover:rotate-180 hover:scale-[1.1]"
+              className={cn(
+                'mr-2 scale-100 text-red-500 transition-all duration-300',
+                {
+                  'hover:rotate-180 hover:scale-[1.1] cursor-pointer':
+                    !disabled,
+                  'cursor-not-allowed opacity-50': disabled,
+                }
+              )}
             />
           )}
           <div className="flex flex-row items-center gap-2">

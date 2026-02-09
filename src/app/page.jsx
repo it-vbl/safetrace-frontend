@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import Cookies from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
 
@@ -22,7 +23,10 @@ import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
 import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
-import { getPetaOverlayDetail, getPetaOverlayList } from '@/services/petaOverlay';
+import {
+  getPetaOverlayDetail,
+  getPetaOverlayList,
+} from '@/services/petaOverlay';
 import { setStaticLayerDetail } from '@/store/slices/staticLayer';
 import {
   setFilterKecamatan,
@@ -619,6 +623,30 @@ const MapDashboard = () => {
     };
   }, []);
 
+  // Auto-apply kelompok tani filter based on logged-in user
+  const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
+  const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const ketuaKelompokTani = Cookies.get('ketua_kelompok_tani');
+    if (ketuaKelompokTani && kelompokTani && kelompokTani.length > 0) {
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === ketuaKelompokTani
+      );
+      if (kelompokOption) {
+        setFilterKelompok(kelompokOption.value);
+        setIsKetuaKelompokTani(true);
+        // Small delay to ensure state is updated before fetching
+        setTimeout(() => setIsKelompokFilterInitialized(true), 100);
+      } else {
+        setIsKelompokFilterInitialized(true);
+      }
+    } else {
+      setIsKelompokFilterInitialized(true);
+    }
+  }, [kelompokTani]);
+
   useEffect(() => {
     const fetchPetaOverlays = async () => {
       setLoadingPetaOverlays(true);
@@ -685,8 +713,12 @@ const MapDashboard = () => {
 
   // Fetch kebun data when filters change or on page load
   useEffect(() => {
-    fetchKebun();
+    // Only fetch after kelompok filter is initialized to prevent race conditions
+    if (isKelompokFilterInitialized) {
+      fetchKebun();
+    }
   }, [
+    isKelompokFilterInitialized,
     pageSize,
     currentPage,
     searchText,
@@ -718,8 +750,6 @@ const MapDashboard = () => {
     <div className="relative h-full w-full max-w-full max-h-full overflow-y-hidden overflow-x-hidden">
       <div className="relative max-h-[calc(100vh-72px)]">
         <FilterSidebar
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
           staticLayers={staticLayerList}
           activeStaticLayers={staticLayersDetail}
           petaOverlays={petaOverlays}
@@ -732,7 +762,7 @@ const MapDashboard = () => {
           onBasemapChange={setActiveTile}
           loading={loadingDetailStaticLayer || loadingPetaOverlays}
         />
-        <RightSidebar />
+        <RightSidebar dateRange={dateRange} onDateRangeChange={setDateRange} />
         <Map
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
           zoom={zoomMap}
@@ -779,6 +809,7 @@ const MapDashboard = () => {
           totalItems={totalKebun}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
+          disableKelompokFilter={isKetuaKelompokTani}
         />
         <DataAlertDeforestasi
           showTable={showAlertTable}
