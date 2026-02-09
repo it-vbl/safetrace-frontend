@@ -77,6 +77,48 @@ export const getListPabrik = (params = {}) =>
 export const deletePenjualanAngkutan = (id) =>
   api.delete(`/penjualan/angkutan/delete/${id}/`);
 
+export const getBarChartTotalPenjualan = (params = {}) => {
+  const formattedParams = {
+    ...(params.start_date && {
+      start_date: params.start_date,
+    }),
+    ...(params.end_date && {
+      end_date: params.end_date,
+    }),
+  };
+  return api.get(`/penjualan/bar-chart/total-penjualan/`, {
+    params: formattedParams,
+  });
+};
+
+export const getBarChartBeratTimbangan = (params = {}) => {
+  const formattedParams = {
+    ...(params.start_date && {
+      start_date: params.start_date,
+    }),
+    ...(params.end_date && {
+      end_date: params.end_date,
+    }),
+  };
+  return api.get(`/penjualan/bar-chart/berat-timbangan/`, {
+    params: formattedParams,
+  });
+};
+
+export const getDonutChartBeratTimbanganPabrik = (params = {}) => {
+  const formattedParams = {
+    ...(params.start_date && {
+      start_date: params.start_date,
+    }),
+    ...(params.end_date && {
+      end_date: params.end_date,
+    }),
+  };
+  return api.get(`/penjualan/donut-chart/berat-timbangan-pabrik/`, {
+    params: formattedParams,
+  });
+};
+
 // *** POST ***
 
 export const createPenjualan = (payload) =>

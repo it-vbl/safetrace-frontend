@@ -6,13 +6,10 @@ import { useSelector } from 'react-redux';
 import Toggle from '@/components/atoms/Toggle';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
-import DateRange from '@/components/molecules/DateRange';
 import RadioButton from '@/components/molecules/RadioButton';
 import SectionLoading from '@/components/molecules/SectionLoading';
 
 const FilterSidebar = ({
-  dateRange = { startDate: '', endDate: '' },
-  onDateRangeChange = () => {},
   staticLayers = [],
   activeStaticLayers = {},
   onStaticLayerChange = () => {},
@@ -24,9 +21,6 @@ const FilterSidebar = ({
   loading = false,
 }) => {
   const { mapviewFilterSidebarOpen } = useSelector((state) => state.app);
-  const handleDateRangeChange = (newDateRange) => {
-    onDateRangeChange(newDateRange);
-  };
 
   useEffect(() => {
     const leftContainer = document.querySelector('.leaflet-left');
@@ -84,21 +78,6 @@ const FilterSidebar = ({
       <SectionLoading loading={loading} />
 
       <div className="flex flex-col gap-6">
-        {/* PERIODE Section */}
-        <div className="flex flex-col gap-3">
-          <Heading level={6} className="text-[14px] font-bold text-gray-800">
-            PERIODE
-          </Heading>
-          <DateRange
-            value={{
-              startDate: dateRange.startDate || '',
-              endDate: dateRange.endDate || '',
-            }}
-            onChange={handleDateRangeChange}
-            placeholder="Pilih Periode"
-          />
-        </div>
-
         {/* STATIK LAYER Section */}
         <div className="flex flex-col gap-3">
           <Heading level={6} className="text-[14px] font-bold text-gray-800">

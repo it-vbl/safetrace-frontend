@@ -157,6 +157,7 @@ const Users = () => {
       is_active: values.status === '1',
       roles: values.roles.map((role) => parseInt(role, 10)),
       username: values.username,
+      ketua_kelompok_tani: values.ketua_kelompok_tani,
     };
 
     try {
