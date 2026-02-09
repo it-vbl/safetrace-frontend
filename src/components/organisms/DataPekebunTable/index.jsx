@@ -39,6 +39,7 @@ const DataPekebunTable = ({
   totalItems,
   onPageChange,
   onPageSizeChange,
+  disableKelompokFilter = false,
 }) => {
   return (
     <div
@@ -63,6 +64,7 @@ const DataPekebunTable = ({
                   containerClassName="w-[150px]"
                   placeholder="Kelompok"
                   options={kelompokOptions}
+                  disabled={disableKelompokFilter}
                 />
                 <Select
                   value={filterRSPO}

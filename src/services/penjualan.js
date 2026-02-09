@@ -1,3 +1,5 @@
+import querystring from 'qs';
+
 import api from './api';
 
 // *** GET ***
@@ -62,13 +64,60 @@ export const getDetailPenjualanPabrik = (id) =>
   api.get(`/penjualan/pabrik/detail/${id}/`);
 
 export const getSankeyData = (params = {}) =>
-  api.get(`/penjualan/sankey-diagram/`, { params });
+  api.get(`/penjualan/sankey-diagram/`, {
+    params,
+    paramsSerializer: (params) => {
+      return querystring.stringify(params, { arrayFormat: 'repeat' });
+    },
+  });
 
 export const getListPabrik = (params = {}) =>
   api.get(`/penjualan/pabrik/list/`, { params });
 
 export const deletePenjualanAngkutan = (id) =>
   api.delete(`/penjualan/angkutan/delete/${id}/`);
+
+export const getBarChartTotalPenjualan = (params = {}) => {
+  const formattedParams = {
+    ...(params.start_date && {
+      start_date: params.start_date,
+    }),
+    ...(params.end_date && {
+      end_date: params.end_date,
+    }),
+  };
+  return api.get(`/penjualan/bar-chart/total-penjualan/`, {
+    params: formattedParams,
+  });
+};
+
+export const getBarChartBeratTimbangan = (params = {}) => {
+  const formattedParams = {
+    ...(params.start_date && {
+      start_date: params.start_date,
+    }),
+    ...(params.end_date && {
+      end_date: params.end_date,
+    }),
+  };
+  return api.get(`/penjualan/bar-chart/berat-timbangan/`, {
+    params: formattedParams,
+  });
+};
+
+export const getDonutChartBeratTimbanganPabrik = (params = {}) => {
+  const formattedParams = {
+    ...(params.start_date && {
+      start_date: params.start_date,
+    }),
+    ...(params.end_date && {
+      end_date: params.end_date,
+    }),
+  };
+  return api.get(`/penjualan/donut-chart/berat-timbangan-pabrik/`, {
+    params: formattedParams,
+  });
+};
 
 // *** POST ***
 

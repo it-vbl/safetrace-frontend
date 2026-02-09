@@ -156,10 +156,15 @@ const SelectMultiple = ({
                     </Paragraph>
                     <div
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleOptionChange(option.value);
+                        if (!disabled) {
+                          e.stopPropagation();
+                          handleOptionChange(option.value);
+                        }
                       }}
-                      className="cursor-pointer rounded p-0.5 hover:bg-neutral3"
+                      className={cn('rounded p-0.5', {
+                        'cursor-pointer hover:bg-neutral3': !disabled,
+                        'cursor-not-allowed opacity-50': disabled,
+                      })}
                     >
                       <Close size={12} />
                     </div>

@@ -56,14 +56,13 @@ const LoginPage = () => {
           Cookies.set('username', data?.username);
           Cookies.set('email', data?.email);
           Cookies.set('roles', JSON.stringify(roles));
+          Cookies.set('ketua_kelompok_tani', data?.ketua_kelompok_tani || '');
 
           toast.success('Login berhasil');
 
           // Normalize roles to numbers for comparison
           const normalizedRoles = roles
-            .map((r) =>
-              typeof r === 'number' ? r : parseInt(r, 10)
-            )
+            .map((r) => (typeof r === 'number' ? r : parseInt(r, 10)))
             .filter((r) => !Number.isNaN(r));
 
           const onlyRole2 =

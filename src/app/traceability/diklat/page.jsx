@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
@@ -59,6 +60,29 @@ const DiklatPage = () => {
   useEffect(() => {
     fetchKelompokTani();
   }, [fetchKelompokTani]);
+
+  // Auto-apply kelompok tani filter based on logged-in user
+  const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
+  const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const ketuaKelompokTani = Cookies.get('ketua_kelompok_tani');
+    if (ketuaKelompokTani && kelompokTani && kelompokTani.length > 0) {
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === ketuaKelompokTani
+      );
+      if (kelompokOption) {
+        setSelectedKelompok(kelompokOption.value);
+        setIsKetuaKelompokTani(true);
+        setTimeout(() => setIsKelompokFilterInitialized(true), 100);
+      } else {
+        setIsKelompokFilterInitialized(true);
+      }
+    } else {
+      setIsKelompokFilterInitialized(true);
+    }
+  }, [kelompokTani]);
 
   const kelompokOptions = useMemo(() => {
     return (
@@ -120,13 +144,21 @@ const DiklatPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchDiklatData({
-      page: currentPage,
-      page_size: pageSize,
-      search,
-      kelompok: selectedKelompok,
-    });
-  }, [currentPage, pageSize, search, selectedKelompok]);
+    if (isKelompokFilterInitialized) {
+      fetchDiklatData({
+        page: currentPage,
+        page_size: pageSize,
+        search,
+        kelompok: selectedKelompok,
+      });
+    }
+  }, [
+    isKelompokFilterInitialized,
+    currentPage,
+    pageSize,
+    search,
+    selectedKelompok,
+  ]);
 
   const handleSearchTextChange = useCallback(
     debounce((value) => {
@@ -524,6 +556,7 @@ const DiklatPage = () => {
                   options={kelompokOptions}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
+                  disabled={isKetuaKelompokTani}
                 />
               </div>
 

@@ -5,6 +5,7 @@ import L from 'leaflet';
 import { ArrowRightIcon, FileWarningIcon } from 'lucide-react';
 import {
   FeatureGroup,
+  GeoJSON,
   MapContainer,
   Polygon,
   Popup,
@@ -24,9 +25,9 @@ import IupMap from './StaticLayers';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet.pm/dist/leaflet.pm.css';
 import '@/styles/globals.css';
 import './map.css';
-import 'leaflet.pm/dist/leaflet.pm.css';
 
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet.pm';
@@ -287,13 +288,49 @@ function ZoomUpdater({ coordinates }) {
   return null;
 }
 
+function AlertZoomHandler({ selectedAlert, alertLayersRef }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (selectedAlert && selectedAlert.geom && alertLayersRef.current) {
+      try {
+        // Get the layer for this alert
+        const alertLayer = alertLayersRef.current[selectedAlert.id];
+
+        if (alertLayer) {
+          // Zoom to the alert bounds
+          const bounds = alertLayer.getBounds();
+          map.fitBounds(bounds, { padding: [50, 50] });
+
+          // Open the popup after a short delay to ensure map has zoomed
+          setTimeout(() => {
+            alertLayer.openPopup();
+          }, 300);
+        } else {
+          // Fallback: use geoJSON to get bounds if layer not found
+          const geoJsonLayer = L.geoJSON(selectedAlert.geom);
+          const bounds = geoJsonLayer.getBounds();
+          map.fitBounds(bounds, { padding: [50, 50] });
+        }
+      } catch (error) {
+        console.error('Error zooming to alert:', error);
+      }
+    }
+  }, [map, selectedAlert, alertLayersRef]);
+
+  return null;
+}
+
 export default function MyMap(props) {
   const mapRef = useRef(null);
+  const alertLayersRef = useRef({});
   const {
     position = [-0.5, 114.9],
     zoom = 7,
     polygons = [],
     data = [],
+    deforestationAlerts = [],
+    selectedAlert = null,
     activeDataId,
     highlightedPolygon = null,
     mapClassName = '',
@@ -408,6 +445,10 @@ export default function MyMap(props) {
       />
       <MapCenterUpdater zoom={zoom} position={finalPosition} />
       <ZoomUpdater coordinates={highlightedPolygon} />
+      <AlertZoomHandler
+        selectedAlert={selectedAlert}
+        alertLayersRef={alertLayersRef}
+      />
       {data?.map((data) => {
         return data?.peta?.geom?.coordinates ? (
           <Polygon
@@ -636,6 +677,118 @@ export default function MyMap(props) {
             ) : null}
           </Polygon>
         ) : null;
+      })}
+      {/* Deforestation Alert Polygons */}
+      {deforestationAlerts?.map((alert) => {
+        // Check if geom exists
+        if (!alert?.geom) return null;
+
+        // Create popup HTML content
+        const createAlertPopupHtml = (alert) => {
+          const lokasiCoords = alert?.titik_lokasi?.coordinates
+            ? convertCoordsToDMS(
+                alert.titik_lokasi.coordinates[0],
+                alert.titik_lokasi.coordinates[1]
+              )
+            : '-';
+
+          return `
+            <div class="w-full">
+              <div class="flex items-center justify-between mb-2">
+                <p class="font-bold text-red-600 text-[16px] m-0">ALERT DEFORESTASI</p>
+              </div>
+              <div class="w-[500px]">
+                <div class="bg-red-100 px-3 rounded mb-4 flex items-center justify-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-red-600">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  <p class="m-0 text-[14px] font-semibold text-red-600">
+                    Alert ID: ${alert?.label || '-'}
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-x-4">
+                  <div class="flex flex-col">
+                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Lokasi Alert</p>
+                      <p class="m-0 text-[14px]">${lokasiCoords}</p>
+                    </div>
+                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Area Deforestasi</p>
+                      <p class="m-0 text-[14px]">${
+                        alert?.area_ha ? `${alert.area_ha.toFixed(1)} Ha` : '-'
+                      }</p>
+                    </div>
+                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Tanggal Terdeteksi</p>
+                      <p class="m-0 text-[14px]">${alert?.date || '-'}</p>
+                    </div>
+                    <div class="flex flex-col py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Alert Type</p>
+                      <p class="m-0 text-[14px] font-semibold text-red-600">${
+                        alert?.source_type?.toUpperCase() || '-'
+                      }</p>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col">
+                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Provinsi</p>
+                      <p class="m-0 text-[14px]">${alert?.provinsi || '-'}</p>
+                    </div>
+                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Kabupaten</p>
+                      <p class="m-0 text-[14px]">${alert?.kabupaten || '-'}</p>
+                    </div>
+                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Kecamatan</p>
+                      <p class="m-0 text-[14px]">${alert?.kecamatan || '-'}</p>
+                    </div>
+                    <div class="flex flex-col py-0">
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Desa</p>
+                      <p class="m-0 text-[14px]">${alert?.desa || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                ${
+                  alert?.obyek_terdampak
+                    ? `<div class="mt-3 pt-3 border-t border-dashed border-gray-300">
+                        <div class="flex flex-col">
+                          <p class="m-0 text-[12px] font-bold text-gray-400">Obyek Terdampak</p>
+                          <p class="m-0 text-[14px]">${alert.obyek_terdampak}</p>
+                        </div>
+                      </div>`
+                    : ''
+                }
+              </div>
+            </div>
+          `;
+        };
+
+        return (
+          <GeoJSON
+            key={`alert-${alert?.id}`}
+            data={alert.geom}
+            style={{
+              color: 'red',
+              fillColor: 'red',
+              fillOpacity: 0.3,
+              weight: 2,
+            }}
+            onEachFeature={(feature, layer) => {
+              const popupHtml = createAlertPopupHtml(alert);
+              layer.bindPopup(popupHtml, {
+                maxWidth: 550,
+                className: 'custom-popup',
+              });
+              // Store layer reference for zooming
+              alertLayersRef.current[alert.id] = layer;
+            }}
+          />
+        );
       })}
       <IupMap data={staticLayers} />
     </MapContainer>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -14,22 +15,43 @@ const statusOptions = [
 ];
 
 const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
-    const {userRoles} = useReferences()
-  const { values, handleChange, handleBlur, handleSubmit, touched, errors, isSubmitting } = useFormik({
+  const { userRoles, kelompokTani, fetchKelompokTani } = useReferences();
+
+  useEffect(() => {
+    fetchKelompokTani();
+  }, [fetchKelompokTani]);
+  const {
+    values,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    touched,
+    errors,
+    isSubmitting,
+    setFieldValue,
+  } = useFormik({
     initialValues: {
       id: userData?.id || '',
       nama: userData?.name || '',
       username: userData?.username || '',
       email: userData?.email || '',
       roles: userData?.roles || [],
-      status: userData?.is_active === true ? "true" : "false",
+      status: userData?.is_active === true ? 'true' : 'false',
+      ketua_kelompok_tani: userData?.ketua_kelompok_tani || '',
     },
     validationSchema: Yup.object({
       nama: Yup.string().required('Nama harus diisi'),
       username: Yup.string().required('Username harus diisi'),
-      email: Yup.string().email('Email tidak valid').required('Email harus diisi'),
+      email: Yup.string()
+        .email('Email tidak valid')
+        .required('Email harus diisi'),
       roles: Yup.array().min(1, 'Pilih minimal satu peran'),
       status: Yup.boolean().required('Status harus dipilih'),
+      ketua_kelompok_tani: Yup.string().when('roles', {
+        is: (roles) => roles && roles.some((role) => role == '3'),
+        then: (schema) => schema.required('Ketua Kelompok Tani harus diisi'),
+        otherwise: (schema) => schema,
+      }),
     }),
     onSubmit: async (values) => {
       try {
@@ -41,15 +63,40 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
     enableReinitialize: true,
   });
 
+  // Check if selected roles include "ketua kelompok tani"
+  const hasKetuaKelompokTaniRole =
+    values.roles && values.roles.some((role) => role == '3');
+
+  // Reset ketua_kelompok_tani field when role is deselected
+  useEffect(() => {
+    if (!hasKetuaKelompokTaniRole && values.ketua_kelompok_tani) {
+      setFieldValue('ketua_kelompok_tani', '');
+    }
+  }, [hasKetuaKelompokTaniRole, values.ketua_kelompok_tani, setFieldValue]);
+
+  // Custom handler for Ketua Kelompok Tani to store the name instead of ID
+  const handleKelompokTaniChange = (e) => {
+    const selectedValue = e.target.value;
+    const selectedOption = kelompokTani.find(
+      (option) => option.value === selectedValue
+    );
+    setFieldValue('ketua_kelompok_tani', selectedOption?.label || '');
+  };
+
   const handleOnClose = () => setOpen(false);
 
   return (
-    <Modal className='!w-[600px] !max-w-[600px]' open={open} onclose={handleOnClose} label='Edit Pengguna'>
-      <div className='flex flex-col gap-4 pt-4 grid grid-cols-2 gap-4'>
+    <Modal
+      className="!w-[600px] !max-w-[600px]"
+      open={open}
+      onclose={handleOnClose}
+      label="Edit Pengguna"
+    >
+      <div className="flex flex-col gap-4 pt-4 grid grid-cols-2 gap-4">
         <InputText
-          label='Nama'
-          name='nama'
-          placeholder='Masukkan nama'
+          label="Nama"
+          name="nama"
+          placeholder="Masukkan nama"
           value={values.nama}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -58,9 +105,9 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           isRequired={true}
         />
         <InputText
-          label='Username'
-          name='username'
-          placeholder='Masukkan username'
+          label="Username"
+          name="username"
+          placeholder="Masukkan username"
           value={values.username}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -69,9 +116,9 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           isRequired={true}
         />
         <InputText
-          label='Email'
-          name='email'
-          placeholder='Masukkan email'
+          label="Email"
+          name="email"
+          placeholder="Masukkan email"
           value={values.email}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -80,9 +127,9 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           isRequired={true}
         />
         <SelectMultiple
-          label='Roles'
-          name='roles'
-          placeholder='Pilih role'
+          label="Roles"
+          name="roles"
+          placeholder="Pilih role"
           options={userRoles}
           value={values.roles}
           onChange={handleChange}
@@ -93,9 +140,28 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           isRequired={true}
           selectClassName={`h-[32px] min-h-[32px]`}
         />
+        {hasKetuaKelompokTaniRole && (
+          <Select
+            label="Ketua Kelompok Tani"
+            name="ketua_kelompok_tani"
+            placeholder="Pilih kelompok tani"
+            options={kelompokTani}
+            value={
+              kelompokTani.find(
+                (option) => option.label === values.ketua_kelompok_tani
+              )?.value || ''
+            }
+            onChange={handleKelompokTaniChange}
+            onBlur={handleBlur}
+            errors={errors}
+            touched={touched}
+            isRequired={true}
+            selectClassName={`h-[32px] min-h-[32px]`}
+          />
+        )}
         <Select
-          label='Status'
-          name='status'
+          label="Status"
+          name="status"
           options={statusOptions}
           value={values.status}
           onChange={handleChange}
@@ -106,8 +172,12 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           selectClassName={`h-[32px] min-h-[32px]`}
         />
       </div>
-      <div className='mt-4 flex flex-row justify-end gap-2'>
-        <Button isLoading={isSubmitting} onClick={handleOnClose} className='bg-red-500'>
+      <div className="mt-4 flex flex-row justify-end gap-2">
+        <Button
+          isLoading={isSubmitting}
+          onClick={handleOnClose}
+          className="bg-red-500"
+        >
           Batalkan
         </Button>
         <Button isLoading={isSubmitting} onClick={handleSubmit}>
@@ -119,4 +189,3 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
 };
 
 export default ModalUpdateUser;
-

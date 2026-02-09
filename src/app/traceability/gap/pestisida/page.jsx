@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import Cookies from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
@@ -16,10 +17,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
-import {
-  downloadListPestisida,
-  getListPestisida,
-} from '@/services/pestisida';
+import { downloadListPestisida, getListPestisida } from '@/services/pestisida';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -43,6 +41,29 @@ const PestisidaPage = () => {
     fetchKelompokTani();
   }, []);
 
+  // Auto-apply kelompok tani filter based on logged-in user
+  const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
+  const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const ketuaKelompokTani = Cookies.get('ketua_kelompok_tani');
+    if (ketuaKelompokTani && kelompokTani && kelompokTani.length > 0) {
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === ketuaKelompokTani
+      );
+      if (kelompokOption) {
+        setSelectedKelompok(kelompokOption.label); // Uses label as value
+        setIsKetuaKelompokTani(true);
+        setTimeout(() => setIsKelompokFilterInitialized(true), 100);
+      } else {
+        setIsKelompokFilterInitialized(true);
+      }
+    } else {
+      setIsKelompokFilterInitialized(true);
+    }
+  }, [kelompokTani]);
+
   const kelompokOptions = useMemo(() => {
     return (
       kelompokTani?.map((item) => ({ label: item.label, value: item.label })) ||
@@ -57,46 +78,48 @@ const PestisidaPage = () => {
       : (Number(num) || 0).toLocaleString('id-ID');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const params = {};
-        if (selectedKelompok) params.kelompok = selectedKelompok;
-        if (search) params.search = search;
-        if (selectedYear) params.tahun = selectedYear;
-        
-        const res = Object.keys(params).length
-          ? await getListPestisida(params)
-          : await getListPestisida();
-        const payload = res?.data?.data || res?.data || {};
-        const list = payload?.results || payload?.data || payload || [];
-        const normalized = (Array.isArray(list) ? list : []).map((item) => ({
-          id: item?.kebun_id,
-          idKebun: item?.id_kebun ?? '-',
-          namaPetani: item?.nama_petani ?? '-',
-          kelompok: item?.kelompok_tani ?? '-',
-          luasKebunHa:
-            typeof item?.luas_kebun === 'string'
-              ? Number(item.luas_kebun)
-              : item?.luas_kebun ?? null,
-          tahunTanam: item?.tahun_tanam ?? null,
-          umurTanaman: item?.umur_tanaman ?? null,
-          totalPestisida:
-            typeof item?.total_pestisida === 'number'
-              ? item.total_pestisida
-              : Number(item?.total_pestisida) || 0,
-        }));
-        setPestisidaData(normalized);
-        const count = payload?.count ?? normalized.length;
-        setTotalPestisida(count);
-      } catch (err) {
-        toast.error('Gagal memuat data pestisida');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [search, selectedKelompok, selectedYear]);
+    if (isKelompokFilterInitialized) {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const params = {};
+          if (selectedKelompok) params.kelompok = selectedKelompok;
+          if (search) params.search = search;
+          if (selectedYear) params.tahun = selectedYear;
+
+          const res = Object.keys(params).length
+            ? await getListPestisida(params)
+            : await getListPestisida();
+          const payload = res?.data?.data || res?.data || {};
+          const list = payload?.results || payload?.data || payload || [];
+          const normalized = (Array.isArray(list) ? list : []).map((item) => ({
+            id: item?.kebun_id,
+            idKebun: item?.id_kebun ?? '-',
+            namaPetani: item?.nama_petani ?? '-',
+            kelompok: item?.kelompok_tani ?? '-',
+            luasKebunHa:
+              typeof item?.luas_kebun === 'string'
+                ? Number(item.luas_kebun)
+                : item?.luas_kebun ?? null,
+            tahunTanam: item?.tahun_tanam ?? null,
+            umurTanaman: item?.umur_tanaman ?? null,
+            totalPestisida:
+              typeof item?.total_pestisida === 'number'
+                ? item.total_pestisida
+                : Number(item?.total_pestisida) || 0,
+          }));
+          setPestisidaData(normalized);
+          const count = payload?.count ?? normalized.length;
+          setTotalPestisida(count);
+        } catch (err) {
+          toast.error('Gagal memuat data pestisida');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [isKelompokFilterInitialized, search, selectedKelompok, selectedYear]);
 
   const handleSearchTextChange = useCallback(
     debounce((value) => {
@@ -262,6 +285,7 @@ const PestisidaPage = () => {
                   options={kelompokOptions}
                   value={selectedKelompok}
                   onChange={handleKelompokChange}
+                  disabled={isKetuaKelompokTani}
                 />
 
                 <Select

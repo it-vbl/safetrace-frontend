@@ -28,6 +28,7 @@ const UserDetailPage = () => {
       email: values.email,
       is_active: values.status === 'true',
       roles: (values.roles || []).map((r) => parseInt(r, 10)),
+      ketua_kelompok_tani: values.ketua_kelompok_tani,
     };
 
     try {
@@ -105,6 +106,12 @@ const UserDetailPage = () => {
             <ColData label="Username" value={detailUser?.username || '-'} />
             <ColData label="Email" value={detailUser?.email || '-'} />
             <ColData label="Roles" value={detailUser?.roles_label || '-'} />
+            {detailUser?.ketua_kelompok_tani && (
+              <ColData
+                label="Ketua Kelompok Tani"
+                value={detailUser?.ketua_kelompok_tani || '-'}
+              />
+            )}
             <ColData
               label="Dibuat Oleh"
               value={detailUser?.registered_via_label || '-'}

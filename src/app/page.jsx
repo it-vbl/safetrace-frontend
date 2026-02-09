@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import Cookies from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
 
@@ -14,6 +15,7 @@ import DataPekebunTable from '@/components/organisms/DataPekebunTable';
 import FilterSidebar from '@/components/organisms/MapView/FilterSidebar';
 import RightSidebar from '@/components/organisms/MapView/RightSidebar';
 import pekebuns from '@/constants/pekebuns';
+import useDeforestationAlerts from '@/hooks/useDeforestationAlerts';
 import useKebun from '@/hooks/useKebun';
 import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
 import useKomoditas from '@/hooks/useKomoditas';
@@ -22,7 +24,11 @@ import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
 import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
-import { getPetaOverlayDetail, getPetaOverlayList } from '@/services/petaOverlay';
+import {
+  getPetaOverlayDetail,
+  getPetaOverlayList,
+} from '@/services/petaOverlay';
+import { getKecamatan, getKota } from '@/services/wilayah';
 import { setStaticLayerDetail } from '@/store/slices/staticLayer';
 import {
   setFilterKecamatan,
@@ -42,6 +48,7 @@ const MapDashboard = () => {
   const [showTable, setShowTable] = useState(false);
   const [showAlertTable, setShowAlertTable] = useState(false);
   const [selectedPekebun, setSelectedPekebun] = useState(pekebuns[0]);
+  const [selectedAlert, setSelectedAlert] = useState(null);
   const [activeFilter, setActiveFilter] = useState('');
   const [activeTile, setActiveTile] = useState('osm');
   const [dateRange, setDateRange] = useState({
@@ -70,6 +77,10 @@ const MapDashboard = () => {
   const [filterAlertType, setFilterAlertType] = useState('');
   const [filterAlertKabupaten, setFilterAlertKabupaten] = useState('');
   const [filterAlertKecamatan, setFilterAlertKecamatan] = useState('');
+  const [kabupatenOptions, setKabupatenOptions] = useState([]);
+  const [kecamatanOptions, setKecamatanOptions] = useState([]);
+  const [loadingKabupaten, setLoadingKabupaten] = useState(false);
+  const [loadingKecamatan, setLoadingKecamatan] = useState(false);
 
   const rspoOptions = [
     { label: 'Sudah', value: 'sudah' },
@@ -133,6 +144,22 @@ const MapDashboard = () => {
     fetchStaticLayersDetail,
     loading: loadingDetailStaticLayer,
   } = useStaticLayer();
+
+  // Deforestation alerts hook
+  const {
+    alertList,
+    loading: loadingAlerts,
+    totalAlerts,
+    fetchAlerts,
+    transformAlertsForTable,
+  } = useDeforestationAlerts({
+    page: alertCurrentPage,
+    page_size: alertPageSize,
+    search: alertSearchText,
+    kabupaten: filterAlertKabupaten,
+    kecamatan: filterAlertKecamatan,
+    source_type: filterAlertType || 'glad',
+  });
 
   useEffect(() => {
     const currentRoles = getCurrentUserRoles();
@@ -240,8 +267,17 @@ const MapDashboard = () => {
   // Alert table cell renderers
   const IdAlertCellRenderer = (params) => {
     const handleLihatClick = () => {
-      // Implement the logic to show alert detail
-      alert('LIHAT clicked for ID: ' + params.data.id_alert);
+      const alertId = params.data?.id;
+      if (alertId) {
+        // Find the original alert data from alertList
+        const originalAlert = alertList.find((a) => a.id === alertId);
+        if (originalAlert) {
+          // Close the alert table
+          setShowAlertTable(false);
+          // Set selected alert to zoom to it on the map
+          setSelectedAlert(originalAlert);
+        }
+      }
     };
 
     const idAlert = params.data?.id_alert || '';
@@ -250,7 +286,7 @@ const MapDashboard = () => {
       <div className="flex flex-col gap-1">
         <button
           onClick={handleLihatClick}
-          className="font-bold text-blue-600 underline text-left"
+          className="font-bold text-blue-600 underline text-left hover:text-blue-700 transition-colors"
         >
           LIHAT
         </button>
@@ -259,45 +295,27 @@ const MapDashboard = () => {
     );
   };
 
-  // Dummy data for alert table
-  const alertDummyData = [
-    {
-      id_alert: 'GR-001-002-001',
-      lokasi_alert: { coordinates: [3.0883, 103.2533] },
-      area_deforestasi: 0.5,
-      tanggal_terdeteksi: '2025-11-10',
-      alert_type: 'GLAD',
-      kabupaten: 'Sanggau',
-      kecamatan: 'Toba Hilir',
-    },
-    {
-      id_alert: 'GR-001-002-002',
-      lokasi_alert: { coordinates: [3.0884, 103.2534] },
-      area_deforestasi: 0.3,
-      tanggal_terdeteksi: '2025-11-09',
-      alert_type: 'GLAD',
-      kabupaten: 'Sanggau',
-      kecamatan: 'Toba Hilir',
-    },
-    {
-      id_alert: 'GR-001-002-003',
-      lokasi_alert: { coordinates: [3.0885, 103.2535] },
-      area_deforestasi: 0.7,
-      tanggal_terdeteksi: '2025-11-08',
-      alert_type: 'RADD',
-      kabupaten: 'Sanggau',
-      kecamatan: 'Toba Hilir',
-    },
-  ];
+  // Transform alert data for table display
+  const alertTableData = useMemo(() => {
+    return transformAlertsForTable(alertList);
+  }, [alertList, transformAlertsForTable]);
 
   // Alert table column definitions
   const alertColDefs = [
     {
-      headerName: 'Id Alert',
-      field: 'id_alert',
+      headerName: '',
+      field: 'actions',
       cellRenderer: IdAlertCellRenderer,
-      width: 180,
+      width: 80,
       pinned: 'left',
+      suppressMenu: true,
+      sortable: false,
+      filter: false,
+    },
+    {
+      headerName: 'Id Alert',
+      field: 'id',
+      width: 180,
       suppressMenu: true,
       sortable: false,
       filter: false,
@@ -339,6 +357,16 @@ const MapDashboard = () => {
       headerName: 'Kecamatan',
       field: 'kecamatan',
       width: 160,
+    },
+    {
+      headerName: 'Desa',
+      field: 'desa',
+      width: 160,
+    },
+    {
+      headerName: 'Object Terdampak',
+      field: 'obyek_terdampak',
+      width: 180,
     },
   ];
 
@@ -589,6 +617,7 @@ const MapDashboard = () => {
   const handleFilterAlertTypeChange = useCallback(
     debounce((e) => {
       setFilterAlertType(e.target.value);
+      setAlertCurrentPage(1);
     }, 500),
     []
   );
@@ -596,6 +625,9 @@ const MapDashboard = () => {
   const handleFilterAlertKabupatenChange = useCallback(
     debounce((e) => {
       setFilterAlertKabupaten(e.target.value);
+      // Reset kecamatan when kabupaten changes
+      setFilterAlertKecamatan('');
+      setAlertCurrentPage(1);
     }, 500),
     []
   );
@@ -603,6 +635,7 @@ const MapDashboard = () => {
   const handleFilterAlertKecamatanChange = useCallback(
     debounce((e) => {
       setFilterAlertKecamatan(e.target.value);
+      setAlertCurrentPage(1);
     }, 500),
     []
   );
@@ -618,6 +651,30 @@ const MapDashboard = () => {
       dispatch(setFilterKecamatan([]));
     };
   }, []);
+
+  // Auto-apply kelompok tani filter based on logged-in user
+  const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
+  const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const ketuaKelompokTani = Cookies.get('ketua_kelompok_tani');
+    if (ketuaKelompokTani && kelompokTani && kelompokTani.length > 0) {
+      const kelompokOption = kelompokTani.find(
+        (kelompok) => kelompok.label === ketuaKelompokTani
+      );
+      if (kelompokOption) {
+        setFilterKelompok(kelompokOption.value);
+        setIsKetuaKelompokTani(true);
+        // Small delay to ensure state is updated before fetching
+        setTimeout(() => setIsKelompokFilterInitialized(true), 100);
+      } else {
+        setIsKelompokFilterInitialized(true);
+      }
+    } else {
+      setIsKelompokFilterInitialized(true);
+    }
+  }, [kelompokTani]);
 
   useEffect(() => {
     const fetchPetaOverlays = async () => {
@@ -644,6 +701,57 @@ const MapDashboard = () => {
 
     fetchPetaOverlays();
   }, []);
+
+  // Fetch kabupaten (regencies) for Kalimantan Barat - Province ID: 61
+  useEffect(() => {
+    const fetchKabupaten = async () => {
+      setLoadingKabupaten(true);
+      try {
+        const response = await getKota('61'); // 61 is Kalimantan Barat province ID
+        const data = response?.data?.data || [];
+        const formatted = data.map((item) => ({
+          value: item.value || item.id,
+          label: item.name || item.label,
+        }));
+        setKabupatenOptions(formatted);
+      } catch (error) {
+        console.error('Failed to fetch kabupaten list', error);
+        setKabupatenOptions([]);
+      } finally {
+        setLoadingKabupaten(false);
+      }
+    };
+
+    fetchKabupaten();
+  }, []);
+
+  // Fetch kecamatan (districts) based on selected kabupaten
+  useEffect(() => {
+    const fetchKecamatan = async () => {
+      if (!filterAlertKabupaten) {
+        setKecamatanOptions([]);
+        return;
+      }
+
+      setLoadingKecamatan(true);
+      try {
+        const response = await getKecamatan(filterAlertKabupaten);
+        const data = response?.data?.data || [];
+        const formatted = data.map((item) => ({
+          value: item.value || item.id,
+          label: item.name || item.label,
+        }));
+        setKecamatanOptions(formatted);
+      } catch (error) {
+        console.error('Failed to fetch kecamatan list', error);
+        setKecamatanOptions([]);
+      } finally {
+        setLoadingKecamatan(false);
+      }
+    };
+
+    fetchKecamatan();
+  }, [filterAlertKabupaten]);
 
   // Handle query parameters for opening Data Kebun Modal with filter
   useEffect(() => {
@@ -685,8 +793,12 @@ const MapDashboard = () => {
 
   // Fetch kebun data when filters change or on page load
   useEffect(() => {
-    fetchKebun();
+    // Only fetch after kelompok filter is initialized to prevent race conditions
+    if (isKelompokFilterInitialized) {
+      fetchKebun();
+    }
   }, [
+    isKelompokFilterInitialized,
     pageSize,
     currentPage,
     searchText,
@@ -698,6 +810,19 @@ const MapDashboard = () => {
     petaniIdFromUrl,
     dateRange.startDate,
     dateRange.endDate,
+  ]);
+
+  // Fetch deforestation alerts on mount and when filters change
+  useEffect(() => {
+    fetchAlerts();
+  }, [
+    alertCurrentPage,
+    alertPageSize,
+    alertSearchText,
+    filterAlertType,
+    filterAlertKabupaten,
+    filterAlertKecamatan,
+    fetchAlerts,
   ]);
 
   if (!rolesLoaded) {
@@ -718,8 +843,6 @@ const MapDashboard = () => {
     <div className="relative h-full w-full max-w-full max-h-full overflow-y-hidden overflow-x-hidden">
       <div className="relative max-h-[calc(100vh-72px)]">
         <FilterSidebar
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
           staticLayers={staticLayerList}
           activeStaticLayers={staticLayersDetail}
           petaOverlays={petaOverlays}
@@ -732,12 +855,14 @@ const MapDashboard = () => {
           onBasemapChange={setActiveTile}
           loading={loadingDetailStaticLayer || loadingPetaOverlays}
         />
-        <RightSidebar />
+        <RightSidebar dateRange={dateRange} onDateRangeChange={setDateRange} />
         <Map
           highlightedPolygon={selectedPekebun?.peta?.geom?.coordinates}
           zoom={zoomMap}
           position={centerMap}
           data={kebunMapData}
+          deforestationAlerts={alertList}
+          selectedAlert={selectedAlert}
           activeDataId={selectedPekebun?.id}
           showCustomControls={true}
           onFilterChange={(filter) =>
@@ -779,6 +904,7 @@ const MapDashboard = () => {
           totalItems={totalKebun}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
+          disableKelompokFilter={isKetuaKelompokTani}
         />
         <DataAlertDeforestasi
           showTable={showAlertTable}
@@ -794,15 +920,15 @@ const MapDashboard = () => {
           filterKecamatan={filterAlertKecamatan}
           onFilterKecamatanChange={handleFilterAlertKecamatanChange}
           alertTypeOptions={alertTypeOptions}
-          kabupatenOptions={kecamatanSanggau}
-          kecamatanOptions={kecamatanSanggau}
-          loading={false}
-          rowData={alertDummyData}
+          kabupatenOptions={kabupatenOptions}
+          kecamatanOptions={kecamatanOptions}
+          loading={loadingAlerts}
+          rowData={alertTableData}
           columnDefs={alertColDefs}
           autoSizeStrategy={autoSizeStrategy}
           currentPage={alertCurrentPage}
           pageSize={alertPageSize}
-          totalItems={500}
+          totalItems={totalAlerts}
           onPageChange={handleAlertPageChange}
           onPageSizeChange={handleAlertPageSizeChange}
         />
