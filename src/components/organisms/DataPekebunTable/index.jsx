@@ -43,7 +43,7 @@ const DataPekebunTable = ({
 }) => {
   return (
     <div
-      className={`border-gray absolute overflow-y-hidden left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] rounded-xl border bg-white p-4 duration-500 ease-in-out ${
+      className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-hidden rounded-xl border bg-white p-4 duration-500 ease-in-out ${
         showTable ? 'translate-y-0' : 'top-[200px] translate-y-full'
       } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
     >

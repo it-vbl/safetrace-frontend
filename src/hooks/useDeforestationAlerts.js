@@ -22,8 +22,8 @@ const useDeforestationAlerts = ({
       const params = {
         page,
         page_size,
-        kabupaten,
-        kecamatan,
+        kabupaten: kabupaten ? String(kabupaten).replace(/\./g, '') : '',
+        kecamatan: kecamatan ? String(kecamatan).replace(/\./g, '') : '',
         source_type,
       };
 
@@ -55,16 +55,16 @@ const useDeforestationAlerts = ({
       id_alert: alert.label || `ALERT-${alert.id}`,
       lokasi_alert: alert.titik_lokasi || { coordinates: [] },
       area_deforestasi: alert.area_ha || 0,
-      tanggal_terdeteksi: alert.date || '',
-      alert_type: alert.source_type?.toUpperCase() || '',
-      kabupaten: alert.kabupaten || '',
-      kecamatan: alert.kecamatan || '',
-      desa: alert.desa || '',
-      provinsi: alert.provinsi || '',
-      obyek_terdampak: alert.obyek_terdampak || '',
+      tanggal_terdeteksi: alert.date || '-',
+      alert_type: alert.source_type?.toUpperCase() || '-',
+      kabupaten: alert.kabupaten || '-',
+      kecamatan: alert.kecamatan || '-',
+      desa: alert.desa || '-',
+      provinsi: alert.provinsi || '-',
+      obyek_terdampak: alert.obyek_terdampak || '-',
       geom: alert.geom || null,
-      created_at: alert.created_at || '',
-      updated_at: alert.updated_at || '',
+      created_at: alert.created_at || '-',
+      updated_at: alert.updated_at || '-',
     }));
   }, []);
 

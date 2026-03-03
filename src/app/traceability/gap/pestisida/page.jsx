@@ -82,7 +82,10 @@ const PestisidaPage = () => {
       const fetchData = async () => {
         try {
           setLoading(true);
-          const params = {};
+          const params = {
+            page: currentPage,
+            page_size: pageSize,
+          };
           if (selectedKelompok) params.kelompok = selectedKelompok;
           if (search) params.search = search;
           if (selectedYear) params.tahun = selectedYear;
@@ -119,7 +122,15 @@ const PestisidaPage = () => {
       };
       fetchData();
     }
-  }, [isKelompokFilterInitialized, search, selectedKelompok, selectedYear]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isKelompokFilterInitialized,
+    currentPage,
+    pageSize,
+    search,
+    selectedKelompok,
+    selectedYear,
+  ]);
 
   const handleSearchTextChange = useCallback(
     debounce((value) => {
@@ -246,16 +257,6 @@ const PestisidaPage = () => {
     return pestisidaData;
   }, [pestisidaData]);
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredData.slice(startIndex, endIndex);
-  }, [filteredData, currentPage, pageSize]);
-
-  useEffect(() => {
-    setTotalPestisida(filteredData.length);
-  }, [filteredData]);
-
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full min-w-[320px] max-w-full">
       <div className="flex h-full flex-col gap-4">
@@ -275,7 +276,7 @@ const PestisidaPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={(e) => handleSearchTextChange(e.target.value)}
-                  placeholder="Cari..."
+                  placeholder="Cari Petani"
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 
@@ -316,7 +317,7 @@ const PestisidaPage = () => {
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             defaultColDef={defaultColDef}
-            rowData={paginatedData}
+            rowData={pestisidaData}
             columnDefs={colDefs}
           />
         </div>

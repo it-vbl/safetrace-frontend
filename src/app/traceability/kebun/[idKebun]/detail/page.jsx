@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
@@ -12,6 +12,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import ModalEditKebun from '@/components/molecules/ModalEditKebun';
 import ModalEditLampiran from '@/components/molecules/ModalEditLampiran';
 import ModalEditPeta from '@/components/molecules/ModalEditPeta';
+import { downloadSHPKebun } from '@/services/kebun';
 import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
 const DOCUMENT_CONFIGS = [
@@ -53,6 +54,11 @@ const DOCUMENT_CONFIGS = [
   },
 ];
 
+const Map = dynamic(() => import('@/components/organisms/MapView'), {
+  loading: () => <p>A map is loading</p>,
+  ssr: false,
+});
+
 const DetailKebunPage = () => {
   const { idKebun: id } = useParams();
   const [kebunData, setKebunData] = useState(null);
@@ -61,16 +67,6 @@ const DetailKebunPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditPetaModal, setShowEditPetaModal] = useState(false);
   const [showEditLampiranModal, setShowEditLampiranModal] = useState(false);
-
-  // Dynamic import for MapView component
-  const Map = useMemo(
-    () =>
-      dynamic(() => import('@/components/organisms/MapView'), {
-        loading: () => <p>A map is loading</p>,
-        ssr: false,
-      }),
-    []
-  );
 
   // Fetch kebun detail and lampiran data
   useEffect(() => {
@@ -145,6 +141,23 @@ const DetailKebunPage = () => {
     window.location.reload();
   };
 
+  const handleDownloadPeta = async () => {
+    try {
+      const res = await downloadSHPKebun(kebunData?.id);
+      if (res.status == 200) {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'peta.shp');
+        document.body.appendChild(link);
+        link.click();
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message || 'Gagal mengunduh SHP');
+    }
+  };
+
   const crumbs = [
     { label: 'KEBUN', href: '/traceability/kebun' },
     { label: 'DETAIL KEBUN' },
@@ -161,6 +174,120 @@ const DetailKebunPage = () => {
       >
         {status}
       </span>
+    );
+  };
+
+  const renderLampiranItem = (label, fileUrl) => {
+    if (!fileUrl) return null;
+
+    const getFileExtension = (url) => {
+      const urlWithoutQuery = url.split('?')[0];
+      return urlWithoutQuery.split('.').pop().toLowerCase();
+    };
+
+    const fileExtension = getFileExtension(fileUrl);
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(
+      fileExtension
+    );
+    const isPDF = fileExtension === 'pdf';
+
+    return (
+      <div
+        key={label}
+        className="min-w-0 flex-1 rounded-lg border border-gray-200 p-3 sm:p-4"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h4 className="truncate text-sm font-medium text-gray-700">
+            {label}
+          </h4>
+        </div>
+
+        <div className="w-full">
+          {isImage ? (
+            <div className="relative">
+              <Image
+                src={fileUrl}
+                alt={label}
+                width={400}
+                height={300}
+                className="h-auto w-full max-w-full rounded border border-gray-300 sm:max-w-md"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  const fb =
+                    e.target.parentNode.querySelector('.fallback-content');
+                  if (fb) fb.style.display = 'block';
+                }}
+              />
+              <div
+                className="fallback-content flex hidden h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50"
+                style={{ display: 'none' }}
+              >
+                <div className="px-2 text-center">
+                  <p className="mb-2 text-xs text-gray-600 sm:text-sm">
+                    Gambar tidak dapat ditampilkan
+                  </p>
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
+                  >
+                    Buka Gambar
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : isPDF ? (
+            <div className="relative">
+              <iframe
+                src={fileUrl}
+                className="h-64 w-full rounded border border-gray-300 sm:h-96"
+                title={label}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  const fb =
+                    e.target.parentNode.querySelector('.fallback-content');
+                  if (fb) fb.style.display = 'block';
+                }}
+              />
+              <div
+                className="fallback-content flex hidden h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50"
+                style={{ display: 'none' }}
+              >
+                <div className="px-2 text-center">
+                  <p className="mb-2 text-xs text-gray-600 sm:text-sm">
+                    PDF tidak dapat ditampilkan
+                  </p>
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
+                  >
+                    Buka PDF
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50">
+              <div className="px-2 text-center">
+                <p className="mb-2 text-xs text-gray-600 sm:text-sm">
+                  File tidak dapat ditampilkan
+                </p>
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
+                >
+                  Unduh File
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -267,12 +394,13 @@ const DetailKebunPage = () => {
             <h3 className="text-lg font-semibold">PETA</h3>
             {kebunData?.geom && (
               <div className="flex gap-3">
-                <Link
-                  href={`/kebun/${id}/unduh-shp`}
+                <button
+                  type="button"
+                  onClick={handleDownloadPeta}
                   className="text-sm font-medium text-green-700 underline hover:text-green-800"
                 >
                   Unduh SHP
-                </Link>
+                </button>
                 <button
                   onClick={() => setShowEditPetaModal(true)}
                   className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
@@ -341,86 +469,49 @@ const DetailKebunPage = () => {
         </section>
 
         {/* === LAMPIRAN SECTION === */}
-        <section className="rounded border border-gray-300 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">LAMPIRAN</h3>
-            <button
-              onClick={() => setShowEditLampiranModal(true)}
-              className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
-            >
-              Ubah Data
-            </button>
-          </div>
-
-          {/* === GRID DOCUMENT === */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {DOCUMENT_CONFIGS.filter((doc) => lampiranData?.[doc.fileKey]).map(
-              (doc) => {
-                const fileUrl = lampiranData?.[doc.fileKey];
-                const thumbUrl =
-                  lampiranData?.[doc.thumbKey] || lampiranData?.[doc.fileKey];
-
-                return (
-                  <div
-                    key={doc.id}
-                    className="rounded-lg border bg-gray-50 p-4"
-                  >
-                    <div className="mb-3">
-                      <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                        {doc.label}
-                      </h4>
-                    </div>
-                    <div className="flex h-48 items-center justify-center overflow-hidden rounded border bg-white p-2">
-                      <div
-                        className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded border`}
-                      >
-                        {thumbUrl ? (
-                          <Image
-                            src={thumbUrl}
-                            alt={doc.label}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                          />
-                        ) : (
-                          <div className="text-center">
-                            <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded border border-gray-300 bg-white">
-                              <span className="text-xs font-bold">
-                                {doc.badge}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-500">{doc.label}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mt-3 text-center">
-                      <a
-                        href={fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block text-xs font-semibold text-blue-600 hover:text-blue-800"
-                      >
-                        Lihat Dokumen
-                      </a>
-                    </div>
-                  </div>
-                );
-              }
+        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN</h3>
+            {lampiranData ? (
+              <button
+                onClick={() => setShowEditLampiranModal(true)}
+                className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+              >
+                Ubah Data
+              </button>
+            ) : (
+              // If lampiranData is undefined/null, but there might still be "Ubah Data" needed... typically they should click Add Data but "Ubah Data" is here in previous.
+              <button
+                onClick={() => setShowEditLampiranModal(true)}
+                className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+              >
+                Ubah Data
+              </button>
             )}
-
-            {/* No documents message */}
-            {!lampiranData?.file_legalitas &&
-              !lampiranData?.file_stdb &&
-              !lampiranData?.file_rspo &&
-              !lampiranData?.file_ispo && (
-                <div className="col-span-full flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <p className="text-gray-500">Tidak ada lampiran dokumen</p>
-                  </div>
-                </div>
-              )}
           </div>
+
+          {lampiranData && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:gap-6">
+              {DOCUMENT_CONFIGS.map((doc) =>
+                renderLampiranItem(doc.label, lampiranData?.[doc.fileKey])
+              )}
+
+              {!lampiranData?.file_legalitas &&
+                !lampiranData?.file_stdb &&
+                !lampiranData?.file_rspo &&
+                !lampiranData?.file_ispo && (
+                  <div className="text-sm text-gray-600">
+                    Belum ada data lampiran.
+                  </div>
+                )}
+            </div>
+          )}
+
+          {!lampiranData && (
+            <div className="text-sm text-gray-600">
+              Belum ada data lampiran.
+            </div>
+          )}
         </section>
       </div>
 

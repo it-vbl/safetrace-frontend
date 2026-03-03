@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
@@ -97,18 +97,6 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const menuConfig = {
     traceability: [
       {
-        label: 'Petani',
-        icon: UserCircle2Icon,
-        path: '/traceability/petani',
-        permission: 'petani.view',
-      },
-      {
-        label: 'Kebun',
-        icon: MapIcon,
-        path: '/traceability/kebun',
-        permission: 'kebun.view',
-      },
-      {
         label: 'Dashboard',
         icon: PieChart,
         permission: null,
@@ -124,6 +112,18 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
             permission: 'sankey.view',
           },
         ],
+      },
+      {
+        label: 'Petani',
+        icon: UserCircle2Icon,
+        path: '/traceability/petani',
+        permission: 'petani.view',
+      },
+      {
+        label: 'Kebun',
+        icon: MapIcon,
+        path: '/traceability/kebun',
+        permission: 'kebun.view',
       },
       {
         label: 'Penjualan',

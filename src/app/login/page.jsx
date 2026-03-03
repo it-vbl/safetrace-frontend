@@ -15,13 +15,14 @@ import InputText from '@/components/molecules/InputText';
 import { login } from '@/services/auth';
 
 import LogoSipekebun from '../../../public/keling-kumang-logo.png';
+import ImagePartnership from '../../../public/partnership.png';
 
 const LoginPage = () => {
   const router = useRouter();
 
   const schemaValidation = Yup.object().shape({
-    username: Yup.string().required('Username harus diisi'),
-    password: Yup.string().required('Password harus diisi'),
+    username: Yup.string().required('Email harus diisi'),
+    password: Yup.string().required('Kata sandi harus diisi'),
   });
 
   const {
@@ -99,29 +100,35 @@ const LoginPage = () => {
 
       {/* Right side - Login Form */}
       <div className="flex w-full items-center justify-center px-8 lg:w-1/2">
-        <div className="w-full max-w-xl">
+        <div className="w-full max-w-lg">
           {/* Logo */}
-          <div className="mb-8 flex items-center justify-center">
+          <div className="mb-8 flex items-center justify-center sm:mb-4">
             <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
           </div>
 
           {/* Welcome Card */}
-          <div className="mb-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-            <div className="flex flex-col gap-4 text-center">
-              <Heading level={1} className="font-normal">
+          <div className="mb-6 rounded-xl border border-gray-200 bg-white px-6 py-8 shadow-sm sm:px-10">
+            <div className="flex flex-col gap-2 text-center sm:gap-3">
+              <Heading
+                level={1}
+                className="font-serif text-2xl font-normal sm:text-3xl"
+              >
                 Selamat Datang
               </Heading>
-              <Paragraph level={2} className="font-normal">
+              <Paragraph
+                level={2}
+                className="text-sm font-normal text-gray-700 sm:text-base"
+              >
                 Masukan email dan kata sandi untuk mulai menggunakan dashboard
                 CU Keling Kumang.
               </Paragraph>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5 sm:mt-8">
               <InputText
-                label={'Username'}
+                label={'Email'}
                 name="username"
-                placeholder="Masukan username"
+                placeholder="Masukan email"
                 value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -129,7 +136,7 @@ const LoginPage = () => {
                 touched={touched}
               />
               <InputText
-                label="Password"
+                label="Kata Sandi"
                 type="password"
                 name="password"
                 placeholder="Masukan kata sandi"
@@ -145,9 +152,9 @@ const LoginPage = () => {
                 className="w-full"
                 disabled={isSubmitting}
               >
-                Login
+                Masuk
               </Button>
-              <div className="mt-6"></div>
+              <div className="mt-4 sm:mt-6"></div>
 
               <div className="text-center">
                 <Link
@@ -160,8 +167,16 @@ const LoginPage = () => {
             </form>
           </div>
 
-          <div className="text-center text-xs text-gray-500">
-            © 2025 CU Keling Kumang. All rights reserved.
+          <div className="mb-4 mt-8 flex justify-center px-4 sm:mb-6 sm:mt-4">
+            <Image
+              src={ImagePartnership}
+              alt="partnership"
+              className="max-h-12 w-full object-contain sm:max-h-14"
+            />
+          </div>
+
+          <div className="text-center text-xs font-medium text-gray-600">
+            © 2026 CU Keling Kumang. All rights reserved.
           </div>
         </div>
       </div>

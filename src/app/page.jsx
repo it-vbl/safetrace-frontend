@@ -200,13 +200,13 @@ const MapDashboard = () => {
       <div className="flex flex-row gap-2">
         <button
           onClick={handlePetaClick}
-          className="font-bold text-orange-600 underline text-left hover:text-orange-700 transition-colors"
+          className="text-left font-bold text-orange-600 underline transition-colors hover:text-orange-700"
         >
           PETA
         </button>
         <button
           onClick={handleDetailClick}
-          className="font-bold text-blue-600 underline text-left hover:text-blue-700 transition-colors"
+          className="text-left font-bold text-blue-600 underline transition-colors hover:text-blue-700"
         >
           DETAIL
         </button>
@@ -241,7 +241,7 @@ const MapDashboard = () => {
 
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${chipClass}`}
+        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${chipClass}`}
       >
         {displayText}
       </span>
@@ -286,7 +286,7 @@ const MapDashboard = () => {
       <div className="flex flex-col gap-1">
         <button
           onClick={handleLihatClick}
-          className="font-bold text-blue-600 underline text-left hover:text-blue-700 transition-colors"
+          className="text-left font-bold text-blue-600 underline transition-colors hover:text-blue-700"
         >
           LIHAT
         </button>
@@ -490,7 +490,7 @@ const MapDashboard = () => {
     () =>
       dynamic(() => import('@/components/organisms/MapView'), {
         loading: () => (
-          <div className="h-[calc(100vh-72px)] w-[100vw] bg-primary/20 flex items-center justify-center">
+          <div className="flex h-[calc(100vh-72px)] w-[100vw] items-center justify-center bg-primary/20">
             Memuat Peta
           </div>
         ),
@@ -840,7 +840,7 @@ const MapDashboard = () => {
   }
 
   return (
-    <div className="relative h-full w-full max-w-full max-h-full overflow-y-hidden overflow-x-hidden">
+    <div className="relative h-full max-h-full w-full max-w-full overflow-x-hidden overflow-y-hidden">
       <div className="relative max-h-[calc(100vh-72px)]">
         <FilterSidebar
           staticLayers={staticLayerList}
@@ -934,7 +934,7 @@ const MapDashboard = () => {
         />
       </div>
 
-      <div className="absolute left-1/2 bottom-0 z-[400] mx-auto -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute bottom-0 left-1/2 z-[400] mx-auto -translate-x-1/2 -translate-y-1/2">
         <div className="flex flex-row items-center gap-2">
           <Button
             className="bg-white"

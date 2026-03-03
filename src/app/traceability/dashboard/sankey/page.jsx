@@ -3,7 +3,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
-import { Calendar, ChevronRight, DownloadCloudIcon } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+import { Calendar, DownloadCloudIcon } from 'lucide-react';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 
@@ -11,7 +13,6 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DatePicker from '@/components/molecules/DatePicker';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
-import { ALL_COLUMN_VALUES, COLUMN_OPTIONS } from '@/constants/columns';
 import { getListPabrik, getSankeyData } from '@/services/penjualan';
 import { getKelompokTani } from '@/services/referensi';
 
@@ -24,8 +25,10 @@ const SankeyPage = () => {
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState({ nodes: [], links: [] });
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const dateDropdownRef = useRef(null);
+  const chartRef = useRef(null);
 
   const [kelompokOptions, setKelompokOptions] = useState([]);
   const [pabrikOptions, setPabrikOptions] = useState([]);
@@ -117,14 +120,11 @@ const SankeyPage = () => {
         const params = {
           start_date: startDate,
           end_date: endDate,
-          start_date: startDate,
-          end_date: endDate,
-          columns: ALL_COLUMN_VALUES,
-          ...(selectedKelompok.length > 0 && {
-            kelompok_tani: selectedKelompok,
-          }),
           ...(selectedPabrik.length > 0 && {
             pabrik: selectedPabrik,
+          }),
+          ...(selectedKelompok.length > 0 && {
+            kelompok_tani: selectedKelompok,
           }),
         };
 
@@ -155,6 +155,43 @@ const SankeyPage = () => {
 
   const handleChangeEndDate = (e) => {
     setEndDate(moment(e.target.value).format('DD-MM-YYYY'));
+  };
+
+  const handleExportPDF = async () => {
+    if (!chartRef.current) return;
+    try {
+      setIsExporting(true);
+
+      // Temporarily store original styles that might affect capturing
+      const originalScrollLeft = chartRef.current.scrollLeft;
+      const originalScrollTop = chartRef.current.scrollTop;
+
+      // Capture the canvas using html2canvas
+      const canvas = await html2canvas(chartRef.current, {
+        scale: 2, // Higher scale for better resolution
+        useCORS: true, // Handle cross-origin images if any
+      });
+
+      // Restore scroll positions if any
+      chartRef.current.scrollLeft = originalScrollLeft;
+      chartRef.current.scrollTop = originalScrollTop;
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`Sankey_Diagram_${startDate}_${endDate}.pdf`);
+      toast.success('Berhasil mengekspor PDF');
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Gagal mengekspor PDF');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -242,6 +279,11 @@ const SankeyPage = () => {
             variant="primary"
             size="medium"
             className="!px-2 text-xs sm:!px-4 sm:text-sm"
+            onClick={handleExportPDF}
+            isLoading={isExporting}
+            disabled={
+              isExporting || isLoading || isError || data.nodes.length === 0
+            }
           >
             Export Pdf
           </Button>
@@ -249,23 +291,10 @@ const SankeyPage = () => {
       </div>
 
       {/* Main Content - Responsive */}
-      <div className="rounded-[8px] border border-gray-200 bg-white p-3 shadow-sm sm:p-6">
-        {/* Column Labels */}
-        <div className="mb-6 flex w-full items-center overflow-x-auto">
-          {COLUMN_OPTIONS.map((column, index) => (
-            <React.Fragment key={column.value}>
-              <div className="flex min-w-[120px] items-center justify-center rounded-md bg-indigo-100 px-6 py-2 text-sm font-bold text-gray-700">
-                {column.label}
-              </div>
-              {index < COLUMN_OPTIONS.length - 1 && (
-                <div className="flex min-w-[40px] flex-1 items-center px-2 text-gray-300">
-                  <div className="h-[2px] w-full bg-gray-300"></div>
-                  <ChevronRight size={20} className="-ml-3" />
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+      <div
+        ref={chartRef}
+        className="rounded-[8px] border border-gray-200 bg-white p-3 shadow-sm sm:p-6"
+      >
         {isError ? (
           <div className="flex h-[300px] w-full flex-col items-center justify-center gap-3 rounded bg-gray-50 text-center sm:h-[400px]">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
@@ -460,50 +489,18 @@ const D3Sankey = ({ data }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    const connectedNodes = hoveredNode
-      ? getConnectedNodes(hoveredNode, links)
-      : null;
-    const linkGroup = svg
-      .append('g')
-      .attr('fill', 'none')
-      .attr('stroke-linecap', 'round');
+    const linkGroup = svg.append('g').attr('fill', 'none');
 
     linkGroup
       .selectAll('path')
       .data(links)
       .join('path')
+      .attr('class', 'sankey-link')
       .attr('d', sankeyLinkHorizontal())
-      .attr('stroke', (d) => {
-        if (hoveredNode) {
-          if (d.source.id === hoveredNode || d.target.id === hoveredNode) {
-            return '#FFA49E';
-          }
-        }
-        if (
-          hoveredLink &&
-          d.source.id === hoveredLink.source.id &&
-          d.target.id === hoveredLink.target.id
-        ) {
-          return '#FFA49E';
-        }
-        return '#E5E7EB';
-      })
+      .attr('stroke', '#E5E7EB')
       .attr('stroke-width', (d) => Math.max(2, d.width))
-      .attr('stroke-opacity', (d) => {
-        if (hoveredNode) {
-          return d.source.id === hoveredNode || d.target.id === hoveredNode
-            ? 0.9
-            : 0.2;
-        }
-        if (
-          hoveredLink &&
-          d.source.id === hoveredLink.source.id &&
-          d.target.id === hoveredLink.target.id
-        ) {
-          return 1;
-        }
-        return 0.6;
-      })
+      .attr('stroke-opacity', 0.5)
+      .style('transition', 'all 0.3s ease')
       .style('cursor', 'pointer')
       .on('mouseenter', function (event, d) {
         setHoveredLink({
@@ -537,29 +534,16 @@ const D3Sankey = ({ data }) => {
 
     node
       .append('rect')
+      .attr('class', 'sankey-node')
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
-      .attr('height', (d) => d.y1 - d.y0)
+      .attr('height', (d) => Math.max(1, d.y1 - d.y0))
       .attr('width', (d) => d.x1 - d.x0)
-      .attr('fill', (d) => {
-        if (hoveredNode === d.id) return '#FF6B5F';
-        return '#FFFFFF';
-      })
+      .attr('fill', '#FFFFFF')
       .attr('stroke', '#D1D5DB')
-      .attr('stroke-width', (d) => (hoveredNode === d.id ? 2 : 1))
-      .attr('rx', 2)
-      .attr('opacity', (d) => {
-        if (hoveredNode) {
-          return connectedNodes?.has(d.id) ? 1 : 0.35;
-        }
-        if (hoveredLink) {
-          return d.id === hoveredLink.source.id ||
-            d.id === hoveredLink.target.id
-            ? 1
-            : 0.35;
-        }
-        return 1;
-      })
+      .attr('stroke-width', 1)
+      .attr('opacity', 1)
+      .style('transition', 'all 0.3s ease')
       .style('cursor', 'pointer')
       .on('mouseenter', function (event, d) {
         setHoveredNode(d.id);
@@ -594,6 +578,7 @@ const D3Sankey = ({ data }) => {
 
     node
       .append('text')
+      .attr('class', 'sankey-node-text')
       .attr('x', (d) => (d.x0 + d.x1) / 2)
       .attr('y', (d) => (d.y0 + d.y1) / 2)
       .attr('dy', '0.35em')
@@ -605,17 +590,82 @@ const D3Sankey = ({ data }) => {
       .style('font-weight', '400')
       .style('fill', '#1F2937')
       .style('pointer-events', 'none')
-      .style('opacity', (d) => {
-        if (hoveredNode) return connectedNodes?.has(d.id) ? 1 : 0.35;
+      .style('transition', 'opacity 0.3s ease')
+      .style('opacity', 1);
+  }, [sankeyGraph, dimensions]);
+
+  // Handle hover visual updates (without remounting elements)
+  useEffect(() => {
+    if (!svgRef.current || sankeyGraph.nodes.length === 0) return;
+
+    const svg = d3.select(svgRef.current);
+    const { links } = sankeyGraph;
+
+    const connectedNodes = hoveredNode
+      ? getConnectedNodes(hoveredNode, links)
+      : null;
+
+    svg
+      .selectAll('.sankey-link')
+      .attr('stroke', (d) => {
+        if (hoveredNode) {
+          if (d.source.id === hoveredNode || d.target.id === hoveredNode) {
+            return '#FFA49E';
+          }
+        }
+        if (
+          hoveredLink &&
+          d.source.id === hoveredLink.source.id &&
+          d.target.id === hoveredLink.target.id
+        ) {
+          return '#FFA49E';
+        }
+        return '#E5E7EB';
+      })
+      .attr('stroke-opacity', (d) => {
+        if (hoveredNode) {
+          return d.source.id === hoveredNode || d.target.id === hoveredNode
+            ? 0.9
+            : 0.1;
+        }
+        if (
+          hoveredLink &&
+          d.source.id === hoveredLink.source.id &&
+          d.target.id === hoveredLink.target.id
+        ) {
+          return 0.9;
+        }
+        if (hoveredLink) return 0.1;
+        return 0.5;
+      });
+
+    svg
+      .selectAll('.sankey-node')
+      .attr('fill', (d) => (hoveredNode === d.id ? '#FF6B5F' : '#FFFFFF'))
+      .attr('stroke-width', (d) => (hoveredNode === d.id ? 2 : 1))
+      .attr('opacity', (d) => {
+        if (hoveredNode) {
+          return connectedNodes?.has(d.id) ? 1 : 0.2;
+        }
         if (hoveredLink) {
           return d.id === hoveredLink.source.id ||
             d.id === hoveredLink.target.id
             ? 1
-            : 0.35;
+            : 0.2;
         }
         return 1;
       });
-  }, [sankeyGraph, dimensions, hoveredNode, hoveredLink, getConnectedNodes]);
+
+    svg.selectAll('.sankey-node-text').style('opacity', (d) => {
+      if (hoveredNode) return connectedNodes?.has(d.id) ? 1 : 0.2;
+      if (hoveredLink) {
+        return d.id === hoveredLink.source.id || d.id === hoveredLink.target.id
+          ? 1
+          : 0.2;
+      }
+      return 1;
+    });
+  }, [hoveredNode, hoveredLink, sankeyGraph, getConnectedNodes]);
 
   const handleContainerMouseLeave = useCallback(() => {
     setHoveredNode(null);
