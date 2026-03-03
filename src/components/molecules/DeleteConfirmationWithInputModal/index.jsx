@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
-import BaseModal from '@/components/molecules/Modal';
 import InputText from '@/components/molecules/InputText';
+import BaseModal from '@/components/molecules/Modal';
 
 const DeleteConfirmationWithInputModal = ({
   isOpen,
