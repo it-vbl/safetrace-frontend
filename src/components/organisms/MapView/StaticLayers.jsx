@@ -23,7 +23,7 @@ export default function IupMap() {
 
   useEffect(() => {
     if (typeof data !== 'object' || data == null) return;
-    const tempArray = Object.values(data);
+    const tempArray = Object.values(data).filter(Boolean);
     setPolygons(tempArray);
 
     // Set view and fit bounds for the last static layer
@@ -54,7 +54,7 @@ export default function IupMap() {
     <>
       {polygons.map((staticLayer, idx) => (
         <GeoJSON
-          key={staticLayer?.id}
+          key={staticLayer?.id || `static-layer-${idx}`}
           data={staticLayer?.geom}
           // // Remove style prop or use as fallback - styles will be set in onEachFeature
           style={() => getColorOptions(staticLayer?.geom?.name)?.pathOptions}

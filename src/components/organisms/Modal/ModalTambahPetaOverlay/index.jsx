@@ -1,4 +1,6 @@
 import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
+import shp from 'shpjs';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
@@ -31,7 +33,7 @@ const ModalTambahPetaOverlay = ({
     validationSchema: Yup.object({
       nama_layer: Yup.string().required('Nama Layer Statis harus diisi'),
       file: requireFile
-        ? Yup.mixed().required('File .geojson harus diupload')
+        ? Yup.mixed().required('File .zip / .geojson harus diupload')
         : Yup.mixed().nullable(),
     }),
     onSubmit: async (values) => {
@@ -50,8 +52,44 @@ const ModalTambahPetaOverlay = ({
     setOpen(false);
   };
 
-  const handleFileChange = (fileData) => {
-    setFieldValue('file', fileData);
+  const handleFileChange = async (fileData) => {
+    if (!fileData || !fileData.value) {
+      setFieldValue('file', fileData);
+      return;
+    }
+
+    const file = fileData.value;
+    const fileType = file.name.split('.').pop().toLowerCase();
+
+    if (fileType === 'shp' || fileType === 'zip') {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const json = await shp(arrayBuffer);
+
+        // Convert the generated geojson to a Blob and File object
+        const geojsonBlob = new Blob([JSON.stringify(json)], {
+          type: 'application/geo+json',
+        });
+        const geojsonFile = new File(
+          [geojsonBlob],
+          file.name.replace(new RegExp(`\\.${fileType}$`, 'i'), '.geojson'),
+          { type: 'application/geo+json' }
+        );
+
+        setFieldValue('file', {
+          ...fileData,
+          value: geojsonFile,
+          name: geojsonFile.name,
+        });
+        toast.success('File SHP berhasil dibaca dan dikonversi ke GeoJSON');
+      } catch (error) {
+        toast.error('Gagal membaca file SHP');
+        console.error('Error handling SHP file:', error);
+        setFieldValue('file', null);
+      }
+    } else {
+      setFieldValue('file', fileData);
+    }
   };
 
   return (
@@ -76,12 +114,18 @@ const ModalTambahPetaOverlay = ({
 
         <div className="flex flex-col gap-1">
           <label className="text-[12px] font-bold text-gray-500">
-            File .geojson <span className="text-red-500">*</span>
+            File .zip / .geojson <span className="text-red-500">*</span>
           </label>
           <Upload
             label=""
             onChangeValue={handleFileChange}
-            allowedFiles={['.geojson', 'application/geo+json']}
+            allowedFiles={[
+              '.geojson',
+              'application/geo+json',
+              '.zip',
+              'application/zip',
+              'application/x-zip-compressed',
+            ]}
             maxSize={50}
             isRequired={requireFile}
             name="file"

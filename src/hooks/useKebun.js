@@ -27,8 +27,8 @@ const useKebun = ({
       if (page) params.set('page', page);
       if (search) params.set('search', search);
       if (kelompok) params.set('kelompok_tani', kelompok);
-      if (rspo) params.set('is_rspo', rspo === 'sudah');
-      if (ispo) params.set('is_ispo', ispo === 'sudah');
+      if (rspo) params.set('rspo', rspo === 'sudah');
+      if (ispo) params.set('ispo', ispo === 'sudah');
       if (legalitas) params.set('jenis_legalitas', legalitas);
       if (petani_id) params.set('petani_id', petani_id);
       if (start_date) params.set('start_date', start_date);

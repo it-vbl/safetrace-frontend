@@ -29,7 +29,7 @@ const Upload = ({
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const validateFile = (file) => {
-    if (file.name.includes('.shp')) {
+    if (file.name.includes('.shp') || file.name.includes('.zip')) {
       return;
     }
     const validTypes = [
@@ -52,6 +52,9 @@ const Upload = ({
       '.shp',
       '.geojson',
       '.csv',
+      '.zip',
+      'application/zip',
+      'application/x-zip-compressed',
     ];
 
     const selectedFileType = validTypes.filter((item) =>

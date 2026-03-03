@@ -417,19 +417,29 @@ const TraceabilityProduksiDetail = () => {
 export default TraceabilityProduksiDetail;
 
 const formatKgInput = (v) => {
-  const num = Number(String(v ?? '').replace(/\D/g, ''));
-  return num.toLocaleString('id-ID');
+  if (v === null || v === undefined || v === '') return '';
+  if (typeof v === 'string' && (v.endsWith('.') || v.endsWith('.0'))) {
+    return v;
+  }
+  const num = Number(v);
+  if (Number.isNaN(num)) return '';
+  return new Intl.NumberFormat('id-ID', {
+    maximumFractionDigits: 10,
+  }).format(num);
 };
 
 const parseKgInput = (v) => {
-  const num = Number(String(v ?? '').replace(/\D/g, ''));
+  if (!v) return 0;
+  const cleanStr = String(v).replace(/\./g, '').replace(/,/g, '.');
+  const num = Number(cleanStr);
   return Number.isNaN(num) ? 0 : num;
 };
 
 const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
   const initialValues = useMemo(() => {
     const months = MONTH_NAMES.reduce((acc, m) => {
-      acc[m] = formatKgInput(yearData?.bulan?.[m] ?? 0);
+      const val = yearData?.bulan?.[m] ?? 0;
+      acc[m] = formatKgInput(val);
       return acc;
     }, {});
     return months;
@@ -479,14 +489,23 @@ const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
               label={m}
               name={m}
               placeholder="0"
-              value={formik.values[m]}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+              value={formik.values[m] || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Allow user to type numbers and optionally comma (as decimal separator in id-ID)
+                if (/^[\d.,]*$/.test(val)) {
+                  formik.setFieldValue(m, val);
+                }
+              }}
+              onBlur={(e) => {
+                const formatted = formatKgInput(parseKgInput(e.target.value));
+                formik.setFieldValue(m, formatted);
+                formik.handleBlur(e);
+              }}
               errors={formik.errors}
               touched={formik.touched}
               suffix="Kg"
               type="string"
-              formatter={formatKgInput}
               isRequired={true}
             />
           ))}

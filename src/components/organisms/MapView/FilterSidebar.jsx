@@ -30,10 +30,10 @@ const FilterSidebar = ({
         if (mapviewFilterSidebarOpen) {
           // Set left to sidebar width (320px) + left padding (16px) = 336px
           leftContainer.classList.remove('leaflet-left-custom');
-          leftToggleButton.classList.add('rotate-180');
+          leftToggleButton?.classList.add('rotate-180');
         } else {
           leftContainer.classList.add('leaflet-left-custom');
-          leftToggleButton.classList.remove('rotate-180');
+          leftToggleButton?.classList.remove('rotate-180');
         }
       } catch (error) {
         console.error(error);
@@ -71,7 +71,7 @@ const FilterSidebar = ({
   return (
     <div
       id="filter-sidebar"
-      className={`absolute !h-[calc(100%-32px)] left-4 top-4 z-[500] w-[250px] duration-300 ease-in-out transition-all border border-gray-200 bg-white overflow-x-auto rounded-[4px] p-4 shadow-lg ${
+      className={`absolute left-4 top-4 z-[500] !h-[calc(100%-32px)] w-[250px] overflow-x-auto rounded-[4px] border border-gray-200 bg-white p-4 shadow-lg transition-all duration-300 ease-in-out ${
         mapviewFilterSidebarOpen ? 'translate-x-0' : '-translate-x-[200%]'
       }`}
     >

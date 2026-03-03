@@ -35,7 +35,6 @@ const DetailKebun = ({
     fetchJenisLegalitas,
   } = useReferences();
 
-  // Fetch kelompok tani and jenis legalitas options on component mount
   useEffect(() => {
     if (kelompokTani.length === 0) {
       fetchKelompokTani();
@@ -50,24 +49,24 @@ const DetailKebun = ({
     fetchJenisLegalitas,
   ]);
 
-  // Fetch petani options when kebunData is loaded (for editing existing kebun)
   useEffect(() => {
     if (kebunData && kebunData.kelompok_tani) {
       fetchPetaniByKelompok(kebunData.kelompok_tani);
     }
   }, [kebunData]);
 
-  // Function to fetch petani based on kelompok tani
   const fetchPetaniByKelompok = async (kelompokTaniValue) => {
     if (kelompokTaniValue) {
       try {
-        const response = await getListPetani({ kelompok: kelompokTaniValue });
+        const response = await getListPetani({
+          kelompok_tani: kelompokTaniValue,
+          page_size: 100,
+        });
         const options = response.data.data.results.map((item) => ({
           label: item.nama,
           value: item.id,
         }));
         setPetaniOptions(options);
-        // Clear petani validation error once options are loaded
         if (formik.errors.petani_id) {
           formik.setFieldError('petani_id', '');
         }
@@ -137,7 +136,6 @@ const DetailKebun = ({
     },
   });
 
-  // Update form values when kebunData changes
   useEffect(() => {
     if (kebunData) {
       console.log('Updating form with kebunData:', kebunData);
@@ -164,32 +162,23 @@ const DetailKebun = ({
     }
   }, [kebunData]);
 
-  // Handle kelompok tani change
   const handleKelompokTaniChange = (e) => {
     const value = e.target.value;
 
-    // Use setFieldValue to ensure the value is properly set
     formik.setFieldValue('kelompok_tani', value);
     formik.setFieldTouched('kelompok_tani', false);
-
-    console.log('Current formik values:', formik.values);
-
-    // Reset petani selection and fetch new petani options
     formik.setFieldValue('petani_id', '');
 
     fetchPetaniByKelompok(value);
   };
 
   const handleSubmit = async () => {
-    // Custom validation for petani field
     const errors = await formik.validateForm();
 
-    // If kelompok tani is selected but no petani options are loaded yet, wait a bit
     if (formik.values.kelompok_tani && petaniOptions.length === 0) {
-      return; // Don't submit yet, wait for options to load
+      return;
     }
 
-    // If kelompok tani is selected and petani options are available but no petani selected
     if (
       formik.values.kelompok_tani &&
       petaniOptions.length > 0 &&
@@ -289,7 +278,7 @@ const DetailKebun = ({
         </div>
 
         <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
-          <div className="flex flex-row gap-2 items-end">
+          <div className="flex flex-row items-end gap-2">
             <Select
               label="Waktu Tanam"
               name="waktu_tanam_month"

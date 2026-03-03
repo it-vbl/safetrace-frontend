@@ -78,7 +78,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
       };
       reader.readAsText(blobFile);
       setIsManual(true);
-    } else if (fileType === 'shp') {
+    } else if (fileType === 'shp' || fileType === 'zip') {
       const arrayBuffer = await blobFile.arrayBuffer();
       const json = await shp(arrayBuffer);
       const newCoords = json.features?.[0].geometry.coordinates?.[0].map(
@@ -268,12 +268,18 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
         ) : (
           <div className="flex flex-1 flex-col gap-4">
             <div className="text-[12px]">
-              Upload <b>.geojson</b> file yang sudah disiapkan.
+              Upload <b>.zip / .geojson</b> file yang sudah disiapkan.
             </div>
             <div>
               <Upload
                 label="Upload File"
-                allowedFiles={['.geojson', 'application/geo+json']}
+                allowedFiles={[
+                  '.geojson',
+                  'application/geo+json',
+                  '.zip',
+                  'application/zip',
+                  'application/x-zip-compressed',
+                ]}
                 onChangeValue={(file) => handleFileUpload(file)}
               />
             </div>

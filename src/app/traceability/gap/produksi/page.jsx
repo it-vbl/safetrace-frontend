@@ -80,7 +80,10 @@ const ProduksiPage = () => {
   const fetchProduksiList = async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = {
+        page: currentPage,
+        page_size: pageSize,
+      };
       if (selectedKelompok) params.kelompok = selectedKelompok;
       if (search) params.search = search;
       if (selectedYear) params.tahun = selectedYear;
@@ -257,16 +260,6 @@ const ProduksiPage = () => {
     return produksiData;
   }, [produksiData]);
 
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredData.slice(start, end);
-  }, [filteredData, currentPage, pageSize]);
-
-  useEffect(() => {
-    setTotalProduksi(filteredData.length);
-  }, [filteredData]);
-
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full min-w-[320px] max-w-full">
       <div className="flex h-full flex-col gap-4">
@@ -286,7 +279,7 @@ const ProduksiPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={(e) => handleSearchTextChange(e.target.value)}
-                  placeholder="Cari..."
+                  placeholder="Cari Petani"
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 
@@ -328,7 +321,7 @@ const ProduksiPage = () => {
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
             defaultColDef={defaultColDef}
-            rowData={paginatedData}
+            rowData={produksiData}
             columnDefs={colDefs}
           />
         </div>
