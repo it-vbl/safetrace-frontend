@@ -183,9 +183,15 @@ const CreatePetaniTraceability = () => {
         }
       } catch (error) {
         console.error(error);
-        toast.error(
-          error?.response?.data?.message || 'Gagal menyimpan data petani'
-        );
+        const dataStr = error?.response?.data;
+        if (dataStr && dataStr.errors && typeof dataStr.errors === 'object') {
+          const errorMessages = Object.values(dataStr.errors).flat().join(', ');
+          toast.error(
+            errorMessages || dataStr.message || 'Gagal menyimpan data petani'
+          );
+        } else {
+          toast.error(dataStr?.message || 'Gagal menyimpan data petani');
+        }
       } finally {
         setSubmitting(false);
       }
@@ -342,7 +348,7 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                isRequired
+                requiredField
               />
               <InputText
                 label="No. KK"
@@ -396,7 +402,7 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                isRequired
+                requiredField
               />
             </div>
             <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
@@ -416,7 +422,7 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                isRequired
+                requiredField
               />
               <DatePicker
                 label="Tanggal Keluar"

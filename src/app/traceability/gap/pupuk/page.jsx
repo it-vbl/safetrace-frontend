@@ -263,6 +263,11 @@ const PupukPage = () => {
         headerName: 'Umur Tanaman',
         flex: 1,
         minWidth: 140,
+        cellRenderer: (params) => {
+          const val = params.value;
+          if (val === '-' || val === null || val === undefined) return '-';
+          return `${val} tahun`;
+        },
       },
       {
         field: 'jumlah_pokok',
@@ -275,6 +280,11 @@ const PupukPage = () => {
         headerName: 'Total Pupuk',
         flex: 1,
         minWidth: 120,
+        cellRenderer: (params) => {
+          const val = params.value;
+          if (val === '-' || val === null || val === undefined) return '-';
+          return `${val} kg`;
+        },
       },
     ],
     [ActionsCellRenderer]
@@ -304,7 +314,7 @@ const PupukPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
-                  placeholder="Cari..."
+                  placeholder="Cari Petani"
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 

@@ -489,7 +489,7 @@ const KebunPage = () => {
                 <SearchBar
                   onChange={handleSearchTextChange}
                   onClear={() => setSearch('')}
-                  placeholder="Cari..."
+                  placeholder="Cari Petani"
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 

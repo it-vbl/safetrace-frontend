@@ -546,7 +546,7 @@ const DiklatPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={(e) => handleSearchTextChange(e.target.value)}
-                  placeholder="Cari..."
+                  placeholder="Cari Petani"
                   className="w-full sm:w-auto lg:w-[200px]"
                 />
 

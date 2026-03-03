@@ -130,8 +130,8 @@ const KontakPage = () => {
   }, [currentPage, pageSize, search]);
 
   const handleSearchTextChange = useCallback(
-    debounce((e) => {
-      setSearch(e.target.value);
+    debounce((value) => {
+      setSearch(value);
       setCurrentPage(1);
     }, 300),
     []
@@ -254,7 +254,16 @@ const KontakPage = () => {
           flex: 1,
           minWidth: 120,
           cellRenderer: (params) => {
-            return params.value === '1' ? 'Manual' : 'CSV';
+            const matched = sumberKontak?.find((s) => s.value === params.value);
+            return matched
+              ? matched.label
+              : params.value === '1'
+              ? 'Manual'
+              : params.value === '2'
+              ? 'Upload CSV'
+              : params.value === '3'
+              ? 'API'
+              : params.value;
           },
         },
         {
@@ -270,7 +279,7 @@ const KontakPage = () => {
     }
 
     return base;
-  }, [isMobileScreen, ActionsCellRenderer]);
+  }, [isMobileScreen, ActionsCellRenderer, sumberKontak]);
 
   const autoSizeStrategy = useMemo(() => {
     return {
@@ -544,7 +553,7 @@ const KontakPage = () => {
             value={createMethod}
             direction="row"
             onChangeValue={handleCreateMethodChange}
-            options={sumberKontak || []}
+            options={(sumberKontak || []).filter((opt) => opt.value !== '3')}
           />
 
           {createMethod === '1' ? (
@@ -817,7 +826,12 @@ const KontakPage = () => {
           </Heading>
           <div className="flex w-full gap-2 sm:w-auto">
             <SearchBar
-              onChange={handleSearchTextChange}
+              value={search}
+              onChange={(e) => handleSearchTextChange(e.target.value)}
+              onClear={() => {
+                setSearch('');
+                setCurrentPage(1);
+              }}
               placeholder="Cari kontak"
               className="w-full sm:w-[300px]"
             />

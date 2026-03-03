@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
+
 import Heading from '@/components/atoms/Typography/Heading';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputMessage from '@/components/molecules/InputMessage';
@@ -11,6 +14,8 @@ import {
   getBroadcastDetail,
   getBroadcastKontakList,
 } from '@/services/broadcast';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 const DetailPesanPage = () => {
   const router = useRouter();
@@ -117,10 +122,17 @@ const DetailPesanPage = () => {
             r?.status_kirim ||
             r?.keterangan ||
             '';
+
           if (!status) {
-            if (r?.gagal === true) status = 'Gagal';
-            else if (r?.terkirim === true) status = 'Terkirim';
-            else status = 'Menunggu';
+            if (data?.terkirim === true && r?.wa_valid === true) {
+              status = 'Terkirim';
+            } else if (r?.gagal === true || r?.wa_valid === false) {
+              status = 'Gagal';
+            } else if (r?.terkirim === true) {
+              status = 'Terkirim';
+            } else {
+              status = 'Menunggu';
+            }
           }
 
           return {
@@ -288,52 +300,52 @@ const DetailPesanPage = () => {
           </Heading>
 
           <div className="mb-6 px-6">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                      No.
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                      Penerima
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                      No. Handphone
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                      Waktu Pengiriman
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(paginatedRecipients || []).map((recipient) => (
-                    <tr
-                      key={recipient.no}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recipient.no}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recipient.name}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recipient.phone}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recipient.sendTime}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recipient.status}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="ag-theme-quartz relative w-full">
+              <AgGridReact
+                overlayLoadingTemplate="."
+                autoSizeStrategy={{ type: 'fitCellContents' }}
+                defaultColDef={{
+                  resizable: true,
+                  minWidth: 100,
+                  wrapText: true,
+                  autoHeight: true,
+                }}
+                domLayout="autoHeight"
+                rowHeight={40}
+                rowData={paginatedRecipients}
+                columnDefs={[
+                  {
+                    field: 'no',
+                    headerName: 'No.',
+                    minWidth: 70,
+                    maxWidth: 90,
+                  },
+                  {
+                    field: 'name',
+                    headerName: 'Penerima',
+                    minWidth: 150,
+                    flex: 2,
+                  },
+                  {
+                    field: 'phone',
+                    headerName: 'No. Handphone',
+                    minWidth: 150,
+                    flex: 2,
+                  },
+                  {
+                    field: 'sendTime',
+                    headerName: 'Waktu Pengiriman',
+                    minWidth: 180,
+                    flex: 2,
+                  },
+                  {
+                    field: 'status',
+                    headerName: 'Status',
+                    minWidth: 120,
+                    flex: 1,
+                  },
+                ]}
+              />
             </div>
             {/* Pagination */}
             <div className="mt-4 flex justify-center sm:justify-end">

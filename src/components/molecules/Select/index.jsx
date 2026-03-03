@@ -156,6 +156,9 @@ const Select = ({
       }
     };
   }, [isDropdownOpen, calculateDropdownPosition]);
+  useEffect(() => {
+    setSelectedValue(value);
+  }, [value]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -339,7 +342,7 @@ const Select = ({
               className={cn(
                 'mr-2 scale-100 text-red-500 transition-all duration-300',
                 {
-                  'hover:rotate-180 hover:scale-[1.1] cursor-pointer':
+                  'cursor-pointer hover:rotate-180 hover:scale-[1.1]':
                     !disabled,
                   'cursor-not-allowed opacity-50': disabled,
                 }

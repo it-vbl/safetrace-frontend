@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Heading from '@/components/atoms/Typography/Heading';
 import DateRange from '@/components/molecules/DateRange';
 import numberFormat from '@/libs/utils/numberFormat';
+import { getSidebarStatistics } from '@/services/kebun';
 import {
   getBarChartBeratTimbangan,
   getBarChartTotalPenjualan,
@@ -60,6 +61,12 @@ const RightSidebar = ({
     labels: [],
     data: [],
   });
+  const [sidebarStats, setSidebarStats] = useState({
+    total_alert: 0,
+    total_luas_deforestation: 0,
+    total_petani: 0,
+    total_kebun: 0,
+  });
   const [loading, setLoading] = useState(false);
 
   // Handle date range change
@@ -77,21 +84,26 @@ const RightSidebar = ({
 
     setLoading(true);
     try {
-      const [totalPenjualanRes, beratTimbanganRes, beratTimbanganPabrikRes] =
-        await Promise.all([
-          getBarChartTotalPenjualan({
-            start_date: startDate,
-            end_date: endDate,
-          }),
-          getBarChartBeratTimbangan({
-            start_date: startDate,
-            end_date: endDate,
-          }),
-          getDonutChartBeratTimbanganPabrik({
-            start_date: startDate,
-            end_date: endDate,
-          }),
-        ]);
+      const [
+        totalPenjualanRes,
+        beratTimbanganRes,
+        beratTimbanganPabrikRes,
+        sidebarStatsRes,
+      ] = await Promise.all([
+        getBarChartTotalPenjualan({
+          start_date: startDate,
+          end_date: endDate,
+        }),
+        getBarChartBeratTimbangan({
+          start_date: startDate,
+          end_date: endDate,
+        }),
+        getDonutChartBeratTimbanganPabrik({
+          start_date: startDate,
+          end_date: endDate,
+        }),
+        getSidebarStatistics(), // Fetch sidebar stats
+      ]);
 
       if (totalPenjualanRes?.data?.data) {
         setTotalPenjualanData(totalPenjualanRes.data.data);
@@ -102,8 +114,11 @@ const RightSidebar = ({
       if (beratTimbanganPabrikRes?.data?.data) {
         setBeratTimbanganPabrikData(beratTimbanganPabrikRes.data.data);
       }
+      if (sidebarStatsRes?.data?.data) {
+        setSidebarStats(sidebarStatsRes.data.data);
+      }
     } catch (error) {
-      console.error('Error fetching chart data:', error);
+      console.error('Error fetching chart and statistics data:', error);
     } finally {
       setLoading(false);
     }
@@ -124,26 +139,26 @@ const RightSidebar = ({
     () => [
       {
         label: 'Total Alert',
-        value: 1789,
+        value: sidebarStats.total_alert || 0,
         color: 'text-red-600',
       },
       {
         label: 'Total Area Deforestasi',
-        value: 1789,
+        value: sidebarStats.total_luas_deforestation || 0,
         color: 'text-red-600',
       },
       {
         label: 'Total Petani',
-        value: 3789,
+        value: sidebarStats.total_petani || 0,
         color: 'text-blue-600',
       },
       {
         label: 'Total Kebun',
-        value: 4009,
+        value: sidebarStats.total_kebun || 0,
         color: 'text-blue-600',
       },
     ],
-    []
+    [sidebarStats]
   );
 
   // Fetch chart data when component mounts
@@ -317,11 +332,11 @@ const RightSidebar = ({
         onClick={() =>
           dispatch(setMapviewRightSidebarOpen(!mapviewRightSidebarOpen))
         }
-        className={`absolute duration-200 ease-in-out transition-all ${
+        className={`absolute transition-all duration-200 ease-in-out ${
           mapviewRightSidebarOpen ? 'right-[276px]' : 'right-[12px]'
-        }  top-[16px] z-[500] bg-white h-[32px] w-[32px] border border-gray-300 rounded-[4px] justify-end cursor-pointer`}
+        }  top-[16px] z-[500] h-[32px] w-[32px] cursor-pointer justify-end rounded-[4px] border border-gray-300 bg-white`}
       >
-        <div className="flex w-full h-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center">
           <ChevronLeft
             className={`${mapviewRightSidebarOpen ? 'rotate-180' : ''}`}
             size={18}
@@ -330,7 +345,7 @@ const RightSidebar = ({
       </div>
       <div
         id="right-sidebar"
-        className={`absolute overflow-x-visible !h-[calc(100%-32px)] right-4 top-4 z-[500] w-[250px] duration-300 ease-in-out transition-all border border-gray-200 bg-white rounded-[4px] p-3 shadow-lg overflow-y-auto floating-scrollbar ${
+        className={`floating-scrollbar absolute right-4 top-4 z-[500] !h-[calc(100%-32px)] w-[250px] overflow-y-auto overflow-x-visible rounded-[4px] border border-gray-200 bg-white p-3 shadow-lg transition-all duration-300 ease-in-out ${
           mapviewRightSidebarOpen ? 'translate-x-0' : 'translate-x-[200%]'
         }`}
       >
@@ -359,7 +374,7 @@ const RightSidebar = ({
             <div className="grid grid-cols-2 gap-2">
               {statistics.map((stat, index) => (
                 <div key={index} className="flex flex-col items-start">
-                  <div className="text-xs font-bold text-gray-600 mt-1 leading-tight">
+                  <div className="mt-1 text-xs font-bold leading-tight text-gray-600">
                     {stat.label}
                   </div>
                   <span className={`text-xl font-bold ${stat.color}`}>
@@ -380,7 +395,7 @@ const RightSidebar = ({
             </Heading>
             <div className="h-[200px] w-full">
               {loading ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex h-full items-center justify-center">
                   <span className="text-xs text-gray-500">Loading...</span>
                 </div>
               ) : (
@@ -399,7 +414,7 @@ const RightSidebar = ({
             </Heading>
             <div className="h-[200px] w-full">
               {loading ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex h-full items-center justify-center">
                   <span className="text-xs text-gray-500">Loading...</span>
                 </div>
               ) : (
@@ -418,7 +433,7 @@ const RightSidebar = ({
             </Heading>
             <div className="h-[250px] w-full">
               {loading ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex h-full items-center justify-center">
                   <span className="text-xs text-gray-500">Loading...</span>
                 </div>
               ) : (

@@ -88,7 +88,7 @@ const DeleteConfirmationWithInputModal = ({
           </Button>
           <Button
             type="submit"
-            disabled={
+            isDisabled={
               isLoading || !inputValue || inputValue !== formattedExpectedInput
             }
           >

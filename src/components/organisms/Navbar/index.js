@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -24,14 +24,6 @@ const Navbar = () => {
   const [name, setName] = useState('');
   const [roles, setRoles] = useState([]);
   const [mounted, setMounted] = useState(false);
-  const [isTraceabilityDropdownOpen, setIsTraceabilityDropdownOpen] =
-    useState(false);
-  const [
-    isTraceabilityDropdownOpenMobile,
-    setIsTraceabilityDropdownOpenMobile,
-  ] = useState(false);
-  const traceabilityDropdownRef = useRef(null);
-  const traceabilityDropdownRefMobile = useRef(null);
 
   const { sidebarOpen } = useSelector((state) => state.app);
   const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
@@ -75,32 +67,6 @@ const Navbar = () => {
     'penjualan.view',
   ]);
 
-  // Handle click outside dropdown
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        traceabilityDropdownRef.current &&
-        !traceabilityDropdownRef.current.contains(event.target)
-      ) {
-        setIsTraceabilityDropdownOpen(false);
-      }
-      if (
-        traceabilityDropdownRefMobile.current &&
-        !traceabilityDropdownRefMobile.current.contains(event.target)
-      ) {
-        setIsTraceabilityDropdownOpenMobile(false);
-      }
-    }
-
-    if (isTraceabilityDropdownOpen || isTraceabilityDropdownOpenMobile) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isTraceabilityDropdownOpen, isTraceabilityDropdownOpenMobile]);
-
   return (
     <div className="flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4">
       {/* logo */}
@@ -130,50 +96,24 @@ const Navbar = () => {
           </div>
         )}
         {canSeeTraceability && (
-          <div
-            className="relative overflow-y-visible"
-            ref={traceabilityDropdownRef}
-          >
+          <>
             <div
-              className={`cursor-pointer flex flex-row items-center gap-2 tracking-[1px] ${getMenuClassName(
-                '/traceability'
-              )} ${pathname == '/' ? 'text-primary font-bold' : 'text-black'}`}
-              onClick={() =>
-                setIsTraceabilityDropdownOpen(!isTraceabilityDropdownOpen)
-              }
+              className={`cursor-pointer tracking-[1px] ${
+                pathname === '/' ? 'font-bold text-primary' : 'text-black'
+              }`}
+              onClick={() => handleMenuClick('/')}
             >
-              <span>Traceability</span>
-              <ChevronDown size={16} />
+              MapView
             </div>
-            {isTraceabilityDropdownOpen && (
-              <div className="absolute left-0 top-full left-[50%] -translate-x-[50%] z-[999] mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg z-50">
-                <div
-                  className={`cursor-pointer px-4 py-2 text-sm hover:bg-gray-100 ${
-                    pathname === '/' ? 'text-primary font-bold' : 'text-black'
-                  }`}
-                  onClick={() => {
-                    handleMenuClick('/');
-                    setIsTraceabilityDropdownOpen(false);
-                  }}
-                >
-                  MapView
-                </div>
-                <div
-                  className={`cursor-pointer px-4 py-2 text-sm hover:bg-gray-100 ${
-                    pathname.startsWith('/traceability')
-                      ? 'text-primary font-bold'
-                      : 'text-black'
-                  }`}
-                  onClick={() => {
-                    handleMenuClick('/traceability/petani');
-                    setIsTraceabilityDropdownOpen(false);
-                  }}
-                >
-                  Traceability
-                </div>
-              </div>
-            )}
-          </div>
+            <div
+              className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+                '/traceability'
+              )}`}
+              onClick={() => handleMenuClick('/traceability/petani')}
+            >
+              Traceability
+            </div>
+          </>
         )}
         {/* <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
@@ -201,51 +141,24 @@ const Navbar = () => {
           </div>
         )}
         {canSeeTraceability && (
-          <div className="relative" ref={traceabilityDropdownRefMobile}>
+          <>
             <div
-              className={`cursor-pointer tracking-[1px] flex flex-row items-center gap-1 ${getMenuClassName(
-                '/traceability'
-              )} ${pathname == '/' ? 'text-primary font-bold' : 'text-black'}`}
-              onClick={() =>
-                setIsTraceabilityDropdownOpenMobile(
-                  !isTraceabilityDropdownOpenMobile
-                )
-              }
+              className={`cursor-pointer tracking-[1px] ${
+                pathname === '/' ? 'font-bold text-primary' : 'text-black'
+              }`}
+              onClick={() => handleMenuClick('/')}
             >
-              <span>Traceability</span>
-              <ChevronDown size={12} />
+              MapView
             </div>
-            {isTraceabilityDropdownOpenMobile && (
-              <div className="absolute left-0 top-full mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-[9999]">
-                <div
-                  className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
-                    pathname === '/'
-                      ? 'text-primary font-bold'
-                      : 'text-black'
-                  }`}
-                  onClick={() => {
-                    handleMenuClick('/');
-                    setIsTraceabilityDropdownOpenMobile(false);
-                  }}
-                >
-                  MapView
-                </div>
-                <div
-                  className={`cursor-pointer px-3 py-2 text-xs hover:bg-gray-100 ${
-                    pathname.startsWith('/traceability')
-                      ? 'text-primary font-bold'
-                      : 'text-black'
-                  }`}
-                  onClick={() => {
-                    handleMenuClick('/traceability/petani');
-                    setIsTraceabilityDropdownOpenMobile(false);
-                  }}
-                >
-                  Traceability
-                </div>
-              </div>
-            )}
-          </div>
+            <div
+              className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+                '/traceability'
+              )}`}
+              onClick={() => handleMenuClick('/traceability/petani')}
+            >
+              Traceability
+            </div>
+          </>
         )}
         <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(

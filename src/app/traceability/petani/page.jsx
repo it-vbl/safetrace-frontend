@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import DeleteConfirmationWithInputModal from '@/components/molecules/DeleteConfirmationWithInputModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
@@ -506,11 +506,12 @@ const PetaniPage = () => {
         </div>
       </div>
 
-      <DeleteConfirmationModal
+      <DeleteConfirmationWithInputModal
         isOpen={showModalConfirmDeletePetani}
         onClose={handleDeleteCancel}
         onConfirm={handleDeletePetani}
         itemName={`petani dengan nama ${selectedPetaniToDelete?.nama_petani}`}
+        expectedInput={selectedPetaniToDelete?.nama_petani || ''}
         isLoading={loading}
       />
     </div>
