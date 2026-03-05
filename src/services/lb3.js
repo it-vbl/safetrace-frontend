@@ -57,7 +57,7 @@ export const downloadListLB3 = (params = {}) => {
     }),
   };
 
-  return api.get(`/gap/lb3/list/download/`, {
+  return api.get(`/gap/lb3/download/`, {
     params: formattedParams,
     responseType: 'blob',
   });

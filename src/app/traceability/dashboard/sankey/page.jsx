@@ -13,7 +13,11 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DatePicker from '@/components/molecules/DatePicker';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
-import { getListPabrik, getSankeyData } from '@/services/penjualan';
+import {
+  downloadSankeyData,
+  getListPabrik,
+  getSankeyData,
+} from '@/services/penjualan';
 import { getKelompokTani } from '@/services/referensi';
 
 const SankeyPage = () => {
@@ -26,6 +30,7 @@ const SankeyPage = () => {
   const [data, setData] = useState({ nodes: [], links: [] });
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
 
   const dateDropdownRef = useRef(null);
   const chartRef = useRef(null);
@@ -194,6 +199,42 @@ const SankeyPage = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      setIsExportingExcel(true);
+      const params = {
+        start_date: moment(startDate, 'DD-MM-YYYY').format('YYYY-MM-DD'),
+        end_date: moment(endDate, 'DD-MM-YYYY').format('YYYY-MM-DD'),
+        ...(selectedPabrik.length > 0 && {
+          pabrik: selectedPabrik,
+        }),
+        ...(selectedKelompok.length > 0 && {
+          kelompok_tani: selectedKelompok,
+        }),
+      };
+
+      const response = await downloadSankeyData(params);
+
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `sankey-diagram-${moment().format('YYYY-MM-DD-HH-mm')}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      toast.error('Gagal mengunduh data');
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
   return (
     <div className="flex h-full w-full flex-col gap-4 sm:gap-6">
       {/* Header - Responsive */}
@@ -274,6 +315,15 @@ const SankeyPage = () => {
             className="!px-2 sm:!px-3"
             icon={<DownloadCloudIcon size={18} />}
             title="Export Excel"
+            onClick={handleExportExcel}
+            isLoading={isExportingExcel}
+            disabled={
+              isExportingExcel ||
+              isExporting ||
+              isLoading ||
+              isError ||
+              data.nodes.length === 0
+            }
           />
           <Button
             variant="primary"

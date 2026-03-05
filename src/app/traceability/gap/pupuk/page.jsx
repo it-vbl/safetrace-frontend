@@ -33,6 +33,7 @@ const PupukPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [pupukData, setPupukData] = useState([]);
   const [totalPupuk, setTotalPupuk] = useState(0);
 
@@ -158,6 +159,7 @@ const PupukPage = () => {
 
   const handleExportExcel = async () => {
     try {
+      setIsExportingExcel(true);
       const params = {};
       if (selectedKelompok) params.kelompok = selectedKelompok;
       if (search) params.search = search;
@@ -178,6 +180,8 @@ const PupukPage = () => {
       link.parentNode.removeChild(link);
     } catch (error) {
       toast.error('Gagal mengunduh data');
+    } finally {
+      setIsExportingExcel(false);
     }
   };
 
@@ -343,6 +347,8 @@ const PupukPage = () => {
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
                   onClick={handleExportExcel}
+                  isLoading={isExportingExcel}
+                  disabled={isExportingExcel || loading}
                 />
               </div>
             </div>
