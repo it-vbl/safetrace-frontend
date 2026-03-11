@@ -100,7 +100,13 @@ const Pemetaan = ({
     <div className="space-y-6">
       <div className="rounded-lg border border-gray-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">PEMETAAN</h3>
-        <DataPemetaan data={pemetaanData} formik={formik} mode="create" />
+        <DataPemetaan 
+          data={pemetaanData} 
+          formik={formik} 
+          mode="create" 
+          idKebun={idKebun} 
+          petaniId={kebunData?.petani_id || 1} 
+        />
         <div className="mt-4 flex justify-between gap-2">
           <div className="flex gap-2">
             <Button

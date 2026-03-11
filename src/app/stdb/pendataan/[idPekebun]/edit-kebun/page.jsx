@@ -102,6 +102,8 @@ const DataKebun = ({
             formik={formik?.formikPemetaan}
             data={data}
             passed={initialActiveTab > 5}
+            idKebun={data?.id}
+            petaniId={data?.petani_id}
           />
         ),
       },

@@ -105,7 +105,13 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* DataPemetaan Component */}
-        <DataPemetaan data={kebunData} formik={formik} mode="edit" />
+        <DataPemetaan 
+          data={kebunData} 
+          formik={formik} 
+          mode="edit" 
+          idKebun={kebunData?.id}
+          petaniId={kebunData?.petani_id}
+        />
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-6">
