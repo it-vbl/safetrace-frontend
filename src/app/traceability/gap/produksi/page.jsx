@@ -33,6 +33,7 @@ const ProduksiPage = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const [loading, setLoading] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [produksiData, setProduksiData] = useState([]);
   const [totalProduksi, setTotalProduksi] = useState(0);
 
@@ -154,6 +155,7 @@ const ProduksiPage = () => {
 
   const handleExportExcel = async () => {
     try {
+      setIsExportingExcel(true);
       const params = {};
       if (selectedKelompok) params.kelompok = selectedKelompok;
       if (search) params.search = search;
@@ -174,6 +176,8 @@ const ProduksiPage = () => {
       link.parentNode.removeChild(link);
     } catch (error) {
       toast.error('Gagal mengunduh data');
+    } finally {
+      setIsExportingExcel(false);
     }
   };
 
@@ -308,6 +312,8 @@ const ProduksiPage = () => {
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
                   onClick={handleExportExcel}
+                  isLoading={isExportingExcel}
+                  disabled={isExportingExcel || loading}
                 />
               </div>
             </div>

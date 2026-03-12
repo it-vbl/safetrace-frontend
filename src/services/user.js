@@ -14,3 +14,5 @@ export const getUserDetail = (userId) =>
 export const updateUserProfile = (payload) =>
   api.post('/accounts/user/profile/update/', null, payload);
 export const getUserProfile = () => api.get('/accounts/user/profile/');
+export const deleteUser = (userId) =>
+  api.delete(`/accounts/user/delete/${userId}/`);
