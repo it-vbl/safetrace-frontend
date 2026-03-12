@@ -35,7 +35,7 @@ export const createKebunLampiran = (payload) =>
 export const updateKebunLampiran = (idKebun, payload) =>
   api.postData(`/kebun/lampiran/update/${idKebun}/`, payload);
 export const getStatistikDokumenKebun = () =>
-  api.get('/kebun/statistik/dokumen/');
+  api.get('/statistics/kebun/dokumen/v2/');
 export const getSidebarStatistics = () =>
   api.get('/statistics/sidebar-statistics/');
 export const uploadShapefile = (id, payload) =>
