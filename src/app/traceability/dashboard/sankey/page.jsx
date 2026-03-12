@@ -97,28 +97,8 @@ const SankeyPage = () => {
     };
   }, []);
 
-  const validateDateRange = (start, end) => {
-    const s = moment(start, 'DD-MM-YYYY');
-    const e = moment(end, 'DD-MM-YYYY');
-    const diffDays = e.diff(s, 'days');
-
-    if (diffDays > 31) {
-      toast.error('Rentang tanggal maksimal 31 hari');
-      return false;
-    }
-    if (diffDays < 0) {
-      toast.error('Tanggal selesai harus setelah tanggal mulai');
-      return false;
-    }
-    return true;
-  };
-
   useEffect(() => {
     const fetchData = async () => {
-      if (!validateDateRange(startDate, endDate)) {
-        return;
-      }
-
       setIsLoading(true);
       setIsError(false);
       try {
@@ -291,6 +271,10 @@ const SankeyPage = () => {
                     value={startDate}
                     onChange={handleChangeStartDate}
                     inputContainerClassName="!h-[40px]"
+                    maxDate={moment(endDate, 'DD-MM-YYYY').format('YYYY-MM-DD')}
+                    minDate={moment(endDate, 'DD-MM-YYYY')
+                      .subtract(31, 'days')
+                      .format('YYYY-MM-DD')}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -306,6 +290,9 @@ const SankeyPage = () => {
                     minDate={moment(startDate, 'DD-MM-YYYY').format(
                       'YYYY-MM-DD'
                     )}
+                    maxDate={moment(startDate, 'DD-MM-YYYY')
+                      .add(31, 'days')
+                      .format('YYYY-MM-DD')}
                   />
                 </div>
               </div>

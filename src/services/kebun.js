@@ -29,12 +29,14 @@ export const deleteKomoditas = (payload) =>
 export const deleteKebun = (payload) =>
   api.post(`/pekebun/kebun/delete/`, null, payload);
 export const downloadSHPKebun = (idKebun) =>
-  api.get(`/pekebun/kebun/peta/download/${idKebun}`);
+  api.get(`/kebun/peta/download/${idKebun}/`, { responseType: 'blob' });
 export const createKebunLampiran = (payload) =>
   api.postData(`/kebun/lampiran/create/`, payload);
 export const updateKebunLampiran = (idKebun, payload) =>
   api.postData(`/kebun/lampiran/update/${idKebun}/`, payload);
 export const getStatistikDokumenKebun = () =>
-  api.get('/kebun/statistik/dokumen/');
+  api.get('/statistics/kebun/dokumen/v2/');
 export const getSidebarStatistics = () =>
   api.get('/statistics/sidebar-statistics/');
+export const uploadShapefile = (id, payload) =>
+  api.postData(`/kebun/peta/upload-shapefile/${id}/`, payload);

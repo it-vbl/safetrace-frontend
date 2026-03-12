@@ -143,17 +143,36 @@ const DetailKebunPage = () => {
 
   const handleDownloadPeta = async () => {
     try {
+      const toastId = toast.loading('Mengunduh SHP...', { autoClose: false });
       const res = await downloadSHPKebun(kebunData?.id);
-      if (res.status == 200) {
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'peta.shp');
-        document.body.appendChild(link);
-        link.click();
+
+      const contentDisposition = res.headers['content-disposition'];
+      let filename = 'peta.zip';
+
+      if (contentDisposition) {
+        const matches = /filename="?([^"]+)"?/.exec(contentDisposition);
+        if (matches != null && matches[1]) filename = matches[1];
       }
+
+      const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.update(toastId, {
+        render: 'File SHP berhasil diunduh',
+        type: 'success',
+        isLoading: false,
+        autoClose: 3000,
+      });
     } catch (err) {
       console.log(err);
+      toast.dismiss();
       toast.error(err?.response?.data?.message || 'Gagal mengunduh SHP');
     }
   };
