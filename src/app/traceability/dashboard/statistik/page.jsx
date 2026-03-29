@@ -5,6 +5,7 @@ import { useEffect,useState } from 'react';
 import Heading from '@/components/atoms/Typography/Heading';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import TraceabilitySummaryCard from '@/components/molecules/TraceabilitySummaryCard';
+import numberFormat from '@/libs/utils/numberFormat';
 import { getStatistikDokumenKebun } from '@/services/kebun';
 import {
   getStatistikDokumenPetani,
@@ -96,30 +97,43 @@ const TraceabilityDashboard = () => {
       ? []
       : [
           {
-            jumlah: dataKebunDokumen?.lahan?.jumlah || 0,
-            presentase: dataKebunDokumen?.lahan?.persentase || 0,
+            jumlah: dataKebunDokumen?.lahan?.jumlah?.plot || 0,
+            presentase: dataKebunDokumen?.lahan?.persentase?.plot || 0,
+            jumlahLabel: `${numberFormat(dataKebunDokumen?.lahan?.jumlah?.plot || 0)} Plot / ${numberFormat(dataKebunDokumen?.lahan?.jumlah?.ha || 0)} Ha`,
+            presentaseLabel: `${dataKebunDokumen?.lahan?.persentase?.plot || 0}% / ${dataKebunDokumen?.lahan?.persentase?.ha || 0}%`,
           },
           {
-            jumlah: dataKebunDokumen?.stdb?.jumlah || 0,
-            presentase: dataKebunDokumen?.stdb?.persentase || 0,
+            jumlah: dataKebunDokumen?.stdb?.jumlah?.plot || 0,
+            presentase: dataKebunDokumen?.stdb?.persentase?.plot || 0,
+            jumlahLabel: `${numberFormat(dataKebunDokumen?.stdb?.jumlah?.plot || 0)} Plot / ${numberFormat(dataKebunDokumen?.stdb?.jumlah?.ha || 0)} Ha`,
+            presentaseLabel: `${dataKebunDokumen?.stdb?.persentase?.plot || 0}% / ${dataKebunDokumen?.stdb?.persentase?.ha || 0}%`,
           },
           {
-            jumlah: dataKebunDokumen?.shm?.jumlah || 0,
-            presentase: dataKebunDokumen?.shm?.persentase || 0,
+            jumlah: dataKebunDokumen?.shm?.jumlah?.plot || 0,
+            presentase: dataKebunDokumen?.shm?.persentase?.plot || 0,
+            jumlahLabel: `${numberFormat(dataKebunDokumen?.shm?.jumlah?.plot || 0)} Plot / ${numberFormat(dataKebunDokumen?.shm?.jumlah?.ha || 0)} Ha`,
+            presentaseLabel: `${dataKebunDokumen?.shm?.persentase?.plot || 0}% / ${dataKebunDokumen?.shm?.persentase?.ha || 0}%`,
           },
           {
-            jumlah: dataKebunDokumen?.skt?.jumlah || 0,
-            presentase: dataKebunDokumen?.skt?.persentase || 0,
+            jumlah: dataKebunDokumen?.skt?.jumlah?.plot || 0,
+            presentase: dataKebunDokumen?.skt?.persentase?.plot || 0,
+            jumlahLabel: `${numberFormat(dataKebunDokumen?.skt?.jumlah?.plot || 0)} Plot / ${numberFormat(dataKebunDokumen?.skt?.jumlah?.ha || 0)} Ha`,
+            presentaseLabel: `${dataKebunDokumen?.skt?.persentase?.plot || 0}% / ${dataKebunDokumen?.skt?.persentase?.ha || 0}%`,
           },
           {
-            jumlah: dataKebunDokumen?.ts?.jumlah || 0,
-            presentase: dataKebunDokumen?.ts?.persentase || 0,
+            jumlah: dataKebunDokumen?.ts?.jumlah?.plot || 0,
+            presentase: dataKebunDokumen?.ts?.persentase?.plot || 0,
+            jumlahLabel: `${numberFormat(dataKebunDokumen?.ts?.jumlah?.plot || 0)} Plot / ${numberFormat(dataKebunDokumen?.ts?.jumlah?.ha || 0)} Ha`,
+            presentaseLabel: `${dataKebunDokumen?.ts?.persentase?.plot || 0}% / ${dataKebunDokumen?.ts?.persentase?.ha || 0}%`,
           },
           {
-            jumlah: dataKebunDokumen?.peta?.jumlah || 0,
-            presentase: dataKebunDokumen?.peta?.persentase || 0,
+            jumlah: dataKebunDokumen?.peta?.jumlah?.plot || 0,
+            presentase: dataKebunDokumen?.peta?.persentase?.plot || 0,
+            jumlahLabel: `${numberFormat(dataKebunDokumen?.peta?.jumlah?.plot || 0)} Plot / ${numberFormat(dataKebunDokumen?.peta?.jumlah?.ha || 0)} Ha`,
+            presentaseLabel: `${dataKebunDokumen?.peta?.persentase?.plot || 0}% / ${dataKebunDokumen?.peta?.persentase?.ha || 0}%`,
           },
         ],
+      
   };
 
   if (error) {

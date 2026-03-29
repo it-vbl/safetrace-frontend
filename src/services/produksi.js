@@ -24,7 +24,22 @@ export const createProduksi = (payload) =>
 export const updateProduksi = (id, payload) =>
   api.post(`/gap/produksi/update/${id}/`, null, payload);
 
-export const downloadListProduksi = (params = undefined) => {
-  const config = params ? { params, responseType: 'blob' } : { responseType: 'blob' };
-  return api.get('/gap/produksi/list/download/', config);
+export const downloadListProduksi = (params = {}) => {
+  const formattedParams = {
+    ...params,
+    ...(params.search && {
+      search: params.search,
+    }),
+    ...(params.kelompok && {
+      kelompok: params.kelompok,
+    }),
+    ...(params.tahun && {
+      tahun: params.tahun,
+    }),
+  };
+
+  return api.get(`/gap/produksi/download/`, {
+    params: formattedParams,
+    responseType: 'blob',
+  });
 };

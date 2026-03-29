@@ -57,7 +57,7 @@ export const downloadListPupuk = (params = {}) => {
     }),
   };
 
-  return api.get(`/gap/pupuk/list/download/`, {
+  return api.get(`/gap/pupuk/download/`, {
     params: formattedParams,
     responseType: 'blob',
   });

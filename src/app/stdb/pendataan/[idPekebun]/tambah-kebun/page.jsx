@@ -93,7 +93,15 @@ const DataKebun = ({
         value: 5,
         clickable: initialActiveTab >= 5,
         passed: initialActiveTab > 5,
-        render: () => <DataPemetaan formik={formik?.formikPemetaan} data={data} passed={initialActiveTab > 5} />,
+        render: () => (
+          <DataPemetaan 
+            formik={formik?.formikPemetaan} 
+            data={data} 
+            passed={initialActiveTab > 5} 
+            idKebun={data?.id}
+            petaniId={data?.petani_id}
+          />
+        ),
       },
     ],
     [formik, initialActiveTab]

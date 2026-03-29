@@ -33,6 +33,7 @@ const PestisidaPage = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const [loading, setLoading] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [pestisidaData, setPestisidaData] = useState([]);
   const [totalPestisida, setTotalPestisida] = useState(0);
   const yearOptions = useYearOptions();
@@ -152,6 +153,7 @@ const PestisidaPage = () => {
 
   const handleExportExcel = async () => {
     try {
+      setIsExportingExcel(true);
       const params = {};
       if (selectedKelompok) params.kelompok = selectedKelompok;
       if (search) params.search = search;
@@ -172,6 +174,8 @@ const PestisidaPage = () => {
       link.parentNode.removeChild(link);
     } catch (error) {
       toast.error('Gagal mengunduh data');
+    } finally {
+      setIsExportingExcel(false);
     }
   };
 
@@ -304,6 +308,8 @@ const PestisidaPage = () => {
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
                   onClick={handleExportExcel}
+                  isLoading={isExportingExcel}
+                  disabled={isExportingExcel || loading}
                 />
               </div>
             </div>

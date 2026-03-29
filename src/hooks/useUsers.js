@@ -203,11 +203,16 @@ export const useUserManagement = () => {
   const deleteUser = useCallback(
     async (userId) => {
       try {
-        // This would be implemented when delete endpoint is available
+        const { deleteUser: deleteUserService } = await import(
+          '@/services/user'
+        );
+        await deleteUserService(userId);
         toast.success('Pengguna berhasil dihapus');
         refetch();
       } catch (err) {
-        toast.error('Failed to delete user');
+        const errorMessage =
+          err.response?.data?.message || 'Gagal menghapus pengguna';
+        toast.error(errorMessage);
         throw err;
       }
     },

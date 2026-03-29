@@ -9,11 +9,13 @@ import Switch from '@/components/atoms/Switch';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import Upload from '@/components/molecules/Upload';
+import { uploadShapefile } from '@/services/kebun';
 
-const DataPemetaan = ({ data, formik, mode = 'create' }) => {
+const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
   const [drawFromMap, setDrawFromMap] = useState(false);
   const [isManual, setIsManual] = useState(true);
   const [newCoord, setNewCoord] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
   const initialPolygon = data?.peta?.geom?.coordinates?.[0]?.map((coord) => ({
     lat: coord[1],
     lng: coord[0],
@@ -65,6 +67,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
   };
 
   const handleFileUpload = async (file) => {
+    setUploadedFile(file.value);
     const blobFile = file.value;
     const fileType = blobFile.name.split('.').pop();
     if (fileType === 'geojson') {
@@ -79,12 +82,31 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
       reader.readAsText(blobFile);
       setIsManual(true);
     } else if (fileType === 'shp' || fileType === 'zip') {
-      const arrayBuffer = await blobFile.arrayBuffer();
-      const json = await shp(arrayBuffer);
-      const newCoords = json.features?.[0].geometry.coordinates?.[0].map(
-        ([lng, lat]) => ({ lng, lat })
-      );
-      setCoords(newCoords);
+      try {
+        const formData = new FormData();
+        formData.append('petani_id', petaniId || 1);
+        formData.append('shapefile_upload', blobFile);
+
+        if (!idKebun) {
+          toast.error('Gagal mengunggah: ID Kebun tidak ditemukan');
+          return;
+        }
+
+        const toastId = toast.loading('Mengunggah shapefile...');
+        const response = await uploadShapefile(idKebun, formData);
+        toast.update(toastId, { render: 'Shapefile berhasil diunggah', type: 'success', isLoading: false, autoClose: 3000 });
+
+        if (response?.data?.data?.geom?.coordinates?.[0]) {
+          const newCoords = response.data.data.geom.coordinates[0].map(
+            (coord) => ({ lng: coord[0], lat: coord[1] })
+          );
+          setCoords(newCoords);
+        }
+      } catch (error) {
+        console.error('Error uploading shapefile:', error);
+        toast.dismiss();
+        toast.error('Gagal mengunggah file shapefile');
+      }
     }
   };
 
@@ -272,6 +294,7 @@ const DataPemetaan = ({ data, formik, mode = 'create' }) => {
             </div>
             <div>
               <Upload
+                file={uploadedFile}
                 label="Upload File"
                 allowedFiles={[
                   '.geojson',

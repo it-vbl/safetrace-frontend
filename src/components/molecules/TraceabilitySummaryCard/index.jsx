@@ -33,7 +33,9 @@ const TraceabilitySummaryCard = ({ title, headers, data }) => {
                   key={index}
                   className="py-2 text-center text-xs font-medium text-gray-900"
                 >
-                  {numberFormat(item.jumlah)}
+                  {item.jumlahLabel !== undefined
+                    ? item.jumlahLabel
+                    : numberFormat(item.jumlah)}
                 </td>
               ))}
             </tr>
@@ -46,7 +48,9 @@ const TraceabilitySummaryCard = ({ title, headers, data }) => {
                   key={index}
                   className="py-2 text-center text-xs font-medium text-gray-900"
                 >
-                  {item.presentase}%
+                  {item.presentaseLabel !== undefined
+                    ? item.presentaseLabel
+                    : `${item.presentase}%`}
                 </td>
               ))}
             </tr>
@@ -62,9 +66,10 @@ TraceabilitySummaryCard.propTypes = {
   headers: PropTypes.arrayOf(PropTypes.string).isRequired,
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      jumlah: PropTypes.number.isRequired,
-      presentase: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-        .isRequired,
+      jumlah: PropTypes.number,
+      presentase: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      jumlahLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+      presentaseLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     })
   ).isRequired,
 };

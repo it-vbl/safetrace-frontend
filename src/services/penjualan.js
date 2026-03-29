@@ -71,6 +71,15 @@ export const getSankeyData = (params = {}) =>
     },
   });
 
+export const downloadSankeyData = (params = {}) =>
+  api.get(`/penjualan/sankey-diagram/download/`, {
+    params,
+    responseType: 'blob',
+    paramsSerializer: (params) => {
+      return querystring.stringify(params, { arrayFormat: 'repeat' });
+    },
+  });
+
 export const getListPabrik = (params = {}) =>
   api.get(`/penjualan/pabrik/list/`, { params });
 
