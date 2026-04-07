@@ -11,9 +11,9 @@ import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import { deletePekerja, getPekerjaByPetani } from '@/services/pekerja';
 import { getDetailPetani } from '@/services/petani';
-import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-';
