@@ -23,13 +23,8 @@ const ModalEditLampiran = ({
   const [rspoFile, setRspoFile] = useState(null);
   const [ispoFile, setIspoFile] = useState(null);
 
-  // Check if lampiranData has any existing files
-  const hasExistingFiles =
-    lampiranData &&
-    (lampiranData.file_legalitas ||
-      lampiranData.file_stdb ||
-      lampiranData.file_rspo ||
-      lampiranData.file_ispo);
+  // Check if lampiranData exists by checking its ID
+  const hasExistingFiles = !!(lampiranData && lampiranData.id);
 
   const validationSchema = Yup.object({
     file_legalitas: Yup.mixed().nullable(),
