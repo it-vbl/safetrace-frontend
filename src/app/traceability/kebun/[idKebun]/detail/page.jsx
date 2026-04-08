@@ -188,7 +188,7 @@ const DetailKebunPage = () => {
     );
   };
 
-  const renderLampiranItem = (label, fileUrl) => {
+  const renderLampiranItem = (label, fileUrl, thumbUrl) => {
     if (!fileUrl) return null;
 
     const getFileExtension = (url) => {
@@ -201,6 +201,7 @@ const DetailKebunPage = () => {
       fileExtension
     );
     const isPDF = fileExtension === 'pdf';
+    const imageSrc = isImage && thumbUrl ? thumbUrl : fileUrl;
 
     return (
       <div
@@ -217,11 +218,11 @@ const DetailKebunPage = () => {
           {isImage ? (
             <div className="relative">
               <Image
-                src={fileUrl}
+                src={imageSrc}
                 alt={label}
                 width={400}
                 height={300}
-                className="h-auto w-full max-w-full rounded border border-gray-300 sm:max-w-md"
+                className="h-auto w-full max-w-full rounded border border-gray-300"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   const fb =
@@ -504,7 +505,7 @@ const DetailKebunPage = () => {
           {lampiranData && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:gap-6">
               {DOCUMENT_CONFIGS.map((doc) =>
-                renderLampiranItem(doc.label, lampiranData?.[doc.fileKey])
+                renderLampiranItem(doc.label, lampiranData?.[doc.fileKey], lampiranData?.[doc.thumbKey])
               )}
 
               {!lampiranData?.file_legalitas &&

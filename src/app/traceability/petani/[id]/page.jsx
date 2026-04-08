@@ -74,24 +74,24 @@ const TraceabilityPetaniDetail = () => {
     { label: 'PETANI', href: '/traceability/petani' },
     { label: 'DETAIL PETANI' },
   ];
-  
+
   const fetchLampiran = async (isRetry = false) => {
-      setLampiranLoading(true);
-      setLampiranError(null);
-      try {
-        const res = await getDetailLampiranPetani(id);
-        const data = res?.data?.data || res?.data;
-        setLampiran(data);
-        if (isRetry) {
-          setRetryCount(0);
-        }
-      } catch (err) {
-        console.error('Error fetching lampiran:', err);
-        setLampiranError(err);
-      } finally {
-        setLampiranLoading(false);
+    setLampiranLoading(true);
+    setLampiranError(null);
+    try {
+      const res = await getDetailLampiranPetani(id);
+      const data = res?.data?.data || res?.data;
+      setLampiran(data);
+      if (isRetry) {
+        setRetryCount(0);
       }
-    };
+    } catch (err) {
+      console.error('Error fetching lampiran:', err);
+      setLampiranError(err);
+    } finally {
+      setLampiranLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchJenisKelamin();
@@ -396,82 +396,82 @@ const TraceabilityPetaniDetail = () => {
     if (errorStatus === 404) {
       return (
         <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-              <Upload
-                label="KTP"
-                file={
-                  ktpFile
-                    ? {
-                        name: ktpFile.name,
-                        size: (ktpFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: ktpFile,
-                      }
-                    : null
-                }
-                onChangeValue={(data) => setKtpFile(data.value)}
-                allowedFiles={['application/pdf']}
-                maxSize={10}
-                isRequired
-                keyField="ktp"
-                name="file_ktp"
-              />
+          <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <Upload
+              label="KTP"
+              file={
+                ktpFile
+                  ? {
+                    name: ktpFile.name,
+                    size: (ktpFile.size / 1048576).toFixed(1),
+                    uploadDate: new Date().toLocaleDateString('en-US'),
+                    value: ktpFile,
+                  }
+                  : null
+              }
+              onChangeValue={(data) => setKtpFile(data.value)}
+              allowedFiles={['application/pdf']}
+              maxSize={10}
+              isRequired
+              keyField="ktp"
+              name="file_ktp"
+            />
 
-              <Upload
-                label="Kartu Keluarga (KK)"
-                file={
-                  kkFile
-                    ? {
-                        name: kkFile.name,
-                        size: (kkFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: kkFile,
-                      }
-                    : null
-                }
-                onChangeValue={(data) => setKkFile(data.value)}
-                allowedFiles={['application/pdf']}
-                maxSize={10}
-                isRequired
-                keyField="kk"
-                name="file_kk"
-              />
+            <Upload
+              label="Kartu Keluarga (KK)"
+              file={
+                kkFile
+                  ? {
+                    name: kkFile.name,
+                    size: (kkFile.size / 1048576).toFixed(1),
+                    uploadDate: new Date().toLocaleDateString('en-US'),
+                    value: kkFile,
+                  }
+                  : null
+              }
+              onChangeValue={(data) => setKkFile(data.value)}
+              allowedFiles={['application/pdf']}
+              maxSize={10}
+              isRequired
+              keyField="kk"
+              name="file_kk"
+            />
 
-              <Upload
-                label="NIB"
-                file={
-                  nibFile
-                    ? {
-                        name: nibFile.name,
-                        size: (nibFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: nibFile,
-                      }
-                    : null
-                }
-                onChangeValue={(data) => setNibFile(data.value)}
-                allowedFiles={['application/pdf']}
-                maxSize={10}
-                isRequired
-                keyField="nib"
-                name="file_nib"
-              />
-            </div>
-            
-            <div className="flex justify-start">
-                 <Button
-                    type="button"
-                    className="w-full sm:w-auto"
-                    onClick={handleCreateLampiran}
-                    isLoading={createLampiranLoading}
-                  >
-                    Simpan Lampiran
-                  </Button>
-            </div>
+            <Upload
+              label="NIB"
+              file={
+                nibFile
+                  ? {
+                    name: nibFile.name,
+                    size: (nibFile.size / 1048576).toFixed(1),
+                    uploadDate: new Date().toLocaleDateString('en-US'),
+                    value: nibFile,
+                  }
+                  : null
+              }
+              onChangeValue={(data) => setNibFile(data.value)}
+              allowedFiles={['application/pdf']}
+              maxSize={10}
+              isRequired
+              keyField="nib"
+              name="file_nib"
+            />
+          </div>
+
+          <div className="flex justify-start">
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={handleCreateLampiran}
+              isLoading={createLampiranLoading}
+            >
+              Simpan Lampiran
+            </Button>
+          </div>
         </div>
       );
     }
-    
+
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
         <div className="flex items-start space-x-3">
@@ -515,11 +515,12 @@ const TraceabilityPetaniDetail = () => {
     );
   };
 
-  const renderLampiranItem = (label, fileUrl) => {
+  const renderLampiranItem = (label, fileUrl, thumbUrl) => {
     if (!fileUrl) return null;
 
     const getFileExtension = (url) => {
-      return url.split('.').pop().toLowerCase();
+      const cleanUrl = url.split('?')[0].split('#')[0];
+      return cleanUrl.substring(cleanUrl.lastIndexOf('.') + 1).toLowerCase();
     };
 
     const fileExtension = getFileExtension(fileUrl);
@@ -527,6 +528,7 @@ const TraceabilityPetaniDetail = () => {
       fileExtension
     );
     const isPDF = fileExtension === 'pdf';
+    const imageSrc = isImage && thumbUrl ? thumbUrl : fileUrl;
 
     return (
       <div
@@ -543,11 +545,11 @@ const TraceabilityPetaniDetail = () => {
           {isImage ? (
             <div className="relative">
               <Image
-                src={fileUrl}
+                src={imageSrc}
                 alt={label}
                 width={400}
                 height={300}
-                className="h-auto w-full max-w-full rounded border border-gray-300 sm:max-w-md"
+                className="h-auto w-full max-w-full rounded border border-gray-300"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   e.target.parentNode.querySelector(
@@ -597,11 +599,10 @@ const TraceabilityPetaniDetail = () => {
       {/* Notification */}
       {notification.show && (
         <div
-          className={`fixed right-2 top-4 z-50 max-w-xs rounded-lg p-3 shadow-lg sm:right-4 sm:max-w-sm sm:p-4 ${
-            notification.type === 'success'
-              ? 'border border-green-400 bg-green-100 text-green-700'
-              : 'border border-red-400 bg-red-100 text-red-700'
-          }`}
+          className={`fixed right-2 top-4 z-50 max-w-xs rounded-lg p-3 shadow-lg sm:right-4 sm:max-w-sm sm:p-4 ${notification.type === 'success'
+            ? 'border border-green-400 bg-green-100 text-green-700'
+            : 'border border-red-400 bg-red-100 text-red-700'
+            }`}
         >
           <div className="flex items-center justify-between">
             <span className="pr-2 text-xs font-medium sm:text-sm">
@@ -713,17 +714,16 @@ const TraceabilityPetaniDetail = () => {
                 label="Status Keanggotaan"
                 value={
                   <span
-                    className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
-                      petani?.keanggotaan === true
-                        ? 'bg-green-200 text-green-800'
-                        : 'bg-red-200 text-red-800'
-                    }`}
+                    className={`inline-block rounded px-2 py-1 text-xs font-semibold ${petani?.keanggotaan === true
+                      ? 'bg-green-200 text-green-800'
+                      : 'bg-red-200 text-red-800'
+                      }`}
                   >
                     {petani?.keanggotaan === true
                       ? 'Aktif'
                       : petani?.keanggotaan === false
-                      ? 'Tidak Aktif'
-                      : petani?.keanggotaan || 'Tidak Diketahui'}
+                        ? 'Tidak Aktif'
+                        : petani?.keanggotaan || 'Tidak Diketahui'}
                   </span>
                 }
               />
@@ -752,9 +752,9 @@ const TraceabilityPetaniDetail = () => {
 
           {!lampiranLoading && !lampiranError && lampiran && (
             <div className="flex flex-col gap-4 overflow-x-auto sm:flex-row sm:gap-4 md:gap-6">
-              {renderLampiranItem('KTP ', lampiran.file_ktp)}
-              {renderLampiranItem('KK', lampiran.file_kk)}
-              {renderLampiranItem('NIB ', lampiran.file_nib)}
+              {renderLampiranItem('KTP ', lampiran.file_ktp, lampiran.thumb_ktp)}
+              {renderLampiranItem('KK', lampiran.file_kk, lampiran.thumb_kk)}
+              {renderLampiranItem('NIB ', lampiran.file_nib, lampiran.thumb_nib)}
 
               {!lampiran.file_ktp &&
                 !lampiran.file_kk &&
