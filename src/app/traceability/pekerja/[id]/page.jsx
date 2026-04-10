@@ -11,7 +11,8 @@ import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
-import { getPekerjaByPetani } from '@/services/pekerja';
+import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import { deletePekerja, getPekerjaByPetani } from '@/services/pekerja';
 import { getDetailPetani } from '@/services/petani';
 
 const formatDate = (dateStr) => {
@@ -29,77 +30,108 @@ const TraceabilityPekerjaDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // States for delete functionality
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [pekerjaToDelete, setPekerjaToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const crumbs = [
     { label: 'HOME', href: '/' },
     { label: 'PEKERJA', href: '/traceability/pekerja' },
     { label: 'DETAIL PEKERJA' },
   ];
 
-  useEffect(() => {
-    const fetchDetail = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [pekerjaRes, petaniRes] = await Promise.all([
-          getPekerjaByPetani(id),
-          getDetailPetani(id),
-        ]);
+  // Extracted fetch function to allow soft-reload
+  const fetchDetail = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [pekerjaRes, petaniRes] = await Promise.all([
+        getPekerjaByPetani(id),
+        getDetailPetani(id),
+      ]);
 
-        if (
-          pekerjaRes?.data?.status === 'success' &&
-          petaniRes?.data?.status === 'success'
-        ) {
-          const pekerjaList = pekerjaRes.data.data.results || [];
-          const petaniDetail = petaniRes.data.data;
+      if (
+        pekerjaRes?.data?.status === 'success' &&
+        petaniRes?.data?.status === 'success'
+      ) {
+        const pekerjaList = pekerjaRes.data.data.results || [];
+        const petaniDetail = petaniRes.data.data;
 
-          setPekerjaData({
-            identitas_pemilik: {
-              id_petani: petaniDetail.id_petani,
-              nama: petaniDetail.nama,
-              jenis_kelamin: petaniDetail.jns_kelamin_label,
-              alamat: petaniDetail.alamat,
-              no_ktp: petaniDetail.no_ktp,
-              tempat_lahir: petaniDetail.tempat,
-              tanggal_lahir: petaniDetail.tanggal_lahir,
-              no_kk: petaniDetail.no_kk,
-              status_perkawinan: petaniDetail.status_perkawinan_label,
-              luas_kebun: petaniDetail.luas_kebun,
-              jumlah_pekerja: pekerjaList.length,
-            },
-            identitas_pekerja: pekerjaList.map((worker) => ({
-              id: worker.id,
-              nama: worker.nama,
-              jenis_kelamin: worker.jenis_kelamin_label,
-              alamat: worker.alamat,
-              no_ktp: worker.no_ktp,
-              tempat_lahir: worker.tempat_lahir,
-              tanggal_lahir: worker.tanggal_lahir,
-              no_kk: worker.no_kk,
-              status_pekerja: worker.status_pekerja_label,
-              ktp_file: worker.file_ktp,
-              kk_file: worker.file_kk,
-            })),
-          });
-        } else {
-          throw new Error('Gagal memuat data pekerja atau petani');
-        }
-      } catch (err) {
-        console.error('Error fetching details:', err);
-        if (err?.response?.status === 401) {
-          toast.error('Sesi anda telah berakhir, silahkan login kembali');
-        } else {
-          toast.error(err?.response?.data?.message || 'Gagal memuat data');
-        }
-        setError(err);
-      } finally {
-        setLoading(false);
+        setPekerjaData({
+          identitas_pemilik: {
+            id_petani: petaniDetail.id_petani,
+            nama: petaniDetail.nama,
+            jenis_kelamin: petaniDetail.jns_kelamin_label,
+            alamat: petaniDetail.alamat,
+            no_ktp: petaniDetail.no_ktp,
+            tempat_lahir: petaniDetail.tempat,
+            tanggal_lahir: petaniDetail.tanggal_lahir,
+            no_kk: petaniDetail.no_kk,
+            status_perkawinan: petaniDetail.status_perkawinan_label,
+            luas_kebun: petaniDetail.luas_kebun,
+            jumlah_pekerja: pekerjaList.length,
+          },
+          identitas_pekerja: pekerjaList.map((worker) => ({
+            id: worker.id,
+            nama: worker.nama,
+            jenis_kelamin: worker.jenis_kelamin_label,
+            alamat: worker.alamat,
+            no_ktp: worker.no_ktp,
+            tempat_lahir: worker.tempat_lahir,
+            tanggal_lahir: worker.tanggal_lahir,
+            no_kk: worker.no_kk,
+            status_pekerja: worker.status_pekerja_label,
+            ktp_file: worker.file_ktp,
+            kk_file: worker.file_kk,
+          })),
+        });
+      } else {
+        throw new Error('Gagal memuat data pekerja atau petani');
       }
-    };
+    } catch (err) {
+      console.error('Error fetching details:', err);
+      if (err?.response?.status === 401) {
+        toast.error('Sesi anda telah berakhir, silahkan login kembali');
+      } else {
+        toast.error(err?.response?.data?.message || 'Gagal memuat data');
+      }
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (id) {
       fetchDetail();
     }
   }, [id, router]);
+
+  const handleDeleteClick = (pekerja) => {
+    setPekerjaToDelete(pekerja);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pekerjaToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deletePekerja(pekerjaToDelete.id);
+      toast.success(`Data pekerja ${pekerjaToDelete.nama} berhasil dihapus`);
+      setIsDeleteModalOpen(false);
+      setPekerjaToDelete(null);
+      await fetchDetail();
+    } catch (err) {
+      console.error('Error deleting pekerja:', err);
+      toast.error(err?.response?.data?.message || 'Gagal menghapus data pekerja');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+
 
   const renderDocumentViewer = (label, fileUrl, title) => {
     if (!fileUrl) return null;
@@ -155,12 +187,20 @@ const TraceabilityPekerjaDetail = () => {
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">IDENTITAS PEKERJA</h3>
-          <Link
-            href={`/traceability/pekerja/ubah/${pekerja.id}`}
-            className="text-sm text-blue-600 underline hover:text-blue-800"
-          >
-            Ubah Data
-          </Link>
+          <div className="flex gap-4">
+            <button
+              onClick={() => handleDeleteClick(pekerja)}
+              className="text-sm font-medium text-red-600 underline hover:text-red-800"
+            >
+              Hapus Data
+            </button>
+            <Link
+              href={`/traceability/pekerja/ubah/${pekerja.id}`}
+              className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+            >
+              Ubah Data
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
@@ -191,12 +231,12 @@ const TraceabilityPekerjaDetail = () => {
           {renderDocumentViewer(
             'KTP',
             pekerja?.ktp_file,
-            `KTP - ${pekerja?.nama || 'Agustinus Nery'}.pdf`
+            pekerja?.ktp_file?.split('?')[0].split('/').pop() || 'File KTP'
           )}
           {renderDocumentViewer(
             'KK',
             pekerja?.kk_file,
-            `KK - ${pekerja?.nama || 'Agustinus Nery'}.pdf`
+            pekerja?.kk_file?.split('?')[0].split('/').pop() || 'File KK'
           )}
         </div>
       </section>
@@ -334,6 +374,15 @@ const TraceabilityPekerjaDetail = () => {
           </>
         )}
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Hapus Data Pekerja"
+        itemName={pekerjaToDelete?.nama}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
