@@ -121,7 +121,7 @@ const APIResponseValidation = async (
         });
     } catch (err) {
       // logout the user
-      console.log(err);
+      console.error(err);
       logout();
     }
   }

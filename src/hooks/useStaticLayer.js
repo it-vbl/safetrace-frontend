@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 import { getPetaOverlayDetail } from '@/services/petaOverlay';
 
@@ -64,7 +64,8 @@ const useStaticLayer = () => {
           tempStaticLayersDetail[staticLayerType] = { active: true, ...data };
           dispatch(setStaticLayerDetail(tempStaticLayersDetail));
         } catch (err) {
-          console.log(err);
+          console.error(err);
+          toast.error('Gagal memproses data layer statis');
         } finally {
         }
       }

@@ -1,8 +1,10 @@
 'use client';
 
-import { useRef,useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { OTPInput as OTPInputField } from '@/components/atoms/OTPInputField';
+
+import { toast } from 'react-toastify';
 
 /**
  * Renders a row of OTP inputs and manages focus / value changes.
@@ -73,7 +75,7 @@ export default function OTPInput({ length = 6, onChange, onComplete }) {
           }
         })
         .catch(() => {
-          console.log('Failed to read clipboard');
+          toast.error('Failed to read clipboard');
         });
     }
   };

@@ -34,7 +34,7 @@ const DataKebun = ({
   formik,
   initialActiveTab,
   activeTab = 2,
-  onTabChange = () => {},
+  onTabChange = () => { },
   komoditasFilled = false,
   mode = 'create',
 }) => {
@@ -42,8 +42,6 @@ const DataKebun = ({
   const passedClassName = 'text-primary';
 
   const [detailKebun, setDetailKebun] = useState(null);
-
-  console.log('DATA', data);
 
   const tabs = useMemo(
     () => [
@@ -116,15 +114,14 @@ const DataKebun = ({
       <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
         {tabs.map((tab, index) => (
           <div
-            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${
-              activeTab === tab.value
-                ? activeClassName
-                : initialActiveTab > tab.value || (komoditasFilled && tab.value === 2)
+            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${activeTab === tab.value
+              ? activeClassName
+              : initialActiveTab > tab.value || (komoditasFilled && tab.value === 2)
                 ? passedClassName
                 : !tab.clickable
-                ? '!cursor-not-allowed'
-                : ''
-            }`}
+                  ? '!cursor-not-allowed'
+                  : ''
+              }`}
             onClick={() => tab.clickable && onTabChange(tab.value)}
             key={index}
             id={`tab-${tab.label}`}

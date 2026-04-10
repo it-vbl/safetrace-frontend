@@ -142,8 +142,8 @@ const KebunDetail = ({ index, item }) => {
         });
       }
     } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data?.message);
+      console.error(err);
+      toast.error(err?.response?.data?.message || 'Gagal memuat status verifikasi kebun');
     }
   };
 
@@ -203,6 +203,7 @@ const VerificationPekebun = () => {
       document.body.removeChild(link);
     } catch (error) {
       console.error(error);
+      toast.error('Gagal mencetak STDB');
     }
   };
 
@@ -213,6 +214,7 @@ const VerificationPekebun = () => {
       router.replace(`/stdb/data-berakhir`);
     } catch (error) {
       console.error(error);
+      toast.error('Gagal memproses data berakhir');
     }
   };
 

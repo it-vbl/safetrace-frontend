@@ -9,6 +9,7 @@ import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
 import { getListPetani } from '@/services/petani';
 import getYearOptions from '@/utils/getYearOptions';
+import { toast } from 'react-toastify';
 
 const rspoOptions = [
   { label: 'Sudah', value: 'sudah' },
@@ -131,14 +132,12 @@ const DetailKebun = ({
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log('CHECK BEFORE ON NEXT', values);
       await onNext(values);
     },
   });
 
   useEffect(() => {
     if (kebunData) {
-      console.log('Updating form with kebunData:', kebunData);
       formik.setValues({
         id_kebun: kebunData.id_kebun || '',
         kelompok_tani: kebunData.kelompok_tani || kebunData.kelompok || '-',
@@ -191,7 +190,8 @@ const DetailKebun = ({
     if (Object.keys(errors).length === 0) {
       await onNext(formik.values);
     } else {
-      console.log('Validation failed:', errors);
+      console.error(errors);
+      toast.error('Data yang diisi belum lengkap');
     }
   };
 
