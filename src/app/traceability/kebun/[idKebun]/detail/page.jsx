@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
@@ -68,77 +67,71 @@ const DetailKebunPage = () => {
   const [showEditPetaModal, setShowEditPetaModal] = useState(false);
   const [showEditLampiranModal, setShowEditLampiranModal] = useState(false);
 
-  // Fetch kebun detail and lampiran data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        // Fetch both kebun detail and lampiran data in parallel
-        const [kebunResponse, lampiranResponse] = await Promise.all([
-          getDetailKebun(id),
-          getLampiranKebun(id).catch(() => null), // Lampiran might not exist, so catch errors
-        ]);
-
-        // Process kebun detail
-        if (kebunResponse?.data?.status === 'success') {
-          const kebun = kebunResponse.data.data;
-
-          // Map API response to component structure
-          const mappedData = {
-            ...kebun,
-            waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString(
-              'id-ID',
-              {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }
-            ),
-            rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
-            ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
-          };
-          console.log('MAPPED DATA', mappedData);
-          setKebunData(mappedData);
-        } else {
-          throw new Error('Invalid kebun response format');
-        }
-
-        // Process lampiran data
-        if (lampiranResponse?.data?.status === 'success') {
-          setLampiranData(lampiranResponse.data.data);
-        } else {
-          setLampiranData(null); // No lampiran data available
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Gagal memuat data kebun');
-      } finally {
-        setLoading(false);
+  const fetchKebun = async () => {
+    try {
+      const kebunResponse = await getDetailKebun(id);
+      if (kebunResponse?.data?.status === 'success') {
+        const kebun = kebunResponse.data.data;
+        const mappedData = {
+          ...kebun,
+          waktu_tanam: new Date(kebun.waktu_tanam).toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
+          ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
+        };
+        console.log('MAPPED DATA', mappedData);
+        setKebunData(mappedData);
+      } else {
+        throw new Error('Invalid kebun response format');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching kebun data:', error);
+      toast.error('Gagal memuat data kebun');
+    }
+  };
 
+  const fetchLampiran = async () => {
+    try {
+      const lampiranResponse = await getLampiranKebun(id).catch(() => null);
+      if (lampiranResponse?.data?.status === 'success') {
+        setLampiranData(lampiranResponse.data.data);
+      } else {
+        setLampiranData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching lampiran data:', error);
+      setLampiranData(null);
+    }
+  };
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    await Promise.all([fetchKebun(), fetchLampiran()]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
     if (id) {
-      fetchData();
+      fetchAllData();
     }
   }, [id]);
 
   // Handle edit modal success
   const handleEditSuccess = () => {
-    // Refresh the page data
-    window.location.reload();
+    fetchKebun();
   };
 
   // Handle edit peta modal success
   const handleEditPetaSuccess = () => {
-    // Refresh the page data
-    window.location.reload();
+    fetchKebun();
   };
 
   // Handle edit lampiran modal success
   const handleEditLampiranSuccess = () => {
-    // Refresh the page data
-    window.location.reload();
+    fetchLampiran();
   };
 
   const handleDownloadPeta = async () => {
@@ -185,18 +178,17 @@ const DetailKebunPage = () => {
   const getStatusBadge = (status) => {
     return (
       <span
-        className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
-          status === 'Sudah'
-            ? 'bg-green-200 text-green-800'
-            : 'bg-red-200 text-red-800'
-        }`}
+        className={`inline-block rounded px-2 py-1 text-xs font-semibold ${status === 'Sudah'
+          ? 'bg-green-200 text-green-800'
+          : 'bg-red-200 text-red-800'
+          }`}
       >
         {status}
       </span>
     );
   };
 
-  const renderLampiranItem = (label, fileUrl) => {
+  const renderLampiranItem = (label, fileUrl, thumbUrl) => {
     if (!fileUrl) return null;
 
     const getFileExtension = (url) => {
@@ -209,6 +201,7 @@ const DetailKebunPage = () => {
       fileExtension
     );
     const isPDF = fileExtension === 'pdf';
+    const imageSrc = isImage && thumbUrl ? thumbUrl : fileUrl;
 
     return (
       <div
@@ -225,11 +218,11 @@ const DetailKebunPage = () => {
           {isImage ? (
             <div className="relative">
               <Image
-                src={fileUrl}
+                src={imageSrc}
                 alt={label}
                 width={400}
                 height={300}
-                className="h-auto w-full max-w-full rounded border border-gray-300 sm:max-w-md"
+                className="h-auto w-full max-w-full rounded border border-gray-300"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   const fb =
@@ -512,7 +505,7 @@ const DetailKebunPage = () => {
           {lampiranData && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:gap-6">
               {DOCUMENT_CONFIGS.map((doc) =>
-                renderLampiranItem(doc.label, lampiranData?.[doc.fileKey])
+                renderLampiranItem(doc.label, lampiranData?.[doc.fileKey], lampiranData?.[doc.thumbKey])
               )}
 
               {!lampiranData?.file_legalitas &&
