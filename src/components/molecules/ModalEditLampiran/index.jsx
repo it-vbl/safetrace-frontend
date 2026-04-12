@@ -140,7 +140,7 @@ const ModalEditLampiran = ({
                     formik.setFieldError('file_legalitas', '');
                   }
                 }}
-                allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 keyField="legalitas"
                 name="file_legalitas"
@@ -180,7 +180,7 @@ const ModalEditLampiran = ({
                     formik.setFieldError('file_stdb', '');
                   }
                 }}
-                allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 keyField="stdb"
                 name="file_stdb"
@@ -220,7 +220,7 @@ const ModalEditLampiran = ({
                     formik.setFieldError('file_rspo', '');
                   }
                 }}
-                allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 keyField="rspo"
                 name="file_rspo"
@@ -260,7 +260,7 @@ const ModalEditLampiran = ({
                     formik.setFieldError('file_ispo', '');
                   }
                 }}
-                allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 keyField="ispo"
                 name="file_ispo"

@@ -410,7 +410,7 @@ const TraceabilityPetaniDetail = () => {
                   : null
               }
               onChangeValue={(data) => setKtpFile(data.value)}
-              allowedFiles={['application/pdf']}
+              allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
               isRequired
               keyField="ktp"
@@ -430,7 +430,7 @@ const TraceabilityPetaniDetail = () => {
                   : null
               }
               onChangeValue={(data) => setKkFile(data.value)}
-              allowedFiles={['application/pdf']}
+              allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
               isRequired
               keyField="kk"
@@ -450,7 +450,7 @@ const TraceabilityPetaniDetail = () => {
                   : null
               }
               onChangeValue={(data) => setNibFile(data.value)}
-              allowedFiles={['application/pdf']}
+              allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
               isRequired
               keyField="nib"

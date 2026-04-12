@@ -116,7 +116,7 @@ const EditLampiranPetaniModal = ({
             onChangeValue={(data) => {
               setKtpFile(data.value);
             }}
-            allowedFiles={['application/pdf']}
+            allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
             maxSize={10}
             isRequired={false}
             keyField="ktp"
@@ -130,7 +130,7 @@ const EditLampiranPetaniModal = ({
             onChangeValue={(data) => {
               setKkFile(data.value);
             }}
-            allowedFiles={['application/pdf']}
+            allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
             maxSize={10}
             isRequired={false}
             keyField="kk"
@@ -144,7 +144,7 @@ const EditLampiranPetaniModal = ({
             onChangeValue={(data) => {
               setNibFile(data.value);
             }}
-            allowedFiles={['application/pdf']}
+            allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
             maxSize={10}
             isRequired={false}
             keyField="nib"

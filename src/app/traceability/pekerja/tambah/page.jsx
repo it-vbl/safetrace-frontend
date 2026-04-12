@@ -312,7 +312,7 @@ function TambahPekerjaContent() {
                     : null
                 }
                 onChangeValue={(data) => setKtpFile(data.value)}
-                allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 isRequired
                 keyField="ktp"
@@ -332,7 +332,7 @@ function TambahPekerjaContent() {
                     : null
                 }
                 onChangeValue={(data) => setKkFile(data.value)}
-                allowedFiles={['application/pdf', 'image/jpeg', 'image/png']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 isRequired
                 keyField="kk"
