@@ -345,7 +345,7 @@ const TraceabilityPupukDetail = () => {
   };
 
   const handleTambahTahun = () => {
-    router.push(`/traceability/gap/pupuk/${id}/tambah-tahun-pupuk`);
+    router.push(`/traceability/gap/pupuk/tambah?kebun=${id}`);
   };
 
   if (loading) {
@@ -364,14 +364,14 @@ const TraceabilityPupukDetail = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full">
-      <div className="flex justify-between items-center">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-6">
+      <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
         <Button
           variant="primary"
           size="medium"
           onClick={handleTambahTahun}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap text-xs sm:text-sm"
         >
           Tambah Tahun Pupuk
         </Button>
@@ -385,7 +385,7 @@ const TraceabilityPupukDetail = () => {
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.kebun.id_kebun ?? '-'}

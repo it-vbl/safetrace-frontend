@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
+import { useState } from 'react';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
@@ -26,17 +26,24 @@ const parseKgInput = (v) => {
 };
 
 const TambahTahunPupukPage = () => {
-  const { id } = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const kebunParam = searchParams.get('kebun');
   const [loading, setLoading] = useState(false);
   const tahunOptions = useYearOptions();
 
-  const crumbs = [
-    { label: 'HOME', href: '/' },
-    { label: 'PUPUK', href: '/traceability/gap/pupuk' },
-    { label: 'DETAIL PUPUK', href: `/traceability/gap/pupuk/${id}` },
-    { label: 'TAMBAH TAHUN PUPUK' },
-  ];
+  const crumbs = kebunParam
+    ? [
+      { label: 'HOME', href: '/' },
+      { label: 'PUPUK', href: '/traceability/gap/pupuk' },
+      { label: 'DETAIL PUPUK', href: `/traceability/gap/pupuk/${kebunParam}` },
+      { label: 'TAMBAH TAHUN PUPUK' },
+    ]
+    : [
+      { label: 'HOME', href: '/' },
+      { label: 'PUPUK', href: '/traceability/gap/pupuk' },
+      { label: 'TAMBAH TAHUN PUPUK' },
+    ];
 
   const initialValues = {
     tahun: new Date().getFullYear().toString(),
@@ -164,9 +171,18 @@ const TambahTahunPupukPage = () => {
     onSubmit: async (values) => {
       setLoading(true);
       try {
+        const kebunId = kebunParam ? parseInt(kebunParam) : null;
+        if (!kebunId || Number.isNaN(kebunId)) {
+          toast.error(
+            'Id Kebun tidak ditemukan. Coba dari halaman detail kebun.'
+          );
+          setLoading(false);
+          return;
+        }
+
         // Map form values to API request format
         const payload = {
-          kebun: parseInt(id),
+          kebun: kebunId,
           tahun: parseInt(values.tahun),
           // Semester 1 (values are already numbers 1-12)
           s1_npk_waktu_aplikasi: values.s1_npk_waktu,
@@ -205,7 +221,11 @@ const TambahTahunPupukPage = () => {
           // Reset form after successful submission
           formik.resetForm();
           // Navigate back to detail page
-          router.push(`/traceability/gap/pupuk/${id}`);
+          if (kebunParam) {
+            router.push(`/traceability/gap/pupuk/${kebunParam}`);
+          } else {
+            router.push('/traceability/gap/pupuk');
+          }
         } else {
           toast.error('Gagal menambahkan data pupuk');
         }
@@ -221,7 +241,11 @@ const TambahTahunPupukPage = () => {
   });
 
   const handleCancel = () => {
-    router.push(`/traceability/gap/pupuk/${id}`);
+    if (kebunParam) {
+      router.push(`/traceability/gap/pupuk/${kebunParam}`);
+    } else {
+      router.push('/traceability/gap/pupuk');
+    }
   };
 
   return (
@@ -259,7 +283,7 @@ const TambahTahunPupukPage = () => {
           <div>
             <div className="space-y-4">
               {/* Row 1: NPK and Natrium */}
-              <div className="flex flex-row gap-4 border-y border-dashed py-4 items-stretch">
+              <div className="flex flex-col lg:flex-row gap-4 border-y border-dashed py-4 items-stretch">
                 <div className="text-sm font-semibold min-w-[100px] h-full flex flex-1 items-center self-center">
                   <Heading level={6} className="text-sm font-semibold">
                     Semester 1
@@ -325,7 +349,7 @@ const TambahTahunPupukPage = () => {
               </div>
 
               {/* Row 2: Postat and Kalium */}
-              <div className="flex flex-row gap-4 border-b border-dashed pb-4">
+              <div className="flex flex-col lg:flex-row gap-4 border-b border-dashed pb-4">
                 <div className="min-w-[100px]" />
                 <Select
                   label="(Postat) Waktu Aplikasi"
@@ -386,7 +410,7 @@ const TambahTahunPupukPage = () => {
               </div>
 
               {/* Row 3: Boron and Magnesium */}
-              <div className="flex flex-row gap-4 border-b border-dashed pb-4">
+              <div className="flex flex-col lg:flex-row gap-4 border-b border-dashed pb-4">
                 <div className="min-w-[100px]" />
                 <Select
                   label="(Boron) Waktu Aplikasi"
@@ -452,7 +476,7 @@ const TambahTahunPupukPage = () => {
           <div>
             <div className="space-y-4">
               {/* Row 1: NPK and Natrium */}
-              <div className="flex flex-row gap-4 border-b border-dashed pb-4 items-stretch">
+              <div className="flex flex-col lg:flex-row gap-4 border-b border-dashed pb-4 items-stretch">
                 <div className="text-sm font-semibold min-w-[100px] h-full flex flex-1 items-center self-center">
                   <Heading level={6} className="text-sm font-semibold">
                     Semester 2
@@ -518,7 +542,7 @@ const TambahTahunPupukPage = () => {
               </div>
 
               {/* Row 2: Postat and Kalium */}
-              <div className="flex flex-row gap-4 border-b border-dashed pb-4">
+              <div className="flex flex-col lg:flex-row gap-4 border-b border-dashed pb-4">
                 <div className="min-w-[100px]" />
                 <Select
                   label="(Postat) Waktu Aplikasi"
@@ -579,7 +603,7 @@ const TambahTahunPupukPage = () => {
               </div>
 
               {/* Row 3: Boron and Magnesium */}
-              <div className="flex flex-row gap-4 border-b border-dashed pb-4">
+              <div className="flex flex-col lg:flex-row gap-4 border-b border-dashed pb-4">
                 <div className="min-w-[100px]" />
                 <Select
                   label="(Boron) Waktu Aplikasi"
@@ -641,16 +665,17 @@ const TambahTahunPupukPage = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col justify-end gap-3 pt-4 sm:flex-row">
             <Button
               type="button"
               variant="danger"
               onClick={handleCancel}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               Batalkan
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>

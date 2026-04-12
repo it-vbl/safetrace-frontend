@@ -71,7 +71,12 @@ function TambahPekerjaContent() {
     prefillData();
   }, [petaniParam]);
 
-  const crumbs = [
+  const crumbs = petaniParam ? [
+    { label: 'HOME', href: '/' },
+    { label: 'PEKERJA', href: '/traceability/pekerja' },
+    { label: 'DETAIL PEKERJA', href: `/traceability/pekerja/${petaniParam}` },
+    { label: 'TAMBAH PEKERJA' },
+  ] : [
     { label: 'HOME', href: '/' },
     { label: 'PEKERJA', href: '/traceability/pekerja' },
     { label: 'TAMBAH PEKERJA' },
@@ -114,7 +119,11 @@ function TambahPekerjaContent() {
 
         if (response?.data?.status === 'success') {
           toast.success('Data pekerja berhasil disimpan');
-          router.push('/traceability/pekerja');
+          if (petaniParam) {
+            router.push(`/traceability/pekerja/${petaniParam}`);
+          } else {
+            router.push('/traceability/pekerja');
+          }
         } else {
           toast.error(
             response?.data?.message || 'Gagal menyimpan data pekerja'
@@ -131,7 +140,11 @@ function TambahPekerjaContent() {
   });
 
   const handleCancel = () => {
-    router.push('/traceability/pekerja');
+    if (petaniParam) {
+      router.push(`/traceability/pekerja/${petaniParam}`);
+    } else {
+      router.push('/traceability/pekerja');
+    }
   };
 
   return (
@@ -140,7 +153,7 @@ function TambahPekerjaContent() {
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="Nama"
                 name="nama"
@@ -193,7 +206,7 @@ function TambahPekerjaContent() {
                 isRequired
               /> */}
             </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               {/* <Select
                 label="Petani Pemilik"
                 name="petaniId"
@@ -243,7 +256,7 @@ function TambahPekerjaContent() {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <InputText
                 label="No. KK"
                 name="noKK"
@@ -285,17 +298,17 @@ function TambahPekerjaContent() {
 
         <Accordion defaultIsOpen title="LAMPIRAN">
           <>
-            <div className="grid grid-cols-2 gap-12 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-4">
               <Upload
                 label="KTP"
                 file={
                   ktpFile
                     ? {
-                        name: ktpFile.name,
-                        size: (ktpFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: ktpFile,
-                      }
+                      name: ktpFile.name,
+                      size: (ktpFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: ktpFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => setKtpFile(data.value)}
@@ -311,11 +324,11 @@ function TambahPekerjaContent() {
                 file={
                   kkFile
                     ? {
-                        name: kkFile.name,
-                        size: (kkFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: kkFile,
-                      }
+                      name: kkFile.name,
+                      size: (kkFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: kkFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => setKkFile(data.value)}
@@ -329,7 +342,7 @@ function TambahPekerjaContent() {
           </>
         </Accordion>
 
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="mt-4 flex flex-col-reverse sm:flex-row justify-end gap-4">
           <Button
             type="button"
             className="bg-red-600 hover:bg-red-700"

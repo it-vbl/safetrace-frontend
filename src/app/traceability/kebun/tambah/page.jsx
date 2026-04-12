@@ -191,7 +191,7 @@ const CreateKebunTraceabilityContent = () => {
       <BreadcrumbDetail items={crumbs} />
 
       {/* Stepper Navigation */}
-      <div className="flex">
+      <div className="flex w-full">
         <Stepper
           steps={steps}
           completedSteps={completedSteps}

@@ -86,7 +86,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
       <div className="rounded-lg border border-gray-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
         <form onSubmit={formik.handleSubmit}>
-          <div className="grid grid-cols-2 gap-6 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
             <div>
               <Upload
                 label="File Legalitas"
@@ -250,8 +250,8 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
           </div>
         </form>
 
-        <div className="mt-4 flex justify-between gap-2">
-          <div className="flex gap-2">
+        <div className="mt-4 flex flex-col-reverse sm:flex-row justify-between gap-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-2">
             <Button
               type="button"
               className="bg-red-600 hover:bg-red-700"

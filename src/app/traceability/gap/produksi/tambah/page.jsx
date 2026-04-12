@@ -76,11 +76,21 @@ function TambahProduksiContent() {
   const kebunParam = searchParams.get('kebun');
   const [isLoading, setIsLoading] = useState(false);
 
-  const crumbs = [
-    { label: 'HOME', href: '/' },
-    { label: 'PRODUKSI', href: '/traceability/gap/produksi' },
-    { label: 'TAMBAH TAHUN PRODUKSI' },
-  ];
+  const crumbs = kebunParam
+    ? [
+        { label: 'HOME', href: '/' },
+        { label: 'PRODUKSI', href: '/traceability/gap/produksi' },
+        {
+          label: 'DETAIL PRODUKSI',
+          href: `/traceability/gap/produksi/${kebunParam}`,
+        },
+        { label: 'TAMBAH TAHUN PRODUKSI' },
+      ]
+    : [
+        { label: 'HOME', href: '/' },
+        { label: 'PRODUKSI', href: '/traceability/gap/produksi' },
+        { label: 'TAMBAH TAHUN PRODUKSI' },
+      ];
 
   const yearOptions = useYearOptions();
 
@@ -137,7 +147,11 @@ function TambahProduksiContent() {
         };
         await createProduksi(payload);
         toast.success('Data produksi berhasil disimpan');
-        router.push('/traceability/gap/produksi');
+        if (kebunParam) {
+          router.push(`/traceability/gap/produksi/${kebunParam}`);
+        } else {
+          router.push('/traceability/gap/produksi');
+        }
       } catch (error) {
         toast.error('Gagal menyimpan data produksi');
       } finally {
@@ -147,7 +161,11 @@ function TambahProduksiContent() {
   });
 
   const handleCancel = () => {
-    router.push('/traceability/gap/produksi');
+    if (kebunParam) {
+      router.push(`/traceability/gap/produksi/${kebunParam}`);
+    } else {
+      router.push('/traceability/gap/produksi');
+    }
   };
 
   return (

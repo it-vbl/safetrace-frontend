@@ -88,11 +88,21 @@ function TambahPestisidaContent() {
   const kebunParam = searchParams.get('kebun');
   const [isLoading, setIsLoading] = useState(false);
 
-  const crumbs = [
-    { label: 'HOME', href: '/' },
-    { label: 'PESTISIDA', href: '/traceability/gap/pestisida' },
-    { label: 'TAMBAH TAHUN PESTISIDA' },
-  ];
+  const crumbs = kebunParam
+    ? [
+        { label: 'HOME', href: '/' },
+        { label: 'PESTISIDA', href: '/traceability/gap/pestisida' },
+        {
+          label: 'DETAIL PESTISIDA',
+          href: `/traceability/gap/pestisida/${kebunParam}`,
+        },
+        { label: 'TAMBAH TAHUN PESTISIDA' },
+      ]
+    : [
+        { label: 'HOME', href: '/' },
+        { label: 'PESTISIDA', href: '/traceability/gap/pestisida' },
+        { label: 'TAMBAH TAHUN PESTISIDA' },
+      ];
 
   const yearOptions = useYearOptions();
 
@@ -141,7 +151,11 @@ function TambahPestisidaContent() {
           toast.success(
             res?.data?.message || 'Data pestisida berhasil disimpan'
           );
-          router.push('/traceability/gap/pestisida');
+          if (kebunParam) {
+            router.push(`/traceability/gap/pestisida/${kebunParam}`);
+          } else {
+            router.push('/traceability/gap/pestisida');
+          }
         } else {
           throw new Error('Invalid response');
         }
@@ -156,7 +170,11 @@ function TambahPestisidaContent() {
   });
 
   const handleCancel = () => {
-    router.push('/traceability/gap/pestisida');
+    if (kebunParam) {
+      router.push(`/traceability/gap/pestisida/${kebunParam}`);
+    } else {
+      router.push('/traceability/gap/pestisida');
+    }
   };
 
   return (
@@ -335,7 +353,7 @@ function TambahPestisidaContent() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-end gap-2 sm:flex-row">
+          <div className="flex flex-col justify-end gap-2 sm:flex-row pt-4">
             <Button
               type="button"
               variant="danger"
