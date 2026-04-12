@@ -1,9 +1,9 @@
 'use client';
 
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
@@ -25,7 +25,7 @@ const parseKgInput = (v) => {
   return Number.isNaN(num) ? 0 : num;
 };
 
-const TambahTahunPupukPage = () => {
+const TambahTahunPupukContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const kebunParam = searchParams.get('kebun');
@@ -684,5 +684,17 @@ const TambahTahunPupukPage = () => {
     </div>
   );
 };
+
+const TambahTahunPupukPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        Memuat data...
+      </div>
+    }>
+      <TambahTahunPupukContent />
+    </Suspense>
+  )
+}
 
 export default TambahTahunPupukPage;

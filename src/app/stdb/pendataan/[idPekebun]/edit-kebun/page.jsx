@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import moment from 'moment';
@@ -138,7 +138,7 @@ const DataKebun = ({
   );
 };
 
-const TambahKebun = () => {
+const EditKebunContent = () => {
   const { idPekebun } = useParams();
   const searchParams = useSearchParams();
   const idKebun = searchParams.get('idKebun');
@@ -267,7 +267,6 @@ const TambahKebun = () => {
     },
   });
 
-  /*************  ✨ Windsurf Command 🌟  *************/
   const {
     fetchPendidikanTerakhir,
     fetchStatusLahan,
@@ -294,7 +293,6 @@ const TambahKebun = () => {
     fetchJenisLahan();
     fetchListKecamatan(6105);
   }, []);
-  /*******  2a457821-e8e2-428b-bd28-c504d421b6cc  *******/
 
   const activeFormik = useMemo(() => {
     const map = [formikLahan, formikPolaTanam, formikKomoditas, formikJenisPupuk, formikMitraPenjualan, formikPemetaan];
@@ -320,8 +318,6 @@ const TambahKebun = () => {
       mitra_penjualan: detailKebun?.mitra_penjualan || '',
     });
   };
-
-  //useEffect Section
 
   useEffect(() => {
     if (formikLahan.values.kecamatan) {
@@ -407,4 +403,16 @@ const TambahKebun = () => {
   );
 };
 
-export default TambahKebun;
+const EditKebun = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        Memuat data...
+      </div>
+    }>
+      <EditKebunContent />
+    </Suspense>
+  )
+}
+
+export default EditKebun;

@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -11,7 +11,7 @@ import Select from '@/components/molecules/Select';
 import useYearOptions from '@/hooks/useYearOptions';
 import { createLB3 } from '@/services/lb3';
 
-const TambahTahunLB3Page = () => {
+const TambahTahunLB3PageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const kebunParam = searchParams.get('kebun');
@@ -28,16 +28,16 @@ const TambahTahunLB3Page = () => {
 
   const crumbs = kebunParam
     ? [
-        { label: 'HOME', href: '/' },
-        { label: 'LB3', href: '/traceability/gap/lb3' },
-        { label: 'DETAIL LB3', href: `/traceability/gap/lb3/${kebunParam}` },
-        { label: 'TAMBAH TAHUN LB3' },
-      ]
+      { label: 'HOME', href: '/' },
+      { label: 'LB3', href: '/traceability/gap/lb3' },
+      { label: 'DETAIL LB3', href: `/traceability/gap/lb3/${kebunParam}` },
+      { label: 'TAMBAH TAHUN LB3' },
+    ]
     : [
-        { label: 'HOME', href: '/' },
-        { label: 'LB3', href: '/traceability/gap/lb3' },
-        { label: 'TAMBAH TAHUN LB3' },
-      ];
+      { label: 'HOME', href: '/' },
+      { label: 'LB3', href: '/traceability/gap/lb3' },
+      { label: 'TAMBAH TAHUN LB3' },
+    ];
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -72,7 +72,7 @@ const TambahTahunLB3Page = () => {
         setLoading(false);
         return;
       }
-      
+
       const payload = {
         kebun: kebunId,
         tahun: parseInt(formData.tahun),
@@ -86,7 +86,7 @@ const TambahTahunLB3Page = () => {
       if (response?.status === 200 || response?.status === 201) {
         toast.success(
           response?.data?.message ||
-            `Data tahun ${formData.tahun} berhasil ditambahkan`
+          `Data tahun ${formData.tahun} berhasil ditambahkan`
         );
         if (kebunParam) {
           router.push(`/traceability/gap/lb3/${kebunParam}`);
@@ -212,6 +212,20 @@ const TambahTahunLB3Page = () => {
         </section>
       </div>
     </div>
+  );
+};
+
+const TambahTahunLB3Page = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+          Memuat data...
+        </div>
+      }
+    >
+      <TambahTahunLB3PageContent />
+    </Suspense>
   );
 };
 

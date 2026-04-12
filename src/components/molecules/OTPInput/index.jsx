@@ -1,10 +1,9 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 
 import { OTPInput as OTPInputField } from '@/components/atoms/OTPInputField';
-
-import { toast } from 'react-toastify';
 
 /**
  * Renders a row of OTP inputs and manages focus / value changes.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import moment from 'moment';
@@ -315,7 +315,7 @@ const KebunDetail = ({ index, item }) => {
   );
 };
 
-const VerificationPekebun = () => {
+const VerificationPekebunContent = () => {
   const { idSTDB } = useParams();
   const queryParams = useSearchParams();
   const idPekebun = queryParams.get('pekebunId');
@@ -500,5 +500,17 @@ const VerificationPekebun = () => {
     </div>
   );
 };
+
+const VerificationPekebun = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        Memuat data...
+      </div>
+    }>
+      <VerificationPekebunContent />
+    </Suspense>
+  )
+}
 
 export default VerificationPekebun;
