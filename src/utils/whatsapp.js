@@ -387,7 +387,7 @@ export const removeDeviceFromLocal = (deviceId) => {
   }
 };
 
-export default {
+const whatsapp = {
   formatPhoneNumber,
   displayPhoneNumber,
   validatePhoneNumber,
@@ -411,3 +411,5 @@ export default {
   getDevicesFromLocal,
   removeDeviceFromLocal,
 };
+
+export default whatsapp;

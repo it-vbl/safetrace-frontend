@@ -175,7 +175,6 @@ const MapDashboard = () => {
   const PetaDetailCellRenderer = (params) => {
     const handlePetaClick = () => {
       const idKebun = params.data?.id;
-      console.log('CHECK idKEbun');
       if (idKebun) {
         // Find the original kebun data and transform it for map
         const originalKebun = kebunList.find((k) => k.id === idKebun);
@@ -430,8 +429,7 @@ const MapDashboard = () => {
       width: 200,
       valueGetter: (params) =>
         params.data?.lokasi_kebun ||
-        `${params.data?.lahan?.kecamatan_label || ''} ${
-          params.data?.lahan?.desa_label || ''
+        `${params.data?.lahan?.kecamatan_label || ''} ${params.data?.lahan?.desa_label || ''
         }`,
     },
     {

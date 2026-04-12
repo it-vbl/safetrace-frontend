@@ -32,7 +32,6 @@ export const handleStep1 = async (values, idKebun) => {
     };
 
     const response = await updateKebun(idKebun, kebunData);
-    console.log('RESPONSE STEP 1', response);
     toast.success('Data kebun berhasil diperbarui');
     return { success: true, idKebun: response.data.id };
   } else {

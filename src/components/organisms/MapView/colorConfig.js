@@ -435,7 +435,6 @@ export function getColorOptions(idOrKey, properties = null) {
     if (lahanGambutFeatureColor) {
       return lahanGambutFeatureColor;
     }
-    console.log('not found', properties);
   }
 
   return byKey || FALLBACK_COLOR_OPTIONS;

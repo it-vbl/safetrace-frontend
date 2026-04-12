@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import moment from 'moment';
@@ -34,7 +34,7 @@ const DataKebun = ({
   formik,
   initialActiveTab,
   activeTab = 2,
-  onTabChange = () => {},
+  onTabChange = () => { },
   komoditasFilled = false,
 }) => {
   const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
@@ -94,10 +94,10 @@ const DataKebun = ({
         clickable: initialActiveTab >= 5,
         passed: initialActiveTab > 5,
         render: () => (
-          <DataPemetaan 
-            formik={formik?.formikPemetaan} 
-            data={data} 
-            passed={initialActiveTab > 5} 
+          <DataPemetaan
+            formik={formik?.formikPemetaan}
+            data={data}
+            passed={initialActiveTab > 5}
             idKebun={data?.id}
             petaniId={data?.petani_id}
           />
@@ -112,15 +112,14 @@ const DataKebun = ({
       <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
         {tabs.map((tab, index) => (
           <div
-            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${
-              activeTab === tab.value
+            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${activeTab === tab.value
                 ? activeClassName
                 : initialActiveTab > tab.value || (komoditasFilled && tab.value === 2)
-                ? passedClassName
-                : !tab.clickable
-                ? '!cursor-not-allowed'
-                : ''
-            }`}
+                  ? passedClassName
+                  : !tab.clickable
+                    ? '!cursor-not-allowed'
+                    : ''
+              }`}
             onClick={() => tab.clickable && onTabChange(tab.value)}
             key={index}
             id={`tab-${tab.label}`}
@@ -137,7 +136,7 @@ const DataKebun = ({
   );
 };
 
-const TambahKebun = () => {
+const TambahKebunContent = () => {
   const { idPekebun } = useParams();
   const searchParams = useSearchParams();
   const idKebun = searchParams.get('idKebun');
@@ -266,7 +265,6 @@ const TambahKebun = () => {
     },
   });
 
-  /*************  ✨ Windsurf Command 🌟  *************/
   const {
     fetchPendidikanTerakhir,
     fetchStatusLahan,
@@ -293,7 +291,6 @@ const TambahKebun = () => {
     fetchJenisLahan();
     fetchListKecamatan(6105);
   }, []);
-  /*******  2a457821-e8e2-428b-bd28-c504d421b6cc  *******/
 
   const activeFormik = useMemo(() => {
     const map = [formikLahan, formikPolaTanam, formikKomoditas, formikJenisPupuk, formikMitraPenjualan, formikPemetaan];
@@ -319,8 +316,6 @@ const TambahKebun = () => {
       mitra_penjualan: detailKebun?.mitra_penjualan || '',
     });
   };
-
-  //useEffect Section
 
   useEffect(() => {
     if (formikLahan.values.kecamatan) {
@@ -404,5 +399,17 @@ const TambahKebun = () => {
     </div>
   );
 };
+
+const TambahKebun = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        Memuat data...
+      </div>
+    }>
+      <TambahKebunContent />
+    </Suspense>
+  )
+}
 
 export default TambahKebun;

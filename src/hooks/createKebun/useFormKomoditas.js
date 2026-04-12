@@ -51,7 +51,7 @@ const useFormKomoditas = ({ kebunId, data, successCallback = (q) => {}, submitCa
         }
       } catch (error) {
         toast.error(error?.response?.data?.message);
-        console.log(error);
+        console.error(error);
       }
     },
   });

@@ -27,12 +27,12 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
   const dataKomoditas = useMemo(() => {
     return listKomoditas?.length > 0
       ? listKomoditas?.map((data, index) => {
-          return {
-            label: index == 0 ? 'Komoditas Utama' : `Komoditas Lain (${index})`,
-            id: data?.id,
-            data: data,
-          };
-        })
+        return {
+          label: index == 0 ? 'Komoditas Utama' : `Komoditas Lain (${index})`,
+          id: data?.id,
+          data: data,
+        };
+      })
       : [{ label: 'Komoditas Utama' }];
   }, [listKomoditas]);
 
@@ -55,7 +55,6 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
       luas_area_tanam: data?.luas_area_tanam,
       id: data?.id,
     };
-    console.log('SET FORMIK VALUES KOMODITAS', tempValues, listKomoditas[activeKomoditasIndex]);
     formik.setValues(tempValues);
   };
 
@@ -86,7 +85,6 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
       });
       if (res.status === 200) {
         const tempListKomoditas = [...listKomoditas]?.filter((data, index) => index !== activeKomoditasIndex);
-        console.log('SET LIST KOMODITAS', tempListKomoditas);
         if (tempListKomoditas.length == 0) {
           tempListKomoditas.push({ label: 'Komoditas Utama' });
           formik.resetForm();
@@ -97,7 +95,7 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
         toast.success('Data komoditas berhasil dihapus');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error('Data komoditas gagal dihapus');
     } finally {
       setIsSubmitting(false);
@@ -109,11 +107,9 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
       <div className='flex flex-row items-start justify-start'>
         {dataKomoditas?.map((data, index) => (
           <div
-            className={`cursor-pointer border-r border-t border-r-gray-300 border-t-gray-300 p-3 py-2 text-[14px] hover:bg-slate-100 ${
-              activeKomoditasIndex === index ? activeClassName : ''
-            } ${index == 0 ? ' rounded-tl-[4px] border-x border-x-gray-300' : ''} ${
-              index === komoditas?.length - 1 ? ' rounded-tr-[4px]' : ''
-            }`}
+            className={`cursor-pointer border-r border-t border-r-gray-300 border-t-gray-300 p-3 py-2 text-[14px] hover:bg-slate-100 ${activeKomoditasIndex === index ? activeClassName : ''
+              } ${index == 0 ? ' rounded-tl-[4px] border-x border-x-gray-300' : ''} ${index === komoditas?.length - 1 ? ' rounded-tr-[4px]' : ''
+              }`}
             key={index}
             onClick={() => setActiveKomoditasIndex(index)}
             id={`tab-komoditas-${index}`}

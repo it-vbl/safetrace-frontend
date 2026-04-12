@@ -33,7 +33,6 @@ const useFormLahan = ({
     // Your provided onSubmit logic
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        console.log('Submitting Lahan', values);
         submitCallback();
         const payload = {
           ...values,
@@ -55,7 +54,7 @@ const useFormLahan = ({
         }
       } catch (error) {
         toast.error(error?.response?.data?.message);
-        console.log(error);
+        console.error(error);
       }
     },
   });

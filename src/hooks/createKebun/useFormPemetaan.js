@@ -29,13 +29,6 @@ const useFormPemetaan = ({
         }
         submitCallback();
         const coordinates = [values?.peta?.map((coord) => [parseFloat(coord.lng), parseFloat(coord.lat)])];
-        console.log(
-          'check',
-          coordinates?.[0]?.[0]?.[0] !== coordinates?.[0]?.[coordinates.length - 1]?.[0] &&
-            coordinates?.[0]?.[0]?.[1] !== coordinates?.[0]?.[coordinates.length - 1]?.[1],
-          coordinates?.[0]?.[0],
-          coordinates?.[0]?.[coordinates?.[0].length - 1]
-        );
         if (
           coordinates?.[0]?.[0]?.[0] !== coordinates?.[0]?.[coordinates?.[0].length - 1]?.[0] &&
           coordinates?.[0]?.[0]?.[1] !== coordinates?.[0]?.[coordinates?.[0].length - 1]?.[1]
@@ -58,7 +51,7 @@ const useFormPemetaan = ({
       } catch (error) {
         failedCallback();
         toast.error(error?.response?.data?.message);
-        console.log(error);
+        console.error(error);
       }
     },
     enableReinitialize: true,

@@ -428,18 +428,18 @@ const PenjualanPage = () => {
       <div className="flex h-full flex-col gap-4">
         <div className="flex max-w-full flex-col gap-3 p-0 sm:gap-4">
           {/* Header Section */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between sm:gap-4">
             <Heading
-              className=" flex flex-1 uppercase tracking-[2px]"
+              className="mt-1 flex uppercase tracking-[2px]"
               level={3}
             >
               PENJUALAN
             </Heading>
 
             {/* Controls Container */}
-            <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-start xl:justify-end sm:gap-3">
               {/* Search and Filters - Responsive Grid */}
-              <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
                 <SearchBar
                   onChange={handleSearchTextChange}
                   placeholder="Cari Driver"
@@ -474,16 +474,16 @@ const PenjualanPage = () => {
               </div>
 
               {/* Action Buttons - Responsive */}
-              <div className="flex flex-row items-center justify-end gap-2">
+              <div className="flex w-full flex-row items-center justify-between gap-2 sm:w-auto sm:justify-end">
                 <Button
                   onClick={handleExportCSV}
-                  className="!px-2 sm:!px-3"
+                  className="!px-3 flex-1 sm:flex-none justify-center"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export CSV"
                 />
                 <Button
                   onClick={() => router.push('/traceability/penjualan/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm"
+                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
                 >
                   Tambah Penjualan
                 </Button>
@@ -493,7 +493,7 @@ const PenjualanPage = () => {
 
           {/* Table Container - Responsive Height */}
         </div>
-        <div className="relative w-full flex-1 ">
+        <div className="relative w-full flex-1 overflow-hidden min-h-[400px]">
           <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}

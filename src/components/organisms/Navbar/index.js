@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import Cookies from 'js-cookie';
-import { ChevronDown } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import SipekebunLogo from '@/components/atoms/SipekebunLogo';
@@ -43,7 +42,7 @@ const Navbar = () => {
     setMounted(true);
   }, []);
 
-  const canSeeKabarTani = hasAnyPermission(roles, [
+  const canSeeKabarTani = mounted && hasAnyPermission(roles, [
     'kontak.view',
     'grup.view',
     'blastpesan.view',
@@ -51,7 +50,7 @@ const Navbar = () => {
     'device.view',
   ]);
 
-  const canSeeTraceability = hasAnyPermission(roles, [
+  const canSeeTraceability = mounted && hasAnyPermission(roles, [
     'petani.view',
     'kebun.view',
     'produksi.view',
@@ -98,9 +97,8 @@ const Navbar = () => {
         {canSeeTraceability && (
           <>
             <div
-              className={`cursor-pointer tracking-[1px] ${
-                pathname === '/' ? 'font-bold text-primary' : 'text-black'
-              }`}
+              className={`cursor-pointer tracking-[1px] ${pathname === '/' ? 'font-bold text-primary' : 'text-black'
+                }`}
               onClick={() => handleMenuClick('/')}
             >
               MapView
@@ -127,7 +125,7 @@ const Navbar = () => {
 
       {/* Mobile center menu */}
       <div
-        className="ml-auto flex flex-1 flex-row items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] uppercase md:hidden"
+        className="flex flex-1 min-w-0 flex-row items-center justify-start gap-4 px-2 overflow-x-auto whitespace-nowrap text-[11px] uppercase md:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         suppressHydrationWarning
       >
         {canSeeKabarTani && (
@@ -143,9 +141,8 @@ const Navbar = () => {
         {canSeeTraceability && (
           <>
             <div
-              className={`cursor-pointer tracking-[1px] ${
-                pathname === '/' ? 'font-bold text-primary' : 'text-black'
-              }`}
+              className={`cursor-pointer tracking-[1px] ${pathname === '/' ? 'font-bold text-primary' : 'text-black'
+                }`}
               onClick={() => handleMenuClick('/')}
             >
               MapView
@@ -160,14 +157,14 @@ const Navbar = () => {
             </div>
           </>
         )}
-        <div
+        {/* <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
             '/koperasi'
           )}`}
           onClick={() => handleMenuClick('/koperasi')}
         >
           Koperasi
-        </div>
+        </div> */}
       </div>
 
       {/* Desktop menu items */}

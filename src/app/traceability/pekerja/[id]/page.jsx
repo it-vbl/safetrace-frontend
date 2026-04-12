@@ -203,7 +203,7 @@ const TraceabilityPekerjaDetail = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
           <BorderBottomColData label="Nama" value={pekerja?.nama || '-'} />
           <BorderBottomColData
             label="Jenis Kelamin"
@@ -245,7 +245,7 @@ const TraceabilityPekerjaDetail = () => {
 
   return (
     <div className="flex w-full flex-col gap-8">
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 sm:items-center">
         <BreadcrumbDetail items={crumbs} />
         <Button
           variant="primary"
@@ -281,7 +281,7 @@ const TraceabilityPekerjaDetail = () => {
             )}
 
             {!loading && !error && pekerjaData?.identitas_pemilik && (
-              <div className="grid grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
                 <BorderBottomColData
                   label="Id Petani"
                   value={pekerjaData.identitas_pemilik?.id_petani || '-'}

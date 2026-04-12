@@ -107,8 +107,8 @@ const Pemetaan = ({
           idKebun={idKebun} 
           petaniId={kebunData?.petani_id || 1} 
         />
-        <div className="mt-4 flex justify-between gap-2">
-          <div className="flex gap-2">
+        <div className="mt-4 flex flex-col-reverse sm:flex-row justify-between gap-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-2">
             <Button
               type="button"
               className="bg-red-600 hover:bg-red-700"

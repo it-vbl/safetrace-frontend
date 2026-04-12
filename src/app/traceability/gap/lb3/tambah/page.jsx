@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import PropTypes from 'prop-types';
+
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -11,8 +11,10 @@ import Select from '@/components/molecules/Select';
 import useYearOptions from '@/hooks/useYearOptions';
 import { createLB3 } from '@/services/lb3';
 
-const TambahTahunLB3Page = ({ params }) => {
+const TambahTahunLB3PageContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const kebunParam = searchParams.get('kebun');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     tahun: new Date().getFullYear().toString(),
@@ -24,11 +26,18 @@ const TambahTahunLB3Page = ({ params }) => {
   // Use existing year options hook
   const tahunOptions = useYearOptions();
 
-  const crumbs = [
-    { label: 'LB3', href: '/traceability/gap/lb3' },
-    { label: 'DETAIL LB3', href: `/traceability/gap/lb3/${params.id}` },
-    { label: 'TAMBAH TAHUN LB3' },
-  ];
+  const crumbs = kebunParam
+    ? [
+      { label: 'HOME', href: '/' },
+      { label: 'LB3', href: '/traceability/gap/lb3' },
+      { label: 'DETAIL LB3', href: `/traceability/gap/lb3/${kebunParam}` },
+      { label: 'TAMBAH TAHUN LB3' },
+    ]
+    : [
+      { label: 'HOME', href: '/' },
+      { label: 'LB3', href: '/traceability/gap/lb3' },
+      { label: 'TAMBAH TAHUN LB3' },
+    ];
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -55,8 +64,17 @@ const TambahTahunLB3Page = ({ params }) => {
 
     setLoading(true);
     try {
+      const kebunId = kebunParam ? parseInt(kebunParam) : null;
+      if (!kebunId || Number.isNaN(kebunId)) {
+        toast.error(
+          'Id Kebun tidak ditemukan. Coba dari halaman detail kebun.'
+        );
+        setLoading(false);
+        return;
+      }
+
       const payload = {
-        kebun: parseInt(params.id),
+        kebun: kebunId,
         tahun: parseInt(formData.tahun),
         limbah_bobot: parseInt(formData.limbahBotol) || 0,
         limbah_jeriken: parseInt(formData.limbahJeriken) || 0,
@@ -68,9 +86,13 @@ const TambahTahunLB3Page = ({ params }) => {
       if (response?.status === 200 || response?.status === 201) {
         toast.success(
           response?.data?.message ||
-            `Data tahun ${formData.tahun} berhasil ditambahkan`
+          `Data tahun ${formData.tahun} berhasil ditambahkan`
         );
-        router.push(`/traceability/gap/lb3/${params.id}`);
+        if (kebunParam) {
+          router.push(`/traceability/gap/lb3/${kebunParam}`);
+        } else {
+          router.push('/traceability/gap/lb3');
+        }
       } else {
         toast.error('Gagal menambahkan data tahun LB3');
       }
@@ -85,7 +107,11 @@ const TambahTahunLB3Page = ({ params }) => {
   };
 
   const handleCancel = () => {
-    router.push(`/traceability/gap/lb3/${params.id}`);
+    if (kebunParam) {
+      router.push(`/traceability/gap/lb3/${kebunParam}`);
+    } else {
+      router.push('/traceability/gap/lb3');
+    }
   };
 
   return (
@@ -118,7 +144,7 @@ const TambahTahunLB3Page = ({ params }) => {
             </div>
 
             {/* Waste Data Inputs */}
-            <div className="grid grid-cols-3 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <InputText
                 label="Limbah Botol"
                 type="number"
@@ -164,16 +190,22 @@ const TambahTahunLB3Page = ({ params }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row">
             <Button
               type="button"
               variant="danger"
               onClick={handleCancel}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               Batalkan
             </Button>
-            <Button type="button" onClick={handleSave} disabled={loading}>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               {loading ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>
@@ -183,10 +215,20 @@ const TambahTahunLB3Page = ({ params }) => {
   );
 };
 
-TambahTahunLB3Page.propTypes = {
-  params: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-  }).isRequired,
+const TambahTahunLB3Page = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+          Memuat data...
+        </div>
+      }
+    >
+      <TambahTahunLB3PageContent />
+    </Suspense>
+  );
 };
+
+TambahTahunLB3Page.propTypes = {};
 
 export default TambahTahunLB3Page;

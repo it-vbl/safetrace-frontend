@@ -82,7 +82,6 @@ const DetailKebunPage = () => {
           rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
           ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
         };
-        console.log('MAPPED DATA', mappedData);
         setKebunData(mappedData);
       } else {
         throw new Error('Invalid kebun response format');
@@ -164,7 +163,7 @@ const DetailKebunPage = () => {
         autoClose: 3000,
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.dismiss();
       toast.error(err?.response?.data?.message || 'Gagal mengunduh SHP');
     }

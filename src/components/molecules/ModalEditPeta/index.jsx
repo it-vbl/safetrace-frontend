@@ -86,7 +86,6 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen && kebunData) {
-      console.log('KESINI kah?');
       formik.setValues(parseExistingData(kebunData));
     }
   }, [isOpen, kebunData]);
@@ -105,10 +104,10 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* DataPemetaan Component */}
-        <DataPemetaan 
-          data={kebunData} 
-          formik={formik} 
-          mode="edit" 
+        <DataPemetaan
+          data={kebunData}
+          formik={formik}
+          mode="edit"
           idKebun={kebunData?.id}
           petaniId={kebunData?.petani_id}
         />

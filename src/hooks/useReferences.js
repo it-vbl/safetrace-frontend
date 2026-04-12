@@ -57,83 +57,86 @@ const useReferences = () => {
     jenisLegalitas,
   } = useSelector((state) => state.referensi);
 
-  const fetchData = async (fetchFunction, setAction) => {
-    setLoading(true);
-    try {
-      const response = await fetchFunction();
-      const references = response.data.data;
-      dispatch(
-        setAction(
-          references.map((data) => ({
-            ...data,
-            value: data?.value,
-            label: data?.label,
-          }))
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      setError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchData = useCallback(
+    async (fetchFunction, setAction) => {
+      setLoading(true);
+      try {
+        const response = await fetchFunction();
+        const references = response.data.data;
+        dispatch(
+          setAction(
+            references.map((data) => ({
+              ...data,
+              value: data?.value,
+              label: data?.label,
+            }))
+          )
+        );
+      } catch (error) {
+        console.error(error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dispatch]
+  );
 
   const fetchPendidikanTerakhir = useCallback(
     () => fetchData(getPendidikanTerakhir, setPendidikanTerakhir),
-    []
+    [fetchData]
   );
   const fetchStatusLahan = useCallback(
     () => fetchData(getStatusLahan, setStatusLahan),
-    []
+    [fetchData]
   );
   const fetchPolaTanam = useCallback(
     () => fetchData(getPolaTanam, setPolaTanam),
-    []
+    [fetchData]
   );
   const fetchAsalBenih = useCallback(
     () => fetchData(getAsalBenih, setAsalBenih),
-    []
+    [fetchData]
   );
   const fetchJenisLahan = useCallback(
     () => fetchData(getJenisLahan, setJenisLahan),
-    []
+    [fetchData]
   );
   const fetchJenisPupuk = useCallback(
     () => fetchData(getJenisPupuk, setJenisPupuk),
-    []
+    [fetchData]
   );
   const fetchJenisKelamin = useCallback(
     () => fetchData(getJenisKelamin, setJenisKelamin),
-    []
+    [fetchData]
   );
   const fetchEksPlasma = useCallback(
     () => fetchData(getEksPlasma, setEksPlasma),
-    []
+    [fetchData]
   );
   const fetchUserRoles = useCallback(
     () => fetchData(getUserRoles, setUserRoles),
-    []
+    [fetchData]
   );
   const fetchStatusPerkawinan = useCallback(
     () => fetchData(getStatusPerkawinan, setStatusPerkawinan),
-    []
+    [fetchData]
   );
   const fetchStatusPekerja = useCallback(
     () => fetchData(getStatusPekerja, setStatusPekerja),
-    []
+    [fetchData]
   );
   const fetchKelompokTani = useCallback(
     () => fetchData(getKelompokTani, setKelompokTani),
-    []
+    [fetchData]
   );
   const fetchSumberKontak = useCallback(
     () => fetchData(getSumberKontak, setSumberKontak),
-    []
+    [fetchData]
   );
   const fetchJenisLegalitas = useCallback(
     () => fetchData(getJenisLegalitas, setJenisLegalitas),
-    []
+    [fetchData]
   );
 
   return {

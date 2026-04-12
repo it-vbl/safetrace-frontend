@@ -260,23 +260,16 @@ const PesanBaruPage = () => {
                 const phone = member?.no_wa;
 
                 if (!phone) {
-                  console.log(
-                    `Anggota ${i + 1}: Tidak memiliki nomor WhatsApp, dilewati`
-                  );
                   results.push({ success: false, skipped: true });
                   continue;
                 }
 
                 try {
-                  console.log(
-                    `Mengirim pesan ${i + 1}/${totalMembers} ke ${phone}...`
-                  );
                   await sendWhatsAppMessage(
                     values.no_pengirim,
                     phone,
                     values.isi_pesan
                   );
-                  console.log(`✓ Berhasil kirim ke ${phone}`);
                   results.push({ success: true, phone });
                 } catch (err) {
                   console.error(`✗ Gagal kirim ke ${phone}:`, err);
@@ -291,8 +284,7 @@ const PesanBaruPage = () => {
 
               if (successCount > 0) {
                 toast.success(
-                  `Pesan WhatsApp terkirim ke ${successCount} dari ${totalMembers} anggota grup${
-                    failureCount ? `, gagal ${failureCount}` : ''
+                  `Pesan WhatsApp terkirim ke ${successCount} dari ${totalMembers} anggota grup${failureCount ? `, gagal ${failureCount}` : ''
                   }`
                 );
               } else {
@@ -333,8 +325,7 @@ const PesanBaruPage = () => {
 
             if (successCount > 0) {
               toast.success(
-                `Pesan WhatsApp terkirim ke ${successCount} kontak${
-                  failureCount ? `, gagal ${failureCount}` : ''
+                `Pesan WhatsApp terkirim ke ${successCount} kontak${failureCount ? `, gagal ${failureCount}` : ''
                 }`
               );
             } else {
@@ -439,10 +430,10 @@ const PesanBaruPage = () => {
         const list = Array.isArray(data?.results)
           ? data.results
           : Array.isArray(response?.data?.results)
-          ? response?.data?.results
-          : Array.isArray(response?.data)
-          ? response?.data
-          : [];
+            ? response?.data?.results
+            : Array.isArray(response?.data)
+              ? response?.data
+              : [];
         if (mounted) setAvailableMembers(list);
       } catch (err) {
         if (mounted) setAvailableMembers([]);
