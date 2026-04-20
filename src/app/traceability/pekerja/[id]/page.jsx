@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
@@ -9,6 +8,7 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
+import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
@@ -84,6 +84,8 @@ const TraceabilityPekerjaDetail = () => {
             status_pekerja: worker.status_pekerja_label,
             ktp_file: worker.file_ktp,
             kk_file: worker.file_kk,
+            ktp_thumb: worker.thumb_ktp,
+            kk_thumb: worker.thumb_kk,
           })),
         });
       } else {
@@ -115,7 +117,7 @@ const TraceabilityPekerjaDetail = () => {
 
   const handleConfirmDelete = async () => {
     if (!pekerjaToDelete) return;
-    
+
     setIsDeleting(true);
     try {
       await deletePekerja(pekerjaToDelete.id);
@@ -133,51 +135,6 @@ const TraceabilityPekerjaDetail = () => {
 
 
 
-  const renderDocumentViewer = (label, fileUrl, title) => {
-    if (!fileUrl) return null;
-
-    // Extract the extension from the fileUrl
-    const extension = fileUrl.split('.').pop().toLowerCase();
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
-
-    return (
-      <div className="flex-1">
-        <div className="mb-2 text-sm font-medium text-gray-700">{title}</div>
-        <div className="relative">
-          <div className="aspect-[4/3] w-full overflow-hidden rounded border border-gray-300 bg-gray-50">
-            {isImage ? (
-              <Image
-                src={fileUrl}
-                alt={label}
-                fill
-                className="object-contain"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentNode.querySelector(
-                    '.fallback-content'
-                  ).style.display = 'flex';
-                }}
-              />
-            ) : (
-              <iframe
-                src={fileUrl}
-                title={title}
-                className="h-full w-full"
-                frameBorder="0"
-              ></iframe>
-            )}
-            <div className="fallback-content hidden h-full w-full items-center justify-center">
-              <div className="text-center">
-                <p className="mb-2 text-sm text-gray-600">
-                  Dokumen tidak tersedia
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const renderIdentitasPekerjaSection = (pekerja, index) => {
     return (
@@ -227,17 +184,17 @@ const TraceabilityPekerjaDetail = () => {
         </div>
 
         {/* Document Viewer Section */}
-        <div className="mt-6 flex flex-col gap-4 md:flex-row md:gap-6">
-          {renderDocumentViewer(
-            'KTP',
-            pekerja?.ktp_file,
-            pekerja?.ktp_file?.split('?')[0].split('/').pop() || 'File KTP'
-          )}
-          {renderDocumentViewer(
-            'KK',
-            pekerja?.kk_file,
-            pekerja?.kk_file?.split('?')[0].split('/').pop() || 'File KK'
-          )}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <AttachmentViewer
+            label="File KTP"
+            fileUrl={pekerja?.ktp_file}
+            thumbUrl={pekerja?.ktp_thumb}
+          />
+          <AttachmentViewer
+            label="File KK"
+            fileUrl={pekerja?.kk_file}
+            thumbUrl={pekerja?.kk_thumb}
+          />
         </div>
       </section>
     );
