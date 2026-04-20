@@ -5,8 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
 
 import Button from '@/components/atoms/Button';
-import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
+import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import EditLampiranPetaniModal from '@/components/molecules/EditLampiranPetaniModal';

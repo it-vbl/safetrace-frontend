@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
-import BaseModal from '@/components/molecules/Modal';
 import { toast } from 'react-toastify';
+
+import BaseModal from '@/components/molecules/Modal';
 
 const FileIcon = ({ type }) => {
   const configs = {
