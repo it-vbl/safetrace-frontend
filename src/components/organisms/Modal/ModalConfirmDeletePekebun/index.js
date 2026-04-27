@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Modal from '@/components/molecules/Modal';
@@ -15,11 +16,11 @@ const ModalConfirmDeletePekebun = ({
 
   const handleOnSubmit = async () => {
     try {
-      console.log('TEST');
       setLoading(true);
-      const res = await handleSubmit();
+      await handleSubmit();
     } catch (error) {
       console.error(error);
+      toast.error('Gagal menghapus data pekebun');
     } finally {
       setLoading(false);
     }

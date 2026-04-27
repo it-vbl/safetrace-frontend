@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
@@ -131,14 +132,12 @@ const DetailKebun = ({
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log('CHECK BEFORE ON NEXT', values);
       await onNext(values);
     },
   });
 
   useEffect(() => {
     if (kebunData) {
-      console.log('Updating form with kebunData:', kebunData);
       formik.setValues({
         id_kebun: kebunData.id_kebun || '',
         kelompok_tani: kebunData.kelompok_tani || kebunData.kelompok || '-',
@@ -191,7 +190,8 @@ const DetailKebun = ({
     if (Object.keys(errors).length === 0) {
       await onNext(formik.values);
     } else {
-      console.log('Validation failed:', errors);
+      console.error(errors);
+      toast.error('Data yang diisi belum lengkap');
     }
   };
 
@@ -199,7 +199,7 @@ const DetailKebun = ({
     <div className="space-y-6">
       <div className="rounded-lg border border-gray-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">DETAIL KEBUN</h3>
-        <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <InputText
             label="ID Kebun"
             name="id_kebun"
@@ -237,7 +237,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <InputText
             label="Lokasi Kebun"
             name="lokasi_kebun"
@@ -277,7 +277,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <div className="flex flex-row items-end gap-2">
             <Select
               label="Waktu Tanam"
@@ -343,7 +343,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <Select
             label="Jenis Legalitas"
             name="jenis_legalitas"
@@ -380,7 +380,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-6 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
           <InputText
             label="STDB"
             name="stdb"
@@ -394,7 +394,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="mt-4 flex justify-between gap-2">
+        <div className="mt-4 flex flex-col sm:flex-row justify-between gap-4">
           <Button
             type="button"
             className="bg-red-600 hover:bg-red-700"

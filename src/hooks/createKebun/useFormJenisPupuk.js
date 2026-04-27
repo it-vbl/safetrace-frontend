@@ -38,7 +38,7 @@ const useFormJenisPupuk = ({
       } catch (error) {
         failedCallback();
         toast.error(error?.response?.data?.message);
-        console.log(error);
+        console.error(error);
       }
     },
     enableReinitialize: true,

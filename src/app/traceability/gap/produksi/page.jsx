@@ -41,7 +41,7 @@ const ProduksiPage = () => {
 
   useEffect(() => {
     fetchKelompokTani();
-  }, []);
+  }, [fetchKelompokTani]);
 
   // Auto-apply kelompok tani filter based on logged-in user
   const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
@@ -78,7 +78,7 @@ const ProduksiPage = () => {
       ? num.toLocaleString('id-ID')
       : (Number(num) || 0).toLocaleString('id-ID');
 
-  const fetchProduksiList = async () => {
+  const fetchProduksiList = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
@@ -117,21 +117,13 @@ const ProduksiPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize, search, selectedKelompok, selectedYear]);
 
   useEffect(() => {
     if (isKelompokFilterInitialized) {
       fetchProduksiList();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isKelompokFilterInitialized,
-    currentPage,
-    pageSize,
-    search,
-    selectedKelompok,
-    selectedYear,
-  ]);
+  }, [isKelompokFilterInitialized, fetchProduksiList]);
 
   const handleSearchTextChange = useCallback(
     debounce((value) => {

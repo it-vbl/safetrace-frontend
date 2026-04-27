@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
+import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import ModalEditKebun from '@/components/molecules/ModalEditKebun';
@@ -82,7 +82,6 @@ const DetailKebunPage = () => {
           rspo: kebun.is_rspo ? 'Sudah' : 'Belum',
           ispo: kebun.is_ispo ? 'Sudah' : 'Belum',
         };
-        console.log('MAPPED DATA', mappedData);
         setKebunData(mappedData);
       } else {
         throw new Error('Invalid kebun response format');
@@ -164,7 +163,7 @@ const DetailKebunPage = () => {
         autoClose: 3000,
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.dismiss();
       toast.error(err?.response?.data?.message || 'Gagal mengunduh SHP');
     }
@@ -188,120 +187,6 @@ const DetailKebunPage = () => {
     );
   };
 
-  const renderLampiranItem = (label, fileUrl, thumbUrl) => {
-    if (!fileUrl) return null;
-
-    const getFileExtension = (url) => {
-      const urlWithoutQuery = url.split('?')[0];
-      return urlWithoutQuery.split('.').pop().toLowerCase();
-    };
-
-    const fileExtension = getFileExtension(fileUrl);
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(
-      fileExtension
-    );
-    const isPDF = fileExtension === 'pdf';
-    const imageSrc = isImage && thumbUrl ? thumbUrl : fileUrl;
-
-    return (
-      <div
-        key={label}
-        className="min-w-0 flex-1 rounded-lg border border-gray-200 p-3 sm:p-4"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h4 className="truncate text-sm font-medium text-gray-700">
-            {label}
-          </h4>
-        </div>
-
-        <div className="w-full">
-          {isImage ? (
-            <div className="relative">
-              <Image
-                src={imageSrc}
-                alt={label}
-                width={400}
-                height={300}
-                className="h-auto w-full max-w-full rounded border border-gray-300"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  const fb =
-                    e.target.parentNode.querySelector('.fallback-content');
-                  if (fb) fb.style.display = 'block';
-                }}
-              />
-              <div
-                className="fallback-content flex hidden h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50"
-                style={{ display: 'none' }}
-              >
-                <div className="px-2 text-center">
-                  <p className="mb-2 text-xs text-gray-600 sm:text-sm">
-                    Gambar tidak dapat ditampilkan
-                  </p>
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
-                  >
-                    Buka Gambar
-                  </a>
-                </div>
-              </div>
-            </div>
-          ) : isPDF ? (
-            <div className="relative">
-              <iframe
-                src={fileUrl}
-                className="h-64 w-full rounded border border-gray-300 sm:h-96"
-                title={label}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  const fb =
-                    e.target.parentNode.querySelector('.fallback-content');
-                  if (fb) fb.style.display = 'block';
-                }}
-              />
-              <div
-                className="fallback-content flex hidden h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50"
-                style={{ display: 'none' }}
-              >
-                <div className="px-2 text-center">
-                  <p className="mb-2 text-xs text-gray-600 sm:text-sm">
-                    PDF tidak dapat ditampilkan
-                  </p>
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
-                  >
-                    Buka PDF
-                  </a>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50">
-              <div className="px-2 text-center">
-                <p className="mb-2 text-xs text-gray-600 sm:text-sm">
-                  File tidak dapat ditampilkan
-                </p>
-                <a
-                  href={fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
-                >
-                  Unduh File
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -504,9 +389,14 @@ const DetailKebunPage = () => {
 
           {lampiranData && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:gap-6">
-              {DOCUMENT_CONFIGS.map((doc) =>
-                renderLampiranItem(doc.label, lampiranData?.[doc.fileKey], lampiranData?.[doc.thumbKey])
-              )}
+              {DOCUMENT_CONFIGS.map((doc) => (
+                <AttachmentViewer
+                  key={doc.id}
+                  label={doc.label}
+                  fileUrl={lampiranData?.[doc.fileKey]}
+                  thumbUrl={lampiranData?.[doc.thumbKey]}
+                />
+              ))}
 
               {!lampiranData?.file_legalitas &&
                 !lampiranData?.file_stdb &&

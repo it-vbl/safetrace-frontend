@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import moment from 'moment';
@@ -20,7 +20,7 @@ import useSTDB from '@/hooks/useSTDB';
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange = () => {}, verifyCheckList }) => {
+const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange = () => { }, verifyCheckList }) => {
   const [activeTab, setActiveTab] = useState('Lahan');
   const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
 
@@ -65,9 +65,8 @@ const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange 
       <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
         {tabs.map((tab, index) => (
           <div
-            className={`flex w-full cursor-pointer flex-row justify-between rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${
-              activeTab === tab.label ? activeClassName : ''
-            }`}
+            className={`flex w-full cursor-pointer flex-row justify-between rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${activeTab === tab.label ? activeClassName : ''
+              }`}
             key={index}
             onClick={() => setActiveTab(tab.label)}
             id={`tab-${tab.label}`}
@@ -121,7 +120,7 @@ const KebunDetail = ({ index, item }) => {
   );
 };
 
-const VerificationPekebun = () => {
+const VerificationPekebunContent = () => {
   const { idSTDB } = useParams();
   const queryParams = useSearchParams();
   const idPekebun = queryParams.get('pekebunId');
@@ -200,5 +199,17 @@ const VerificationPekebun = () => {
     </div>
   );
 };
+
+const VerificationPekebun = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        Memuat data...
+      </div>
+    }>
+      <VerificationPekebunContent />
+    </Suspense>
+  )
+}
 
 export default VerificationPekebun;

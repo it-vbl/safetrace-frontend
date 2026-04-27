@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   images: {
-    domains: ['cukk-be.buatin.com'],
+    domains: ['cukk-be.buatin.com', 'api.cukk-dashboard.com'],
   },
   // Disable ESLint during production builds
   eslint: {

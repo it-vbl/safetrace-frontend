@@ -10,7 +10,7 @@ import { downloadSHPKebun } from '@/services/kebun';
 
 import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
-const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChange = (e) => {} }) => {
+const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChange = (e) => { } }) => {
   const Map = useMemo(
     () =>
       dynamic(() => import('@/components/organisms/MapView'), {
@@ -32,12 +32,10 @@ const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChan
         link.click();
       }
     } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data?.message);
+      console.error(err);
+      toast.error(err?.response?.data?.message || 'Gagal mengunduh peta');
     }
   };
-
-  console.log('TSt', data?.peta?.geom?.coordinates?.[0]);
 
   return (
     <div className='flex w-full flex-col'>

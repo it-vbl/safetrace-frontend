@@ -51,7 +51,7 @@ export const useUsers = ({
 
         return data;
       } catch (err) {
-        console.log(err);
+        console.error(err);
         const errorMessage =
           err.response?.data?.message || 'Failed to fetch users';
         setError(errorMessage);

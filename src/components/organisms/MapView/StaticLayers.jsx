@@ -75,7 +75,6 @@ export default function IupMap() {
               feature?.properties
             );
             const pathOptions = colorOptions?.pathOptions || {};
-            console.log(pathOptions);
             // Apply style to the layer based on feature properties
             layer.setStyle(pathOptions);
 

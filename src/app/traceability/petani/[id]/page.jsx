@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
 
 import Button from '@/components/atoms/Button';
 import LoadingSpinner from '@/components/atoms/LoadingSpinner';
+import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import EditLampiranPetaniModal from '@/components/molecules/EditLampiranPetaniModal';
@@ -410,7 +410,7 @@ const TraceabilityPetaniDetail = () => {
                   : null
               }
               onChangeValue={(data) => setKtpFile(data.value)}
-              allowedFiles={['application/pdf']}
+              allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
               isRequired
               keyField="ktp"
@@ -430,7 +430,7 @@ const TraceabilityPetaniDetail = () => {
                   : null
               }
               onChangeValue={(data) => setKkFile(data.value)}
-              allowedFiles={['application/pdf']}
+              allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
               isRequired
               keyField="kk"
@@ -450,7 +450,7 @@ const TraceabilityPetaniDetail = () => {
                   : null
               }
               onChangeValue={(data) => setNibFile(data.value)}
-              allowedFiles={['application/pdf']}
+              allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
               isRequired
               keyField="nib"
@@ -515,84 +515,6 @@ const TraceabilityPetaniDetail = () => {
     );
   };
 
-  const renderLampiranItem = (label, fileUrl, thumbUrl) => {
-    if (!fileUrl) return null;
-
-    const getFileExtension = (url) => {
-      const cleanUrl = url.split('?')[0].split('#')[0];
-      return cleanUrl.substring(cleanUrl.lastIndexOf('.') + 1).toLowerCase();
-    };
-
-    const fileExtension = getFileExtension(fileUrl);
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(
-      fileExtension
-    );
-    const isPDF = fileExtension === 'pdf';
-    const imageSrc = isImage && thumbUrl ? thumbUrl : fileUrl;
-
-    return (
-      <div
-        key={label}
-        className="min-w-0 flex-1 rounded-lg border border-gray-200 p-3 sm:p-4"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h4 className="truncate text-sm font-medium text-gray-700">
-            {label}
-          </h4>
-        </div>
-
-        <div className="w-full">
-          {isImage ? (
-            <div className="relative">
-              <Image
-                src={imageSrc}
-                alt={label}
-                width={400}
-                height={300}
-                className="h-auto w-full max-w-full rounded border border-gray-300"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentNode.querySelector(
-                    '.fallback-content'
-                  ).style.display = 'block';
-                }}
-              />
-            </div>
-          ) : isPDF ? (
-            <div className="relative">
-              <iframe
-                src={fileUrl}
-                className="h-64 w-full rounded border border-gray-300 sm:h-96"
-                title={label}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentNode.querySelector(
-                    '.fallback-content'
-                  ).style.display = 'block';
-                }}
-              />
-            </div>
-          ) : (
-            <div className="flex h-32 w-full items-center justify-center rounded border border-gray-300 bg-gray-50">
-              <div className="px-2 text-center">
-                <p className="mb-2 text-xs text-gray-600 sm:text-sm">
-                  File tidak dapat ditampilkan
-                </p>
-                <a
-                  href={fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 underline hover:text-blue-800 sm:text-sm"
-                >
-                  Unduh File
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
@@ -751,10 +673,10 @@ const TraceabilityPetaniDetail = () => {
           {lampiranError && renderLampiranError()}
 
           {!lampiranLoading && !lampiranError && lampiran && (
-            <div className="flex flex-col gap-4 overflow-x-auto sm:flex-row sm:gap-4 md:gap-6">
-              {renderLampiranItem('KTP ', lampiran.file_ktp, lampiran.thumb_ktp)}
-              {renderLampiranItem('KK', lampiran.file_kk, lampiran.thumb_kk)}
-              {renderLampiranItem('NIB ', lampiran.file_nib, lampiran.thumb_nib)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <AttachmentViewer label="KTP" fileUrl={lampiran.file_ktp} thumbUrl={lampiran.thumb_ktp} />
+              <AttachmentViewer label="KK" fileUrl={lampiran.file_kk} thumbUrl={lampiran.thumb_kk} />
+              <AttachmentViewer label="NIB" fileUrl={lampiran.file_nib} thumbUrl={lampiran.thumb_nib} />
 
               {!lampiran.file_ktp &&
                 !lampiran.file_kk &&

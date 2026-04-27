@@ -1,6 +1,7 @@
 'use client';
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import Stepper from '@/components/molecules/Stepper';
@@ -135,6 +136,14 @@ const CreateKebunTraceabilityContent = () => {
       }
     } catch (error) {
       console.error('Error in step:', error);
+      const errorData = error?.response?.data;
+      if (errorData?.errors) {
+        const firstKey = Object.keys(errorData.errors)[0];
+        const errorMessage = errorData.errors[firstKey][0];
+        toast.error(errorMessage || errorData?.message || 'Terjadi kesalahan');
+      } else {
+        toast.error(errorData?.message || 'Terjadi kesalahan');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -191,7 +200,7 @@ const CreateKebunTraceabilityContent = () => {
       <BreadcrumbDetail items={crumbs} />
 
       {/* Stepper Navigation */}
-      <div className="flex">
+      <div className="flex w-full">
         <Stepper
           steps={steps}
           completedSteps={completedSteps}

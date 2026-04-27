@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DownloadIcon } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import RingkasanCard from '@/components/molecules/RingkasanCard';
 import Select from '@/components/molecules/Select';
-import useReferences from '@/hooks/useReferences';
 import useRingkasan from '@/hooks/useRingkasan';
 
 const periodeOptions = [
@@ -21,14 +21,14 @@ const RingkasanPage = () => {
   const router = useRouter();
   const [komoditas, setKomoditas] = useState('');
   const [periode, setPeriode] = useState('1month');
-  
-  const { 
-    loading, 
-    error, 
-    listRingkasan, 
-    totalRingkasan, 
-    fetchRingkasan, 
-    resetRingkasan 
+
+  const {
+    loading,
+    error,
+    listRingkasan,
+    totalRingkasan,
+    fetchRingkasan,
+    resetRingkasan
   } = useRingkasan();
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const RingkasanPage = () => {
   const getDateRangeFromPeriod = (period) => {
     const endDate = new Date();
     const startDate = new Date();
-    
+
     switch (period) {
       case '1week':
         startDate.setDate(startDate.getDate() - 7);
@@ -68,7 +68,7 @@ const RingkasanPage = () => {
       default:
         startDate.setMonth(startDate.getMonth() - 1);
     }
-    
+
     return {
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
@@ -94,7 +94,8 @@ const RingkasanPage = () => {
     if (route) {
       router.push(route);
     } else {
-      console.log('No route found for:', title);
+      console.error('No route found for:', title);
+      toast.error('Halaman tidak ditemukan');
     }
   };
 
@@ -220,18 +221,18 @@ const RingkasanPage = () => {
               placeholder="Pilih Periode"
             />
           </div>
-          <Button 
-            variant="primary" 
-            size="medium" 
+          <Button
+            variant="primary"
+            size="medium"
             onClick={handleFilterChange}
             disabled={loading}
           >
             {loading ? 'Loading...' : 'Filter'}
           </Button>
-          <Button 
-            icon={<DownloadIcon width={16} height={16} />} 
-            variant="primary" 
-            size="medium" 
+          <Button
+            icon={<DownloadIcon width={16} height={16} />}
+            variant="primary"
+            size="medium"
             onClick={handleDownloadPdf}
             disabled={loading}
           >

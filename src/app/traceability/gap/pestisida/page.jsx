@@ -40,7 +40,7 @@ const PestisidaPage = () => {
 
   useEffect(() => {
     fetchKelompokTani();
-  }, []);
+  }, [fetchKelompokTani]);
 
   // Auto-apply kelompok tani filter based on logged-in user
   const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
@@ -78,60 +78,53 @@ const PestisidaPage = () => {
       ? num.toLocaleString('id-ID')
       : (Number(num) || 0).toLocaleString('id-ID');
 
+  const fetchPestisidaList = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = {
+        page: currentPage,
+        page_size: pageSize,
+      };
+      if (selectedKelompok) params.kelompok = selectedKelompok;
+      if (search) params.search = search;
+      if (selectedYear) params.tahun = selectedYear;
+
+      const res = Object.keys(params).length
+        ? await getListPestisida(params)
+        : await getListPestisida();
+      const payload = res?.data?.data || res?.data || {};
+      const list = payload?.results || payload?.data || payload || [];
+      const normalized = (Array.isArray(list) ? list : []).map((item) => ({
+        id: item?.kebun_id,
+        idKebun: item?.id_kebun ?? '-',
+        namaPetani: item?.nama_petani ?? '-',
+        kelompok: item?.kelompok_tani ?? '-',
+        luasKebunHa:
+          typeof item?.luas_kebun === 'string'
+            ? Number(item.luas_kebun)
+            : item?.luas_kebun ?? null,
+        tahunTanam: item?.tahun_tanam ?? null,
+        umurTanaman: item?.umur_tanaman ?? null,
+        totalPestisida:
+          typeof item?.total_pestisida === 'number'
+            ? item.total_pestisida
+            : Number(item?.total_pestisida) || 0,
+      }));
+      setPestisidaData(normalized);
+      const count = payload?.count ?? normalized.length;
+      setTotalPestisida(count);
+    } catch (err) {
+      toast.error('Gagal memuat data pestisida');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, pageSize, search, selectedKelompok, selectedYear]);
+
   useEffect(() => {
     if (isKelompokFilterInitialized) {
-      const fetchData = async () => {
-        try {
-          setLoading(true);
-          const params = {
-            page: currentPage,
-            page_size: pageSize,
-          };
-          if (selectedKelompok) params.kelompok = selectedKelompok;
-          if (search) params.search = search;
-          if (selectedYear) params.tahun = selectedYear;
-
-          const res = Object.keys(params).length
-            ? await getListPestisida(params)
-            : await getListPestisida();
-          const payload = res?.data?.data || res?.data || {};
-          const list = payload?.results || payload?.data || payload || [];
-          const normalized = (Array.isArray(list) ? list : []).map((item) => ({
-            id: item?.kebun_id,
-            idKebun: item?.id_kebun ?? '-',
-            namaPetani: item?.nama_petani ?? '-',
-            kelompok: item?.kelompok_tani ?? '-',
-            luasKebunHa:
-              typeof item?.luas_kebun === 'string'
-                ? Number(item.luas_kebun)
-                : item?.luas_kebun ?? null,
-            tahunTanam: item?.tahun_tanam ?? null,
-            umurTanaman: item?.umur_tanaman ?? null,
-            totalPestisida:
-              typeof item?.total_pestisida === 'number'
-                ? item.total_pestisida
-                : Number(item?.total_pestisida) || 0,
-          }));
-          setPestisidaData(normalized);
-          const count = payload?.count ?? normalized.length;
-          setTotalPestisida(count);
-        } catch (err) {
-          toast.error('Gagal memuat data pestisida');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchData();
+      fetchPestisidaList();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isKelompokFilterInitialized,
-    currentPage,
-    pageSize,
-    search,
-    selectedKelompok,
-    selectedYear,
-  ]);
+  }, [isKelompokFilterInitialized, fetchPestisidaList]);
 
   const handleSearchTextChange = useCallback(
     debounce((value) => {

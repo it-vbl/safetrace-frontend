@@ -100,7 +100,7 @@ const EditPenjualanContent = () => {
           }
         } catch (error) {
           // Angkutan doesn't exist yet - that's okay
-          console.log('Angkutan not found, starting from step 1');
+          console.error(error)
         }
 
         // If angkutan exists, try to fetch kelompok penyetor detail
@@ -149,12 +149,12 @@ const EditPenjualanContent = () => {
                         jenis_kelamin:
                           petani.jns_kelamin_label ||
                           (petani.jns_kelamin === '1' ||
-                          petani.jns_kelamin === 1
+                            petani.jns_kelamin === 1
                             ? 'Laki - Laki'
                             : petani.jns_kelamin === '2' ||
                               petani.jns_kelamin === 2
-                            ? 'Perempuan'
-                            : '-'),
+                              ? 'Perempuan'
+                              : '-'),
                       })
                     );
 
@@ -169,7 +169,7 @@ const EditPenjualanContent = () => {
             }
           } catch (error) {
             // Kelompok penyetor doesn't exist yet - that's okay
-            console.log('Kelompok penyetor not found');
+            console.error(error)
           }
 
           // If angkutan exists and has pabrik ID, try to fetch pabrik detail
@@ -199,7 +199,7 @@ const EditPenjualanContent = () => {
               }
             } catch (error) {
               // Pabrik doesn't exist yet - that's okay
-              console.log('Pabrik not found');
+              console.error(error)
             }
           }
         }
@@ -292,10 +292,6 @@ const EditPenjualanContent = () => {
             targetCompletedSteps = [1];
           }
         }
-
-        console.log('targetStep', targetStep);
-        console.log('targetLastStep', targetLastStep);
-        console.log('targetCompletedSteps', targetCompletedSteps);
 
         setCurrentStep(targetStep);
         setLastStep(targetLastStep);

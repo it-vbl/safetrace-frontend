@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 
@@ -16,8 +16,9 @@ import {
   updateLB3,
 } from '@/services/lb3';
 
-const LB3DetailPage = ({ params }) => {
+const LB3DetailPage = () => {
   const router = useRouter();
+  const params = useParams();
   const [loading, setLoading] = useState(true);
   const [kebunData, setKebunData] = useState({});
   const [tahunData, setTahunData] = useState([]);
@@ -33,23 +34,23 @@ const LB3DetailPage = ({ params }) => {
   // Transform waste data from API to component format
   const transformWasteData = useCallback((item) => {
     const wasteData = [];
-    
+
     // Always include all three waste types, even if value is 0
     wasteData.push({
       type: 'Limbah Botol',
       quantity: `${item?.limbah_bobot || 0} Kg`,
     });
-    
+
     wasteData.push({
       type: 'Limbah Jeriken',
       quantity: `${item?.limbah_jeriken || 0} Kg`,
     });
-    
+
     wasteData.push({
       type: 'Limbah Karung Pupuk',
       quantity: `${item?.limbah_karung_pupuk || 0} Kg`,
     });
-    
+
     return wasteData;
   }, []);
 
@@ -117,7 +118,7 @@ const LB3DetailPage = ({ params }) => {
   }, [params?.id, fetchLB3Detail]);
 
   const handleTambahTahun = () => {
-    router.push(`/traceability/gap/lb3/${params.id}/tambah-tahun-lb3`);
+    router.push(`/traceability/gap/lb3/tambah?kebun=${params.id}`);
   };
 
   const handleEditTahun = (tahun) => {
@@ -178,7 +179,7 @@ const LB3DetailPage = ({ params }) => {
       if (response?.status === 200 || response?.status === 201) {
         toast.success(
           response?.data?.message ||
-            `Data tahun ${tahun} berhasil diperbarui`
+          `Data tahun ${tahun} berhasil diperbarui`
         );
         handleCloseEditModal();
         // Refresh the data
@@ -245,6 +246,7 @@ const LB3DetailPage = ({ params }) => {
   };
 
   const crumbs = [
+    { label: 'HOME', href: '/' },
     { label: 'LB3', href: '/traceability/gap/lb3' },
     { label: 'DETAIL LB3' },
   ];
@@ -264,8 +266,8 @@ const LB3DetailPage = ({ params }) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <div className="flex items-center justify-between">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-6">
+      <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
         <Button
           onClick={handleTambahTahun}
@@ -282,7 +284,7 @@ const LB3DetailPage = ({ params }) => {
             <h3 className="text-lg font-semibold">DETAIL KEBUN</h3>
           </div>
 
-          <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             <BorderBottomColData
               label="Id Kebun"
               value={kebunData.idKebun || '-'}
@@ -320,7 +322,7 @@ const LB3DetailPage = ({ params }) => {
             key={`tahun-${tahun.tahun}-${index}`}
             className="rounded border border-gray-300 bg-white p-6"
           >
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <h3 className="text-lg font-semibold">TAHUN {tahun.tahun}</h3>
               <div className="flex gap-4">
                 <button
@@ -338,7 +340,7 @@ const LB3DetailPage = ({ params }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-x-6 gap-y-4 text-sm text-gray-700">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-3">
               {tahun.wasteData.map((waste, wasteIndex) => (
                 <BorderBottomColData
                   key={`waste-${waste.type}-${wasteIndex}`}
@@ -373,10 +375,6 @@ const LB3DetailPage = ({ params }) => {
   );
 };
 
-LB3DetailPage.propTypes = {
-  params: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-  }).isRequired,
-};
+LB3DetailPage.propTypes = {};
 
 export default LB3DetailPage;

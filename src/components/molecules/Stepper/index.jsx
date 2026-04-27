@@ -14,7 +14,7 @@ const Stepper = ({
   return (
     <div
       className={cn(
-        'flex items-center justify-center space-x-2 border border-gray-300 p-2 rounded-[4px] bg-white',
+        'flex w-full overflow-x-auto items-center justify-start md:justify-center gap-2 border border-gray-300 p-2 rounded-[4px] bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
         className
       )}
     >
@@ -29,7 +29,7 @@ const Stepper = ({
           <div
             key={stepNumber}
             className={cn(
-              'flex items-center cursor-pointer px-4 py-2 transition-all duration-200',
+              'flex flex-shrink-0 items-center cursor-pointer px-3 md:px-4 py-2 transition-all duration-200 whitespace-nowrap',
               isCurrent && 'bg-gray-100 rounded-lg ',
               isFuture && !isLastStep && 'cursor-not-allowed'
             )}
