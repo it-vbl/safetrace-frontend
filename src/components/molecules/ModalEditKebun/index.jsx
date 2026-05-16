@@ -21,8 +21,18 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
   const {
     jenisLegalitas,
     kelompokTani,
+    komoditas,
+    polaTanam,
+    jenisLahan,
+    asalBenih,
+    jenisPupuk,
     fetchJenisLegalitas,
     fetchKelompokTani,
+    fetchKomoditas,
+    fetchPolaTanam,
+    fetchJenisLahan,
+    fetchAsalBenih,
+    fetchJenisPupuk,
   } = useReferences();
 
   // Month options for waktu_tanam
@@ -83,6 +93,11 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     if (isOpen) {
       fetchJenisLegalitas();
       fetchKelompokTani();
+      fetchKomoditas();
+      fetchPolaTanam();
+      fetchJenisLahan();
+      fetchAsalBenih();
+      fetchJenisPupuk();
       // Fetch petani if kebunData has kelompok_tani
       if (kebunData?.kelompok_tani) {
         fetchPetaniByKelompok(kebunData.kelompok_tani);
@@ -92,6 +107,11 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     isOpen,
     fetchJenisLegalitas,
     fetchKelompokTani,
+    fetchKomoditas,
+    fetchPolaTanam,
+    fetchJenisLahan,
+    fetchAsalBenih,
+    fetchJenisPupuk,
     kebunData?.kelompok_tani,
   ]);
 
@@ -131,6 +151,15 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       nomor_legalitas: data.nomor_legalitas || '',
       pemilik_legalitas: data.pemilik_legalitas || '',
       nomor_stdb: data.nomor_stdb || '',
+      komoditas: data.komoditas?.toString() || '',
+      total_prod_per_tahun: data.total_prod_per_tahun?.toString() || '',
+      tahun_peremajaan: data.tahun_peremajaan?.toString() || '',
+      jumlah_pokok: data.jumlah_pohon?.toString() || data.jumlah_pokok?.toString() || '',
+      pola_tanam: data.pola_tanam?.toString() || '',
+      jenis_lahan: data.jenis_lahan?.toString() || '',
+      asal_benih: data.asal_benih?.toString() || '',
+      jenis_pupuk: data.jenis_pupuk?.toString() || '',
+      mitra_penjualan: data.mitra_penjualan || '',
     };
   };
 
@@ -148,6 +177,15 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     nomor_legalitas: Yup.string().required('Nomor Legalitas wajib diisi'),
     pemilik_legalitas: Yup.string().required('Pemilik Legalitas wajib diisi'),
     nomor_stdb: Yup.string().required('Nomor STDB wajib diisi'),
+    komoditas: Yup.string().required('Komoditas wajib diisi'),
+    total_prod_per_tahun: Yup.string().required('Total produksi wajib diisi'),
+    tahun_peremajaan: Yup.string().required('Tahun peremajaan wajib diisi'),
+    jumlah_pokok: Yup.string().required('Jumlah pohon wajib diisi'),
+    pola_tanam: Yup.string().required('Pola tanam wajib diisi'),
+    jenis_lahan: Yup.string().required('Jenis lahan wajib diisi'),
+    asal_benih: Yup.string().required('Asal benih wajib diisi'),
+    jenis_pupuk: Yup.string().required('Jenis pupuk wajib diisi'),
+    mitra_penjualan: Yup.string().required('Mitra penjualan wajib diisi'),
   });
 
   const formik = useFormik({
@@ -175,7 +213,15 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
           nomor_legalitas: values.nomor_legalitas,
           pemilik_legalitas: values.pemilik_legalitas,
           nomor_stdb: values.nomor_stdb,
-          jumlah_pokok: values?.jumlah_pokok || 0,
+          komoditas: values.komoditas,
+          total_prod_per_tahun: parseFloat(values.total_prod_per_tahun),
+          tahun_peremajaan: parseInt(values.tahun_peremajaan),
+          jumlah_pokok: parseInt(values.jumlah_pokok) || 0,
+          pola_tanam: values.pola_tanam,
+          jenis_lahan: values.jenis_lahan,
+          asal_benih: values.asal_benih,
+          jenis_pupuk: values.jenis_pupuk,
+          mitra_penjualan: values.mitra_penjualan,
         };
 
         // Call API
@@ -216,6 +262,18 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       fetchPetaniByKelompok(formik.values.kelompok_tani);
     }
   }, [isOpen, formik.values.kelompok_tani]);
+
+  // Fix case mismatch for kelompok_tani with API options
+  useEffect(() => {
+    if (kelompokTani.length > 0 && formik.values.kelompok_tani) {
+      const matched = kelompokTani.find(
+        (opt) => typeof opt.value === 'string' && opt.value.toLowerCase() === formik.values.kelompok_tani.toLowerCase()
+      );
+      if (matched && matched.value !== formik.values.kelompok_tani) {
+        formik.setFieldValue('kelompok_tani', matched.value);
+      }
+    }
+  }, [kelompokTani, formik.values.kelompok_tani, formik.setFieldValue]);
 
   const handleClose = () => {
     formik.resetForm();
@@ -350,6 +408,62 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
               errors={formik.errors}
               touched={formik.touched}
             />
+
+            {/* Komoditas */}
+            <Select
+              label="Komoditas"
+              name="komoditas"
+              value={formik.values.komoditas}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              options={komoditas}
+              placeholder="Pilih Komoditas"
+              isError={formik.touched.komoditas && formik.errors.komoditas}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Total Produksi */}
+            <InputText
+              label="Total Produksi 1 Tahun (Kg)"
+              name="total_prod_per_tahun"
+              type="number"
+              value={formik.values.total_prod_per_tahun}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="18000"
+              isError={formik.touched.total_prod_per_tahun && formik.errors.total_prod_per_tahun}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Tahun Peremajaan */}
+            <InputText
+              label="Tahun Peremajaan"
+              name="tahun_peremajaan"
+              type="number"
+              value={formik.values.tahun_peremajaan}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="2020"
+              isError={formik.touched.tahun_peremajaan && formik.errors.tahun_peremajaan}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Jumlah Pohon */}
+            <InputText
+              label="Jumlah Pohon"
+              name="jumlah_pokok"
+              type="number"
+              value={formik.values.jumlah_pokok}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="300"
+              isError={formik.touched.jumlah_pokok && formik.errors.jumlah_pokok}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
           </div>
 
           {/* Right Column */}
@@ -446,6 +560,75 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
                 formik.touched.pemilik_legalitas &&
                 formik.errors.pemilik_legalitas
               }
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Pola Tanam */}
+            <Select
+              label="Pola Tanam"
+              name="pola_tanam"
+              value={formik.values.pola_tanam}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              options={polaTanam}
+              placeholder="Pilih Pola Tanam"
+              isError={formik.touched.pola_tanam && formik.errors.pola_tanam}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Jenis Lahan */}
+            <Select
+              label="Jenis Lahan"
+              name="jenis_lahan"
+              value={formik.values.jenis_lahan}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              options={jenisLahan}
+              placeholder="Pilih Jenis Lahan"
+              isError={formik.touched.jenis_lahan && formik.errors.jenis_lahan}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Asal Benih */}
+            <Select
+              label="Asal Benih"
+              name="asal_benih"
+              value={formik.values.asal_benih}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              options={asalBenih}
+              placeholder="Pilih Asal Benih"
+              isError={formik.touched.asal_benih && formik.errors.asal_benih}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Jenis Pupuk */}
+            <Select
+              label="Jenis Pupuk"
+              name="jenis_pupuk"
+              value={formik.values.jenis_pupuk}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              options={jenisPupuk}
+              placeholder="Pilih Jenis Pupuk"
+              isError={formik.touched.jenis_pupuk && formik.errors.jenis_pupuk}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Mitra Penjualan */}
+            <InputText
+              label="Mitra Penjualan"
+              name="mitra_penjualan"
+              value={formik.values.mitra_penjualan}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Masukan Mitra Penjualan"
+              isError={formik.touched.mitra_penjualan && formik.errors.mitra_penjualan}
               errors={formik.errors}
               touched={formik.touched}
             />

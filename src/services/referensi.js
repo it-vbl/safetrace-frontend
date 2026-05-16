@@ -16,3 +16,11 @@ export const getStatusPerkawinan = () =>
 export const getStatusPekerja = () => api.get(`/referensi/status-pekerja/`);
 export const getSumberKontak = () => api.get(`/referensi/sumber-kontak/`);
 export const getJenisLegalitas = () => api.get(`/referensi/jenis-legalitas/`);
+export const getStatusKeanggotaan = () => api.get(`/referensi/status-keanggotaan/`);
+export const getRegisteredVia = () => api.get(`/referensi/registered-via/`);
+export const getRequestOtpVia = () => api.get(`/referensi/request-otp-via/`);
+export const getPenerimaBroadcast = () => api.get(`/referensi/penerima-boardcast/`);
+export const getWhispStatus = () => api.get(`/referensi/whisp-status/`);
+export const getPilihanBulan = () => api.get(`/referensi/pilihan-bulan/`);
+export const getDeforestationAlertType = () => api.get(`/referensi/deforestation-alert-type/`);
+export const getKomoditas = () => api.get(`/referensi/komoditas/`);

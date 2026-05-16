@@ -293,7 +293,7 @@ const DataPabrik = ({
             isRequired
             showSearchBar={true}
             allowAddOption={{
-              visible: true,
+              visible: false,
               placeholder: 'Masukan nama pabrik baru',
               isLoading: isLoadingPabrik,
               onSubmitOption: handleAddCustomPabrik,

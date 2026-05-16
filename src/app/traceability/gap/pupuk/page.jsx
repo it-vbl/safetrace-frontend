@@ -61,11 +61,11 @@ const PupukPage = () => {
             id_kebun: item?.id_kebun || '-',
             nama_petani: item?.nama_petani || '-',
             kelompok: item?.kelompok_tani || '-',
-            luas_kebun: item?.luas_kebun || 0,
+            luas_kebun: item?.luas_kebun ?? 0,
             tahun_tanam: item?.tahun_tanam || '-',
-            umur_tanaman: item?.umur_tanaman || '-',
-            jumlah_pokok: item?.jumlah_pokok || '-',
-            total_pupuk: item?.total_pupuk || '-',
+            umur_tanaman: item?.umur_tanaman ?? '-',
+            jumlah_pokok: item?.jumlah_pokok ?? '-',
+            total_pupuk: item?.total_pupuk ?? '-',
           }));
 
           setPupukData(mapped);

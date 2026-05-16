@@ -23,46 +23,50 @@ const validationSchema = Yup.object({
     .typeError('Tahun wajib dipilih')
     .required('Tahun wajib dipilih'),
   s1_sistemik_waktu: Yup.number()
-    .typeError('Wajib diisi')
+    .nullable()
+    .transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
     .min(1)
-    .max(12)
-    .required('Wajib diisi'),
+    .max(12),
   s1_sistemik_jumlah: Yup.string()
-    .required('Wajib diisi')
+    .nullable()
     .test('angka-valid', 'Harus angka >= 0', (val) => {
+      if (!val) return true;
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
   s1_kontak_waktu: Yup.number()
-    .typeError('Wajib diisi')
+    .nullable()
+    .transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
     .min(1)
-    .max(12)
-    .required('Wajib diisi'),
+    .max(12),
   s1_kontak_jumlah: Yup.string()
-    .required('Wajib diisi')
+    .nullable()
     .test('angka-valid', 'Harus angka >= 0', (val) => {
+      if (!val) return true;
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
   s2_sistemik_waktu: Yup.number()
-    .typeError('Wajib diisi')
+    .nullable()
+    .transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
     .min(1)
-    .max(12)
-    .required('Wajib diisi'),
+    .max(12),
   s2_sistemik_jumlah: Yup.string()
-    .required('Wajib diisi')
+    .nullable()
     .test('angka-valid', 'Harus angka >= 0', (val) => {
+      if (!val) return true;
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
   s2_kontak_waktu: Yup.number()
-    .typeError('Wajib diisi')
+    .nullable()
+    .transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
     .min(1)
-    .max(12)
-    .required('Wajib diisi'),
+    .max(12),
   s2_kontak_jumlah: Yup.string()
-    .required('Wajib diisi')
+    .nullable()
     .test('angka-valid', 'Harus angka >= 0', (val) => {
+      if (!val) return true;
       const n = parseLiterInput(val);
       return Number.isFinite(n) && n >= 0;
     }),
@@ -133,14 +137,14 @@ function TambahPestisidaContent() {
         const payload = {
           kebun: kebunId,
           tahun: values.tahun,
-          s1_sistemik_waktu_aplikasi: Number(values.s1_sistemik_waktu),
-          s1_sistemik_jumlah: parseLiterInput(values.s1_sistemik_jumlah),
-          s1_kontak_waktu_aplikasi: Number(values.s1_kontak_waktu),
-          s1_kontak_jumlah: parseLiterInput(values.s1_kontak_jumlah),
-          s2_sistemik_waktu_aplikasi: Number(values.s2_sistemik_waktu),
-          s2_sistemik_jumlah: parseLiterInput(values.s2_sistemik_jumlah),
-          s2_kontak_waktu_aplikasi: Number(values.s2_kontak_waktu),
-          s2_kontak_jumlah: parseLiterInput(values.s2_kontak_jumlah),
+          s1_sistemik_waktu_aplikasi: values.s1_sistemik_waktu ? Number(values.s1_sistemik_waktu) : null,
+          s1_sistemik_jumlah: values.s1_sistemik_jumlah ? parseLiterInput(values.s1_sistemik_jumlah) : null,
+          s1_kontak_waktu_aplikasi: values.s1_kontak_waktu ? Number(values.s1_kontak_waktu) : null,
+          s1_kontak_jumlah: values.s1_kontak_jumlah ? parseLiterInput(values.s1_kontak_jumlah) : null,
+          s2_sistemik_waktu_aplikasi: values.s2_sistemik_waktu ? Number(values.s2_sistemik_waktu) : null,
+          s2_sistemik_jumlah: values.s2_sistemik_jumlah ? parseLiterInput(values.s2_sistemik_jumlah) : null,
+          s2_kontak_waktu_aplikasi: values.s2_kontak_waktu ? Number(values.s2_kontak_waktu) : null,
+          s2_kontak_jumlah: values.s2_kontak_jumlah ? parseLiterInput(values.s2_kontak_jumlah) : null,
         };
         const res = await createPestisida(payload);
         const ok =
@@ -225,13 +229,12 @@ function TambahPestisidaContent() {
                       onChange={(e) =>
                         formik.setFieldValue(
                           's1_sistemik_waktu',
-                          Number(e.target.value)
+                          e.target.value ? Number(e.target.value) : ''
                         )
                       }
                       onBlur={formik.handleBlur}
                       errors={formik.errors}
                       touched={formik.touched}
-                      isRequired
                     />
                     <InputText
                       label="(Sistemik) Jumlah"
@@ -245,7 +248,6 @@ function TambahPestisidaContent() {
                       suffix="Liter"
                       type="string"
                       formatter={formatLiterInput}
-                      isRequired
                     />
                     <Select
                       label="(Kontak) Waktu Aplikasi"
@@ -256,13 +258,12 @@ function TambahPestisidaContent() {
                       onChange={(e) =>
                         formik.setFieldValue(
                           's1_kontak_waktu',
-                          Number(e.target.value)
+                          e.target.value ? Number(e.target.value) : ''
                         )
                       }
                       onBlur={formik.handleBlur}
                       errors={formik.errors}
                       touched={formik.touched}
-                      isRequired
                     />
                     <InputText
                       label="(Kontak) Jumlah"
@@ -276,7 +277,6 @@ function TambahPestisidaContent() {
                       suffix="Liter"
                       type="string"
                       formatter={formatLiterInput}
-                      isRequired
                     />
                   </div>
                 </div>
@@ -294,13 +294,12 @@ function TambahPestisidaContent() {
                       onChange={(e) =>
                         formik.setFieldValue(
                           's2_sistemik_waktu',
-                          Number(e.target.value)
+                          e.target.value ? Number(e.target.value) : ''
                         )
                       }
                       onBlur={formik.handleBlur}
                       errors={formik.errors}
                       touched={formik.touched}
-                      isRequired
                     />
                     <InputText
                       label="(Sistemik) Jumlah"
@@ -314,7 +313,6 @@ function TambahPestisidaContent() {
                       suffix="Liter"
                       type="string"
                       formatter={formatLiterInput}
-                      isRequired
                     />
                     <Select
                       label="(Kontak) Waktu Aplikasi"
@@ -325,13 +323,12 @@ function TambahPestisidaContent() {
                       onChange={(e) =>
                         formik.setFieldValue(
                           's2_kontak_waktu',
-                          Number(e.target.value)
+                          e.target.value ? Number(e.target.value) : ''
                         )
                       }
                       onBlur={formik.handleBlur}
                       errors={formik.errors}
                       touched={formik.touched}
-                      isRequired
                     />
                     <InputText
                       label="(Kontak) Jumlah"
@@ -345,7 +342,6 @@ function TambahPestisidaContent() {
                       suffix="Liter"
                       type="string"
                       formatter={formatLiterInput}
-                      isRequired
                     />
                   </div>
                 </div>

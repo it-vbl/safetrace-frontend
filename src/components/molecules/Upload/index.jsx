@@ -29,8 +29,12 @@ const Upload = ({
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const validateFile = (file) => {
-    if (file.name.includes('.shp') || file.name.includes('.zip')) {
-      return;
+    if (
+      file.name.includes('.shp') ||
+      file.name.includes('.zip') ||
+      file.name.toLowerCase().endsWith('.kml')
+    ) {
+      return '';
     }
     const validTypes = [
       'application/pdf',

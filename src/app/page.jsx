@@ -158,7 +158,7 @@ const MapDashboard = () => {
     search: alertSearchText,
     kabupaten: filterAlertKabupaten,
     kecamatan: filterAlertKecamatan,
-    source_type: filterAlertType || 'glad',
+    source_type: filterAlertType,
   });
 
   useEffect(() => {

@@ -448,8 +448,9 @@ const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
   const validationSchema = useMemo(() => {
     const shape = MONTH_NAMES.reduce((acc, m) => {
       acc[m] = Yup.string()
-        .required('Wajib diisi')
+        .nullable()
         .test('angka-valid', 'Harus angka >= 0', (val) => {
+          if (!val) return true;
           const n = parseKgInput(val);
           return Number.isFinite(n) && n >= 0;
         });
@@ -506,7 +507,7 @@ const EditProduksiModal = ({ open, onClose, yearData, onSave }) => {
               touched={formik.touched}
               suffix="Kg"
               type="string"
-              isRequired={true}
+              
             />
           ))}
         </div>
