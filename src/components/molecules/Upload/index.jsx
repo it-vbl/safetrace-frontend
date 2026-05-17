@@ -29,6 +29,7 @@ const Upload = ({
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const validateFile = (file) => {
+    if (!file || !file.name) return 'File tidak valid';
     if (
       file.name.includes('.shp') ||
       file.name.includes('.zip') ||

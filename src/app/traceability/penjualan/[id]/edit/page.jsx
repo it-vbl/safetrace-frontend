@@ -350,7 +350,7 @@ const EditPenjualanContent = () => {
 
   // Function to handle step click
   const handleStepClick = (stepNumber) => {
-    if (stepNumber <= lastStep) {
+    if (idPenjualan || stepNumber <= lastStep) {
       setCurrentStep(stepNumber);
     }
   };
@@ -639,8 +639,8 @@ const EditPenjualanContent = () => {
       <div className="flex">
         <Stepper
           steps={steps}
-          completedSteps={completedSteps}
-          lastStep={lastStep}
+          completedSteps={idPenjualan ? steps.map((_, i) => i + 1) : completedSteps}
+          lastStep={idPenjualan ? steps.length : lastStep}
           currentStep={currentStep}
           onStepClick={handleStepClick}
         />

@@ -7,23 +7,23 @@ import Button from '@/components/atoms/Button';
 import Upload from '@/components/molecules/Upload';
 
 const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting }) => {
-  // State for dynamic list of files
-  const [lampiranFiles, setLampiranFiles] = useState(
-    lampiranData && lampiranData.length > 0
-      ? lampiranData.map((item, i) => ({ id: item.id || i, file: item.file || item }))
-      : [{ id: Date.now(), file: null }]
-  );
-
-  const handleAddFile = () => {
-    setLampiranFiles([...lampiranFiles, { id: Date.now(), file: null }]);
-  };
+  // State for exactly 6 files
+  const [lampiranFiles, setLampiranFiles] = useState(() => {
+    const initialFiles = Array(6).fill(null).map((_, i) => ({ id: i, file: null }));
+    if (lampiranData && lampiranData.length > 0) {
+      lampiranData.forEach((item, i) => {
+        if (i < 6) {
+          initialFiles[i] = { id: i, file: item.file || item };
+        }
+      });
+    }
+    return initialFiles;
+  });
 
   const handleRemoveFile = (id) => {
-    if (lampiranFiles.length > 1) {
-      setLampiranFiles(lampiranFiles.filter((item) => item.id !== id));
-    } else {
-      setLampiranFiles([{ id: Date.now(), file: null }]);
-    }
+    setLampiranFiles((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, file: null } : item))
+    );
   };
 
   const handleChangeFile = (id, fileData) => {
@@ -49,9 +49,6 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
       <div className="rounded-lg border border-gray-300 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">LAMPIRAN</h3>
-          <Button type="button" onClick={handleAddFile} size="small">
-            + Tambah Lampiran
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
@@ -74,16 +71,19 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
                 onChangeValue={(data) => handleChangeFile(item.id, data)}
                 allowedFiles={['image/jpeg', 'image/png', 'application/pdf']}
                 maxSize={10}
+                keyField={`lampiran-${item.id}`}
               />
-              <button
-                type="button"
-                onClick={() => handleRemoveFile(item.id)}
-                className="absolute right-0 top-0 text-red-500 hover:text-red-700 font-bold"
-                style={{ marginTop: '-4px' }}
-                title="Hapus"
-              >
-                ×
-              </button>
+              {item.file && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(item.id)}
+                  className="absolute right-0 top-0 text-red-500 hover:text-red-700 font-bold"
+                  style={{ marginTop: '-4px' }}
+                  title="Hapus"
+                >
+                  ×
+                </button>
+              )}
             </div>
           ))}
         </div>
