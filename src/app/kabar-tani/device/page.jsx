@@ -663,8 +663,7 @@ const DevicePage = () => {
               DEVICE
             </Heading>
             <Paragraph level={3}>
-              Maksimal device atau perangkat yang bisa terhubung adalah 10
-              device
+              Maksimal device atau perangkat yang bisa terhubung adalah 5 device
             </Paragraph>
           </div>
           <div className="flex w-full gap-2 sm:w-auto">
@@ -672,6 +671,7 @@ const DevicePage = () => {
               onClick={() => {
                 setIsOpen(true);
               }}
+              isDisabled={totalDevice >= 5}
             >
               Tambah Device
             </Button>

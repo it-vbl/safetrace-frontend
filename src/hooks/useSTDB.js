@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback,useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -25,7 +25,7 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
   const { stdb, filterKomoditas, filterKecamatan, filterSTDBStatus } =
     useSelector((state) => state.stdb);
 
-  const fetchStatusVerifikasiKebun = async (pekebunId, kebunId) => {
+  const fetchStatusVerifikasiKebun = useCallback(async (pekebunId, kebunId) => {
     try {
       const response = await getStatusVerifikasiKebun(pekebunId, kebunId);
       const data = response.data.data;
@@ -34,9 +34,9 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
       console.error(error);
       return false;
     }
-  };
+  }, []);
 
-  const fetchListVerifikasi = async ({ page_size, page, search }) => {
+  const fetchListVerifikasi = useCallback(async ({ page_size, page, search }) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -52,9 +52,9 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchListKebunSTDB = async (stdbId) => {
+  const fetchListKebunSTDB = useCallback(async (stdbId) => {
     try {
       const response = await getListKebunSTDB(stdbId);
       if (response.status == 200) {
@@ -64,9 +64,9 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
       console.error(error);
       return false;
     }
-  };
+  }, []);
 
-  const fetchAPI = async (api, setState, params) => {
+  const fetchAPI = useCallback(async (api, setState, params) => {
     setLoading(true);
     try {
       const response = await api(params);
@@ -80,23 +80,23 @@ const useSTDB = ({ page_size = 10, page = 1, search = '' } = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchTidakTerbit = async (params) => {
+  const fetchTidakTerbit = useCallback(async (params) => {
     return fetchAPI(getTidakTerbitList, setListTidakTerbit, params);
-  };
+  }, [fetchAPI]);
 
-  const fetchPenerbitan = async (params) => {
+  const fetchPenerbitan = useCallback(async (params) => {
     return fetchAPI(getPenerbitanList, setListPenerbitan, params);
-  };
+  }, [fetchAPI]);
 
-  const fetchTerbit = async (params) => {
+  const fetchTerbit = useCallback(async (params) => {
     return fetchAPI(getDataTerbitList, setListTerbit, params);
-  };
+  }, [fetchAPI]);
 
-  const fetchDataBerakhir = async (params) => {
+  const fetchDataBerakhir = useCallback(async (params) => {
     return fetchAPI(getDataBerakhirList, setListDataBerakhir, params);
-  };
+  }, [fetchAPI]);
 
   return {
     stdb,

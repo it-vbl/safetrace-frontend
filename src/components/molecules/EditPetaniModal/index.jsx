@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -8,6 +9,7 @@ import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import TextArea from '@/components/molecules/TextArea';
+import useWilayah from '@/hooks/useWilayah';
 
 const validationSchema = Yup.object({
   id: Yup.string().required('Id Petani is required'),
@@ -20,11 +22,16 @@ const validationSchema = Yup.object({
   tanggal_lahir: Yup.string().required('Tanggal Lahir is required'),
   no_kk: Yup.string().required('No. KK is required'),
   status_pernikahan: Yup.string().required('Status Pernikahan is required'),
-  no_nib: Yup.string().required('No. NIB is required'),
-  tanggal_terbit_sppl: Yup.string().required('Tanggal Terbit SPPL is required'),
-  tanggal_bergabung: Yup.string().required('Tanggal Bergabung is required'),
-  no_whatsapp: Yup.string().required('No. Whatsapp is required'),
+  no_nib: Yup.string(),
+  tanggal_terbit_sppl: Yup.string(),
+  tanggal_bergabung: Yup.string(),
+  no_whatsapp: Yup.string(),
   keanggotaan: Yup.string().required('Status Keanggotaan is required'),
+  pendidikan_terakhir: Yup.string().required('Pendidikan Terakhir is required'),
+  provinsi: Yup.string().required('Provinsi is required'),
+  kabupaten: Yup.string().required('Kabupaten is required'),
+  kecamatan: Yup.string().required('Kecamatan is required'),
+  desa: Yup.string().required('Desa is required'),
 });
 
 const EditPetaniModal = ({
@@ -35,7 +42,64 @@ const EditPetaniModal = ({
   jenisKelamin = [],
   statusPerkawinan = [],
   kelompokTani = [],
+  pendidikanTerakhir = [],
+  statusKeanggotaan = [],
 }) => {
+  const {
+    listProvinsi,
+    listKota,
+    listKecamatan,
+    listDesa,
+    fetchListProvinsi,
+    fetchListKota,
+    fetchListKecamatan,
+    fetchListDesa,
+  } = useWilayah();
+
+  useEffect(() => {
+    if (open) {
+      fetchListProvinsi();
+
+      if (initialValues.provinsi) {
+        fetchListKota(initialValues.provinsi);
+      }
+
+      if (initialValues.kabupaten) {
+        fetchListKecamatan(initialValues.kabupaten);
+      }
+
+      if (initialValues.kecamatan) {
+        fetchListDesa(initialValues.kecamatan);
+      }
+    }
+  }, [open, initialValues, fetchListProvinsi, fetchListKota, fetchListKecamatan, fetchListDesa]);
+
+  const handleProvinsiChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kabupaten', '');
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKota(e.target.value);
+    }
+  };
+
+  const handleKotaChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKecamatan(e.target.value);
+    }
+  };
+
+  const handleKecamatanChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListDesa(e.target.value);
+    }
+  };
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema,
@@ -46,22 +110,31 @@ const EditPetaniModal = ({
     enableReinitialize: true,
   });
 
-  const statusKeanggotaanOptions = [
-    { value: 'true', label: 'Aktif' },
-    { value: 'false', label: 'Tidak Aktif' },
-  ];
-
   return (
     <BaseModal
       open={open}
       setOpen={setOpen}
       label="UBAH IDENTITAS PETANI"
       isShowCloseIcon={true}
+      className="max-w-5xl"
     >
       <form
         onSubmit={formik.handleSubmit}
-        className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-700"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm text-gray-700 mt-4"
       >
+        {/* Row 1 */}
+        <Select
+          label="Status Keanggotaan"
+          name="keanggotaan"
+          value={formik.values.keanggotaan}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          options={statusKeanggotaan}
+          isError={formik.touched.keanggotaan && formik.errors.keanggotaan}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
         <InputText
           label="Id Petani"
           name="id"
@@ -84,6 +157,8 @@ const EditPetaniModal = ({
           touched={formik.touched}
           isRequired
         />
+
+        {/* Row 2 */}
         <Select
           label="Jenis Kelamin"
           name="jenis_kelamin"
@@ -108,24 +183,6 @@ const EditPetaniModal = ({
           touched={formik.touched}
           isRequired
         />
-        <div className="col-span-2">
-          <TextArea
-            label="Alamat"
-            name="alamat"
-            value={formik.values.alamat}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            hasError={formik.touched.alamat && formik.errors.alamat}
-            helperText={
-              formik.touched.alamat && formik.errors.alamat
-                ? formik.errors.alamat
-                : ''
-            }
-            isRequired
-            maxChar={500}
-            isFullWidth={true}
-          />
-        </div>
         <InputText
           label="No. KTP"
           name="no_ktp"
@@ -137,29 +194,8 @@ const EditPetaniModal = ({
           touched={formik.touched}
           isRequired
         />
-        <InputText
-          label="Tempat Lahir"
-          name="tempat_lahir"
-          value={formik.values.tempat_lahir}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          isError={formik.touched.tempat_lahir && formik.errors.tempat_lahir}
-          errors={formik.errors}
-          touched={formik.touched}
-          isRequired
-        />
-        <DatePicker
-          label="Tanggal Lahir"
-          name="tanggal_lahir"
-          value={formik.values.tanggal_lahir}
-          onChange={(e) =>
-            formik.setFieldValue('tanggal_lahir', e.target.value)
-          }
-          onBlur={formik.handleBlur}
-          errors={formik.errors}
-          touched={formik.touched}
-          isRequired
-        />
+
+        {/* Row 3 */}
         <InputText
           label="No. KK"
           name="no_kk"
@@ -185,6 +221,127 @@ const EditPetaniModal = ({
           touched={formik.touched}
           isRequired
         />
+        <Select
+          label="Provinsi"
+          name="provinsi"
+          value={formik.values.provinsi}
+          onChange={handleProvinsiChange}
+          onBlur={formik.handleBlur}
+          options={listProvinsi}
+          isError={formik.touched.provinsi && formik.errors.provinsi}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
+
+        {/* Row 4 */}
+        <Select
+          label="Kabupaten/Kota"
+          name="kabupaten"
+          value={formik.values.kabupaten}
+          onChange={handleKotaChange}
+          onBlur={formik.handleBlur}
+          options={listKota}
+          isError={formik.touched.kabupaten && formik.errors.kabupaten}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
+        <Select
+          label="Desa"
+          name="desa"
+          value={formik.values.desa}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          options={listDesa}
+          isError={formik.touched.desa && formik.errors.desa}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
+        <Select
+          label="Kecamatan"
+          name="kecamatan"
+          value={formik.values.kecamatan}
+          onChange={handleKecamatanChange}
+          onBlur={formik.handleBlur}
+          options={listKecamatan}
+          isError={formik.touched.kecamatan && formik.errors.kecamatan}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
+
+        {/* Row 5 */}
+        <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+          <TextArea
+            label="Alamat"
+            name="alamat"
+            value={formik.values.alamat}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            hasError={formik.touched.alamat && formik.errors.alamat}
+            helperText={
+              formik.touched.alamat && formik.errors.alamat
+                ? formik.errors.alamat
+                : ''
+            }
+            isRequired
+            maxChar={500}
+            isFullWidth={true}
+          />
+        </div>
+
+        {/* Row 6 */}
+        <Select
+          label="Pendidikan Terakhir"
+          name="pendidikan_terakhir"
+          value={formik.values.pendidikan_terakhir}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          options={pendidikanTerakhir}
+          isError={
+            formik.touched.pendidikan_terakhir && formik.errors.pendidikan_terakhir
+          }
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
+        <InputText
+          label="No Whatsapp"
+          name="no_whatsapp"
+          value={formik.values.no_whatsapp}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          isError={formik.touched.no_whatsapp && formik.errors.no_whatsapp}
+          errors={formik.errors}
+          touched={formik.touched}
+        />
+        <InputText
+          label="Tempat Lahir"
+          name="tempat_lahir"
+          value={formik.values.tempat_lahir}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          isError={formik.touched.tempat_lahir && formik.errors.tempat_lahir}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
+
+        {/* Row 7 */}
+        <DatePicker
+          label="Tanggal Lahir"
+          name="tanggal_lahir"
+          value={formik.values.tanggal_lahir}
+          onChange={(e) =>
+            formik.setFieldValue('tanggal_lahir', e.target.value)
+          }
+          onBlur={formik.handleBlur}
+          errors={formik.errors}
+          touched={formik.touched}
+          isRequired
+        />
         <InputText
           label="No. NIB"
           name="no_nib"
@@ -194,7 +351,6 @@ const EditPetaniModal = ({
           isError={formik.touched.no_nib && formik.errors.no_nib}
           errors={formik.errors}
           touched={formik.touched}
-          isRequired
         />
         <DatePicker
           label="Tanggal Terbit SPPL"
@@ -206,8 +362,9 @@ const EditPetaniModal = ({
           onBlur={formik.handleBlur}
           errors={formik.errors}
           touched={formik.touched}
-          isRequired
         />
+
+        {/* Row 8 */}
         <DatePicker
           label="Tanggal Bergabung"
           name="tanggal_bergabung"
@@ -218,7 +375,6 @@ const EditPetaniModal = ({
           onBlur={formik.handleBlur}
           errors={formik.errors}
           touched={formik.touched}
-          isRequired
         />
         <DatePicker
           label="Tanggal Keluar"
@@ -231,32 +387,10 @@ const EditPetaniModal = ({
           errors={formik.errors}
           touched={formik.touched}
         />
-        <InputText
-          label="No. Whatsapp"
-          name="no_whatsapp"
-          value={formik.values.no_whatsapp}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          isError={formik.touched.no_whatsapp && formik.errors.no_whatsapp}
-          errors={formik.errors}
-          touched={formik.touched}
-          isRequired
-        />
+        <div className="hidden lg:block"></div> {/* Empty space for grid alignment */}
 
-        <Select
-          label="Status Keanggotaan"
-          name="keanggotaan"
-          value={formik.values.keanggotaan}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          options={statusKeanggotaanOptions}
-          isError={formik.touched.keanggotaan && formik.errors.keanggotaan}
-          errors={formik.errors}
-          touched={formik.touched}
-          isRequired
-        />
-
-        <div className="col-span-2 mt-6 flex justify-end gap-4">
+        {/* Action Buttons */}
+        <div className="col-span-1 sm:col-span-2 lg:col-span-3 mt-6 flex justify-end gap-4">
           <button
             type="button"
             onClick={() => setOpen(false)}

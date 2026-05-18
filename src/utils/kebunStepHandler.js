@@ -28,7 +28,15 @@ export const handleStep1 = async (values, idKebun) => {
       nomor_legalitas: values.no_legalitas,
       pemilik_legalitas: values.pemilik_legalitas,
       nomor_stdb: values.stdb,
-      jumlah_pokok: values.jumlah_pokok || 0,
+      komoditas: values.komoditas,
+      total_prod_per_tahun: parseFloat(values.total_prod_per_tahun),
+      tahun_peremajaan: parseInt(values.tahun_peremajaan),
+      jumlah_pokok: parseInt(values.jumlah_pokok) || 0,
+      pola_tanam: values.pola_tanam,
+      jenis_lahan: values.jenis_lahan,
+      asal_benih: values.asal_benih,
+      jenis_pupuk: values.jenis_pupuk,
+      mitra_penjualan: values.mitra_penjualan,
     };
 
     const response = await updateKebun(idKebun, kebunData);
@@ -54,7 +62,15 @@ export const handleStep1 = async (values, idKebun) => {
       nomor_legalitas: values.no_legalitas,
       pemilik_legalitas: values.pemilik_legalitas,
       nomor_stdb: values.stdb,
-      jumlah_pokok: values.jumlah_pokok || 0,
+      komoditas: values.komoditas,
+      total_prod_per_tahun: parseFloat(values.total_prod_per_tahun),
+      tahun_peremajaan: parseInt(values.tahun_peremajaan),
+      jumlah_pokok: parseInt(values.jumlah_pokok) || 0,
+      pola_tanam: values.pola_tanam,
+      jenis_lahan: values.jenis_lahan,
+      asal_benih: values.asal_benih,
+      jenis_pupuk: values.jenis_pupuk,
+      mitra_penjualan: values.mitra_penjualan,
     };
 
     const response = await createKebunDetail(kebunData);

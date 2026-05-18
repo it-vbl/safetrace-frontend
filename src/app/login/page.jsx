@@ -102,13 +102,13 @@ const LoginPage = () => {
       <div className="flex w-full items-center justify-center px-8 lg:w-1/2">
         <div className="w-full max-w-lg">
           {/* Logo */}
-          <div className="mb-8 flex items-center justify-center sm:mb-4">
-            <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
+          <div className="m-4 flex items-center justify-center">
+            <Image src={LogoSipekebun} width="auto" height={38} alt="logo" />
           </div>
 
           {/* Welcome Card */}
-          <div className="mb-6 rounded-xl border border-gray-200 bg-white px-6 py-8 shadow-sm sm:px-10">
-            <div className="flex flex-col gap-2 text-center sm:gap-3">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:px-10">
+            <div className="flex flex-col gap-2 text-center">
               <Heading
                 level={1}
                 className="font-serif text-2xl font-normal sm:text-3xl"
@@ -120,11 +120,11 @@ const LoginPage = () => {
                 className="text-sm font-normal text-gray-700 sm:text-base"
               >
                 Masukan email dan kata sandi untuk mulai menggunakan dashboard
-                CU Keling Kumang.
+                Keling Kumang.
               </Paragraph>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5 sm:mt-8">
+            <form onSubmit={handleSubmit} className="mt-4 space-y-6">
               <InputText
                 label={'Email'}
                 name="username"
@@ -154,7 +154,6 @@ const LoginPage = () => {
               >
                 Masuk
               </Button>
-              <div className="mt-4 sm:mt-6"></div>
 
               <div className="text-center">
                 <Link
@@ -167,16 +166,12 @@ const LoginPage = () => {
             </form>
           </div>
 
-          <div className="mb-4 mt-8 flex justify-center px-4 sm:mb-6 sm:mt-4">
-            <Image
-              src={ImagePartnership}
-              alt="partnership"
-              className="max-h-12 w-full object-contain sm:max-h-14"
-            />
+          <div className="m-4 flex justify-center px-4">
+            <Image src={ImagePartnership} width="auto" height={52} alt="logo" />
           </div>
 
           <div className="text-center text-xs font-medium text-gray-600">
-            © 2026 CU Keling Kumang. All rights reserved.
+            © 2026 Keling Kumang. All rights reserved.
           </div>
         </div>
       </div>

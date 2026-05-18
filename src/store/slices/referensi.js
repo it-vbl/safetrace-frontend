@@ -17,6 +17,14 @@ export const referensiSlice = createSlice({
     kelompokTani: [],
     sumberKontak: [],
     jenisLegalitas: [],
+    statusKeanggotaan: [],
+    registeredVia: [],
+    requestOtpVia: [],
+    penerimaBroadcast: [],
+    whispStatus: [],
+    pilihanBulan: [],
+    deforestationAlertType: [],
+    komoditas: [],
   },
   reducers: {
     setPendidikanTerakhir: (state, action) => {
@@ -61,6 +69,30 @@ export const referensiSlice = createSlice({
     setJenisLegalitas: (state, action) => {
       state.jenisLegalitas = action.payload;
     },
+    setStatusKeanggotaan: (state, action) => {
+      state.statusKeanggotaan = action.payload;
+    },
+    setRegisteredVia: (state, action) => {
+      state.registeredVia = action.payload;
+    },
+    setRequestOtpVia: (state, action) => {
+      state.requestOtpVia = action.payload;
+    },
+    setPenerimaBroadcast: (state, action) => {
+      state.penerimaBroadcast = action.payload;
+    },
+    setWhispStatus: (state, action) => {
+      state.whispStatus = action.payload;
+    },
+    setPilihanBulan: (state, action) => {
+      state.pilihanBulan = action.payload;
+    },
+    setDeforestationAlertType: (state, action) => {
+      state.deforestationAlertType = action.payload;
+    },
+    setKomoditas: (state, action) => {
+      state.komoditas = action.payload;
+    },
   },
 });
 
@@ -79,5 +111,13 @@ export const {
   setKelompokTani,
   setSumberKontak,
   setJenisLegalitas,
+  setStatusKeanggotaan,
+  setRegisteredVia,
+  setRequestOtpVia,
+  setPenerimaBroadcast,
+  setWhispStatus,
+  setPilihanBulan,
+  setDeforestationAlertType,
+  setKomoditas,
 } = referensiSlice.actions;
 export default referensiSlice.reducer;

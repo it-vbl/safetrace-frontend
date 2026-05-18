@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback,useState } from 'react';
 
 import { getRingkasanList } from '../services/stdb';
 
@@ -7,7 +7,7 @@ const useRingkasan = () => {
   const [error, setError] = useState(null);
   const [listRingkasan, setListRingkasan] = useState([]);
 
-  const fetchRingkasan = async ({ komoditas = '', start_date = '', end_date = '' } = {}) => {
+  const fetchRingkasan = useCallback(async ({ komoditas = '', start_date = '', end_date = '' } = {}) => {
     setLoading(true);
     setError(null);
     
@@ -33,12 +33,12 @@ const useRingkasan = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const resetRingkasan = () => {
+  const resetRingkasan = useCallback(() => {
     setListRingkasan([]);
     setError(null);
-  };
+  }, []);
 
   return {
     loading,

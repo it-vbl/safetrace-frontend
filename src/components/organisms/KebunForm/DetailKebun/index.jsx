@@ -32,22 +32,43 @@ const DetailKebun = ({
   const {
     kelompokTani,
     jenisLegalitas,
+    komoditas,
+    polaTanam,
+    jenisLahan,
+    asalBenih,
+    jenisPupuk,
     fetchKelompokTani,
     fetchJenisLegalitas,
+    fetchKomoditas,
+    fetchPolaTanam,
+    fetchJenisLahan,
+    fetchAsalBenih,
+    fetchJenisPupuk,
   } = useReferences();
 
   useEffect(() => {
-    if (kelompokTani.length === 0) {
-      fetchKelompokTani();
-    }
-    if (jenisLegalitas.length === 0) {
-      fetchJenisLegalitas();
-    }
+    if (kelompokTani.length === 0) fetchKelompokTani();
+    if (jenisLegalitas.length === 0) fetchJenisLegalitas();
+    if (komoditas.length === 0) fetchKomoditas();
+    if (polaTanam.length === 0) fetchPolaTanam();
+    if (jenisLahan.length === 0) fetchJenisLahan();
+    if (asalBenih.length === 0) fetchAsalBenih();
+    if (jenisPupuk.length === 0) fetchJenisPupuk();
   }, [
     kelompokTani.length,
     jenisLegalitas.length,
+    komoditas.length,
+    polaTanam.length,
+    jenisLahan.length,
+    asalBenih.length,
+    jenisPupuk.length,
     fetchKelompokTani,
     fetchJenisLegalitas,
+    fetchKomoditas,
+    fetchPolaTanam,
+    fetchJenisLahan,
+    fetchAsalBenih,
+    fetchJenisPupuk,
   ]);
 
   useEffect(() => {
@@ -107,6 +128,15 @@ const DetailKebun = ({
     no_legalitas: Yup.string().required('No. Legalitas harus diisi'),
     pemilik_legalitas: Yup.string().required('Pemilik Legalitas harus diisi'),
     stdb: Yup.string().required('STDB harus diisi'),
+    komoditas: Yup.string().required('Komoditas harus diisi'),
+    total_prod_per_tahun: Yup.string().required('Total produksi harus diisi'),
+    tahun_peremajaan: Yup.string().required('Tahun peremajaan harus diisi'),
+    jumlah_pokok: Yup.string().required('Jumlah pohon harus diisi'),
+    pola_tanam: Yup.string().required('Pola tanam harus diisi'),
+    jenis_lahan: Yup.string().required('Jenis lahan harus diisi'),
+    asal_benih: Yup.string().required('Asal benih harus diisi'),
+    jenis_pupuk: Yup.string().required('Jenis pupuk harus diisi'),
+    mitra_penjualan: Yup.string().required('Mitra penjualan harus diisi'),
   });
 
   const formik = useFormik({
@@ -129,6 +159,15 @@ const DetailKebun = ({
       no_legalitas: kebunData?.nomor_legalitas || '',
       pemilik_legalitas: kebunData?.pemilik_legalitas || '',
       stdb: kebunData?.nomor_stdb || '',
+      komoditas: kebunData?.komoditas?.toString() || '',
+      total_prod_per_tahun: kebunData?.total_prod_per_tahun?.toString() || '',
+      tahun_peremajaan: kebunData?.tahun_peremajaan?.toString() || '',
+      jumlah_pokok: kebunData?.jumlah_pohon?.toString() || kebunData?.jumlah_pokok?.toString() || '',
+      pola_tanam: kebunData?.pola_tanam?.toString() || '',
+      jenis_lahan: kebunData?.jenis_lahan?.toString() || '',
+      asal_benih: kebunData?.asal_benih?.toString() || '',
+      jenis_pupuk: kebunData?.jenis_pupuk?.toString() || '',
+      mitra_penjualan: kebunData?.mitra_penjualan || '',
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -157,9 +196,30 @@ const DetailKebun = ({
         no_legalitas: kebunData.nomor_legalitas || '',
         pemilik_legalitas: kebunData.pemilik_legalitas || '',
         stdb: kebunData.nomor_stdb || '',
+        komoditas: kebunData.komoditas?.toString() || '',
+        total_prod_per_tahun: kebunData.total_prod_per_tahun?.toString() || '',
+        tahun_peremajaan: kebunData.tahun_peremajaan?.toString() || '',
+        jumlah_pokok: kebunData.jumlah_pohon?.toString() || kebunData.jumlah_pokok?.toString() || '',
+        pola_tanam: kebunData.pola_tanam?.toString() || '',
+        jenis_lahan: kebunData.jenis_lahan?.toString() || '',
+        asal_benih: kebunData.asal_benih?.toString() || '',
+        jenis_pupuk: kebunData.jenis_pupuk?.toString() || '',
+        mitra_penjualan: kebunData.mitra_penjualan || '',
       });
     }
   }, [kebunData]);
+
+  // Fix case mismatch for kelompok_tani with API options
+  useEffect(() => {
+    if (kelompokTani.length > 0 && formik.values.kelompok_tani) {
+      const matched = kelompokTani.find(
+        (opt) => typeof opt.value === 'string' && opt.value.toLowerCase() === formik.values.kelompok_tani.toLowerCase()
+      );
+      if (matched && matched.value !== formik.values.kelompok_tani) {
+        formik.setFieldValue('kelompok_tani', matched.value);
+      }
+    }
+  }, [kelompokTani, formik.values.kelompok_tani, formik.setFieldValue]);
 
   const handleKelompokTaniChange = (e) => {
     const value = e.target.value;
@@ -380,12 +440,128 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <InputText
             label="STDB"
             name="stdb"
             placeholder="Masukan STDB"
             value={formik.values.stdb}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Komoditas"
+            name="komoditas"
+            placeholder="Pilih Komoditas"
+            options={komoditas}
+            value={formik.values.komoditas}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <InputText
+            label="Total Produksi 1 Tahun (Kg)"
+            name="total_prod_per_tahun"
+            placeholder="Contoh: 18000"
+            type="number"
+            value={formik.values.total_prod_per_tahun}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+          <InputText
+            label="Tahun Peremajaan"
+            name="tahun_peremajaan"
+            placeholder="Contoh: 2020"
+            type="number"
+            value={formik.values.tahun_peremajaan}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <InputText
+            label="Jumlah Pohon"
+            name="jumlah_pokok"
+            placeholder="Contoh: 300"
+            type="number"
+            value={formik.values.jumlah_pokok}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Pola Tanam"
+            name="pola_tanam"
+            placeholder="Pilih Pola Tanam"
+            options={polaTanam}
+            value={formik.values.pola_tanam}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+          <Select
+            label="Jenis Lahan"
+            name="jenis_lahan"
+            placeholder="Pilih Jenis Lahan"
+            options={jenisLahan}
+            value={formik.values.jenis_lahan}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Asal Benih"
+            name="asal_benih"
+            placeholder="Pilih Asal Benih"
+            options={asalBenih}
+            value={formik.values.asal_benih}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Jenis Pupuk"
+            name="jenis_pupuk"
+            placeholder="Pilih Jenis Pupuk"
+            options={jenisPupuk}
+            value={formik.values.jenis_pupuk}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+          <InputText
+            label="Mitra Penjualan"
+            name="mitra_penjualan"
+            placeholder="Masukan Mitra Penjualan"
+            value={formik.values.mitra_penjualan}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             errors={formik.errors}

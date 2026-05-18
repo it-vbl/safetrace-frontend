@@ -7,6 +7,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import Stepper from '@/components/molecules/Stepper';
 import DataAngkutan from '@/components/organisms/PenjualanForm/DataAngkutan';
 import DataKelompokTani from '@/components/organisms/PenjualanForm/DataKelompokTani';
+import DataLampiran from '@/components/organisms/PenjualanForm/DataLampiran';
 import DataPabrik from '@/components/organisms/PenjualanForm/DataPabrik';
 import useReferences from '@/hooks/useReferences';
 import {
@@ -37,6 +38,7 @@ const EditPenjualanContent = () => {
     { title: 'Angkutan', key: 'angkutan' },
     { title: 'Kelompok Tani', key: 'kelompok_tani' },
     { title: 'Pabrik', key: 'pabrik' },
+    { title: 'Lampiran', key: 'lampiran' },
   ];
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -49,6 +51,7 @@ const EditPenjualanContent = () => {
     angkutan: null,
     kelompokTani: null,
     pabrik: null,
+    lampiran: null,
   });
   const [createdAngkutanId, setCreatedAngkutanId] = useState(null);
   const hasInitialized = useRef(false);
@@ -233,12 +236,22 @@ const EditPenjualanContent = () => {
           } else {
             targetStep = 3;
           }
+        } else if (tabFromUrl === 'lampiran') {
+          if (!hasKelompokTaniData) {
+            toast.error('Mohon lengkapi data kelompok tani terlebih dahulu');
+            targetStep = 2;
+          } else if (!formattedPabrikData) {
+            toast.error('Mohon lengkapi data pabrik terlebih dahulu');
+            targetStep = 3;
+          } else {
+            targetStep = 4;
+          }
         }
 
         // Determine step based on data existence if no tab parameter or tab is invalid
         if (
           !tabFromUrl ||
-          !['angkutan', 'kelompok_tani', 'pabrik'].includes(tabFromUrl)
+          !['angkutan', 'kelompok_tani', 'pabrik', 'lampiran'].includes(tabFromUrl)
         ) {
           if (
             angkutanData &&
@@ -247,9 +260,9 @@ const EditPenjualanContent = () => {
             hasKelompokTaniData
           ) {
             // All steps completed - all data exists
-            targetStep = 3;
-            targetLastStep = 3;
-            targetCompletedSteps = [1, 2, 3];
+            targetStep = 4;
+            targetLastStep = 4;
+            targetCompletedSteps = [1, 2, 3, 4];
           } else if (
             angkutanData &&
             formattedKelompokPenyetorData &&
@@ -278,8 +291,8 @@ const EditPenjualanContent = () => {
             formattedPabrikData &&
             hasKelompokTaniData
           ) {
-            targetLastStep = 3;
-            targetCompletedSteps = [1, 2, 3];
+            targetLastStep = 4;
+            targetCompletedSteps = [1, 2, 3, 4];
           } else if (
             angkutanData &&
             formattedKelompokPenyetorData &&
@@ -300,11 +313,13 @@ const EditPenjualanContent = () => {
           angkutan: angkutanData,
           kelompokTani: formattedKelompokPenyetorData,
           pabrik: formattedPabrikData,
+          lampiran: null, // Since we don't have lampiran fetched in edit
         });
         setPenjualanData({
           angkutan: angkutanData,
           kelompok_tani: formattedKelompokPenyetorData,
           pabrik: formattedPabrikData,
+          lampiran: null,
         });
 
         // Mark as initialized after setting initial state
@@ -335,7 +350,7 @@ const EditPenjualanContent = () => {
 
   // Function to handle step click
   const handleStepClick = (stepNumber) => {
-    if (stepNumber <= lastStep) {
+    if (idPenjualan || stepNumber <= lastStep) {
       setCurrentStep(stepNumber);
     }
   };
@@ -527,14 +542,19 @@ const EditPenjualanContent = () => {
           toast.success('Data pabrik berhasil disimpan');
           setFormData((prev) => ({ ...prev, pabrik: stepData }));
           setCompletedSteps((prev) => [...prev, 3]);
-          // Redirect to penjualan list after completion
-          router.push('/traceability/penjualan');
-          return;
+          setCurrentStep(4);
+          setLastStep(4);
         } else {
           // Handle error response with proper formatting
           const errorMessage = formatApiErrorMessage(updateResponse?.data);
           toast.error(errorMessage || 'Gagal menyimpan data pabrik');
         }
+      } else if (currentStep === 4) {
+        // Handle lampiran step submission
+        setFormData((prev) => ({ ...prev, lampiran: stepData }));
+        toast.success('Data penjualan berhasil disimpan');
+        // Redirect to penjualan list after completion
+        router.push('/traceability/penjualan');
       }
     } catch (error) {
       console.error('Error in step:', error);
@@ -588,6 +608,16 @@ const EditPenjualanContent = () => {
             isSubmitting={isSubmitting}
           />
         );
+      case 4:
+        return (
+          <DataLampiran
+            lampiranData={formData.lampiran || penjualanData?.lampiran || []}
+            onNext={handleNextStep}
+            onPrevious={handlePreviousStep}
+            onCancel={() => router.back()}
+            isSubmitting={isSubmitting}
+          />
+        );
       default:
         return null;
     }
@@ -609,8 +639,8 @@ const EditPenjualanContent = () => {
       <div className="flex">
         <Stepper
           steps={steps}
-          completedSteps={completedSteps}
-          lastStep={lastStep}
+          completedSteps={idPenjualan ? steps.map((_, i) => i + 1) : completedSteps}
+          lastStep={idPenjualan ? steps.length : lastStep}
           currentStep={currentStep}
           onStepClick={handleStepClick}
         />

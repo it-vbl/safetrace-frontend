@@ -22,6 +22,7 @@ const ModalEditLampiran = ({
   const [stdbFile, setStdbFile] = useState(null);
   const [rspoFile, setRspoFile] = useState(null);
   const [ispoFile, setIspoFile] = useState(null);
+  const [petaFile, setPetaFile] = useState(null);
 
   // Check if lampiranData exists by checking its ID
   const hasExistingFiles = !!(lampiranData && lampiranData.id);
@@ -31,6 +32,7 @@ const ModalEditLampiran = ({
     file_stdb: Yup.mixed().nullable(),
     file_rspo: Yup.mixed().nullable(),
     file_ispo: Yup.mixed().nullable(),
+    file_peta: Yup.mixed().nullable(),
   });
 
   const formik = useFormik({
@@ -39,6 +41,7 @@ const ModalEditLampiran = ({
       file_stdb: null,
       file_rspo: null,
       file_ispo: null,
+      file_peta: null,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -54,6 +57,7 @@ const ModalEditLampiran = ({
           if (stdbFile) formData.append('file_stdb', stdbFile);
           if (rspoFile) formData.append('file_rspo', rspoFile);
           if (ispoFile) formData.append('file_ispo', ispoFile);
+          if (petaFile) formData.append('file_gambar_peta', petaFile);
 
           // Call update API
           const response = await updateKebunLampiran(kebunData?.id, formData);
@@ -75,6 +79,7 @@ const ModalEditLampiran = ({
           if (stdbFile) formData.append('file_stdb', stdbFile);
           if (rspoFile) formData.append('file_rspo', rspoFile);
           if (ispoFile) formData.append('file_ispo', ispoFile);
+          if (petaFile) formData.append('file_gambar_peta', petaFile);
 
           // Call create API
           const response = await createKebunLampiran(formData);
@@ -103,6 +108,7 @@ const ModalEditLampiran = ({
     setStdbFile(null);
     setRspoFile(null);
     setIspoFile(null);
+    setPetaFile(null);
     formik.resetForm();
     onClose();
   };
@@ -118,6 +124,46 @@ const ModalEditLampiran = ({
         <div className="rounded-lg border border-gray-300 bg-white p-6">
           <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
           <div className="grid grid-cols-2 gap-6 py-4">
+            <div>
+              <Upload
+                label="File Peta"
+                file={
+                  petaFile
+                    ? {
+                        name: petaFile.name,
+                        size: (petaFile.size / 1048576).toFixed(1),
+                        uploadDate: new Date().toLocaleDateString('en-US'),
+                        value: petaFile,
+                      }
+                    : null
+                }
+                onChangeValue={(data) => {
+                  setPetaFile(data.value);
+                  formik.setFieldValue('file_peta', data.value);
+                  formik.setFieldTouched('file_peta', true);
+                  // Clear error when file is uploaded
+                  if (data.value && formik.errors.file_peta) {
+                    formik.setFieldError('file_peta', '');
+                  }
+                }}
+                allowedFiles={['image/jpeg', 'image/png', '.kml', 'application/vnd.google-earth.kml+xml']}
+                maxSize={10}
+                keyField="peta"
+                name="file_peta"
+                error={
+                  formik.touched.file_peta &&
+                  formik.errors.file_peta &&
+                  !petaFile
+                }
+              />
+              {formik.touched.file_peta &&
+                formik.errors.file_peta &&
+                !petaFile && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {formik.errors.file_peta}
+                  </p>
+                )}
+            </div>
             <div>
               <Upload
                 label="File Legalitas"

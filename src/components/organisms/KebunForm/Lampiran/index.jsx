@@ -22,6 +22,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
     file_stdb: Yup.mixed().nullable(),
     file_rspo: Yup.mixed().nullable(),
     file_ispo: Yup.mixed().nullable(),
+    file_peta: Yup.mixed().nullable(),
   });
 
   const formik = useFormik({
@@ -30,6 +31,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
       file_stdb: null,
       file_rspo: null,
       file_ispo: null,
+      file_peta: null,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -42,6 +44,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
         if (stdbFile) formData.append('file_stdb', stdbFile);
         if (rspoFile) formData.append('file_rspo', rspoFile);
         if (ispoFile) formData.append('file_ispo', ispoFile);
+        if (petaFile) formData.append('file_gambar_peta', petaFile);
 
         // Call API to create lampiran
         const response = await createKebunLampiran(formData);
@@ -68,7 +71,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
 
   const handleSubmit = async () => {
     // Check if any files are uploaded
-    const hasAnyFile = legalitasFile || stdbFile || rspoFile || ispoFile;
+    const hasAnyFile = legalitasFile || stdbFile || rspoFile || ispoFile || petaFile;
 
     if (!hasAnyFile) {
       // No files uploaded, redirect to kebun detail page
@@ -87,6 +90,46 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
         <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
         <form onSubmit={formik.handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            <div>
+              <Upload
+                label="File Peta"
+                file={
+                  petaFile
+                    ? {
+                        name: petaFile.name,
+                        size: (petaFile.size / 1048576).toFixed(1),
+                        uploadDate: new Date().toLocaleDateString('en-US'),
+                        value: petaFile,
+                      }
+                    : null
+                }
+                onChangeValue={(data) => {
+                  setPetaFile(data.value);
+                  formik.setFieldValue('file_peta', data.value);
+                  formik.setFieldTouched('file_peta', true);
+                  // Clear error when file is uploaded
+                  if (data.value && formik.errors.file_peta) {
+                    formik.setFieldError('file_peta', '');
+                  }
+                }}
+                allowedFiles={['image/jpeg', 'image/png', '.kml', 'application/vnd.google-earth.kml+xml']}
+                maxSize={10}
+                keyField="peta"
+                name="file_peta"
+                error={
+                  formik.touched.file_peta &&
+                  formik.errors.file_peta &&
+                  !petaFile
+                }
+              />
+              {formik.touched.file_peta &&
+                formik.errors.file_peta &&
+                !petaFile && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {formik.errors.file_peta}
+                  </p>
+                )}
+            </div>
             <div>
               <Upload
                 label="File Legalitas"

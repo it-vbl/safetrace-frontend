@@ -8,7 +8,7 @@ const useDeforestationAlerts = ({
   search = '',
   kabupaten = '',
   kecamatan = '',
-  source_type = 'glad',
+  source_type = '',
 } = {}) => {
   const [alertList, setAlertList] = useState([]);
   const [loading, setLoading] = useState(false);

@@ -1,4 +1,4 @@
-import { useEffect,useState } from 'react';
+import { useCallback,useEffect, useState } from 'react';
 import { useDispatch,useSelector } from 'react-redux';
 
 import { setDetailPekebun, setListKebun, setOnPendataanPekebuns, setPekebuns } from '@/store/slices/pekebun';
@@ -14,7 +14,7 @@ const usePekebuns = () => {
 
   const { pekebuns, onPendataanPekebuns, detailPekebun, listKebun } = useSelector((state) => state.pekebun);
 
-  const fetchData = async (action, setDataCallback, setterCallback) => {
+  const fetchData = useCallback(async (action, setDataCallback, setterCallback) => {
     setLoading(true);
     try {
       const response = await action();
@@ -31,7 +31,7 @@ const usePekebuns = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   return {
     pekebuns,
@@ -39,23 +39,23 @@ const usePekebuns = () => {
     onPendataanPekebuns,
     detailPekebun,
     listKebun,
-    fetchPekebun: ({ page_size = 10, page = 1, search = '' } = {}) => {
+    fetchPekebun: useCallback(({ page_size = 10, page = 1, search = '' } = {}) => {
       const params = `page_size=${page_size}&page=${page}&search=${search}`;
       return fetchData(() => getListPekebun(params), setPekebuns);
-    },
-    fetchPekebunOnPendataan: ({ page_size = 10, page = 1, search = '', komoditas = '', kecamatan = '' } = {}) => {
+    }, [fetchData]),
+    fetchPekebunOnPendataan: useCallback(({ page_size = 10, page = 1, search = '', komoditas = '', kecamatan = '' } = {}) => {
       let params = `page_size=${page_size}&page=${page}&search=${search}`;
       if (komoditas) params += `&komoditas=${komoditas}`;
       if (kecamatan) params += `&kecamatan=${kecamatan}`;
       return fetchData(() => getListPekebunOnPendataan(params), setOnPendataanPekebuns);
-    },
-    fetchDetailPekebun: (id) =>
+    }, [fetchData]),
+    fetchDetailPekebun: useCallback((id) =>
       fetchData(
         () => getDetailPekebun(id),
         null,
         (data) => dispatch(setDetailPekebun(data?.data?.data))
-      ),
-    fetchListKebun: (params) =>
+      ), [fetchData, dispatch]),
+    fetchListKebun: useCallback((params) =>
       fetchData(
         () => getListKebun(params),
         setListKebun,
@@ -85,7 +85,7 @@ const usePekebuns = () => {
             )
           );
         }
-      ),
+      ), [fetchData, dispatch]),
     loading,
     error,
   };
