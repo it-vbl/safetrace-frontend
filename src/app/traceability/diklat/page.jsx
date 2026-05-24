@@ -15,9 +15,9 @@ import Heading from '@/components/atoms/Typography/Heading';
 import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
 import SearchBar from '@/components/molecules/SearchBar';
-import StatCard from '@/components/molecules/StatCard';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
+import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
 
 import useReferences from '../../../hooks/useReferences';

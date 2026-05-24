@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import {
+  ChartLineIcon,
   ChevronRight,
   ContactIcon,
   Flag,
@@ -16,9 +17,7 @@ import {
   Smartphone,
   TrendingUp,
   UserCircle2Icon,
-  UsersIcon,
-  ChartLineIcon
-} from 'lucide-react';
+  UsersIcon} from 'lucide-react';
 import { IoHomeOutline } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
