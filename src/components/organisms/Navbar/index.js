@@ -62,6 +62,7 @@ const Navbar = () => {
     'limbah.view',
     'diklat.view',
     'pekerja.view',
+    'laporan.view',
     'pengguna.view',
     'peta.view',
     'statistik.view',

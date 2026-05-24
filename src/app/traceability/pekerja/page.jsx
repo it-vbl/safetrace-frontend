@@ -11,11 +11,13 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import DeleteConfirmationWithInputModal from '@/components/molecules/DeleteConfirmationWithInputModal';
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
+import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
-import { downloadListPekerja, getListPekerja } from '@/services/pekerja';
+import { deletePekerja, downloadListPekerja, getListPekerja, getStatistikPekerja } from '@/services/pekerja';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -23,13 +25,27 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const PekerjaPage = () => {
   const router = useRouter();
   const { kelompokTani, fetchKelompokTani } = useReferences();
+
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [pekerjaData, setPekerjaData] = useState([]);
   const [totalPekerja, setTotalPekerja] = useState(0);
+
+  const [statistik, setStatistik] = useState({
+    total_pekerja: 0,
+    total_pekerja_pria: 0,
+    total_pekerja_wanita: 0,
+    total_status_pekerja_keluarga: 0,
+    total_status_pekerja_buruh_tetap: 0,
+    total_status_pekerja_buruh_harian_lepas: 0,
+  });
+
+  const [showModalConfirmDeletePekerja, setShowModalConfirmDeletePekerja] = useState(false);
+  const [selectedPekerjaToDelete, setSelectedPekerjaToDelete] = useState(null);
 
   // Fetch pekerja data function
   const fetchPekerjaData = async ({ page, page_size, search, kelompok }) => {
@@ -50,17 +66,15 @@ const PekerjaPage = () => {
 
         const mappedData = results.map((pekerja) => ({
           id: pekerja.id,
-          id_petani: pekerja.id_petani || '-',
-          nama_petani: pekerja.nama_petani || '-',
+          petani_id: pekerja.petani_id,
+          pemilik_kebun: pekerja.pemilik_kebun || '-',
+          kelompok: pekerja.kelompok_tani || '-',
+          nama_pekerja: pekerja.nama_pekerja || '-',
           jenis_kelamin: pekerja.jenis_kelamin_label || '-',
-          kelompok: pekerja.nama_kelompok || '-',
           no_ktp: pekerja.no_ktp || '-',
           no_kk: pekerja.no_kk || '-',
-          luas_kebun: pekerja.luas_kebun || '0',
-          jumlah_pekerja: pekerja.jumlah_pekerja || 0,
-          terakhir_diubah: pekerja.updated_at
-            ? moment(pekerja.updated_at).format('DD/MM/YYYY HH:mm')
-            : '-',
+          umur: pekerja.umur ? `${pekerja.umur} Tahun` : '-',
+          status: pekerja.status_pekerja_label || '-',
         }));
 
         setPekerjaData(mappedData);
@@ -76,6 +90,26 @@ const PekerjaPage = () => {
       setTotalPekerja(0);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch worker statistics function
+  const fetchStatistikData = async (params = {}) => {
+    try {
+      const response = await getStatistikPekerja(params);
+      if (response?.data?.status === 'success') {
+        const data = response.data.data;
+        setStatistik({
+          total_pekerja: data?.total_pekerja || 0,
+          total_pekerja_pria: data?.total_pekerja_pria || 0,
+          total_pekerja_wanita: data?.total_pekerja_wanita || 0,
+          total_status_pekerja_keluarga: data?.total_status_pekerja_keluarga || 0,
+          total_status_pekerja_buruh_tetap: data?.total_status_pekerja_buruh_tetap || 0,
+          total_status_pekerja_buruh_harian_lepas: data?.total_status_pekerja_buruh_harian_lepas || 0,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching pekerja statistik:', error);
     }
   };
 
@@ -133,6 +167,7 @@ const PekerjaPage = () => {
     }
   }, [kelompokTani]);
 
+  // Fetch pekerja data when filters change
   useEffect(() => {
     if (isKelompokFilterInitialized) {
       fetchPekerjaData({
@@ -150,12 +185,30 @@ const PekerjaPage = () => {
     selectedKelompok,
   ]);
 
-  const handleSearchTextChange = useCallback(
-    debounce((e) => {
-      setSearch(e.target.value);
-      setCurrentPage(1);
-    }, 300),
+  // Fetch statistics when search or kelompok changes
+  useEffect(() => {
+    if (isKelompokFilterInitialized) {
+      fetchStatistikData({
+        ...(search && { search }),
+        ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
+      });
+    }
+  }, [isKelompokFilterInitialized, search, selectedKelompok]);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((val) => {
+        setSearch(val);
+        setCurrentPage(1);
+      }, 300),
     []
+  );
+
+  const handleSearchTextChange = useCallback(
+    (e) => {
+      debouncedSearch(e.target.value);
+    },
+    [debouncedSearch]
   );
 
   const handleKelompokChange = (e) => {
@@ -172,8 +225,56 @@ const PekerjaPage = () => {
     setCurrentPage(1);
   };
 
-  const handleLihatClicked = (data) => {
-    router.push(`/traceability/pekerja/${data?.id}`);
+  const handleLihatClicked = useCallback((data) => {
+    router.push(`/traceability/pekerja/${data?.petani_id}`);
+  }, [router]);
+
+  const handleDeleteClicked = useCallback((data) => {
+    setSelectedPekerjaToDelete(data);
+    setShowModalConfirmDeletePekerja(true);
+  }, []);
+
+  const handleDeletePekerja = async () => {
+    if (!selectedPekerjaToDelete?.id) {
+      toast.error('ID pekerja tidak ditemukan');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await deletePekerja(selectedPekerjaToDelete.id);
+      if (
+        res?.data?.status === 'success' ||
+        res?.status === 200 ||
+        res?.status === 204
+      ) {
+        toast.success('Data pekerja berhasil dihapus');
+        setShowModalConfirmDeletePekerja(false);
+        fetchPekerjaData({
+          page: currentPage,
+          page_size: pageSize,
+          search,
+          kelompok: selectedKelompok,
+        });
+        fetchStatistikData({
+          ...(search && { search }),
+          ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
+        });
+      } else {
+        toast.error(res?.data?.message || 'Data pekerja gagal dihapus');
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || 'Data pekerja gagal dihapus'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowModalConfirmDeletePekerja(false);
+    setSelectedPekerjaToDelete(null);
   };
 
   const ActionsCellRenderer = useCallback((e) => {
@@ -185,9 +286,15 @@ const PekerjaPage = () => {
         >
           LIHAT
         </div>
+        <div
+          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+          onClick={() => handleDeleteClicked(e.data)}
+        >
+          HAPUS
+        </div>
       </div>
     );
-  }, []);
+  }, [handleLihatClicked, handleDeleteClicked]);
 
   const colDefs = useMemo(
     () => [
@@ -196,19 +303,25 @@ const PekerjaPage = () => {
         headerName: '',
         cellRenderer: ActionsCellRenderer,
         width: 80,
-        minWidth: 70,
-        maxWidth: 100,
+        minWidth: 100,
+        maxWidth: 130,
         suppressSizeToFit: false,
       },
       {
-        field: 'id_petani',
-        headerName: 'Id Petani',
+        field: 'pemilik_kebun',
+        headerName: 'Pemilik Kebun',
         flex: 1,
         minWidth: 140,
       },
       {
-        field: 'nama_petani',
-        headerName: 'Nama Petani',
+        field: 'kelompok',
+        headerName: 'Kelompok',
+        flex: 1,
+        minWidth: 140,
+      },
+      {
+        field: 'nama_pekerja',
+        headerName: 'Nama Pekerja',
         flex: 1,
         minWidth: 140,
       },
@@ -217,12 +330,6 @@ const PekerjaPage = () => {
         headerName: 'Jenis Kelamin',
         flex: 1,
         minWidth: 120,
-      },
-      {
-        field: 'kelompok',
-        headerName: 'Kelompok',
-        flex: 1,
-        minWidth: 140,
       },
       {
         field: 'no_ktp',
@@ -237,19 +344,16 @@ const PekerjaPage = () => {
         minWidth: 140,
       },
       {
-        field: 'luas_kebun',
-        headerName: 'Luas Kebun (Ha)',
+        field: 'umur',
+        headerName: 'Umur',
         flex: 1,
-        minWidth: 120,
-        cellRenderer: (params) => {
-          return `${params.value}`;
-        },
+        minWidth: 140,
       },
       {
-        field: 'jumlah_pekerja',
-        headerName: 'Jumlah Pekerja',
+        field: 'status',
+        headerName: 'Status Pekerja',
         flex: 1,
-        minWidth: 120,
+        minWidth: 160,
       },
     ],
     [ActionsCellRenderer]
@@ -260,6 +364,16 @@ const PekerjaPage = () => {
       type: 'fitCellContents',
     };
   }, []);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      minWidth: 100,
+      wrapText: true,
+      autoHeight: true,
+    }),
+    []
+  );
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -279,8 +393,17 @@ const PekerjaPage = () => {
               <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
                 <SearchBar
                   onChange={handleSearchTextChange}
-                  placeholder="Cari Petani"
+                  placeholder="Cari..."
                   className="w-full sm:w-auto lg:w-[200px]"
+                />
+
+                <Select
+                  containerClassName="w-full sm:w-auto lg:w-[150px]"
+                  placeholder="Pemilik Kebun"
+                  options={[
+                    { label: 'Pemilik Kebun 1', value: '1' },
+                    { label: 'Pemilik Kebun 2', value: '2' },
+                  ]}
                 />
 
                 <Select
@@ -301,17 +424,64 @@ const PekerjaPage = () => {
                   title="Export Excel"
                   onClick={handleExportExcel}
                 />
+
+                <Button
+                  onClick={() => router.push('/traceability/pekerja/tambah')}
+                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
+                >
+                  Tambah Pekerja
+                </Button>
               </div>
             </div>
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 p-3 sm:p-4 !pt-0">
+          <StatCard
+            title="Total Pekerja"
+            value={statistik.total_pekerja}
+            isActive={false}
+            onClick={() => {}}
+          />
+          <StatCard
+            title="Laki - Laki"
+            value={statistik.total_pekerja_pria}
+            isActive={false}
+            onClick={() => {}}
+          />
+          <StatCard
+            title="Perempuan"
+            value={statistik.total_pekerja_wanita}
+            isActive={false}
+            onClick={() => {}}
+          />
+          <StatCard
+            title="Keluarga"
+            value={statistik.total_status_pekerja_keluarga}
+            isActive={false}
+            onClick={() => {}}
+          />
+          <StatCard
+            title="Buruh Tetap"
+            value={statistik.total_status_pekerja_buruh_tetap}
+            isActive={false}
+            onClick={() => {}}
+          />
+          <StatCard
+            title="Buruh Lepas"
+            value={statistik.total_status_pekerja_buruh_harian_lepas}
+            isActive={false}
+            onClick={() => {}}
+          />
+        </div>
+
         {/* === TABLE CONTAINER === */}
-        <div className="relative w-full flex-1">
+        <div className="relative w-full flex-1 min-h-[400px]">
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."
             autoSizeStrategy={autoSizeStrategy}
+            defaultColDef={defaultColDef}
             rowData={pekerjaData}
             columnDefs={colDefs}
           />
@@ -334,6 +504,15 @@ const PekerjaPage = () => {
           />
         </div>
       </div>
+
+      <DeleteConfirmationWithInputModal
+        isOpen={showModalConfirmDeletePekerja}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeletePekerja}
+        itemName={`pekerja dengan nama ${selectedPekerjaToDelete?.nama_pekerja}`}
+        expectedInput={selectedPekerjaToDelete?.nama_pekerja || ''}
+        isLoading={loading}
+      />
     </div>
   );
 };

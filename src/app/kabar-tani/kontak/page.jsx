@@ -55,7 +55,7 @@ const KontakPage = () => {
   const [errorRows, setErrorRows] = useState([]);
   const [errorPage, setErrorPage] = useState(1);
   const [errorPageSize, setErrorPageSize] = useState(10);
-  const { sumberKontak, fetchSumberKontak } = useReferences();
+  const { jenisKelamin, sumberKontak, fetchJenisKelamin, fetchSumberKontak } = useReferences();
   const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -64,7 +64,8 @@ const KontakPage = () => {
 
   useEffect(() => {
     fetchSumberKontak();
-  }, [fetchSumberKontak]);
+    fetchJenisKelamin();
+  }, [fetchSumberKontak, fetchJenisKelamin]);
 
   const fetchPetaniWaList = async () => {
     setLoadingPetaniWa(true);
@@ -117,7 +118,7 @@ const KontakPage = () => {
       setTotalKontak(0);
       toast.error(
         error?.response?.data?.message ||
-          'Terjadi kesalahan saat mengambil data'
+        'Terjadi kesalahan saat mengambil data'
       );
       console.error('Error fetching kontak data:', error);
     } finally {
@@ -258,12 +259,12 @@ const KontakPage = () => {
             return matched
               ? matched.label
               : params.value === '1'
-              ? 'Manual'
-              : params.value === '2'
-              ? 'Upload CSV'
-              : params.value === '3'
-              ? 'API'
-              : params.value;
+                ? 'Manual'
+                : params.value === '2'
+                  ? 'Upload CSV'
+                  : params.value === '3'
+                    ? 'API'
+                    : params.value;
           },
         },
         {
@@ -316,11 +317,6 @@ const KontakPage = () => {
       otherwise: (schema) => schema,
     }),
   });
-
-  const jenisKelamin = [
-    { value: '1', label: 'Laki-Laki' },
-    { value: '2', label: 'Perempuan' },
-  ];
 
   const {
     handleSubmit,
@@ -612,11 +608,11 @@ const KontakPage = () => {
                 file={
                   contactFile
                     ? {
-                        name: contactFile.name,
-                        size: (contactFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: contactFile,
-                      }
+                      name: contactFile.name,
+                      size: (contactFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: contactFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => setContactFile(data.value)}

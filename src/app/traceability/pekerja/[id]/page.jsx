@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
@@ -42,7 +42,7 @@ const TraceabilityPekerjaDetail = () => {
   ];
 
   // Extracted fetch function to allow soft-reload
-  const fetchDetail = async () => {
+  const fetchDetail = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -82,6 +82,9 @@ const TraceabilityPekerjaDetail = () => {
             tanggal_lahir: worker.tanggal_lahir,
             no_kk: worker.no_kk,
             status_pekerja: worker.status_pekerja_label,
+            umur: worker.umur,
+            jenis_pekerjaan: worker.jenis_pekerjaan_label,
+            jenis_apd: worker.jenis_apd_label,
             ktp_file: worker.file_ktp,
             kk_file: worker.file_kk,
             ktp_thumb: worker.thumb_ktp,
@@ -102,13 +105,13 @@ const TraceabilityPekerjaDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       fetchDetail();
     }
-  }, [id, router]);
+  }, [id, fetchDetail]);
 
   const handleDeleteClick = (pekerja) => {
     setPekerjaToDelete(pekerja);
@@ -180,6 +183,18 @@ const TraceabilityPekerjaDetail = () => {
           <BorderBottomColData
             label="Status Pekerja"
             value={pekerja?.status_pekerja || '-'}
+          />
+          <BorderBottomColData
+            label="Umur"
+            value={pekerja?.umur ? `${pekerja.umur} Tahun` : '-'}
+          />
+          <BorderBottomColData
+            label="Jenis Pekerjaan"
+            value={pekerja?.jenis_pekerjaan || '-'}
+          />
+          <BorderBottomColData
+            label="Jenis APD"
+            value={pekerja?.jenis_apd || '-'}
           />
         </div>
 

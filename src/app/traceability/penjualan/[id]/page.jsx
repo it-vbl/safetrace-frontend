@@ -15,6 +15,7 @@ import {
 import {
   getDetailPenjualanAngkutan,
   getDetailPenjualanKelompokPenyetor,
+  getDetailPenjualanLampiran,
   getDetailPenjualanPabrik,
 } from '@/services/penjualan';
 
@@ -23,6 +24,7 @@ const PenjualanDetailPage = () => {
   const router = useRouter();
 
   const [detailData, setDetailData] = useState(null);
+  const [lampiranData, setLampiranData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const crumbs = useMemo(
@@ -122,6 +124,38 @@ const PenjualanDetailPage = () => {
             }
           }
 
+          // Fetch lampiran detail using angkutan ID
+          try {
+            const lampiranResponse = await getDetailPenjualanLampiran(id);
+            if (
+              lampiranResponse?.status === 200 &&
+              (lampiranResponse?.data?.status === 'success' ||
+                lampiranResponse?.data?.data)
+            ) {
+              const lampiranRaw =
+                lampiranResponse?.data?.data || lampiranResponse?.data;
+
+              // Transform file_1…file_6 flat structure into an array
+              const lampiranArray = [];
+              for (let i = 1; i <= 6; i++) {
+                const fileUrl = lampiranRaw[`file_${i}`];
+                const thumbUrl = lampiranRaw[`thumb_${i}`];
+                if (fileUrl) {
+                  lampiranArray.push({
+                    id: `${lampiranRaw.id}-${i}`,
+                    index: i,
+                    file: fileUrl,
+                    thumb: thumbUrl || fileUrl,
+                  });
+                }
+              }
+              setLampiranData(lampiranArray);
+            }
+          } catch (error) {
+            // Lampiran might not exist yet — that's fine
+            console.error('Failed to fetch lampiran:', error);
+          }
+
           // Set the transformed data
           setDetailData({
             angkutan: {
@@ -201,13 +235,13 @@ const PenjualanDetailPage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {dataToRender?.angkutan?.lampiran && dataToRender.angkutan.lampiran.length > 0 ? (
-                  dataToRender.angkutan.lampiran.map((item, index) => (
+                {lampiranData.length > 0 ? (
+                  lampiranData.map((item) => (
                     <AttachmentViewer
-                      key={item.id || index}
-                      label={`Gambar ${index + 1}`}
-                      fileUrl={item.file || item.file_url || item.url || item}
-                      thumbUrl={item.thumb || item.file || item.file_url || item.url || item}
+                      key={item.id}
+                      label={`Lampiran ${item.index}`}
+                      fileUrl={item.file}
+                      thumbUrl={item.thumb}
                     />
                   ))
                 ) : (

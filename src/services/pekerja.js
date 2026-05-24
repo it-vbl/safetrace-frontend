@@ -4,6 +4,10 @@ export const getListPekerja = (params = {}) => {
   return api.get('/petani/pekerja/list/', { params });
 };
 
+export const getStatistikPekerja = (params = {}) => {
+  return api.get('/petani/pekerja/statistik/', { params });
+};
+
 export const getPekerjaById = (id) => {
   return api.get(`/petani/pekerja/detail/${id}/`);
 };

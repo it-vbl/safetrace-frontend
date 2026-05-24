@@ -24,3 +24,5 @@ export const getWhispStatus = () => api.get(`/referensi/whisp-status/`);
 export const getPilihanBulan = () => api.get(`/referensi/pilihan-bulan/`);
 export const getDeforestationAlertType = () => api.get(`/referensi/deforestation-alert-type/`);
 export const getKomoditas = () => api.get(`/referensi/komoditas/`);
+export const getJenisPekerjaan = () => api.get(`/referensi/jenis-pekerjaan/`);
+export const getJenisApd = () => api.get(`/referensi/jenis-apd/`);

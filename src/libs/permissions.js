@@ -114,6 +114,14 @@ export const PERMISSIONS = {
   'pekerja.search': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
   'pekerja.download': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
 
+  // TRACEABILITY - PEKERJA
+  'laporan.view': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  'laporan.create': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  'laporan.update': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  'laporan.delete': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  'laporan.search': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  'laporan.download': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+
   // TRACEABILITY - PENGGUNA
   'pengguna.view': [ROLE_IDS.ADMIN],
   'pengguna.create': [ROLE_IDS.ADMIN],
