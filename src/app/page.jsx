@@ -22,7 +22,7 @@ import useKomoditas from '@/hooks/useKomoditas';
 import useReferences from '@/hooks/useReferences';
 import useStaticLayer from '@/hooks/useStaticLayer';
 import useSTDB from '@/hooks/useSTDB';
-import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission, isViewOnlyRole } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
 import {
   getPetaOverlayDetail,
@@ -166,6 +166,15 @@ const MapDashboard = () => {
     setRoles(currentRoles);
     setRolesLoaded(true);
   }, []);
+
+  // Redirect view-only roles (Disbunak Kalbar & Disbunak Sekadau) away from the map dashboard
+  useEffect(() => {
+    if (!rolesLoaded) return;
+    const currentRoles = getCurrentUserRoles();
+    if (isViewOnlyRole(currentRoles)) {
+      router.replace('/traceability/petani');
+    }
+  }, [rolesLoaded, router]);
 
   const canViewMap = useMemo(
     () => hasPermission(roles, 'peta.dashboard'),

@@ -13,6 +13,7 @@ import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationMo
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -27,6 +28,9 @@ const LaporanPage = () => {
     const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
+
+    // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+    const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
     useEffect(() => {
         setMounted(true);
@@ -63,15 +67,17 @@ const LaporanPage = () => {
                 >
                     UNDUH
                 </div>
-                <div
-                    className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-                    onClick={() => handleDeleteClicked(e.data)}
-                >
-                    HAPUS
-                </div>
+                {!isViewOnly && (
+                    <div
+                        className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+                        onClick={() => handleDeleteClicked(e.data)}
+                    >
+                        HAPUS
+                    </div>
+                )}
             </div>
         );
-    }, []);
+    }, [isViewOnly]);
 
     const handlePageChange = useCallback((newPage) => {
         setCurrentPage(newPage);
@@ -168,11 +174,13 @@ const LaporanPage = () => {
                             placeholder="Cari Laporan"
                             className="w-full sm:w-[300px]"
                         />
-                        <Button
-                            onClick={() => router.push('/traceability/laporan/tambah')}
-                        >
-                            Tambah laporan
-                        </Button>
+                        {!isViewOnly && (
+                            <Button
+                                onClick={() => router.push('/traceability/laporan/tambah')}
+                            >
+                                Tambah laporan
+                            </Button>
+                        )}
                     </div>
                 </div>
 

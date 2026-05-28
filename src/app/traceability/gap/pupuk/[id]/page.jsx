@@ -18,6 +18,7 @@ import {
   getListPupukKebun,
   updatePupuk,
 } from '@/services/pupuk';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 const formatNumber = (num) =>
   typeof num === 'number'
@@ -36,6 +37,9 @@ const monthNameToNumber = (monthName) => {
 const TraceabilityPupukDetail = () => {
   const { id } = useParams();
   const router = useRouter();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -367,14 +371,16 @@ const TraceabilityPupukDetail = () => {
     <div className="flex w-full min-w-[320px] max-w-full flex-col gap-6">
       <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
-        <Button
-          variant="primary"
-          size="medium"
-          onClick={handleTambahTahun}
-          className="whitespace-nowrap text-xs sm:text-sm"
-        >
-          Tambah Tahun Pupuk
-        </Button>
+        {!isViewOnly && (
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={handleTambahTahun}
+            className="whitespace-nowrap text-xs sm:text-sm"
+          >
+            Tambah Tahun Pupuk
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -427,8 +433,8 @@ const TraceabilityPupukDetail = () => {
           <YearCard
             key={yearData.tahun}
             yearData={yearData}
-            onEdit={handleEditYear}
-            onDelete={handleDeleteYear}
+            onEdit={isViewOnly ? undefined : handleEditYear}
+            onDelete={isViewOnly ? undefined : handleDeleteYear}
             title="Penggunaan Pupuk"
             dataFields={[
               { key: 'npk', label: '(NPK)', unit: 'Kg' },

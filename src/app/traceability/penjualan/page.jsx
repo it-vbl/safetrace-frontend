@@ -20,6 +20,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 
 import useReferences from '../../../hooks/useReferences';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   deletePenjualanAngkutan,
   exportPenjualanAngkutanToCSV,
@@ -31,6 +32,9 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 const PenjualanPage = () => {
   const router = useRouter();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
@@ -310,15 +314,17 @@ const PenjualanPage = () => {
         >
           LIHAT
         </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
-        </div>
+        {!isViewOnly && (
+          <div
+            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            onClick={() => handleDeleteClicked(e.data)}
+          >
+            HAPUS
+          </div>
+        )}
       </div>
     );
-  }, []);
+  }, [isViewOnly]);
 
   const colDefs = useMemo(
     () => [
@@ -481,12 +487,14 @@ const PenjualanPage = () => {
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export CSV"
                 />
-                <Button
-                  onClick={() => router.push('/traceability/penjualan/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
-                >
-                  Tambah Penjualan
-                </Button>
+                {!isViewOnly && (
+                  <Button
+                    onClick={() => router.push('/traceability/penjualan/tambah')}
+                    className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
+                  >
+                    Tambah Penjualan
+                  </Button>
+                )}
               </div>
             </div>
           </div>

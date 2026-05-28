@@ -16,6 +16,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   deleteKebun,
   exportKebunToExcel,
@@ -58,6 +59,10 @@ const ispoOptions = [
 
 const KebunPage = () => {
   const router = useRouter();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -333,16 +338,20 @@ const KebunPage = () => {
         >
           LIHAT
         </div>
-        <div className="text-gray-400">|</div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-600 underline hover:text-red-700 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
-        </div>
+        {!isViewOnly && (
+          <>
+            <div className="text-gray-400">|</div>
+            <div
+              className="cursor-pointer text-[10px] font-bold uppercase text-red-600 underline hover:text-red-700 sm:text-[12px]"
+              onClick={() => handleDeleteClicked(e.data)}
+            >
+              HAPUS
+            </div>
+          </>
+        )}
       </div>
     );
-  }, []);
+  }, [isViewOnly]);
 
   const StatusCellRenderer = useCallback((params) => {
     const status = params.value;
@@ -527,12 +536,14 @@ const KebunPage = () => {
                   title="Export Excel"
                   onClick={handleExportExcel}
                 />
-                <Button
-                  onClick={() => router.push('/traceability/kebun/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm"
-                >
-                  Tambah Kebun
-                </Button>
+                {!isViewOnly && (
+                  <Button
+                    onClick={() => router.push('/traceability/kebun/tambah')}
+                    className="whitespace-nowrap text-xs sm:text-sm"
+                  >
+                    Tambah Kebun
+                  </Button>
+                )}
               </div>
             </div>
           </div>

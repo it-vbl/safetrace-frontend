@@ -17,6 +17,7 @@ import Select from '@/components/molecules/Select';
 import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import { deletePekerja, downloadListPekerja, getListPekerja, getStatistikPekerja } from '@/services/pekerja';
 
 // Register all Community features
@@ -25,6 +26,9 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const PekerjaPage = () => {
   const router = useRouter();
   const { kelompokTani, fetchKelompokTani } = useReferences();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -286,15 +290,17 @@ const PekerjaPage = () => {
         >
           LIHAT
         </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
-        </div>
+        {!isViewOnly && (
+          <div
+            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            onClick={() => handleDeleteClicked(e.data)}
+          >
+            HAPUS
+          </div>
+        )}
       </div>
     );
-  }, [handleLihatClicked, handleDeleteClicked]);
+  }, [handleLihatClicked, handleDeleteClicked, isViewOnly]);
 
   const colDefs = useMemo(
     () => [
@@ -425,12 +431,14 @@ const PekerjaPage = () => {
                   onClick={handleExportExcel}
                 />
 
-                <Button
-                  onClick={() => router.push('/traceability/pekerja/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
-                >
-                  Tambah Pekerja
-                </Button>
+                {!isViewOnly && (
+                  <Button
+                    onClick={() => router.push('/traceability/pekerja/tambah')}
+                    className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
+                  >
+                    Tambah Pekerja
+                  </Button>
+                )}
               </div>
             </div>
           </div>
