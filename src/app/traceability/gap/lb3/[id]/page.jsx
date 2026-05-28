@@ -9,13 +9,13 @@ import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import EditWasteDataModal from '@/components/molecules/EditWasteDataModal';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   deleteLB3,
   getDetailLB3Kebun,
   getListLB3Kebun,
   updateLB3,
 } from '@/services/lb3';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 const LB3DetailPage = () => {
   const router = useRouter();
