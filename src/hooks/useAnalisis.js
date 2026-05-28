@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback,useState } from 'react';
 
 import {
   getEksPlasmaStatistik,
@@ -15,7 +15,7 @@ const useAnalisis = () => {
   const [polaTanamStatistik, setPolaTanamStatistik] = useState([]);
   const [eksPlasmaStatistik, setEksPlasmaStatistik] = useState([]);
 
-  const fetchStdbStatistik = async (params) => {
+  const fetchStdbStatistik = useCallback(async (params) => {
     setLoading(true);
     try {
       const response = await getStdbStatistik(params);
@@ -28,9 +28,9 @@ const useAnalisis = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchJenisPupukStatistik = async (params) => {
+  const fetchJenisPupukStatistik = useCallback(async (params) => {
     setLoading(true);
     try {
       const response = await getJenisPupukStatistik(params);
@@ -43,9 +43,9 @@ const useAnalisis = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchPolaTanamStatistik = async (params) => {
+  const fetchPolaTanamStatistik = useCallback(async (params) => {
     setLoading(true);
     try {
       const response = await getPolaTanamStatistik(params);
@@ -58,9 +58,9 @@ const useAnalisis = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchEksPlasmaStatistik = async (params) => {
+  const fetchEksPlasmaStatistik = useCallback(async (params) => {
     setLoading(true);
     try {
       const response = await getEksPlasmaStatistik(params);
@@ -73,9 +73,9 @@ const useAnalisis = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAPI = async (api, setState, params) => {
+  const fetchAPI = useCallback(async (api, setState, params) => {
     setLoading(true);
     try {
       const response = await api(params);
@@ -88,11 +88,11 @@ const useAnalisis = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const resetError = () => {
+  const resetError = useCallback(() => {
     setError(null);
-  };
+  }, []);
 
   return {
     loading,

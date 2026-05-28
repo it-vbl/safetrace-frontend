@@ -15,16 +15,14 @@ import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
+import useWilayah from '@/hooks/useWilayah';
 
 import {
   createLampiranPetani,
   createPetani,
 } from '../../../../services/petani';
 
-const statusKeanggotaanOptions = [
-  { label: 'Aktif', value: true },
-  { label: 'Tidak Aktif', value: false },
-];
+
 
 const CreatePetaniTraceability = () => {
   const router = useRouter();
@@ -32,11 +30,26 @@ const CreatePetaniTraceability = () => {
     jenisKelamin,
     statusPerkawinan,
     kelompokTani,
+    pendidikanTerakhir,
+    statusKeanggotaan,
     fetchJenisKelamin,
     fetchStatusPerkawinan,
     fetchKelompokTani,
+    fetchPendidikanTerakhir,
+    fetchStatusKeanggotaan,
     loading: referencesLoading,
   } = useReferences();
+
+  const {
+    listProvinsi,
+    listKota,
+    listKecamatan,
+    listDesa,
+    fetchListProvinsi,
+    fetchListKota,
+    fetchListKecamatan,
+    fetchListDesa,
+  } = useWilayah();
 
   const crumbs = [
     { label: 'HOME', href: '/' },
@@ -55,12 +68,41 @@ const CreatePetaniTraceability = () => {
     return [...kelompokTani, ...customKelompokTani];
   }, [kelompokTani, customKelompokTani]);
 
-  // Fetch reference data on component mount
   useEffect(() => {
     fetchJenisKelamin();
     fetchStatusPerkawinan();
     fetchKelompokTani();
-  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani]);
+    fetchPendidikanTerakhir();
+    fetchStatusKeanggotaan();
+    fetchListProvinsi();
+  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani, fetchPendidikanTerakhir, fetchStatusKeanggotaan, fetchListProvinsi]);
+
+  const handleProvinsiChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kabupaten', '');
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKota(e.target.value);
+    }
+  };
+
+  const handleKotaChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKecamatan(e.target.value);
+    }
+  };
+
+  const handleKecamatanChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListDesa(e.target.value);
+    }
+  };
 
   const schemaValidation = Yup.object().shape({
     id_petani: Yup.string().required('Id Petani harus diisi'),
@@ -73,12 +115,18 @@ const CreatePetaniTraceability = () => {
     tanggal_lahir: Yup.date().required('Tanggal Lahir harus diisi'),
     no_kk: Yup.string().required('No. KK harus diisi'),
     status_pernikahan: Yup.string().required('Status Pernikahan harus diisi'),
-    no_nib: Yup.string().required('No. NIB harus diisi'),
-    tanggal_terbit_sppl: Yup.date().required('Tanggal Terbit SPPL harus diisi'),
-    tanggal_bergabung: Yup.date().required('Tanggal Bergabung harus diisi'),
+    no_nib: Yup.string(),
+    tanggal_terbit_sppl: Yup.date().nullable(),
+    tanggal_bergabung: Yup.date().nullable(),
     tanggal_keluar: Yup.date().nullable(),
-    no_whatsapp: Yup.string().required('No. Whatsapp harus diisi'),
+    no_whatsapp: Yup.string(),
     status_keanggotaan: Yup.string().required('Status Keanggotaan harus diisi'),
+    luas_kebun: Yup.number().required('Luas Kebun harus diisi').typeError('Luas Kebun harus berupa angka'),
+    pendidikan_terakhir: Yup.string().required('Pendidikan Terakhir harus diisi'),
+    provinsi: Yup.string().required('Provinsi harus diisi'),
+    kabupaten: Yup.string().required('Kabupaten harus diisi'),
+    kecamatan: Yup.string().required('Kecamatan harus diisi'),
+    desa: Yup.string().required('Desa harus diisi'),
   });
 
   const formik = useFormik({
@@ -99,6 +147,12 @@ const CreatePetaniTraceability = () => {
       tanggal_keluar: '',
       no_whatsapp: '',
       status_keanggotaan: '',
+      luas_kebun: '',
+      pendidikan_terakhir: '',
+      provinsi: '',
+      kabupaten: '',
+      kecamatan: '',
+      desa: '',
     },
     validationSchema: schemaValidation,
     onSubmit: async (values, { setSubmitting }) => {
@@ -132,6 +186,12 @@ const CreatePetaniTraceability = () => {
           tanggal_keluar: values.tanggal_keluar
             ? formatDate(values.tanggal_keluar)
             : null,
+          luas_kebun: parseFloat(values.luas_kebun),
+          pendidikan_terakhir: values.pendidikan_terakhir,
+          provinsi: parseInt(values.provinsi, 10),
+          kabupaten: parseInt(values.kabupaten, 10),
+          kecamatan: parseInt(values.kecamatan, 10),
+          desa: parseInt(values.desa, 10),
         };
 
         const res = await createPetani(payload);
@@ -299,10 +359,70 @@ const CreatePetaniTraceability = () => {
                 showSearchBar
               />
               <InputText
+                label="Luas Kebun (Ha)"
+                name="luas_kebun"
+                type="number"
+                placeholder="Masukan Luas Kebun"
+                value={formik.values.luas_kebun}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
+              <InputText
                 label="Alamat"
                 name="alamat"
                 placeholder="Masukan Alamat"
                 value={formik.values.alamat}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
+              <Select
+                label="Provinsi"
+                name="provinsi"
+                placeholder="Pilih Provinsi"
+                options={listProvinsi}
+                value={formik.values.provinsi}
+                onChange={handleProvinsiChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
+              <Select
+                label="Kabupaten"
+                name="kabupaten"
+                placeholder="Pilih Kabupaten"
+                options={listKota}
+                value={formik.values.kabupaten}
+                onChange={handleKotaChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
+              <Select
+                label="Kecamatan"
+                name="kecamatan"
+                placeholder="Pilih Kecamatan"
+                options={listKecamatan}
+                value={formik.values.kecamatan}
+                onChange={handleKecamatanChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
+              <Select
+                label="Desa"
+                name="desa"
+                placeholder="Pilih Desa"
+                options={listDesa}
+                value={formik.values.desa}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
@@ -375,6 +495,18 @@ const CreatePetaniTraceability = () => {
                 touched={formik.touched}
                 isRequired
               />
+              <Select
+                label="Pendidikan Terakhir"
+                name="pendidikan_terakhir"
+                placeholder="Pilih Pendidikan Terakhir"
+                options={pendidikanTerakhir}
+                value={formik.values.pendidikan_terakhir}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
               <InputText
                 label="No. NIB"
                 name="no_nib"
@@ -384,7 +516,6 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                isRequired
               />
               <DatePicker
                 label="Tanggal Terbit SPPL"
@@ -402,7 +533,6 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                requiredField
               />
             </div>
             <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
@@ -422,7 +552,6 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                requiredField
               />
               <DatePicker
                 label="Tanggal Keluar"
@@ -449,7 +578,6 @@ const CreatePetaniTraceability = () => {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
-                isRequired
               />
             </div>
             <div className="grid grid-cols-1 gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -457,7 +585,7 @@ const CreatePetaniTraceability = () => {
                 label="Status Keanggotaan"
                 name="status_keanggotaan"
                 placeholder="Pilih Status Keanggotaan"
-                options={statusKeanggotaanOptions}
+                options={statusKeanggotaan}
                 value={formik.values.status_keanggotaan}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -487,7 +615,6 @@ const CreatePetaniTraceability = () => {
                 onChangeValue={(data) => setKtpFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                isRequired
                 keyField="ktp"
                 name="file_ktp"
               />
@@ -507,7 +634,6 @@ const CreatePetaniTraceability = () => {
                 onChangeValue={(data) => setKkFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                isRequired
                 keyField="kk"
                 name="file_kk"
               />
@@ -527,7 +653,6 @@ const CreatePetaniTraceability = () => {
                 onChangeValue={(data) => setNibFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                isRequired
                 keyField="nib"
                 name="file_nib"
               />

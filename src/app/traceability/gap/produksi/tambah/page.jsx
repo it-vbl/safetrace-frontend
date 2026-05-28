@@ -46,7 +46,7 @@ const validationSchema = Yup.object({
   bulan: Yup.object(
     MONTHS.reduce((acc, m) => {
       acc[m] = Yup.string()
-        .required('Wajib diisi')
+        .nullable()
         .test('is-number', 'Harus angka', (val) => {
           const n = parseKgInput(val);
           return !Number.isNaN(n) && n >= 0;
@@ -193,7 +193,6 @@ function TambahProduksiContent() {
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
-                // selectClassName="!min-h-[30px] !h-[30px]"
               />
             </div>
 

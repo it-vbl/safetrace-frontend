@@ -327,7 +327,7 @@ function UbahPekerjaContent() {
                 onChangeValue={(data) => setKtpFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                isRequired={!existingKtpUrl} // Required only if not already existing
+                 // Required only if not already existing
                 keyField="ktp"
                 name="file_ktp"
               />
@@ -353,7 +353,7 @@ function UbahPekerjaContent() {
                 onChangeValue={(data) => setKkFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                isRequired={!existingKkUrl}
+                
                 keyField="kk"
                 name="file_kk"
               />

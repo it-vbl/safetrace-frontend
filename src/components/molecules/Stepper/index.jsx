@@ -23,6 +23,7 @@ const Stepper = ({
         const isCompleted = completedSteps.includes(stepNumber);
         const isCurrent = stepNumber === currentStep;
         const isLastStep = stepNumber === lastStep;
+        const isDisabled = stepNumber > lastStep;
         const isFuture = stepNumber > currentStep;
 
         return (
@@ -31,7 +32,7 @@ const Stepper = ({
             className={cn(
               'flex flex-shrink-0 items-center cursor-pointer px-3 md:px-4 py-2 transition-all duration-200 whitespace-nowrap',
               isCurrent && 'bg-gray-100 rounded-lg ',
-              isFuture && !isLastStep && 'cursor-not-allowed'
+              isDisabled && 'cursor-not-allowed'
             )}
             onClick={() => onStepClick && onStepClick(stepNumber)}
           >

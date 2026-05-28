@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useDispatch,useSelector } from 'react-redux';
+import { useCallback,useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { setListDesa,setListKecamatan, setListKota, setListProvinsi } from '@/store/slices/wilayah';
+import { setListDesa, setListKecamatan, setListKota, setListProvinsi } from '@/store/slices/wilayah';
 
-import { getDesa, getKecamatan,getKota, getProvinsi } from '../services/wilayah';
+import { getDesa, getKecamatan, getKota, getProvinsi } from '../services/wilayah';
 
 const useWilayah = () => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ const useWilayah = () => {
     return find;
   };
 
-  const fetchData = async (action, id, setDataCallback) => {
+  const fetchData = useCallback(async (action, id, setDataCallback) => {
     setLoading(true);
     try {
       const response = await action(id);
@@ -36,7 +36,12 @@ const useWilayah = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
+
+  const fetchListProvinsi = useCallback(() => fetchData(getProvinsi, null, setListProvinsi), [fetchData]);
+  const fetchListKota = useCallback((idProvinsi) => fetchData(getKota, idProvinsi, setListKota), [fetchData]);
+  const fetchListKecamatan = useCallback((idKota) => fetchData(getKecamatan, idKota, setListKecamatan), [fetchData]);
+  const fetchListDesa = useCallback((idKecamatan) => fetchData(getDesa, idKecamatan, setListDesa), [fetchData]);
 
   return {
     listProvinsi,
@@ -46,10 +51,10 @@ const useWilayah = () => {
     loading,
     error,
     search,
-    fetchListProvinsi: () => fetchData(getProvinsi, null, setListProvinsi),
-    fetchListKota: (idProvinsi) => fetchData(getKota, idProvinsi, setListKota),
-    fetchListKecamatan: (idKota) => fetchData(getKecamatan, idKota, setListKecamatan),
-    fetchListDesa: (idKecamatan) => fetchData(getDesa, idKecamatan, setListDesa),
+    fetchListProvinsi,
+    fetchListKota,
+    fetchListKecamatan,
+    fetchListDesa,
   };
 };
 

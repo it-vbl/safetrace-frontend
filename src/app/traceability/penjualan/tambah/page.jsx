@@ -8,6 +8,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import Stepper from '@/components/molecules/Stepper';
 import DataAngkutan from '@/components/organisms/PenjualanForm/DataAngkutan';
 import DataKelompokTani from '@/components/organisms/PenjualanForm/DataKelompokTani';
+import DataLampiran from '@/components/organisms/PenjualanForm/DataLampiran';
 import DataPabrik from '@/components/organisms/PenjualanForm/DataPabrik';
 import {
   createPenjualanAngkutan,
@@ -31,6 +32,7 @@ const TambahPenjualanContent = () => {
     { title: 'Angkutan', key: 'angkutan' },
     { title: 'Kelompok Tani', key: 'kelompok_tani' },
     { title: 'Pabrik', key: 'pabrik' },
+    { title: 'Lampiran', key: 'lampiran' },
   ];
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -43,6 +45,7 @@ const TambahPenjualanContent = () => {
     angkutan: null,
     kelompokTani: null,
     pabrik: null,
+    lampiran: null,
   });
   const [createdAngkutanId, setCreatedAngkutanId] = useState(null);
 
@@ -58,32 +61,45 @@ const TambahPenjualanContent = () => {
             setPenjualanData(data);
 
             // Determine current step based on existing data
-            if (data?.pabrik) {
-              setCurrentStep(3);
-              setLastStep(3);
+            if (data?.lampiran && data?.lampiran.length > 0) {
+              setCurrentStep(4);
+              setLastStep(4);
+              setCompletedSteps([1, 2, 3, 4]);
+              setFormData({
+                angkutan: data?.angkutan || null,
+                kelompokTani: data?.kelompok_tani || null,
+                pabrik: data?.pabrik || null,
+                lampiran: data?.lampiran || null,
+              });
+            } else if (data?.pabrik) {
+              setCurrentStep(4);
+              setLastStep(4);
               setCompletedSteps([1, 2, 3]);
               setFormData({
                 angkutan: data?.angkutan || null,
                 kelompokTani: data?.kelompok_tani || null,
                 pabrik: data?.pabrik || null,
+                lampiran: null,
               });
             } else if (data?.kelompok_tani) {
               setCurrentStep(3);
-              setLastStep(3);
+              setLastStep(4);
               setCompletedSteps([1, 2]);
               setFormData({
                 angkutan: data?.angkutan || null,
                 kelompokTani: data?.kelompok_tani || null,
                 pabrik: null,
+                lampiran: null,
               });
             } else if (data?.angkutan) {
               setCurrentStep(2);
-              setLastStep(3);
+              setLastStep(4);
               setCompletedSteps([1]);
               setFormData({
                 angkutan: data?.angkutan || null,
                 kelompokTani: null,
                 pabrik: null,
+                lampiran: null,
               });
             }
           }
@@ -200,14 +216,20 @@ const TambahPenjualanContent = () => {
           toast.success('Data pabrik berhasil disimpan');
           setFormData((prev) => ({ ...prev, pabrik: stepData }));
           setCompletedSteps((prev) => [...prev, 3]);
-          // Redirect to penjualan list after completion
-          router.push('/traceability/penjualan');
-          return;
+          setCurrentStep(4);
+          setLastStep(4);
         } else {
           // Handle error response with proper formatting
           const errorMessage = formatApiErrorMessage(response?.data);
           toast.error(errorMessage);
         }
+      } else if (currentStep === 4) {
+        // Save lampiran
+        // Since we are not actually submitting to backend yet based on API
+        setFormData((prev) => ({ ...prev, lampiran: stepData }));
+        toast.success('Data penjualan berhasil disimpan');
+        // Redirect to penjualan list after completion
+        router.push('/traceability/penjualan');
       }
     } catch (error) {
       console.error('Error in step:', error);
@@ -255,6 +277,16 @@ const TambahPenjualanContent = () => {
         return (
           <DataPabrik
             pabrikData={formData.pabrik || penjualanData?.pabrik}
+            onNext={handleNextStep}
+            onPrevious={handlePreviousStep}
+            onCancel={() => router.back()}
+            isSubmitting={isSubmitting}
+          />
+        );
+      case 4:
+        return (
+          <DataLampiran
+            lampiranData={formData.lampiran || penjualanData?.lampiran || []}
             onNext={handleNextStep}
             onPrevious={handlePreviousStep}
             onCancel={() => router.back()}

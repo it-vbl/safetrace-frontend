@@ -27,18 +27,31 @@ import {
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const keanggotaanOptions = [
-  { label: 'Aktif', value: true },
-  { label: 'Tidak Aktif', value: false },
+
+const ispoOptions = [
+  { label: 'Sudah', value: true },
+  { label: 'Belum', value: false },
+];
+
+const rspoOptions = [
+  { label: 'Sudah', value: true },
+  { label: 'Belum', value: false },
 ];
 
 const PetaniPage = () => {
   const router = useRouter();
 
-  const { kelompokTani, fetchKelompokTani } = useReferences();
+  const {
+    kelompokTani,
+    fetchKelompokTani,
+    statusKeanggotaan,
+    fetchStatusKeanggotaan,
+  } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
   const [selectedKeanggotaan, setSelectedKeanggotaan] = useState(null);
+  const [selectedIspo, setSelectedIspo] = useState(null);
+  const [selectedRspo, setSelectedRspo] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -53,7 +66,8 @@ const PetaniPage = () => {
 
   useEffect(() => {
     fetchKelompokTani();
-  }, [fetchKelompokTani]);
+    fetchStatusKeanggotaan();
+  }, [fetchKelompokTani, fetchStatusKeanggotaan]);
 
   // Auto-apply kelompok tani filter based on logged-in user
   const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
@@ -93,6 +107,8 @@ const PetaniPage = () => {
     search,
     keanggotaan,
     kelompok_tani,
+    is_ispo,
+    is_rspo,
   }) => {
     setLoading(true);
     try {
@@ -103,6 +119,8 @@ const PetaniPage = () => {
         ...(keanggotaan !== null &&
           keanggotaan !== undefined && { keanggotaan }),
         ...(kelompok_tani && { kelompok_tani }),
+        ...(is_ispo !== null && is_ispo !== undefined && { is_ispo }),
+        ...(is_rspo !== null && is_rspo !== undefined && { is_rspo }),
       };
 
       const response = await getListPetani(params);
@@ -115,6 +133,7 @@ const PetaniPage = () => {
           id: item?.id,
           id_petani: item?.id_petani,
           nama_petani: item?.nama,
+          jumlah_kebun: item?.jumlah_kebun,
           jenis_kelamin: item?.jns_kelamin_label ?? '-',
           kelompok: item?.nama_kelompok ?? '-',
           no_ktp: item?.no_ktp ?? '-',
@@ -123,8 +142,8 @@ const PetaniPage = () => {
           no_nib: item?.no_nib ?? '-',
           tgl_terbit_sppl: item?.tgl_terbit_sppl
             ? `${item?.tempat ? item.tempat + ', ' : ''}${moment(
-                item.tgl_terbit_sppl
-              ).format('DD-MM-YYYY')}`
+              item.tgl_terbit_sppl
+            ).format('DD-MM-YYYY')}`
             : '-',
           tanggal_bergabung: item?.tanggal_bergabung
             ? moment(item.tanggal_bergabung).format('DD/MM/YYYY')
@@ -161,6 +180,8 @@ const PetaniPage = () => {
         search,
         keanggotaan: selectedKeanggotaan,
         kelompok_tani: selectedKelompok,
+        is_ispo: selectedIspo,
+        is_rspo: selectedRspo,
       });
     }
   }, [
@@ -170,6 +191,8 @@ const PetaniPage = () => {
     search,
     selectedKeanggotaan,
     selectedKelompok,
+    selectedIspo,
+    selectedRspo,
   ]);
 
   const handleSearchTextChange = useCallback(
@@ -187,6 +210,16 @@ const PetaniPage = () => {
 
   const handleKeanggotaanChange = (e) => {
     setSelectedKeanggotaan(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleIspoChange = (e) => {
+    setSelectedIspo(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleRspoChange = (e) => {
+    setSelectedRspo(e.target.value);
     setCurrentPage(1);
   };
 
@@ -214,9 +247,11 @@ const PetaniPage = () => {
         ...(search && { search }),
         ...(selectedKeanggotaan !== null &&
           selectedKeanggotaan !== undefined && {
-            keanggotaan: selectedKeanggotaan,
-          }),
+          keanggotaan: selectedKeanggotaan,
+        }),
         ...(selectedKelompok && { kelompok_tani: selectedKelompok }),
+        ...(selectedIspo !== null && selectedIspo !== undefined && { is_ispo: selectedIspo }),
+        ...(selectedRspo !== null && selectedRspo !== undefined && { is_rspo: selectedRspo }),
       };
 
       const response = await downloadListPetani(params);
@@ -282,6 +317,12 @@ const PetaniPage = () => {
         flex: 1,
       },
       {
+        field: 'jumlah_kebun',
+        headerName: 'Jumlah Kebun',
+        minWidth: 120,
+        flex: 1,
+      },
+      {
         field: 'jenis_kelamin',
         headerName: 'Jenis Kelamin',
         minWidth: 120,
@@ -343,11 +384,10 @@ const PetaniPage = () => {
           const isActive = params.value;
           return (
             <div
-              className={`w-fit rounded px-2 py-1 text-center text-xs font-bold ${
-                isActive
-                  ? 'bg-green-100 text-green-600'
-                  : 'bg-red-100 text-red-600'
-              }`}
+              className={`w-fit rounded px-2 py-1 text-center text-xs font-bold ${isActive
+                ? 'bg-green-100 text-green-600'
+                : 'bg-red-100 text-red-600'
+                }`}
             >
               {isActive ? 'Aktif' : 'Keluar'}
             </div>
@@ -417,22 +457,22 @@ const PetaniPage = () => {
   };
 
   return (
-    <div className="relative !min-h-[calc(100%-72px)] w-full min-w-[320px] max-w-full">
+    <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
       <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
+        <div className="flex max-w-full flex-col gap-3 p-0 sm:gap-4">
           {/* Header Section */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between sm:gap-4">
             <Heading
-              className=" flex flex-1 uppercase tracking-[2px]"
+              className="mt-1 flex whitespace-nowrap uppercase tracking-[2px]"
               level={3}
             >
               DATA PETANI
             </Heading>
 
             {/* Controls Container */}
-            <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-start xl:justify-end sm:gap-3">
               {/* Search and Filters - Responsive Grid */}
-              <div className="grid w-full grid-cols-1 items-center gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:flex-row">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
                 <SearchBar
                   onChange={(e) => handleSearchTextChange(e.target.value)}
                   placeholder="Cari petani"
@@ -440,7 +480,7 @@ const PetaniPage = () => {
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
+                  containerClassName="w-full sm:w-auto lg:w-[150px]"
                   placeholder="Kelompok"
                   options={kelompokOptions}
                   value={selectedKelompok}
@@ -449,25 +489,41 @@ const PetaniPage = () => {
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
+                  containerClassName="w-full sm:w-auto lg:w-[150px]"
                   placeholder="Keanggotaan"
-                  options={keanggotaanOptions}
+                  options={statusKeanggotaan}
                   value={selectedKeanggotaan}
                   onChange={handleKeanggotaanChange}
+                />
+
+                <Select
+                  containerClassName="w-full sm:w-auto lg:w-[130px]"
+                  placeholder="ISPO"
+                  options={ispoOptions}
+                  value={selectedIspo}
+                  onChange={handleIspoChange}
+                />
+
+                <Select
+                  containerClassName="w-full sm:w-auto lg:w-[130px]"
+                  placeholder="RSPO"
+                  options={rspoOptions}
+                  value={selectedRspo}
+                  onChange={handleRspoChange}
                 />
               </div>
 
               {/* Action Buttons - Responsive */}
-              <div className="flex flex-row flex-wrap items-center justify-end gap-2">
+              <div className="flex w-full flex-row items-center justify-between gap-2 sm:w-auto sm:justify-end">
                 <Button
-                  className="!px-2 sm:!px-3"
+                  onClick={handleExportExcel}
+                  className="!px-3 flex-1 sm:flex-none justify-center"
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
-                  onClick={handleExportExcel}
                 />
                 <Button
                   onClick={() => router.push('/traceability/petani/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm"
+                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
                 >
                   Tambah Petani
                 </Button>
@@ -477,7 +533,7 @@ const PetaniPage = () => {
 
           {/* Table Container - Responsive Height */}
         </div>
-        <div className="relative w-full flex-1 overflow-x-auto">
+        <div className="relative w-full flex-1 overflow-hidden min-h-[400px]">
           <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
@@ -488,7 +544,7 @@ const PetaniPage = () => {
             columnDefs={colDefs}
           />
         </div>
-        <div className="flex w-full justify-center overflow-x-auto sm:justify-end">
+        <div className="flex justify-center sm:justify-end">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}

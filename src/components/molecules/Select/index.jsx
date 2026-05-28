@@ -208,7 +208,12 @@ const Select = ({
   }, [options]);
 
   const selectedOption = useMemo(() => {
-    return validOptions.find((option) => selectedValue == option.value);
+    return validOptions.find((option) => {
+      if (typeof selectedValue === 'string' && typeof option.value === 'string') {
+        return selectedValue.toLowerCase() === option.value.toLowerCase();
+      }
+      return selectedValue == option.value;
+    });
   }, [validOptions, selectedValue]);
 
   const filteredOptions = validOptions.filter((item) =>

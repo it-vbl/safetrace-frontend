@@ -42,9 +42,13 @@ const TraceabilityPetaniDetail = () => {
     jenisKelamin,
     statusPerkawinan,
     kelompokTani,
+    pendidikanTerakhir,
+    statusKeanggotaan,
     fetchJenisKelamin,
     fetchStatusPerkawinan,
     fetchKelompokTani,
+    fetchPendidikanTerakhir,
+    fetchStatusKeanggotaan,
     loading: referencesLoading,
   } = useReferences();
 
@@ -97,7 +101,9 @@ const TraceabilityPetaniDetail = () => {
     fetchJenisKelamin();
     fetchStatusPerkawinan();
     fetchKelompokTani();
-  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani]);
+    fetchPendidikanTerakhir();
+    fetchStatusKeanggotaan();
+  }, [fetchJenisKelamin, fetchStatusPerkawinan, fetchKelompokTani, fetchPendidikanTerakhir, fetchStatusKeanggotaan]);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -176,9 +182,15 @@ const TraceabilityPetaniDetail = () => {
         no_nib: formData.no_nib,
         tgl_terbit_sppl: formData.tanggal_terbit_sppl,
         no_wa: formData.no_whatsapp,
-        keanggotaan: formData.keanggotaan === 'true',
+        keanggotaan: formData.keanggotaan,
         tanggal_bergabung: formData.tanggal_bergabung,
         tanggal_keluar: formData.tanggal_keluar || null,
+        luas_kebun: parseFloat(formData.luas_kebun),
+        pendidikan_terakhir: formData.pendidikan_terakhir,
+        provinsi: parseInt(formData.provinsi, 10),
+        kabupaten: parseInt(formData.kabupaten, 10),
+        kecamatan: parseInt(formData.kecamatan, 10),
+        desa: parseInt(formData.desa, 10),
       };
 
       await updatePetani(id, updateData);
@@ -219,11 +231,11 @@ const TraceabilityPetaniDetail = () => {
     setCreateLampiranLoading(true);
     setNotification({ show: false, type: '', message: '' });
 
-    if (!ktpFile || !kkFile || !nibFile) {
+    if (!ktpFile && !kkFile && !nibFile) {
       setNotification({
         show: true,
         type: 'error',
-        message: 'Mohon lengkapi semua file lampiran (KTP, KK, dan NIB)',
+        message: 'Mohon pilih minimal 1 file lampiran',
       });
 
       setTimeout(() => {
@@ -412,7 +424,6 @@ const TraceabilityPetaniDetail = () => {
               onChangeValue={(data) => setKtpFile(data.value)}
               allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
-              isRequired
               keyField="ktp"
               name="file_ktp"
             />
@@ -432,7 +443,6 @@ const TraceabilityPetaniDetail = () => {
               onChangeValue={(data) => setKkFile(data.value)}
               allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
-              isRequired
               keyField="kk"
               name="file_kk"
             />
@@ -452,7 +462,6 @@ const TraceabilityPetaniDetail = () => {
               onChangeValue={(data) => setNibFile(data.value)}
               allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
               maxSize={10}
-              isRequired
               keyField="nib"
               name="file_nib"
             />
@@ -549,7 +558,7 @@ const TraceabilityPetaniDetail = () => {
             <h3 className="font-semibold">IDENTITAS</h3>
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+              className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
               disabled={updateLoading}
             >
               Ubah Data
@@ -570,6 +579,7 @@ const TraceabilityPetaniDetail = () => {
 
           {!loading && !error && petani && (
             <div className="grid grid-cols-1 gap-x-3 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
+              {/* Row 1 */}
               <BorderBottomColData
                 label="Id Petani"
                 value={petani?.id_petani || petani?.id || '-'}
@@ -580,19 +590,55 @@ const TraceabilityPetaniDetail = () => {
               />
               <BorderBottomColData
                 label="Jenis Kelamin"
-                value={formatJenisKelamin(petani?.jns_kelamin)}
+                value={petani?.jns_kelamin_label || formatJenisKelamin(petani?.jns_kelamin)}
               />
               <BorderBottomColData
                 label="Kelompok Tani"
                 value={petani?.nama_kelompok || '-'}
               />
               <BorderBottomColData
+                label="No. KTP"
+                value={petani?.no_ktp || '-'}
+              />
+              <BorderBottomColData
+                label="No. KK"
+                value={petani?.no_kk || '-'}
+              />
+
+              {/* Row 2 */}
+              <BorderBottomColData
+                label="Status Pernikahan"
+                value={petani?.status_perkawinan_label || (petani?.status_perkawinan == '1' ? 'Belum Kawin' : 'Kawin')}
+              />
+              <BorderBottomColData
+                label="Provinsi"
+                value={petani?.provinsi_nama || '-'}
+              />
+              <BorderBottomColData
+                label="Kabupaten/Kota"
+                value={petani?.kabupaten_nama || '-'}
+              />
+              <BorderBottomColData
+                label="Kecamatan"
+                value={petani?.kecamatan_nama || '-'}
+              />
+              <BorderBottomColData
+                label="Desa"
+                value={petani?.desa_nama || '-'}
+              />
+              <BorderBottomColData
                 label="Alamat"
                 value={petani?.alamat || '-'}
               />
+
+              {/* Row 3 */}
               <BorderBottomColData
-                label="No. KTP"
-                value={petani?.no_ktp || '-'}
+                label="Pendidikan Terakhir"
+                value={petani?.pendidikan_terakhir || '-'}
+              />
+              <BorderBottomColData
+                label="No. Whatsapp"
+                value={petani?.no_wa || '-'}
               />
               <BorderBottomColData
                 label="Tempat Lahir"
@@ -603,16 +649,6 @@ const TraceabilityPetaniDetail = () => {
                 value={formatDate(petani?.tanggal_lahir)}
               />
               <BorderBottomColData
-                label="No. KK"
-                value={petani?.no_kk || '-'}
-              />
-              <BorderBottomColData
-                label="Status Pernikahan"
-                value={
-                  petani?.status_perkawinan == '1' ? 'Belum Kawin' : 'Kawin'
-                }
-              />
-              <BorderBottomColData
                 label="No. NIB"
                 value={petani?.no_nib || '-'}
               />
@@ -620,6 +656,8 @@ const TraceabilityPetaniDetail = () => {
                 label="Tanggal Terbit SPPL"
                 value={formatDate(petani?.tgl_terbit_sppl)}
               />
+
+              {/* Row 4 */}
               <BorderBottomColData
                 label="Tanggal Bergabung"
                 value={formatDate(petani?.tanggal_bergabung)}
@@ -629,24 +667,26 @@ const TraceabilityPetaniDetail = () => {
                 value={formatDate(petani?.tanggal_keluar)}
               />
               <BorderBottomColData
-                label="No. Whatsapp"
-                value={petani?.no_wa || '-'}
-              />
-              <BorderBottomColData
                 label="Status Keanggotaan"
                 value={
-                  <span
-                    className={`inline-block rounded px-2 py-1 text-xs font-semibold ${petani?.keanggotaan === true
-                      ? 'bg-green-200 text-green-800'
-                      : 'bg-red-200 text-red-800'
-                      }`}
-                  >
-                    {petani?.keanggotaan === true
-                      ? 'Aktif'
-                      : petani?.keanggotaan === false
-                        ? 'Tidak Aktif'
-                        : petani?.keanggotaan || 'Tidak Diketahui'}
-                  </span>
+                  (() => {
+                    const statusObj = statusKeanggotaan.find(
+                      (item) => item.value == petani?.keanggotaan
+                    );
+                    const label = statusObj ? statusObj.label : (petani?.keanggotaan || 'Tidak Diketahui');
+                    const isGreen = label.toLowerCase() === 'aktif';
+
+                    return (
+                      <span
+                        className={`inline-block rounded px-2 py-1 text-xs font-semibold ${isGreen
+                          ? 'bg-green-200 text-green-800'
+                          : 'bg-red-200 text-red-800'
+                          }`}
+                      >
+                        {label}
+                      </span>
+                    );
+                  })()
                 }
               />
             </div>
@@ -660,7 +700,7 @@ const TraceabilityPetaniDetail = () => {
             {lampiran && (
               <button
                 onClick={() => setIsEditLampiranModalOpen(true)}
-                className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+                className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
                 disabled={updateLampiranLoading}
               >
                 Ubah Data
@@ -704,6 +744,8 @@ const TraceabilityPetaniDetail = () => {
           jenisKelamin={jenisKelamin}
           statusPerkawinan={statusPerkawinan}
           kelompokTani={kelompokTani}
+          pendidikanTerakhir={pendidikanTerakhir}
+          statusKeanggotaan={statusKeanggotaan}
           initialValues={{
             id: petani?.id_petani || petani?.id || '',
             nama: petani?.nama || '',
@@ -720,7 +762,13 @@ const TraceabilityPetaniDetail = () => {
             no_whatsapp: petani?.no_wa || '',
             tanggal_bergabung: petani?.tanggal_bergabung || '',
             tanggal_keluar: petani?.tanggal_keluar || null,
-            keanggotaan: petani?.keanggotaan ? 'true' : 'false',
+            keanggotaan: petani?.keanggotaan || '',
+            luas_kebun: petani?.luas_kebun || '',
+            pendidikan_terakhir: petani?.pendidikan_terakhir || '',
+            provinsi: petani?.provinsi || '',
+            kabupaten: petani?.kabupaten || '',
+            kecamatan: petani?.kecamatan || '',
+            desa: petani?.desa || '',
           }}
           onSave={handleUpdatePetani}
         />

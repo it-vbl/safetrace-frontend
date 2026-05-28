@@ -61,46 +61,50 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
 
   const validationSchema = Yup.object().shape({
     s1_sistemik_waktu: Yup.number()
-      .typeError('Wajib diisi')
+      .nullable().transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
       .min(1)
       .max(12)
-      .required('Wajib diisi'),
+      .nullable(),
     s1_sistemik_jumlah: Yup.string()
-      .required('Wajib diisi')
+      .nullable()
       .test('angka-valid', 'Harus angka >= 0', (val) => {
+        if (!val) return true;
         const n = parseLiterInput(val);
         return Number.isFinite(n) && n >= 0;
       }),
     s1_kontak_waktu: Yup.number()
-      .typeError('Wajib diisi')
+      .nullable().transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
       .min(1)
       .max(12)
-      .required('Wajib diisi'),
+      .nullable(),
     s1_kontak_jumlah: Yup.string()
-      .required('Wajib diisi')
+      .nullable()
       .test('angka-valid', 'Harus angka >= 0', (val) => {
+        if (!val) return true;
         const n = parseLiterInput(val);
         return Number.isFinite(n) && n >= 0;
       }),
     s2_sistemik_waktu: Yup.number()
-      .typeError('Wajib diisi')
+      .nullable().transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
       .min(1)
       .max(12)
-      .required('Wajib diisi'),
+      .nullable(),
     s2_sistemik_jumlah: Yup.string()
-      .required('Wajib diisi')
+      .nullable()
       .test('angka-valid', 'Harus angka >= 0', (val) => {
+        if (!val) return true;
         const n = parseLiterInput(val);
         return Number.isFinite(n) && n >= 0;
       }),
     s2_kontak_waktu: Yup.number()
-      .typeError('Wajib diisi')
+      .nullable().transform((value, originalValue) => (String(originalValue).trim() === '' || originalValue === 0 ? null : value))
       .min(1)
       .max(12)
-      .required('Wajib diisi'),
+      .nullable(),
     s2_kontak_jumlah: Yup.string()
-      .required('Wajib diisi')
+      .nullable()
       .test('angka-valid', 'Harus angka >= 0', (val) => {
+        if (!val) return true;
         const n = parseLiterInput(val);
         return Number.isFinite(n) && n >= 0;
       }),
@@ -157,7 +161,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
+              
             />
             <InputText
               label="(Sistemik) Jumlah"
@@ -171,7 +175,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Liter"
               type="string"
               formatter={formatLiterInput}
-              isRequired={true}
+              
             />
             <Select
               label="(Kontak) Waktu Aplikasi"
@@ -185,7 +189,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
+              
             />
             <InputText
               label="(Kontak) Jumlah"
@@ -199,7 +203,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Liter"
               type="string"
               formatter={formatLiterInput}
-              isRequired={true}
+              
             />
           </div>
 
@@ -221,7 +225,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
+              
             />
             <InputText
               label="(Sistemik) Jumlah"
@@ -235,7 +239,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Liter"
               type="string"
               formatter={formatLiterInput}
-              isRequired={true}
+              
             />
             <Select
               label="(Kontak) Waktu Aplikasi"
@@ -249,7 +253,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
+              
             />
             <InputText
               label="(Kontak) Jumlah"
@@ -263,7 +267,7 @@ const EditPestisidaModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Liter"
               type="string"
               formatter={formatLiterInput}
-              isRequired={true}
+              
             />
           </div>
         </div>

@@ -156,7 +156,7 @@ const TambahTahunLB3PageContent = () => {
                 suffix="Kg"
                 minNumber={0}
                 name="limbahBotol"
-                isRequired
+                
               />
 
               <InputText
@@ -170,7 +170,7 @@ const TambahTahunLB3PageContent = () => {
                 suffix="Kg"
                 minNumber={0}
                 name="limbahJeriken"
-                isRequired
+                
               />
 
               <InputText
@@ -184,7 +184,7 @@ const TambahTahunLB3PageContent = () => {
                 suffix="Kg"
                 minNumber={0}
                 name="limbahKarungPupuk"
-                isRequired
+                
               />
             </div>
           </div>

@@ -32,7 +32,10 @@ const Navbar = () => {
   };
 
   const getMenuClassName = (menu) => {
-    return pathname.startsWith(menu) ? 'text-primary font-bold' : 'text-black';
+    const isActive = menu === '/' ? pathname === '/' : pathname.startsWith(menu);
+    return isActive
+      ? 'bg-primary text-white px-4 py-2 rounded-[4px] font-bold transition-all duration-300'
+      : 'text-black hover:text-primary px-4 py-2 transition-all duration-300 rounded-lg hover:bg-gray-50';
   };
 
   useEffect(() => {
@@ -70,7 +73,7 @@ const Navbar = () => {
     <div className="flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4">
       {/* logo */}
 
-      <div className="flex w-auto items-center md:flex-1">
+      <div className="flex w-auto min-w-fit items-center md:flex-1">
         {pathname !== '/' && (
           <HamburgerMenuIcon
             onClick={() => dispatch(setSidebarOpen(!sidebarOpen))}
@@ -79,39 +82,43 @@ const Navbar = () => {
             height={mounted && isMobileScreen ? 16 : 24}
           />
         )}
-        <div>
-          <SipekebunLogo />
+        <div className="cursor-pointer" onClick={() => handleMenuClick('/')}>
+          <SipekebunLogo isNavbar={true} className="w-fit" />
         </div>
       </div>
-      <div className="ml-auto hidden flex-1  flex-row items-center justify-center gap-4 uppercase md:!flex">
+
+      {/* Desktop center menu */}
+      <div
+        className="hidden flex-1 mx-2 flex-row items-center justify-center uppercase md:!flex"
+        suppressHydrationWarning
+      >
+        {canSeeTraceability && (
+          <>
+            <div
+              className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName('/')}`}
+              onClick={() => handleMenuClick('/')}
+            >
+              Peta
+            </div>
+            <div
+              className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName(
+                '/traceability'
+              )}`}
+              onClick={() => handleMenuClick('/traceability/petani')}
+            >
+              Petani
+            </div>
+          </>
+        )}
         {canSeeKabarTani && (
           <div
-            className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+            className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName(
               '/kabar-tani/'
             )} `}
             onClick={() => handleMenuClick('/kabar-tani/kontak')}
           >
             Kabar Tani
           </div>
-        )}
-        {canSeeTraceability && (
-          <>
-            <div
-              className={`cursor-pointer tracking-[1px] ${pathname === '/' ? 'font-bold text-primary' : 'text-black'
-                }`}
-              onClick={() => handleMenuClick('/')}
-            >
-              MapView
-            </div>
-            <div
-              className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-                '/traceability'
-              )}`}
-              onClick={() => handleMenuClick('/traceability/petani')}
-            >
-              Traceability
-            </div>
-          </>
         )}
         {/* <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
@@ -125,9 +132,27 @@ const Navbar = () => {
 
       {/* Mobile center menu */}
       <div
-        className="flex flex-1 min-w-0 flex-row items-center justify-start gap-4 px-2 overflow-x-auto whitespace-nowrap text-[11px] uppercase md:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex flex-1 min-w-0 flex-row items-center justify-start px-4 mx-2 overflow-x-auto whitespace-nowrap text-[12px] font-bold uppercase md:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         suppressHydrationWarning
       >
+        {canSeeTraceability && (
+          <>
+            <div
+              className={`cursor-pointer tracking-[1px] ${getMenuClassName('/')}`}
+              onClick={() => handleMenuClick('/')}
+            >
+              Peta
+            </div>
+            <div
+              className={`cursor-pointer tracking-[1px] ${getMenuClassName(
+                '/traceability'
+              )}`}
+              onClick={() => handleMenuClick('/traceability/petani')}
+            >
+              Petani
+            </div>
+          </>
+        )}
         {canSeeKabarTani && (
           <div
             className={`cursor-pointer tracking-[1px] ${getMenuClassName(
@@ -137,25 +162,6 @@ const Navbar = () => {
           >
             Kabar Tani
           </div>
-        )}
-        {canSeeTraceability && (
-          <>
-            <div
-              className={`cursor-pointer tracking-[1px] ${pathname === '/' ? 'font-bold text-primary' : 'text-black'
-                }`}
-              onClick={() => handleMenuClick('/')}
-            >
-              MapView
-            </div>
-            <div
-              className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-                '/traceability'
-              )}`}
-              onClick={() => handleMenuClick('/traceability/petani')}
-            >
-              Traceability
-            </div>
-          </>
         )}
         {/* <div
           className={`cursor-pointer tracking-[1px] ${getMenuClassName(
@@ -168,7 +174,7 @@ const Navbar = () => {
       </div>
 
       {/* Desktop menu items */}
-      <div className="ml-auto hidden flex-1  flex-row items-center justify-end gap-4 uppercase md:!flex">
+      <div className="hidden flex-1 mx-2 flex-row items-center justify-end gap-4 uppercase md:!flex">
         <div
           id="user"
           className="flex cursor-pointer flex-row items-center gap-2 font-bold"

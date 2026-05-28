@@ -3,35 +3,51 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import {
   getAsalBenih,
+  getDeforestationAlertType,
   getEksPlasma,
   getJenisKelamin,
   getJenisLahan,
   getJenisLegalitas,
   getJenisPupuk,
   getKelompokTani,
+  getKomoditas,
   getPendidikanTerakhir,
+  getPenerimaBroadcast,
+  getPilihanBulan,
   getPolaTanam,
+  getRegisteredVia,
+  getRequestOtpVia,
+  getStatusKeanggotaan,
   getStatusLahan,
   getStatusPekerja,
   getStatusPerkawinan,
   getSumberKontak,
   getUserRoles,
+  getWhispStatus,
 } from '../services/referensi';
 import {
   setAsalBenih,
+  setDeforestationAlertType,
   setEksPlasma,
   setJenisKelamin,
   setJenisLahan,
   setJenisLegalitas,
   setJenisPupuk,
   setKelompokTani,
+  setKomoditas,
   setPendidikanTerakhir,
+  setPenerimaBroadcast,
+  setPilihanBulan,
   setPolaTanam,
+  setRegisteredVia,
+  setRequestOtpVia,
+  setStatusKeanggotaan,
   setStatusLahan,
   setStatusPekerja,
   setStatusPerkawinan,
   setSumberKontak,
   setUserRoles,
+  setWhispStatus,
 } from '../store/slices/referensi';
 
 const useReferences = () => {
@@ -55,6 +71,14 @@ const useReferences = () => {
     kelompokTani,
     sumberKontak,
     jenisLegalitas,
+    statusKeanggotaan,
+    registeredVia,
+    requestOtpVia,
+    penerimaBroadcast,
+    whispStatus,
+    pilihanBulan,
+    deforestationAlertType,
+    komoditas,
   } = useSelector((state) => state.referensi);
 
   const fetchData = useCallback(
@@ -138,6 +162,38 @@ const useReferences = () => {
     () => fetchData(getJenisLegalitas, setJenisLegalitas),
     [fetchData]
   );
+  const fetchStatusKeanggotaan = useCallback(
+    () => fetchData(getStatusKeanggotaan, setStatusKeanggotaan),
+    [fetchData]
+  );
+  const fetchRegisteredVia = useCallback(
+    () => fetchData(getRegisteredVia, setRegisteredVia),
+    [fetchData]
+  );
+  const fetchRequestOtpVia = useCallback(
+    () => fetchData(getRequestOtpVia, setRequestOtpVia),
+    [fetchData]
+  );
+  const fetchPenerimaBroadcast = useCallback(
+    () => fetchData(getPenerimaBroadcast, setPenerimaBroadcast),
+    [fetchData]
+  );
+  const fetchWhispStatus = useCallback(
+    () => fetchData(getWhispStatus, setWhispStatus),
+    [fetchData]
+  );
+  const fetchPilihanBulan = useCallback(
+    () => fetchData(getPilihanBulan, setPilihanBulan),
+    [fetchData]
+  );
+  const fetchDeforestationAlertType = useCallback(
+    () => fetchData(getDeforestationAlertType, setDeforestationAlertType),
+    [fetchData]
+  );
+  const fetchKomoditas = useCallback(
+    () => fetchData(getKomoditas, setKomoditas),
+    [fetchData]
+  );
 
   return {
     loading,
@@ -156,6 +212,14 @@ const useReferences = () => {
     kelompokTani,
     sumberKontak,
     jenisLegalitas,
+    statusKeanggotaan,
+    registeredVia,
+    requestOtpVia,
+    penerimaBroadcast,
+    whispStatus,
+    pilihanBulan,
+    deforestationAlertType,
+    komoditas,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
     fetchPolaTanam,
@@ -170,6 +234,14 @@ const useReferences = () => {
     fetchKelompokTani,
     fetchSumberKontak,
     fetchJenisLegalitas,
+    fetchStatusKeanggotaan,
+    fetchRegisteredVia,
+    fetchRequestOtpVia,
+    fetchPenerimaBroadcast,
+    fetchWhispStatus,
+    fetchPilihanBulan,
+    fetchDeforestationAlertType,
+    fetchKomoditas,
   };
 };
 

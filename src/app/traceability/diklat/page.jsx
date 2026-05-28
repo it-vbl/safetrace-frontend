@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
+import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
@@ -47,6 +48,20 @@ const DiklatPage = () => {
   const [totalDiklat, setTotalDiklat] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+
+  const [cardFilters, setCardFilters] = useState({
+    sl: false,
+    pnc: false,
+    pestida: false,
+    k3: false,
+    sop: false,
+    pdg: false,
+  });
+
+  const handleToggleCardFilter = (key) => {
+    setCardFilters((prev) => ({ ...prev, [key]: !prev[key] }));
+    setCurrentPage(1);
+  };
 
   const [statistik, setStatistik] = useState({
     sl: 0,
@@ -112,7 +127,7 @@ const DiklatPage = () => {
     }
   };
 
-  const fetchDiklatData = async ({ page, page_size, search, kelompok }) => {
+  const fetchDiklatData = async ({ page, page_size, search, kelompok, cardFilters }) => {
     setLoading(true);
     try {
       const params = {
@@ -121,6 +136,13 @@ const DiklatPage = () => {
         ...(search && { search }),
         ...(kelompok && { kelompok_tani: kelompok }),
       };
+      if (cardFilters) {
+        Object.keys(cardFilters).forEach((key) => {
+          if (cardFilters[key]) {
+            params[key] = true;
+          }
+        });
+      }
 
       const response = await getListDiklat(params);
       if (response?.status === 200) {
@@ -150,6 +172,7 @@ const DiklatPage = () => {
         page_size: pageSize,
         search,
         kelompok: selectedKelompok,
+        cardFilters,
       });
     }
   }, [
@@ -158,6 +181,7 @@ const DiklatPage = () => {
     pageSize,
     search,
     selectedKelompok,
+    cardFilters,
   ]);
 
   const handleSearchTextChange = useCallback(
@@ -212,16 +236,24 @@ const DiklatPage = () => {
     values,
     setValues,
     setFieldValue,
+    handleChange,
+    handleBlur,
     isSubmitting,
     resetForm,
   } = useFormik({
     initialValues: {
       sl: null,
+      sl_trainer: '',
       pnc: null,
+      pnc_trainer: '',
       pestisida: null,
+      pestisida_trainer: '',
       k3: null,
+      k3_trainer: '',
       sop: null,
+      sop_trainer: '',
       pdg: null,
+      pdg_trainer: '',
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!selectedId) return;
@@ -230,11 +262,17 @@ const DiklatPage = () => {
         setSubmitting(true);
         const payload = {
           sl: values.sl,
+          sl_trainer: values.sl_trainer || null,
           pnc: values.pnc,
+          pnc_trainer: values.pnc_trainer || null,
           pestisida: values.pestisida,
+          pestisida_trainer: values.pestisida_trainer || null,
           k3: values.k3,
+          k3_trainer: values.k3_trainer || null,
           sop: values.sop,
+          sop_trainer: values.sop_trainer || null,
           pdg: values.pdg,
+          pdg_trainer: values.pdg_trainer || null,
         };
 
         const response = await updateDiklat(selectedId, payload);
@@ -283,11 +321,17 @@ const DiklatPage = () => {
         const detail = res.data.data;
         setValues({
           sl: detail.sl,
+          sl_trainer: detail.sl_trainer || '',
           pnc: detail.pnc ?? detail.pc_rspo_ispo,
+          pnc_trainer: detail.pnc_trainer || detail.pc_rspo_ispo_trainer || '',
           pestisida: detail.pestisida,
+          pestisida_trainer: detail.pestisida_trainer || '',
           k3: detail.k3,
+          k3_trainer: detail.k3_trainer || '',
           sop: detail.sop,
+          sop_trainer: detail.sop_trainer || '',
           pdg: detail.pdg ?? detail.fgd,
+          pdg_trainer: detail.pdg_trainer || detail.fgd_trainer || '',
         });
       }
     } catch (error) {
@@ -439,12 +483,52 @@ const DiklatPage = () => {
   const StatCard = ({
     title,
     value,
-    bgColor = 'bg-white',
-    textColor = 'text-green8',
+    isActive,
+    onClick,
   }) => (
-    <div className={`${bgColor} rounded-lg border p-4`}>
-      <div className={`mb-1 text-sm font-medium ${textColor}`}>{title}</div>
-      <div className="text-2xl font-bold text-gray-900">{value}</div>
+    <div
+      onClick={onClick}
+      className={`group relative overflow-hidden rounded-xl border p-4 transition-all duration-300 ease-out
+        ${onClick ? 'cursor-pointer' : ''}
+        ${
+          isActive
+            ? 'border-green8 bg-[#F0FDF4] shadow-[0_4px_12px_rgba(0,0,0,0.05)] -translate-y-[2px]'
+            : 'border-gray-200 bg-white hover:border-green8/40 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:-translate-y-[1px]'
+        }
+      `}
+    >
+      {/* Subtle Top Border Indicator when active */}
+      <div 
+        className={`absolute left-0 top-0 h-1 w-full transition-all duration-300 ${
+          isActive ? 'bg-green8 opacity-100' : 'bg-transparent opacity-0'
+        }`}
+      />
+
+      <div className="relative z-10 flex flex-col gap-1">
+        <div
+          className={`text-xs font-medium tracking-wide transition-colors duration-300 sm:text-sm ${
+            isActive ? 'text-green8' : 'text-gray-500 group-hover:text-gray-700'
+          }`}
+        >
+          {title}
+        </div>
+        <div
+          className={`text-xl font-bold transition-colors duration-300 sm:text-2xl ${
+            isActive ? 'text-gray-900' : 'text-gray-800'
+          }`}
+        >
+          {value}
+        </div>
+      </div>
+      
+      {/* Indicator Dot */}
+      <div 
+        className={`absolute -right-2 -top-2 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-500 ${
+          isActive ? 'scale-100 bg-green8/10 opacity-100' : 'scale-50 opacity-0'
+        }`}
+      >
+        <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green8" />
+      </div>
     </div>
   );
 
@@ -455,7 +539,7 @@ const DiklatPage = () => {
         setOpen={handleCancel}
         isShowLabel={false}
         isShowCloseIcon={false}
-        className="flex max-w-md flex-col"
+        className="flex max-w-2xl flex-col"
       >
         <form onSubmit={handleSubmit}>
           <Heading
@@ -464,58 +548,124 @@ const DiklatPage = () => {
           >
             UBAH STATUS DIKLAT
           </Heading>
-          <div className="my-4 flex gap-4">
-            <div className="flex flex-1 flex-col gap-4">
+          <div className="my-4 flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-2">
+            {/* SL */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
               <Select
                 label="SL"
-                containerClassName="w-full sm:w-auto lg:w-full"
+                containerClassName="w-full"
                 placeholder="Pilih SL"
                 options={statusOption}
                 value={values.sl}
                 onChange={(e) => setFieldValue('sl', e.target.value)}
               />
-              <Select
-                label="Pestisida"
-                containerClassName="w-full sm:w-auto lg:w-full"
-                placeholder="Pilih pestisida"
-                options={statusOption}
-                value={values.pestisida}
-                onChange={(e) => setFieldValue('pestisida', e.target.value)}
-              />
-              <Select
-                label="SOP"
-                containerClassName="w-full sm:w-auto lg:w-full"
-                placeholder="Pilih SOP"
-                options={statusOption}
-                value={values.sop}
-                onChange={(e) => setFieldValue('sop', e.target.value)}
+              <InputText
+                label="SL Trainer"
+                name="sl_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.sl_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-4">
+            {/* P&C */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
               <Select
                 label="P&C (RSPO/ISPO)"
-                containerClassName="w-full sm:w-auto lg:w-full"
-                placeholder="Pilih P&C (RSPO/ISPO)"
+                containerClassName="w-full"
+                placeholder="Pilih P&C"
                 options={statusOption}
                 value={values.pnc}
                 onChange={(e) => setFieldValue('pnc', e.target.value)}
               />
+              <InputText
+                label="P&C Trainer"
+                name="pnc_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.pnc_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
+
+            {/* K3 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
               <Select
                 label="K3"
-                containerClassName="w-full sm:w-auto lg:w-full"
+                containerClassName="w-full"
                 placeholder="Pilih K3"
                 options={statusOption}
                 value={values.k3}
                 onChange={(e) => setFieldValue('k3', e.target.value)}
               />
+              <InputText
+                label="K3 Trainer"
+                name="k3_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.k3_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
+
+            {/* SOP */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+              <Select
+                label="SOP"
+                containerClassName="w-full"
+                placeholder="Pilih SOP"
+                options={statusOption}
+                value={values.sop}
+                onChange={(e) => setFieldValue('sop', e.target.value)}
+              />
+              <InputText
+                label="SOP Trainer"
+                name="sop_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.sop_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
+
+            {/* FGD/PDG */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
               <Select
                 label="FGD"
-                containerClassName="w-full sm:w-auto lg:w-full"
+                containerClassName="w-full"
                 placeholder="Pilih FGD"
                 options={statusOption}
                 value={values.pdg}
                 onChange={(e) => setFieldValue('pdg', e.target.value)}
+              />
+              <InputText
+                label="FGD Trainer"
+                name="pdg_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.pdg_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
+
+            {/* Pestisida */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+              <Select
+                label="Pestisida"
+                containerClassName="w-full"
+                placeholder="Pilih Pestisida"
+                options={statusOption}
+                value={values.pestisida}
+                onChange={(e) => setFieldValue('pestisida', e.target.value)}
+              />
+              <InputText
+                label="Pestisida Trainer"
+                name="pestisida_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.pestisida_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
               />
             </div>
           </div>
@@ -574,12 +724,12 @@ const DiklatPage = () => {
 
           {/* === STATISTICS CARDS === */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <StatCard title="SL" value={statistik.sl} />
-            <StatCard title="P&C (RSPO/ISPO)" value={statistik.pcRspoIspo} />
-            <StatCard title="Pestisida" value={statistik.pestisida} />
-            <StatCard title="K3" value={statistik.k3} />
-            <StatCard title="SOP" value={statistik.sop} />
-            <StatCard title="FDG" value={statistik.fdg} />
+            <StatCard title="SL" value={statistik.sl} isActive={cardFilters.sl} onClick={() => handleToggleCardFilter('sl')} />
+            <StatCard title="P&C (RSPO/ISPO)" value={statistik.pcRspoIspo} isActive={cardFilters.pnc} onClick={() => handleToggleCardFilter('pnc')} />
+            <StatCard title="Pestisida" value={statistik.pestisida} isActive={cardFilters.pestida} onClick={() => handleToggleCardFilter('pestida')} />
+            <StatCard title="K3" value={statistik.k3} isActive={cardFilters.k3} onClick={() => handleToggleCardFilter('k3')} />
+            <StatCard title="SOP" value={statistik.sop} isActive={cardFilters.sop} onClick={() => handleToggleCardFilter('sop')} />
+            <StatCard title="FDG" value={statistik.fdg} isActive={cardFilters.pdg} onClick={() => handleToggleCardFilter('pdg')} />
           </div>
         </div>
 

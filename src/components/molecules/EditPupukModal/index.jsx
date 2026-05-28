@@ -32,13 +32,14 @@ const formatKgInput = (v) => {
 };
 
 const parseKgInput = (v) => {
+  if (!v) return null;
   const num = Number(String(v ?? '').replace(/\D/g, ''));
   return Number.isNaN(num) ? 0 : num;
 };
 
 const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
   const initialValues = useMemo(() => {
-    const s1 = yearData?.semester?.['Semester 1'] ?? {
+    const s1 = yearData?.semester?.['Tahap 1'] ?? {
       npk: { waktu: '', jumlah: 0 },
       nitrogen: { waktu: '', jumlah: 0 },
       pospat: { waktu: '', jumlah: 0 },
@@ -46,7 +47,15 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
       boron: { waktu: '', jumlah: 0 },
       magnesium: { waktu: '', jumlah: 0 },
     };
-    const s2 = yearData?.semester?.['Semester 2'] ?? {
+    const s2 = yearData?.semester?.['Tahap 2'] ?? {
+      npk: { waktu: '', jumlah: 0 },
+      nitrogen: { waktu: '', jumlah: 0 },
+      pospat: { waktu: '', jumlah: 0 },
+      kalium: { waktu: '', jumlah: 0 },
+      boron: { waktu: '', jumlah: 0 },
+      magnesium: { waktu: '', jumlah: 0 },
+    };
+    const s3 = yearData?.semester?.['Tahap 3'] ?? {
       npk: { waktu: '', jumlah: 0 },
       nitrogen: { waktu: '', jumlah: 0 },
       pospat: { waktu: '', jumlah: 0 },
@@ -81,94 +90,58 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
       s2_boron_jumlah: formatKgInput(s2.boron.jumlah || 0),
       s2_magnesium_waktu: monthNameToNumber(s2.magnesium.waktu),
       s2_magnesium_jumlah: formatKgInput(s2.magnesium.jumlah || 0),
+      s3_npk_waktu: monthNameToNumber(s3.npk.waktu),
+      s3_npk_jumlah: formatKgInput(s3.npk.jumlah || 0),
+      s3_nitrogen_waktu: monthNameToNumber(s3.nitrogen.waktu),
+      s3_nitrogen_jumlah: formatKgInput(s3.nitrogen.jumlah || 0),
+      s3_pospat_waktu: monthNameToNumber(s3.pospat.waktu),
+      s3_pospat_jumlah: formatKgInput(s3.pospat.jumlah || 0),
+      s3_kalium_waktu: monthNameToNumber(s3.kalium.waktu),
+      s3_kalium_jumlah: formatKgInput(s3.kalium.jumlah || 0),
+      s3_boron_waktu: monthNameToNumber(s3.boron.waktu),
+      s3_boron_jumlah: formatKgInput(s3.boron.jumlah || 0),
+      s3_magnesium_waktu: monthNameToNumber(s3.magnesium.waktu),
+      s3_magnesium_jumlah: formatKgInput(s3.magnesium.jumlah || 0),
     };
   }, [yearData]);
 
   const validationSchema = Yup.object().shape({
-    s1_npk_waktu: Yup.number().required('Wajib diisi'),
-    s1_npk_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s1_nitrogen_waktu: Yup.string().required('Wajib diisi'),
-    s1_nitrogen_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s1_pospat_waktu: Yup.string().required('Wajib diisi'),
-    s1_pospat_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s1_kalium_waktu: Yup.string().required('Wajib diisi'),
-    s1_kalium_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s1_boron_waktu: Yup.string().required('Wajib diisi'),
-    s1_boron_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s1_magnesium_waktu: Yup.string().required('Wajib diisi'),
-    s1_magnesium_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s2_npk_waktu: Yup.string().required('Wajib diisi'),
-    s2_npk_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s2_nitrogen_waktu: Yup.string().required('Wajib diisi'),
-    s2_nitrogen_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s2_pospat_waktu: Yup.string().required('Wajib diisi'),
-    s2_pospat_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s2_kalium_waktu: Yup.string().required('Wajib diisi'),
-    s2_kalium_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s2_boron_waktu: Yup.string().required('Wajib diisi'),
-    s2_boron_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
-    s2_magnesium_waktu: Yup.string().required('Wajib diisi'),
-    s2_magnesium_jumlah: Yup.string()
-      .required('Wajib diisi')
-      .test('angka-valid', 'Harus angka >= 0', (val) => {
-        const n = parseKgInput(val);
-        return Number.isFinite(n) && n >= 0;
-      }),
+    s1_npk_waktu: Yup.string().nullable(),
+    s1_npk_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s1_nitrogen_waktu: Yup.string().nullable(),
+    s1_nitrogen_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s1_pospat_waktu: Yup.string().nullable(),
+    s1_pospat_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s1_kalium_waktu: Yup.string().nullable(),
+    s1_kalium_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s1_boron_waktu: Yup.string().nullable(),
+    s1_boron_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s1_magnesium_waktu: Yup.string().nullable(),
+    s1_magnesium_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s2_npk_waktu: Yup.string().nullable(),
+    s2_npk_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s2_nitrogen_waktu: Yup.string().nullable(),
+    s2_nitrogen_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s2_pospat_waktu: Yup.string().nullable(),
+    s2_pospat_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s2_kalium_waktu: Yup.string().nullable(),
+    s2_kalium_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s2_boron_waktu: Yup.string().nullable(),
+    s2_boron_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s2_magnesium_waktu: Yup.string().nullable(),
+    s2_magnesium_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s3_npk_waktu: Yup.string().nullable(),
+    s3_npk_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s3_nitrogen_waktu: Yup.string().nullable(),
+    s3_nitrogen_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s3_pospat_waktu: Yup.string().nullable(),
+    s3_pospat_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s3_kalium_waktu: Yup.string().nullable(),
+    s3_kalium_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s3_boron_waktu: Yup.string().nullable(),
+    s3_boron_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); }),
+    s3_magnesium_waktu: Yup.string().nullable(),
+    s3_magnesium_jumlah: Yup.string().nullable().test('angka-valid', 'Harus angka >= 0', (val) => { if (!val) return true; const n = parseKgInput(val); return n === null || (Number.isFinite(n) && n >= 0); })
   });
 
   const formik = useFormik({
@@ -178,7 +151,7 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
     onSubmit: (values) => {
       // Convert month numbers back to month names for onSave callback
       const updated = {
-        'Semester 1': {
+        'Tahap 1': {
           npk: {
             waktu: monthNumberToName(values.s1_npk_waktu) || '-',
             jumlah: parseKgInput(values.s1_npk_jumlah),
@@ -204,11 +177,37 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
             jumlah: parseKgInput(values.s1_magnesium_jumlah),
           },
         },
-        'Semester 2': {
+        'Tahap 2': {
           npk: {
             waktu: monthNumberToName(values.s2_npk_waktu) || '-',
             jumlah: parseKgInput(values.s2_npk_jumlah),
           },
+        'Tahap 3': {
+          npk: {
+            waktu: monthNumberToName(values.s3_npk_waktu) || '-',
+            jumlah: parseKgInput(values.s3_npk_jumlah),
+          },
+          nitrogen: {
+            waktu: monthNumberToName(values.s3_nitrogen_waktu) || '-',
+            jumlah: parseKgInput(values.s3_nitrogen_jumlah),
+          },
+          pospat: {
+            waktu: monthNumberToName(values.s3_pospat_waktu) || '-',
+            jumlah: parseKgInput(values.s3_pospat_jumlah),
+          },
+          kalium: {
+            waktu: monthNumberToName(values.s3_kalium_waktu) || '-',
+            jumlah: parseKgInput(values.s3_kalium_jumlah),
+          },
+          boron: {
+            waktu: monthNumberToName(values.s3_boron_waktu) || '-',
+            jumlah: parseKgInput(values.s3_boron_jumlah),
+          },
+          magnesium: {
+            waktu: monthNumberToName(values.s3_magnesium_waktu) || '-',
+            jumlah: parseKgInput(values.s3_magnesium_jumlah),
+          },
+        },
           nitrogen: {
             waktu: monthNumberToName(values.s2_nitrogen_waktu) || '-',
             jumlah: parseKgInput(values.s2_nitrogen_jumlah),
@@ -247,10 +246,10 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
       className="!max-w-[768px] transition-all duration-200"
     >
       <div id="modal" className="pt-4">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Semester 1 */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {/* Tahap 1 */}
           <div className="flex flex-col gap-2">
-            <div className="mb-2 text-sm font-semibold">Semester 1</div>
+            <div className="mb-2 text-sm font-semibold">Tahap 1</div>
             <Select
               label="(NPK) Waktu Aplikasi"
               name="s1_npk_waktu"
@@ -263,7 +262,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(NPK) Jumlah"
@@ -277,10 +275,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
-              label="(Natrium) Waktu Aplikasi"
+              label="(Nitrogen) Waktu Aplikasi"
               name="s1_nitrogen_waktu"
               placeholder="Pilih bulan"
               options={MONTH_OPTIONS}
@@ -291,10 +288,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
-              label="(Natrium) Jumlah"
+              label="(Nitrogen) Jumlah"
               name="s1_nitrogen_jumlah"
               placeholder="0"
               value={formik.values.s1_nitrogen_jumlah}
@@ -305,10 +301,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
-              label="(Postat) Waktu Aplikasi"
+              label="(Postpat) Waktu Aplikasi"
               name="s1_pospat_waktu"
               placeholder="Pilih bulan"
               options={MONTH_OPTIONS}
@@ -319,10 +314,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
-              label="(Postat) Jumlah"
+              label="(Postpat) Jumlah"
               name="s1_pospat_jumlah"
               placeholder="0"
               value={formik.values.s1_pospat_jumlah}
@@ -333,7 +327,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
               label="(Kalium) Waktu Aplikasi"
@@ -347,7 +340,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(Kalium) Jumlah"
@@ -361,7 +353,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
               label="(Boron) Waktu Aplikasi"
@@ -375,7 +366,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(Boron) Jumlah"
@@ -389,7 +379,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
               label="(Magnesium) Waktu Aplikasi"
@@ -403,7 +392,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(Magnesium) Jumlah"
@@ -417,13 +405,12 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
           </div>
 
-          {/* Semester 2 */}
+          {/* Tahap 2 */}
           <div className="flex flex-col gap-2">
-            <div className="mb-2 text-sm font-semibold">Semester 2</div>
+            <div className="mb-2 text-sm font-semibold">Tahap 2</div>
             <Select
               label="(NPK) Waktu Aplikasi"
               name="s2_npk_waktu"
@@ -436,7 +423,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(NPK) Jumlah"
@@ -450,10 +436,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
-              label="(Natrium) Waktu Aplikasi"
+              label="(Nitrogen) Waktu Aplikasi"
               name="s2_nitrogen_waktu"
               placeholder="Pilih bulan"
               options={MONTH_OPTIONS}
@@ -464,10 +449,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
-              label="(Natrium) Jumlah"
+              label="(Nitrogen) Jumlah"
               name="s2_nitrogen_jumlah"
               placeholder="0"
               value={formik.values.s2_nitrogen_jumlah}
@@ -478,10 +462,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
-              label="(Postat) Waktu Aplikasi"
+              label="(Postpat) Waktu Aplikasi"
               name="s2_pospat_waktu"
               placeholder="Pilih bulan"
               options={MONTH_OPTIONS}
@@ -492,10 +475,9 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
-              label="(Postat) Jumlah"
+              label="(Postpat) Jumlah"
               name="s2_pospat_jumlah"
               placeholder="0"
               value={formik.values.s2_pospat_jumlah}
@@ -506,7 +488,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
               label="(Kalium) Waktu Aplikasi"
@@ -520,7 +501,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(Kalium) Jumlah"
@@ -534,7 +514,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
               label="(Boron) Waktu Aplikasi"
@@ -548,7 +527,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(Boron) Jumlah"
@@ -562,7 +540,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
             />
             <Select
               label="(Magnesium) Waktu Aplikasi"
@@ -576,7 +553,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               onBlur={formik.handleBlur}
               errors={formik.errors}
               touched={formik.touched}
-              isRequired={true}
             />
             <InputText
               label="(Magnesium) Jumlah"
@@ -590,7 +566,166 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
               suffix="Kg"
               type="string"
               formatter={formatKgInput}
-              isRequired={true}
+            />
+          </div>
+          {/* Tahap 3 */}
+          <div className="flex flex-col gap-2">
+            <div className="mb-2 text-sm font-semibold">Tahap 3</div>
+            <Select
+              label="(NPK) Waktu Aplikasi"
+              name="s3_npk_waktu"
+              placeholder="Pilih bulan"
+              options={MONTH_OPTIONS}
+              value={formik.values.s3_npk_waktu}
+              onChange={(e) =>
+                formik.setFieldValue('s3_npk_waktu', e.target.value)
+              }
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+            <InputText
+              label="(NPK) Jumlah"
+              name="s3_npk_jumlah"
+              placeholder="0"
+              value={formik.values.s3_npk_jumlah}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+              suffix="Kg"
+              type="string"
+              formatter={formatKgInput}
+            />
+            <Select
+              label="(Nitrogen) Waktu Aplikasi"
+              name="s3_nitrogen_waktu"
+              placeholder="Pilih bulan"
+              options={MONTH_OPTIONS}
+              value={formik.values.s3_nitrogen_waktu}
+              onChange={(e) =>
+                formik.setFieldValue('s3_nitrogen_waktu', e.target.value)
+              }
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+            <InputText
+              label="(Nitrogen) Jumlah"
+              name="s3_nitrogen_jumlah"
+              placeholder="0"
+              value={formik.values.s3_nitrogen_jumlah}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+              suffix="Kg"
+              type="string"
+              formatter={formatKgInput}
+            />
+            <Select
+              label="(Postpat) Waktu Aplikasi"
+              name="s3_pospat_waktu"
+              placeholder="Pilih bulan"
+              options={MONTH_OPTIONS}
+              value={formik.values.s3_pospat_waktu}
+              onChange={(e) =>
+                formik.setFieldValue('s3_pospat_waktu', e.target.value)
+              }
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+            <InputText
+              label="(Postpat) Jumlah"
+              name="s3_pospat_jumlah"
+              placeholder="0"
+              value={formik.values.s3_pospat_jumlah}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+              suffix="Kg"
+              type="string"
+              formatter={formatKgInput}
+            />
+            <Select
+              label="(Kalium) Waktu Aplikasi"
+              name="s3_kalium_waktu"
+              placeholder="Pilih bulan"
+              options={MONTH_OPTIONS}
+              value={formik.values.s3_kalium_waktu}
+              onChange={(e) =>
+                formik.setFieldValue('s3_kalium_waktu', e.target.value)
+              }
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+            <InputText
+              label="(Kalium) Jumlah"
+              name="s3_kalium_jumlah"
+              placeholder="0"
+              value={formik.values.s3_kalium_jumlah}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+              suffix="Kg"
+              type="string"
+              formatter={formatKgInput}
+            />
+            <Select
+              label="(Boron) Waktu Aplikasi"
+              name="s3_boron_waktu"
+              placeholder="Pilih bulan"
+              options={MONTH_OPTIONS}
+              value={formik.values.s3_boron_waktu}
+              onChange={(e) =>
+                formik.setFieldValue('s3_boron_waktu', e.target.value)
+              }
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+            <InputText
+              label="(Boron) Jumlah"
+              name="s3_boron_jumlah"
+              placeholder="0"
+              value={formik.values.s3_boron_jumlah}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+              suffix="Kg"
+              type="string"
+              formatter={formatKgInput}
+            />
+            <Select
+              label="(Magnesium) Waktu Aplikasi"
+              name="s3_magnesium_waktu"
+              placeholder="Pilih bulan"
+              options={MONTH_OPTIONS}
+              value={formik.values.s3_magnesium_waktu}
+              onChange={(e) =>
+                formik.setFieldValue('s3_magnesium_waktu', e.target.value)
+              }
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+            <InputText
+              label="(Magnesium) Jumlah"
+              name="s3_magnesium_jumlah"
+              placeholder="0"
+              value={formik.values.s3_magnesium_jumlah}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              errors={formik.errors}
+              touched={formik.touched}
+              suffix="Kg"
+              type="string"
+              formatter={formatKgInput}
             />
           </div>
         </div>
@@ -618,7 +753,7 @@ EditPupukModal.propTypes = {
   yearData: PropTypes.shape({
     tahun: PropTypes.number.isRequired,
     semester: PropTypes.shape({
-      'Semester 1': PropTypes.shape({
+      'Tahap 1': PropTypes.shape({
         npk: PropTypes.shape({
           waktu: PropTypes.string,
           jumlah: PropTypes.number,
@@ -644,7 +779,33 @@ EditPupukModal.propTypes = {
           jumlah: PropTypes.number,
         }),
       }),
-      'Semester 2': PropTypes.shape({
+      'Tahap 2': PropTypes.shape({
+        npk: PropTypes.shape({
+          waktu: PropTypes.string,
+          jumlah: PropTypes.number,
+        }),
+        nitrogen: PropTypes.shape({
+          waktu: PropTypes.string,
+          jumlah: PropTypes.number,
+        }),
+        pospat: PropTypes.shape({
+          waktu: PropTypes.string,
+          jumlah: PropTypes.number,
+        }),
+        kalium: PropTypes.shape({
+          waktu: PropTypes.string,
+          jumlah: PropTypes.number,
+        }),
+        boron: PropTypes.shape({
+          waktu: PropTypes.string,
+          jumlah: PropTypes.number,
+        }),
+        magnesium: PropTypes.shape({
+          waktu: PropTypes.string,
+          jumlah: PropTypes.number,
+        }),
+      }),
+      'Tahap 3': PropTypes.shape({
         npk: PropTypes.shape({
           waktu: PropTypes.string,
           jumlah: PropTypes.number,

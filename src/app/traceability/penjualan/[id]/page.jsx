@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
-import Heading from '@/components/atoms/Typography/Heading';
+import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import {
@@ -125,6 +125,7 @@ const PenjualanDetailPage = () => {
           // Set the transformed data
           setDetailData({
             angkutan: {
+              ...angkutanData,
               tanggal_penjualan: angkutanData.tanggal_penjualan,
               driver: angkutanData.driver,
               no_registrasi: angkutanData.no_registrasi,
@@ -187,6 +188,33 @@ const PenjualanDetailPage = () => {
               data={dataToRender?.pabrik}
               onEdit={() => handleEditData('pabrik')}
             />
+
+            <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN</h3>
+                <button
+                  onClick={() => handleEditData('lampiran')}
+                  className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                >
+                  Ubah Data
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                {dataToRender?.angkutan?.lampiran && dataToRender.angkutan.lampiran.length > 0 ? (
+                  dataToRender.angkutan.lampiran.map((item, index) => (
+                    <AttachmentViewer
+                      key={item.id || index}
+                      label={`Gambar ${index + 1}`}
+                      fileUrl={item.file || item.file_url || item.url || item}
+                      thumbUrl={item.thumb || item.file || item.file_url || item.url || item}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full text-sm text-gray-500">Belum ada lampiran.</div>
+                )}
+              </div>
+            </section>
           </div>
         ) : !loading ? (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white p-10 text-gray-500">

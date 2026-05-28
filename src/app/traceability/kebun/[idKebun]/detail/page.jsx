@@ -16,6 +16,15 @@ import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
 const DOCUMENT_CONFIGS = [
   {
+    id: 'peta',
+    label: 'File Peta',
+    badge: 'PETA',
+    fileKey: 'file_gambar_peta',
+    thumbKey: 'thumb_gambar_peta',
+    accentBorder: 'border-yellow-200',
+    accentBackground: 'bg-yellow-50',
+  },
+  {
     id: 'legalitas',
     label: 'Dokumen Legalitas',
     badge: 'SERTIFIKAT',
@@ -190,7 +199,7 @@ const DetailKebunPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-8">
+      <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
         <BreadcrumbDetail items={crumbs} />
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
@@ -204,7 +213,7 @@ const DetailKebunPage = () => {
 
   if (!kebunData) {
     return (
-      <div className="flex flex-col gap-8">
+      <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
         <BreadcrumbDetail items={crumbs} />
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
@@ -216,81 +225,63 @@ const DetailKebunPage = () => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-8">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:gap-6">
         {/* === DETAIL SECTION === */}
-        <section className="rounded border border-gray-300 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">DETAIL KEBUN</h3>
+        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-base font-semibold sm:text-lg">DETAIL KEBUN</h3>
             <button
               onClick={() => setShowEditModal(true)}
-              className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+              className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
             >
               Ubah Data
             </button>
           </div>
 
           {/* === GRID LAYOUT FOR KEBUN DETAIL === */}
-          <div className="grid grid-cols-5 gap-x-6 gap-y-4 text-sm text-gray-700">
-            {/* Row 1 */}
-            <BorderBottomColData label="Id Kebun" value={kebunData.id_kebun} />
-            <BorderBottomColData label="Petani" value={kebunData.nama_petani} />
-            <BorderBottomColData
-              label="Kelompok Tani"
-              value={kebunData.kelompok_tani}
-            />
-            <BorderBottomColData
-              label="Lokasi Kebun"
-              value={kebunData.lokasi_kebun}
-            />
-            <BorderBottomColData
-              label="Luas Kebun (Ha)"
-              value={kebunData.luas}
-            />
+          <div className="grid grid-cols-1 gap-x-4 gap-y-4 text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {/* Row 1: Identitas Dasar */}
+            <BorderBottomColData label="Id Kebun" value={kebunData.id_kebun || '-'} />
+            <BorderBottomColData label="Petani" value={kebunData.nama_petani || '-'} />
+            <BorderBottomColData label="Kelompok Tani" value={kebunData.kelompok_tani || '-'} />
+            <BorderBottomColData label="Kelurahan" value={kebunData.desa_nama || '-'} />
+            <BorderBottomColData label="Lokasi Kebun" value={kebunData.lokasi_kebun || '-'} />
+            <BorderBottomColData label="Luas Kebun (Ha)" value={kebunData.luas || '-'} />
 
-            {/* Row 2 */}
-            <BorderBottomColData
-              label="Luas Peta (Ha)"
-              value={kebunData.luas_peta}
-            />
-            <BorderBottomColData
-              label="Waktu Tanam"
-              value={kebunData.waktu_tanam}
-            />
-            <BorderBottomColData
-              label="RSPO"
-              value={getStatusBadge(kebunData.rspo)}
-            />
-            <BorderBottomColData
-              label="ISPO"
-              value={getStatusBadge(kebunData.ispo)}
-            />
-            <BorderBottomColData
-              label="Jenis Legalitas"
-              value={kebunData.jenis_legalitas_label}
-            />
+            {/* Row 2: Lokasi & Luas */}
+            <BorderBottomColData label="Luas Peta (Ha)" value={kebunData.luas_peta || '-'} />
+            <BorderBottomColData label="Waktu Tanam" value={kebunData.waktu_tanam || '-'} />
+            <BorderBottomColData label="RSPO" value={getStatusBadge(kebunData.rspo)} />
+            <BorderBottomColData label="ISPO" value={getStatusBadge(kebunData.ispo)} />
+            <BorderBottomColData label="Jenis Legalitas" value={kebunData.jenis_legalitas_label || '-'} />
+            <BorderBottomColData label="No. Legalitas" value={kebunData.nomor_legalitas || '-'} />
 
-            {/* Row 3 */}
-            <BorderBottomColData
-              label="No. Legalitas"
-              value={kebunData.nomor_legalitas}
-            />
-            <BorderBottomColData
-              label="Pemilik Legalitas"
-              value={kebunData.pemilik_legalitas}
-            />
-            <BorderBottomColData label="STDB" value={kebunData.nomor_stdb} />
+            {/* Row 3: Spesifikasi Lahan & Tanam */}
+            <BorderBottomColData label="Pemilik Legalitas" value={kebunData.pemilik_legalitas || '-'} />
+            <BorderBottomColData label="No. STDB" value={kebunData.nomor_stdb || '-'} />
+            <BorderBottomColData label="Komoditas" value={kebunData.komoditas_label || '-'} />
+            <BorderBottomColData label="Total Produksi 1 Tahun (Kg)" value={kebunData.total_prod_per_tahun ? `${kebunData.total_prod_per_tahun} Kg` : '-'} />
+            <BorderBottomColData label="Tahun Peremajaan" value={kebunData.tahun_peremajaan || '-'} />
+            <BorderBottomColData label="Jumlah Pohon" value={kebunData.jumlah_pohon || kebunData.jumlah_pokok || '-'} />
+
+            {/* Row 4: Waktu Tanam & Produksi */}
+            <BorderBottomColData label="Pola Tanam" value={kebunData.pola_tanam_label || '-'} />
+            <BorderBottomColData label="Jenis Lahan" value={kebunData.jenis_lahan_label || '-'} />
+            <BorderBottomColData label="Asal Benih" value={kebunData.asal_benih_label || '-'} />
+            <BorderBottomColData label="Jenis Pupuk" value={kebunData.jenis_pupuk_label || '-'} />
+            <BorderBottomColData label="Mitra Penjualan" value={kebunData.mitra_penjualan || '-'} />
           </div>
         </section>
 
         {/* === MAP SECTION === */}
-        <section className="rounded border border-gray-300 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">PETA</h3>
+        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-base font-semibold sm:text-lg">PETA</h3>
             {kebunData?.geom && (
-              <div className="flex gap-3">
+              <div className="flex gap-3 self-start sm:self-auto">
                 <button
                   type="button"
                   onClick={handleDownloadPeta}
@@ -309,7 +300,7 @@ const DetailKebunPage = () => {
             {!kebunData?.geom && (
               <button
                 onClick={() => setShowEditPetaModal(true)}
-                className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+                className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
               >
                 Tambah Data
               </button>
@@ -368,7 +359,7 @@ const DetailKebunPage = () => {
         {/* === LAMPIRAN SECTION === */}
         <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN</h3>
+            <h3 className="mb-2 text-base font-semibold sm:mb-4 sm:text-lg">LAMPIRAN</h3>
             {lampiranData ? (
               <button
                 onClick={() => setShowEditLampiranModal(true)}
@@ -401,7 +392,8 @@ const DetailKebunPage = () => {
               {!lampiranData?.file_legalitas &&
                 !lampiranData?.file_stdb &&
                 !lampiranData?.file_rspo &&
-                !lampiranData?.file_ispo && (
+                !lampiranData?.file_ispo &&
+                !lampiranData?.file_gambar_peta && (
                   <div className="text-sm text-gray-600">
                     Belum ada data lampiran.
                   </div>

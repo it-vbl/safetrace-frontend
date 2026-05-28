@@ -19,7 +19,7 @@ const useKebun = ({
   const [kebunList, setKebunList] = useState([]);
   const [totalKebun, setTotalKebun] = useState(0);
 
-  const fetchKebun = async () => {
+  const fetchKebun = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -47,7 +47,7 @@ const useKebun = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [page_size, page, search, kelompok, rspo, ispo, legalitas, petani_id, start_date, end_date]);
 
   // Transform kebun data for table display
   const transformKebunForTable = useCallback((kebunData) => {
