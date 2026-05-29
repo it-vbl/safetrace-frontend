@@ -7,13 +7,12 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
-import bannerLogin from '@/assets/images/login-bg.png';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
+import { hasPermission,isViewOnlyRole } from '@/libs/permissions';
 import { login } from '@/services/auth';
-import { isViewOnlyRole, hasPermission } from '@/libs/permissions';
 
 import LogoSipekebun from '../../../public/keling-kumang-logo.png';
 import ImagePartnership from '../../../public/partnership.png';
@@ -99,17 +98,18 @@ const LoginPage = () => {
   });
 
   return (
-    <div className="flex h-screen w-screen bg-white">
-      <div className="relative hidden py-8 pl-8 lg:flex lg:w-[60vw]">
-        <Image
-          src={bannerLogin}
+    <div className="flex h-screen w-full bg-white">
+      <div className="relative max-lg:hidden py-8 pl-8 lg:flex lg:w-[60%] lg:shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/login-bg.png"
           alt="banner-login"
           className="h-full w-full rounded-xl object-cover"
         />
       </div>
 
       {/* Right side - Login Form */}
-      <div className="flex w-full items-center justify-center px-8 lg:w-1/2">
+      <div className="flex w-full items-center justify-center px-8 lg:w-[40%] lg:shrink-0">
         <div className="w-full max-w-lg">
           {/* Logo */}
           <div className="m-4 flex items-center justify-center">
