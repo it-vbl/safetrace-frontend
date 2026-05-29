@@ -167,11 +167,11 @@ const MapDashboard = () => {
     setRolesLoaded(true);
   }, []);
 
-  // Redirect view-only roles (Disbunak Kalbar & Disbunak Sekadau) away from the map dashboard
+  // Redirect users without peta.dashboard permission away from the map dashboard
   useEffect(() => {
     if (!rolesLoaded) return;
     const currentRoles = getCurrentUserRoles();
-    if (isViewOnlyRole(currentRoles)) {
+    if (!hasPermission(currentRoles, 'peta.dashboard')) {
       router.replace('/traceability/petani');
     }
   }, [rolesLoaded, router]);

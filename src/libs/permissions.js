@@ -154,9 +154,14 @@ const normalizeRoles = (roles) => {
 
   return list
     .map((r) => {
-      if (typeof r === 'number') return r;
-      if (typeof r === 'string') {
-        const parsed = parseInt(r, 10);
+      if (r === null || r === undefined) return null;
+      let val = r;
+      if (typeof r === 'object' && 'id' in r) {
+        val = r.id;
+      }
+      if (typeof val === 'number') return val;
+      if (typeof val === 'string') {
+        const parsed = parseInt(val, 10);
         return Number.isNaN(parsed) ? null : parsed;
       }
       return null;
@@ -195,9 +200,9 @@ export const hasAnyPermission = (roles, permissionKeys = []) => {
 
 /**
  * Role IDs that are view-only (cannot create, update, or delete).
- * Disbunak Kalbar (4) and Disbunak Sekadau (5).
+ * Disbunak Kalbar (4), Disbunak Sekadau (5), and Mitra Pabrik (6).
  */
-export const VIEW_ONLY_ROLES = [ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU];
+export const VIEW_ONLY_ROLES = [ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK];
 
 /**
  * Returns true if the user has at least one role AND all of their roles

@@ -13,6 +13,7 @@ import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
 import { login } from '@/services/auth';
+import { isViewOnlyRole, hasPermission } from '@/libs/permissions';
 
 import LogoSipekebun from '../../../public/keling-kumang-logo.png';
 import ImagePartnership from '../../../public/partnership.png';
@@ -63,14 +64,23 @@ const LoginPage = () => {
 
           // Normalize roles to numbers for comparison
           const normalizedRoles = roles
-            .map((r) => (typeof r === 'number' ? r : parseInt(r, 10)))
-            .filter((r) => !Number.isNaN(r));
+            .map((r) => {
+              if (r === null || r === undefined) return null;
+              let val = r;
+              if (typeof r === 'object' && 'id' in r) {
+                val = r.id;
+              }
+              return typeof val === 'number' ? val : parseInt(val, 10);
+            })
+            .filter((r) => r !== null && !Number.isNaN(r));
 
           const onlyRole2 =
             normalizedRoles.length === 1 && normalizedRoles[0] === 2;
 
           if (onlyRole2) {
             router.push('/kabar-tani/kontak');
+          } else if (isViewOnlyRole(normalizedRoles) && !hasPermission(normalizedRoles, 'peta.dashboard')) {
+            router.push('/traceability/petani');
           } else {
             router.push('/');
           }

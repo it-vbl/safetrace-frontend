@@ -19,6 +19,7 @@ import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -39,6 +40,13 @@ const statusOption = [
 
 const DiklatPage = () => {
   const { kelompokTani, fetchKelompokTani } = useReferences();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
 
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -286,9 +294,9 @@ const DiklatPage = () => {
           toast.success('Berhasil mengubah data diklat');
 
           setDiklatData((prev) =>
-            prev.map((item) =>
-              item.id === selectedId ? { ...item, ...payload } : item
-            )
+              prev.map((item) =>
+                item.id === selectedId ? { ...item, ...payload } : item
+              )
           );
 
           setIsOpen(false);
@@ -347,6 +355,7 @@ const DiklatPage = () => {
   };
 
   const ActionsCellRenderer = useCallback((e) => {
+    if (isViewOnly) return null;
     return (
       <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
         <div
@@ -357,7 +366,7 @@ const DiklatPage = () => {
         </div>
       </div>
     );
-  }, []);
+  }, [isViewOnly]);
 
   const StatusCellRenderer = useCallback((params) => {
     const status = params.value;
@@ -382,18 +391,8 @@ const DiklatPage = () => {
     );
   }, []);
 
-  const colDefs = useMemo(
-    () => [
-      {
-        field: 'actions',
-        headerName: '',
-        cellRenderer: ActionsCellRenderer,
-        width: 80,
-        minWidth: 70,
-        maxWidth: 100,
-        suppressSizeToFit: false,
-        pinned: 'left',
-      },
+  const colDefs = useMemo(() => {
+    const base = [
       {
         field: 'id_petani',
         headerName: 'Id Petani',
@@ -460,9 +459,23 @@ const DiklatPage = () => {
         minWidth: 80,
         cellRenderer: StatusCellRenderer,
       },
-    ],
-    [ActionsCellRenderer, StatusCellRenderer]
-  );
+    ];
+
+    if (!isViewOnly) {
+      base.unshift({
+        field: 'actions',
+        headerName: '',
+        cellRenderer: ActionsCellRenderer,
+        width: 80,
+        minWidth: 70,
+        maxWidth: 100,
+        suppressSizeToFit: false,
+        pinned: 'left',
+      });
+    }
+
+    return base;
+  }, [ActionsCellRenderer, StatusCellRenderer, isViewOnly]);
 
   const autoSizeStrategy = useMemo(() => {
     return {

@@ -42,8 +42,13 @@ const rspoOptions = [
 const PetaniPage = () => {
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
-  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+  const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
 
   const {
     kelompokTani,

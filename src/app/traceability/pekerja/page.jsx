@@ -27,8 +27,13 @@ const PekerjaPage = () => {
   const router = useRouter();
   const { kelompokTani, fetchKelompokTani } = useReferences();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
-  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+  const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
 
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);

@@ -30,7 +30,7 @@ const LaporanPage = () => {
     const router = useRouter();
 
     // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
-    const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+    const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
 
     useEffect(() => {
         setMounted(true);
