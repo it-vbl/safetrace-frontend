@@ -12,6 +12,7 @@ import {
   PenjualanDetailKelompokCard,
   PenjualanDetailPabrikCard,
 } from '@/components/organisms/PenjualanDetail';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   getDetailPenjualanAngkutan,
   getDetailPenjualanKelompokPenyetor,
@@ -22,6 +23,7 @@ import {
 const PenjualanDetailPage = () => {
   const { id } = useParams();
   const router = useRouter();
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const [detailData, setDetailData] = useState(null);
   const [lampiranData, setLampiranData] = useState([]);
@@ -212,26 +214,28 @@ const PenjualanDetailPage = () => {
           <div className="flex flex-col gap-6">
             <PenjualanDetailAngkutanCard
               data={dataToRender?.angkutan}
-              onEdit={() => handleEditData('angkutan')}
+              onEdit={isViewOnly ? undefined : () => handleEditData('angkutan')}
             />
             <PenjualanDetailKelompokCard
               data={dataToRender?.kelompok_tani}
-              onEdit={() => handleEditData('kelompok_tani')}
+              onEdit={isViewOnly ? undefined : () => handleEditData('kelompok_tani')}
             />
             <PenjualanDetailPabrikCard
               data={dataToRender?.pabrik}
-              onEdit={() => handleEditData('pabrik')}
+              onEdit={isViewOnly ? undefined : () => handleEditData('pabrik')}
             />
 
             <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
               <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN</h3>
-                <button
-                  onClick={() => handleEditData('lampiran')}
-                  className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
-                >
-                  Ubah Data
-                </button>
+                {!isViewOnly && (
+                  <button
+                    onClick={() => handleEditData('lampiran')}
+                    className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                  >
+                    Ubah Data
+                  </button>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
