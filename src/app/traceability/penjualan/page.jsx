@@ -38,9 +38,7 @@ const PenjualanPage = () => {
     setMounted(true);
   }, []);
 
-  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
   const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
-
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -68,7 +66,6 @@ const PenjualanPage = () => {
     fetchPabrikOptions();
   }, [fetchKelompokTani]);
 
-  // Auto-apply kelompok tani filter based on logged-in user
   const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
   const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
     useState(false);
@@ -90,6 +87,28 @@ const PenjualanPage = () => {
       setIsKelompokFilterInitialized(true);
     }
   }, [kelompokTani]);
+
+  const [isMitraPabrik, setIsMitraPabrik] = useState(false);
+  const [isPabrikFilterInitialized, setIsPabrikFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const storedPabrik = Cookies.get('pabrik');
+    if (storedPabrik && pabrikOptions && pabrikOptions.length > 0) {
+      const pabrikOption = pabrikOptions.find(
+        (pabrik) => pabrik.label === storedPabrik
+      );
+      if (pabrikOption) {
+        setSelectedPabrik(pabrikOption.value);
+        setIsMitraPabrik(true);
+        setTimeout(() => setIsPabrikFilterInitialized(true), 100);
+      } else {
+        setIsPabrikFilterInitialized(true);
+      }
+    } else {
+      setIsPabrikFilterInitialized(true);
+    }
+  }, [pabrikOptions]);
 
   const fetchPabrikOptions = async () => {
     try {
@@ -198,7 +217,7 @@ const PenjualanPage = () => {
   };
 
   useEffect(() => {
-    if (isKelompokFilterInitialized) {
+    if (isKelompokFilterInitialized && isPabrikFilterInitialized) {
       const startDate = selectedDateRange.startDate
         ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
         : null;
@@ -218,6 +237,7 @@ const PenjualanPage = () => {
     }
   }, [
     isKelompokFilterInitialized,
+    isPabrikFilterInitialized,
     currentPage,
     pageSize,
     search,
@@ -467,14 +487,15 @@ const PenjualanPage = () => {
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
+                  containerClassName="w-full sm:w-auto lg:w-[210px]"
                   placeholder="Pabrik"
                   options={pabrikOptions}
                   value={selectedPabrik}
                   onChange={handlePabrikChange}
+                  disabled={isMitraPabrik}
                 />
 
-                <div className="w-full sm:w-auto lg:w-[280px]">
+                <div className="w-full sm:w-auto lg:w-[230px]">
                   <DateRange
                     value={selectedDateRange}
                     onChange={handleDateRangeChange}

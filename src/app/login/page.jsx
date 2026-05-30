@@ -58,6 +58,8 @@ const LoginPage = () => {
           Cookies.set('email', data?.email);
           Cookies.set('roles', JSON.stringify(roles));
           Cookies.set('ketua_kelompok_tani', data?.ketua_kelompok_tani || '');
+          Cookies.set('pabrik', data?.pabrik?.nama || '');
+          Cookies.set('pabrik_id', data?.pabrik?.id?.toString() || '');
 
           toast.success('Login berhasil');
 
