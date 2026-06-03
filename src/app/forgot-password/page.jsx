@@ -56,16 +56,17 @@ const LoginPage = () => {
   });
 
   return (
-    <div className="flex h-screen w-screen bg-white">
-      <div className="relative hidden py-8 pl-8 lg:flex lg:w-[60vw]">
-        <Image
-          src={bannerLogin}
+    <div className="flex h-screen w-full bg-white">
+      <div className="relative max-lg:hidden py-8 pl-8 lg:flex lg:w-[60%] lg:shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/login-bg.png"
           alt="banner-login"
           className="h-full w-full rounded-xl object-cover"
         />
       </div>
 
-      <div className="flex w-full items-center justify-center px-8 lg:w-1/2">
+      <div className="flex w-full items-center justify-center px-8 lg:w-[40%] lg:shrink-0">
         <div className="w-full max-w-xl">
           <div className="mb-8 flex items-center justify-center">
             <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />

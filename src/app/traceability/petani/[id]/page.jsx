@@ -13,6 +13,7 @@ import EditLampiranPetaniModal from '@/components/molecules/EditLampiranPetaniMo
 import EditPetaniModal from '@/components/molecules/EditPetaniModal';
 import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 import {
   createLampiranPetani,
@@ -38,6 +39,7 @@ const formatDate = (dateStr) => {
 const TraceabilityPetaniDetail = () => {
   const { id } = useParams();
   const router = useRouter();
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
   const {
     jenisKelamin,
     statusPerkawinan,
@@ -406,6 +408,13 @@ const TraceabilityPetaniDetail = () => {
     }
 
     if (errorStatus === 404) {
+      if (isViewOnly) {
+        return (
+          <div className="text-sm text-gray-600">
+            Belum ada data lampiran.
+          </div>
+        );
+      }
       return (
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
@@ -556,13 +565,15 @@ const TraceabilityPetaniDetail = () => {
         <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">IDENTITAS</h3>
-            <button
-              onClick={() => setIsEditModalOpen(true)}
-              className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
-              disabled={updateLoading}
-            >
-              Ubah Data
-            </button>
+            {!isViewOnly && (
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                disabled={updateLoading}
+              >
+                Ubah Data
+              </button>
+            )}
           </div>
 
           {loading && (
@@ -697,7 +708,7 @@ const TraceabilityPetaniDetail = () => {
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN IDENTITAS</h3>
 
-            {lampiran && (
+            {lampiran && !isViewOnly && (
               <button
                 onClick={() => setIsEditLampiranModalOpen(true)}
                 className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"

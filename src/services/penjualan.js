@@ -63,6 +63,9 @@ export const getDetailPenjualanKelompokPenyetor = (id) =>
 export const getDetailPenjualanPabrik = (id) =>
   api.get(`/penjualan/pabrik/detail/${id}/`);
 
+export const getDetailPenjualanLampiran = (angkutanId) =>
+  api.get(`/penjualan/lampiran/detail/${angkutanId}/`);
+
 export const getSankeyData = (params = {}) =>
   api.get(`/penjualan/sankey-diagram/`, {
     params,
@@ -144,6 +147,12 @@ export const createPenjualanPabrik = (payload) =>
 
 export const updatePenjualan = (id, payload) =>
   api.post(`/penjualan/update/${id}/`, null, payload);
+
+export const createPenjualanLampiran = (formData) =>
+  api.postData(`/penjualan/lampiran/create/`, formData);
+
+export const updatePenjualanLampiran = (angkutanId, formData) =>
+  api.putData(`/penjualan/lampiran/update/${angkutanId}/`, formData);
 
 export const updateAngkutanPabrik = (idAngkutan, payload) =>
   api.patch(`/penjualan/angkutan/update-pabrik/${idAngkutan}/`, {}, payload);

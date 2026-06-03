@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import SipekebunLogo from '@/components/atoms/SipekebunLogo';
 import ProfilePopup from '@/components/molecules/ProfilePopup';
-import { getCurrentUserRoles, hasAnyPermission } from '@/libs/permissions';
+import { getCurrentUserRoles, hasAnyPermission, hasPermission } from '@/libs/permissions';
 import { setSidebarOpen } from '@/store/slices/app';
 import { ChevronDownIcon, HamburgerMenuIcon } from '@radix-ui/react-icons';
 
@@ -62,12 +62,15 @@ const Navbar = () => {
     'limbah.view',
     'diklat.view',
     'pekerja.view',
+    'laporan.view',
     'pengguna.view',
     'peta.view',
     'statistik.view',
     'sankey.view',
     'penjualan.view',
   ]);
+
+  const canSeePeta = mounted && hasPermission(roles, 'peta.dashboard');
 
   return (
     <div className="flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4">
@@ -94,12 +97,14 @@ const Navbar = () => {
       >
         {canSeeTraceability && (
           <>
-            <div
-              className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName('/')}`}
-              onClick={() => handleMenuClick('/')}
-            >
-              Peta
-            </div>
+            {canSeePeta && (
+              <div
+                className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName('/')}`}
+                onClick={() => handleMenuClick('/')}
+              >
+                Peta
+              </div>
+            )}
             <div
               className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName(
                 '/traceability'
@@ -137,12 +142,14 @@ const Navbar = () => {
       >
         {canSeeTraceability && (
           <>
-            <div
-              className={`cursor-pointer tracking-[1px] ${getMenuClassName('/')}`}
-              onClick={() => handleMenuClick('/')}
-            >
-              Peta
-            </div>
+            {canSeePeta && (
+              <div
+                className={`cursor-pointer tracking-[1px] ${getMenuClassName('/')}`}
+                onClick={() => handleMenuClick('/')}
+              >
+                Peta
+              </div>
+            )}
             <div
               className={`cursor-pointer tracking-[1px] ${getMenuClassName(
                 '/traceability'

@@ -9,6 +9,7 @@ import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import EditWasteDataModal from '@/components/molecules/EditWasteDataModal';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   deleteLB3,
   getDetailLB3Kebun,
@@ -19,6 +20,10 @@ import {
 const LB3DetailPage = () => {
   const router = useRouter();
   const params = useParams();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+
   const [loading, setLoading] = useState(true);
   const [kebunData, setKebunData] = useState({});
   const [tahunData, setTahunData] = useState([]);
@@ -269,12 +274,14 @@ const LB3DetailPage = () => {
     <div className="flex w-full min-w-[320px] max-w-full flex-col gap-6">
       <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
-        <Button
-          onClick={handleTambahTahun}
-          className="whitespace-nowrap text-xs sm:text-sm"
-        >
-          Tambah Tahun LB3
-        </Button>
+        {!isViewOnly && (
+          <Button
+            onClick={handleTambahTahun}
+            className="whitespace-nowrap text-xs sm:text-sm"
+          >
+            Tambah Tahun LB3
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -324,20 +331,22 @@ const LB3DetailPage = () => {
           >
             <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <h3 className="text-lg font-semibold">TAHUN {tahun.tahun}</h3>
-              <div className="flex gap-4">
-                <button
-                  className="text-sm font-medium text-red-600 underline hover:text-red-800"
-                  onClick={() => handleDeleteTahun(tahun.tahun)}
-                >
-                  Hapus
-                </button>
-                <button
-                  className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
-                  onClick={() => handleEditTahun(tahun.tahun)}
-                >
-                  Ubah Data
-                </button>
-              </div>
+              {!isViewOnly && (
+                <div className="flex gap-4">
+                  <button
+                    className="text-sm font-medium text-red-600 underline hover:text-red-800"
+                    onClick={() => handleDeleteTahun(tahun.tahun)}
+                  >
+                    Hapus
+                  </button>
+                  <button
+                    className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+                    onClick={() => handleEditTahun(tahun.tahun)}
+                  >
+                    Ubah Data
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-3">

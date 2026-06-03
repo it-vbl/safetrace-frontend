@@ -25,6 +25,8 @@ export const referensiSlice = createSlice({
     pilihanBulan: [],
     deforestationAlertType: [],
     komoditas: [],
+    jenisPekerjaan: [],
+    jenisApd: [],
   },
   reducers: {
     setPendidikanTerakhir: (state, action) => {
@@ -93,6 +95,12 @@ export const referensiSlice = createSlice({
     setKomoditas: (state, action) => {
       state.komoditas = action.payload;
     },
+    setJenisPekerjaan: (state, action) => {
+      state.jenisPekerjaan = action.payload;
+    },
+    setJenisApd: (state, action) => {
+      state.jenisApd = action.payload;
+    },
   },
 });
 
@@ -119,5 +127,7 @@ export const {
   setPilihanBulan,
   setDeforestationAlertType,
   setKomoditas,
+  setJenisPekerjaan,
+  setJenisApd,
 } = referensiSlice.actions;
 export default referensiSlice.reducer;

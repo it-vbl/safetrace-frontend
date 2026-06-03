@@ -5,9 +5,11 @@ import {
   getAsalBenih,
   getDeforestationAlertType,
   getEksPlasma,
+  getJenisApd,
   getJenisKelamin,
   getJenisLahan,
   getJenisLegalitas,
+  getJenisPekerjaan,
   getJenisPupuk,
   getKelompokTani,
   getKomoditas,
@@ -29,9 +31,11 @@ import {
   setAsalBenih,
   setDeforestationAlertType,
   setEksPlasma,
+  setJenisApd,
   setJenisKelamin,
   setJenisLahan,
   setJenisLegalitas,
+  setJenisPekerjaan,
   setJenisPupuk,
   setKelompokTani,
   setKomoditas,
@@ -79,6 +83,8 @@ const useReferences = () => {
     pilihanBulan,
     deforestationAlertType,
     komoditas,
+    jenisPekerjaan,
+    jenisApd,
   } = useSelector((state) => state.referensi);
 
   const fetchData = useCallback(
@@ -194,6 +200,14 @@ const useReferences = () => {
     () => fetchData(getKomoditas, setKomoditas),
     [fetchData]
   );
+  const fetchJenisPekerjaan = useCallback(
+    () => fetchData(getJenisPekerjaan, setJenisPekerjaan),
+    [fetchData]
+  );
+  const fetchJenisApd = useCallback(
+    () => fetchData(getJenisApd, setJenisApd),
+    [fetchData]
+  );
 
   return {
     loading,
@@ -220,6 +234,8 @@ const useReferences = () => {
     pilihanBulan,
     deforestationAlertType,
     komoditas,
+    jenisPekerjaan,
+    jenisApd,
     fetchPendidikanTerakhir,
     fetchStatusLahan,
     fetchPolaTanam,
@@ -242,6 +258,8 @@ const useReferences = () => {
     fetchPilihanBulan,
     fetchDeforestationAlertType,
     fetchKomoditas,
+    fetchJenisPekerjaan,
+    fetchJenisApd,
   };
 };
 

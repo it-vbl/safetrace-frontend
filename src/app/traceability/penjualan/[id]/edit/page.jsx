@@ -612,6 +612,8 @@ const EditPenjualanContent = () => {
         return (
           <DataLampiran
             lampiranData={formData.lampiran || penjualanData?.lampiran || []}
+            angkutanId={id || penjualanData?.angkutan?.id}
+            mode="update"
             onNext={handleNextStep}
             onPrevious={handlePreviousStep}
             onCancel={() => router.back()}

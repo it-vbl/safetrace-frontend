@@ -17,6 +17,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -40,6 +41,14 @@ const rspoOptions = [
 
 const PetaniPage = () => {
   const router = useRouter();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
 
   const {
     kelompokTani,
@@ -282,15 +291,17 @@ const PetaniPage = () => {
         >
           LIHAT
         </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
-        </div>
+        {!isViewOnly && (
+          <div
+            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            onClick={() => handleDeleteClicked(e.data)}
+          >
+            HAPUS
+          </div>
+        )}
       </div>
     );
-  }, []);
+  }, [isViewOnly]);
 
   const colDefs = useMemo(
     () => [
@@ -521,12 +532,14 @@ const PetaniPage = () => {
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export Excel"
                 />
-                <Button
-                  onClick={() => router.push('/traceability/petani/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
-                >
-                  Tambah Petani
-                </Button>
+                {!isViewOnly && (
+                  <Button
+                    onClick={() => router.push('/traceability/petani/tambah')}
+                    className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
+                  >
+                    Tambah Petani
+                  </Button>
+                )}
               </div>
             </div>
           </div>

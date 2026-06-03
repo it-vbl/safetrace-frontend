@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
@@ -12,6 +12,7 @@ import AttachmentViewer from '@/components/molecules/AttachmentViewer';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import { deletePekerja, getPekerjaByPetani } from '@/services/pekerja';
 import { getDetailPetani } from '@/services/petani';
 
@@ -25,6 +26,9 @@ const formatDate = (dateStr) => {
 const TraceabilityPekerjaDetail = () => {
   const { id } = useParams();
   const router = useRouter();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const [pekerjaData, setPekerjaData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +46,7 @@ const TraceabilityPekerjaDetail = () => {
   ];
 
   // Extracted fetch function to allow soft-reload
-  const fetchDetail = async () => {
+  const fetchDetail = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -82,6 +86,9 @@ const TraceabilityPekerjaDetail = () => {
             tanggal_lahir: worker.tanggal_lahir,
             no_kk: worker.no_kk,
             status_pekerja: worker.status_pekerja_label,
+            umur: worker.umur,
+            jenis_pekerjaan: worker.jenis_pekerjaan_label,
+            jenis_apd: worker.jenis_apd_label,
             ktp_file: worker.file_ktp,
             kk_file: worker.file_kk,
             ktp_thumb: worker.thumb_ktp,
@@ -102,13 +109,13 @@ const TraceabilityPekerjaDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       fetchDetail();
     }
-  }, [id, router]);
+  }, [id, fetchDetail]);
 
   const handleDeleteClick = (pekerja) => {
     setPekerjaToDelete(pekerja);
@@ -144,20 +151,22 @@ const TraceabilityPekerjaDetail = () => {
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">IDENTITAS PEKERJA</h3>
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleDeleteClick(pekerja)}
-              className="text-sm font-medium text-red-600 underline hover:text-red-800"
-            >
-              Hapus Data
-            </button>
-            <Link
-              href={`/traceability/pekerja/ubah/${pekerja.id}`}
-              className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
-            >
-              Ubah Data
-            </Link>
-          </div>
+          {!isViewOnly && (
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleDeleteClick(pekerja)}
+                className="text-sm font-medium text-red-600 underline hover:text-red-800"
+              >
+                Hapus Data
+              </button>
+              <Link
+                href={`/traceability/pekerja/ubah/${pekerja.id}`}
+                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+              >
+                Ubah Data
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
@@ -180,6 +189,18 @@ const TraceabilityPekerjaDetail = () => {
           <BorderBottomColData
             label="Status Pekerja"
             value={pekerja?.status_pekerja || '-'}
+          />
+          <BorderBottomColData
+            label="Umur"
+            value={pekerja?.umur ? `${pekerja.umur} Tahun` : '-'}
+          />
+          <BorderBottomColData
+            label="Jenis Pekerjaan"
+            value={pekerja?.jenis_pekerjaan || '-'}
+          />
+          <BorderBottomColData
+            label="Jenis APD"
+            value={pekerja?.jenis_apd || '-'}
           />
         </div>
 
@@ -204,16 +225,18 @@ const TraceabilityPekerjaDetail = () => {
     <div className="flex w-full flex-col gap-8">
       <div className="flex flex-col sm:flex-row justify-between gap-4 sm:items-center">
         <BreadcrumbDetail items={crumbs} />
-        <Button
-          variant="primary"
-          size="medium"
-          onClick={() =>
-            router.push(`/traceability/pekerja/tambah?petani=${id}`)
-          }
-          className="whitespace-nowrap"
-        >
-          Tambah Pekerja
-        </Button>
+        {!isViewOnly && (
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={() =>
+              router.push(`/traceability/pekerja/tambah?petani=${id}`)
+            }
+            className="whitespace-nowrap"
+          >
+            Tambah Pekerja
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -317,15 +340,17 @@ const TraceabilityPekerjaDetail = () => {
                 <p className="mb-4 text-gray-500">
                   Belum ada data pekerja yang terdaftar untuk petani ini.
                 </p>
-                <Button
-                  variant="primary"
-                  size="medium"
-                  onClick={() =>
-                    router.push(`/traceability/pekerja/tambah?petani=${id}`)
-                  }
-                >
-                  Tambah Pekerja
-                </Button>
+                {!isViewOnly && (
+                  <Button
+                    variant="primary"
+                    size="medium"
+                    onClick={() =>
+                      router.push(`/traceability/pekerja/tambah?petani=${id}`)
+                    }
+                  >
+                    Tambah Pekerja
+                  </Button>
+                )}
               </section>
             )}
           </>

@@ -13,6 +13,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DatePicker from '@/components/molecules/DatePicker';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
+import SelectMultiple from '@/components/molecules/SelectMultiple';
 import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
 import { createPekerja } from '@/services/pekerja';
@@ -29,6 +30,8 @@ const validationSchema = Yup.object({
   statusPekerja: Yup.string().required('Status pekerja wajib dipilih'),
   noWA: Yup.string(),
   // petaniId: Yup.string().required('Petani wajib dipilih'),
+  jenisPekerjaan: Yup.array().of(Yup.string()),
+  jenisApd: Yup.array().of(Yup.string()),
 });
 
 export default function TambahPekerjaPage() {
@@ -53,34 +56,16 @@ function TambahPekerjaContent() {
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
 
-  const { jenisKelamin, fetchJenisKelamin, statusPekerja, fetchStatusPekerja } =
-    useReferences();
-
-  useEffect(() => {
-    fetchJenisKelamin();
-    fetchStatusPekerja();
-  }, [fetchJenisKelamin, fetchStatusPekerja]);
-
-  useEffect(() => {
-    const prefillData = async () => {
-      if (petaniParam) {
-        formik.setFieldValue('petaniId', petaniParam);
-      }
-    };
-
-    prefillData();
-  }, [petaniParam]);
-
-  const crumbs = petaniParam ? [
-    { label: 'HOME', href: '/' },
-    { label: 'PEKERJA', href: '/traceability/pekerja' },
-    { label: 'DETAIL PEKERJA', href: `/traceability/pekerja/${petaniParam}` },
-    { label: 'TAMBAH PEKERJA' },
-  ] : [
-    { label: 'HOME', href: '/' },
-    { label: 'PEKERJA', href: '/traceability/pekerja' },
-    { label: 'TAMBAH PEKERJA' },
-  ];
+  const {
+    jenisKelamin,
+    fetchJenisKelamin,
+    statusPekerja,
+    fetchStatusPekerja,
+    jenisPekerjaan,
+    fetchJenisPekerjaan,
+    jenisApd,
+    fetchJenisApd,
+  } = useReferences();
 
   const formik = useFormik({
     initialValues: {
@@ -95,27 +80,47 @@ function TambahPekerjaContent() {
       statusPekerja: '',
       noWA: '',
       petaniId: petaniParam || '',
+      jenisPekerjaan: [],
+      jenisApd: [],
     },
     validationSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const formData = {
-          petani_id: petaniParam || values.petaniId,
-          nama: values.nama,
-          jns_kelamin: values.jenisKelamin,
-          alamat: values.alamat,
-          no_ktp: values.noKTP,
-          tempat_lahir: values.tempatLahir,
-          tanggal_lahir: moment(values.tanggalLahir).format('YYYY-MM-DD'),
-          no_kk: values.noKK,
-          no_wa: values.noWA,
-          status_pekerja: values.statusPekerja,
-          file_ktp: ktpFile,
-          file_kk: kkFile,
-        };
+        const dataPayload = new FormData();
+        dataPayload.append('petani_id', petaniParam || values.petaniId);
+        dataPayload.append('nama', values.nama);
+        dataPayload.append('jns_kelamin', values.jenisKelamin);
+        dataPayload.append('alamat', values.alamat);
+        dataPayload.append('no_ktp', values.noKTP);
+        dataPayload.append('tempat_lahir', values.tempatLahir);
+        dataPayload.append('tanggal_lahir', moment(values.tanggalLahir).format('YYYY-MM-DD'));
+        dataPayload.append('no_kk', values.noKK);
+        if (values.noWA) {
+          dataPayload.append('no_wa', values.noWA);
+        }
+        dataPayload.append('status_pekerja', values.statusPekerja);
 
-        const response = await createPekerja(formData);
+        if (ktpFile) {
+          dataPayload.append('file_ktp', ktpFile);
+        }
+        if (kkFile) {
+          dataPayload.append('file_kk', kkFile);
+        }
+
+        // Add multi-value fields:
+        if (values.jenisPekerjaan && values.jenisPekerjaan.length > 0) {
+          values.jenisPekerjaan.forEach((item) => {
+            dataPayload.append('jenis_pekerjaan', item);
+          });
+        }
+        if (values.jenisApd && values.jenisApd.length > 0) {
+          values.jenisApd.forEach((item) => {
+            dataPayload.append('jenis_apd', item);
+          });
+        }
+
+        const response = await createPekerja(dataPayload);
 
         if (response?.data?.status === 'success') {
           toast.success('Data pekerja berhasil disimpan');
@@ -138,6 +143,32 @@ function TambahPekerjaContent() {
       }
     },
   });
+
+  const { setFieldValue } = formik;
+
+  useEffect(() => {
+    fetchJenisKelamin();
+    fetchStatusPekerja();
+    fetchJenisPekerjaan();
+    fetchJenisApd();
+  }, [fetchJenisKelamin, fetchStatusPekerja, fetchJenisPekerjaan, fetchJenisApd]);
+
+  useEffect(() => {
+    if (petaniParam) {
+      setFieldValue('petaniId', petaniParam);
+    }
+  }, [petaniParam, setFieldValue]);
+
+  const crumbs = petaniParam ? [
+    { label: 'HOME', href: '/' },
+    { label: 'PEKERJA', href: '/traceability/pekerja' },
+    { label: 'DETAIL PEKERJA', href: `/traceability/pekerja/${petaniParam}` },
+    { label: 'TAMBAH PEKERJA' },
+  ] : [
+    { label: 'HOME', href: '/' },
+    { label: 'PEKERJA', href: '/traceability/pekerja' },
+    { label: 'TAMBAH PEKERJA' },
+  ];
 
   const handleCancel = () => {
     if (petaniParam) {
@@ -291,6 +322,34 @@ function TambahPekerjaContent() {
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+              <SelectMultiple
+                label="Jenis Pekerjaan"
+                name="jenisPekerjaan"
+                placeholder="Pilih Jenis Pekerjaan"
+                options={jenisPekerjaan}
+                value={formik.values.jenisPekerjaan}
+                onChange={(e) =>
+                  formik.setFieldValue('jenisPekerjaan', e.target.value)
+                }
+                onBlur={formik.handleBlur}
+                isError={formik.touched.jenisPekerjaan && Boolean(formik.errors.jenisPekerjaan)}
+                helperText={formik.touched.jenisPekerjaan && formik.errors.jenisPekerjaan}
+              />
+              <SelectMultiple
+                label="Jenis APD"
+                name="jenisApd"
+                placeholder="Pilih Jenis APD"
+                options={jenisApd}
+                value={formik.values.jenisApd}
+                onChange={(e) =>
+                  formik.setFieldValue('jenisApd', e.target.value)
+                }
+                onBlur={formik.handleBlur}
+                isError={formik.touched.jenisApd && Boolean(formik.errors.jenisApd)}
+                helperText={formik.touched.jenisApd && formik.errors.jenisApd}
               />
             </div>
           </>

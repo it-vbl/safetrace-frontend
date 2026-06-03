@@ -1,12 +1,30 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useFormik } from 'formik';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Upload from '@/components/molecules/Upload';
+import {
+  createPenjualanLampiran,
+  updatePenjualanLampiran,
+} from '@/services/penjualan';
+import { formatApiErrorMessage } from '@/utils/errorFormatter';
 
-const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting }) => {
+/**
+ * DataLampiran
+ * @param {string}  mode        - 'create' (default) | 'update'
+ * @param {number}  angkutanId  - angkutan ID used in the API call
+ * @param {Array}   lampiranData - existing lampiran items for pre-fill
+ */
+const DataLampiran = ({
+  lampiranData,
+  angkutanId,
+  mode = 'create',
+  onNext,
+  onPrevious,
+  onCancel,
+  isSubmitting,
+}) => {
   // State for exactly 6 files
   const [lampiranFiles, setLampiranFiles] = useState(() => {
     const initialFiles = Array(6).fill(null).map((_, i) => ({ id: i, file: null }));
@@ -19,6 +37,8 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
     }
     return initialFiles;
   });
+
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleRemoveFile = (id) => {
     setLampiranFiles((prev) =>
@@ -33,16 +53,65 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
   };
 
   const handleSubmit = async () => {
-    // Filter out empty files
-    const validFiles = lampiranFiles.filter((item) => item.file !== null);
-    
-    // In a real scenario, you would upload these files via API here
-    // For now, we'll just pass them to the next step or save them
-    // const formData = new FormData();
-    // validFiles.forEach((item, index) => formData.append(`lampiran[${index}]`, item.file));
-    
-    await onNext(validFiles);
+    // Only send File objects as new uploads; skip existing string URLs
+    const validFiles = lampiranFiles.filter((item) => item.file instanceof File);
+
+    // Build multipart FormData
+    const formData = new FormData();
+
+    // Append each new file using its original slot index (file_1 … file_6)
+    lampiranFiles.forEach((item, index) => {
+      if (item.file instanceof File) {
+        formData.append(`file_${index + 1}`, item.file, item.file.name);
+      }
+    });
+
+    // If no files attached, skip the API call and proceed
+    if (validFiles.length === 0) {
+      await onNext([]);
+      return;
+    }
+
+    // For create mode, include angkutan ID in the body
+    if (mode === 'create' && angkutanId) {
+      formData.append('angkutan', angkutanId);
+    }
+
+    setIsUploading(true);
+    try {
+      let response;
+
+      if (mode === 'update') {
+        if (!angkutanId) {
+          toast.error('ID angkutan tidak ditemukan');
+          return;
+        }
+        response = await updatePenjualanLampiran(angkutanId, formData);
+      } else {
+        response = await createPenjualanLampiran(formData);
+      }
+
+      if (
+        response?.status === 200 ||
+        response?.status === 201 ||
+        response?.data?.status === 'success'
+      ) {
+        toast.success(response?.data?.message || 'Lampiran berhasil disimpan');
+        await onNext(response?.data?.data || validFiles);
+      } else {
+        const errorMessage = formatApiErrorMessage(response?.data);
+        toast.error(errorMessage || 'Gagal menyimpan lampiran');
+      }
+    } catch (error) {
+      const errorData = error?.response?.data || error?.data;
+      const errorMessage = formatApiErrorMessage(errorData);
+      toast.error(errorMessage || 'Terjadi kesalahan saat menyimpan lampiran');
+    } finally {
+      setIsUploading(false);
+    }
   };
+
+  const isBusy = isSubmitting || isUploading;
 
   return (
     <div className="space-y-6">
@@ -55,7 +124,7 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
           {lampiranFiles.map((item, index) => (
             <div key={item.id} className="relative">
               <Upload
-                label={`Gambar ${index + 1}`}
+                label={`Lampiran ${index + 1}`}
                 file={
                   item.file instanceof File
                     ? {
@@ -65,8 +134,8 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
                         value: item.file,
                       }
                     : typeof item.file === 'string'
-                    ? { name: `Gambar ${index + 1}`, value: item.file }
-                    : item.file
+                      ? { name: `Lampiran ${index + 1}`, value: item.file }
+                      : item.file
                 }
                 onChangeValue={(data) => handleChangeFile(item.id, data)}
                 allowedFiles={['image/jpeg', 'image/png', 'application/pdf']}
@@ -94,7 +163,7 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
               type="button"
               className="bg-red-600 hover:bg-red-700"
               onClick={onCancel}
-              disabled={isSubmitting}
+              disabled={isBusy}
             >
               Batalkan
             </Button>
@@ -102,7 +171,7 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
               type="button"
               className="bg-gray-600 hover:bg-gray-700"
               onClick={onPrevious}
-              disabled={isSubmitting}
+              disabled={isBusy}
             >
               Sebelumnya
             </Button>
@@ -111,7 +180,7 @@ const DataLampiran = ({ lampiranData, onNext, onPrevious, onCancel, isSubmitting
             type="button"
             className="bg-blue-600 hover:bg-blue-700"
             onClick={handleSubmit}
-            isLoading={isSubmitting}
+            isLoading={isBusy}
           >
             Selesai
           </Button>

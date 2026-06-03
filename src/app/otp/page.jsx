@@ -58,8 +58,9 @@ const LoginPage = () => {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex hidden h-full w-2/3 flex-1 md:block">
-        <Image
-          src={bannerLogin}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/login-bg.png"
           alt="banner-login"
           className="h-full w-full object-cover"
         />
