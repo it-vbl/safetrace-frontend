@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import Cookies from 'js-cookie';
 import {
   ChartLineIcon,
   ChevronRight,
@@ -32,8 +31,6 @@ import {
 } from '@radix-ui/react-icons';
 
 const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
-  const storedValue = Cookies.get('storeProfile');
-  const profile = storedValue ? JSON.parse(storedValue) : null;
   const [openSubMenu, setOpenSubMenu] = useState(null);
   const [isSubMenuOpened, setIsSubMenuOpened] = useState(false);
   const { sidebarOpen, sidebarCollapsed } = useSelector((state) => state.app);
