@@ -5,11 +5,13 @@
  * to fetch the fresh bundle references, with an infinite reload prevention check.
  */
 export const initChunkErrorHandler = (): (() => void) => {
-  if (typeof window === 'undefined') return () => {};
+  if (globalThis.window === undefined) return () => {};
+
+  let lastReload = 0;
 
   const handleChunkError = (event: ErrorEvent | PromiseRejectionEvent) => {
     // Extract error object from error event or promise rejection reason
-    const error = 'error' in event ? event.error : (event as PromiseRejectionEvent).reason;
+    const error = 'error' in event ? event.error : event.reason;
     if (!error) return;
 
     const errorMessage = error.message || '';
@@ -22,23 +24,37 @@ export const initChunkErrorHandler = (): (() => void) => {
       /loading.*chunk/i.test(errorMessage);
 
     if (isChunkError) {
-      // Prevent infinite reload loops (max once per 10 seconds)
-      const lastReload = sessionStorage.getItem('last-chunk-error-reload');
       const now = Date.now();
+      let shouldReload = lastReload === 0 || now - lastReload > 10000;
 
-      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
-        sessionStorage.setItem('last-chunk-error-reload', now.toString());
-        window.location.reload();
+      // Prefer sessionStorage when available, but gracefully fallback if blocked.
+      try {
+        const stored = sessionStorage.getItem('last-chunk-error-reload');
+        if (stored) {
+          shouldReload = now - Number.parseInt(stored, 10) > 10000;
+        }
+      } catch {
+        // Ignore storage access issues in restricted browser contexts.
+      }
+
+      if (shouldReload) {
+        lastReload = now;
+        try {
+          sessionStorage.setItem('last-chunk-error-reload', now.toString());
+        } catch {
+          // Ignore storage access issues in restricted browser contexts.
+        }
+        globalThis.window.location.reload();
       }
     }
   };
 
-  window.addEventListener('error', handleChunkError);
-  window.addEventListener('unhandledrejection', handleChunkError);
+  globalThis.window.addEventListener('error', handleChunkError);
+  globalThis.window.addEventListener('unhandledrejection', handleChunkError);
 
   // Return a cleanup function
   return () => {
-    window.removeEventListener('error', handleChunkError);
-    window.removeEventListener('unhandledrejection', handleChunkError);
+    globalThis.window.removeEventListener('error', handleChunkError);
+    globalThis.window.removeEventListener('unhandledrejection', handleChunkError);
   };
 };
