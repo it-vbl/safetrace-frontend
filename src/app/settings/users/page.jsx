@@ -158,6 +158,7 @@ const Users = () => {
       roles: values.roles.map((role) => parseInt(role, 10)),
       username: values.username,
       ketua_kelompok_tani: values.ketua_kelompok_tani,
+      pabrik: values.pabrik ? parseInt(values.pabrik, 10) : null,
     };
 
     try {

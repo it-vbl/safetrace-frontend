@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -8,6 +8,7 @@ import Modal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import SelectMultiple from '@/components/molecules/SelectMultiple';
 import useReferences from '@/hooks/useReferences';
+import { getListPabrik } from '@/services/penjualan';
 
 const statusOptions = [
   { label: 'Aktif', value: 'true' },
@@ -38,6 +39,7 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
       roles: userData?.roles || [],
       status: userData?.is_active === true ? 'true' : 'false',
       ketua_kelompok_tani: userData?.ketua_kelompok_tani || '',
+      pabrik: userData?.pabrik?.id ? String(userData.pabrik.id) : '',
     },
     validationSchema: Yup.object({
       nama: Yup.string().required('Nama harus diisi'),
@@ -50,6 +52,11 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
       ketua_kelompok_tani: Yup.string().when('roles', {
         is: (roles) => roles && roles.some((role) => role == '3'),
         then: (schema) => schema.required('Ketua Kelompok Tani harus diisi'),
+        otherwise: (schema) => schema,
+      }),
+      pabrik: Yup.string().when('roles', {
+        is: (roles) => roles && roles.some((role) => role == '6'),
+        then: (schema) => schema.required('Pabrik harus diisi'),
         otherwise: (schema) => schema,
       }),
     }),
@@ -67,12 +74,53 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
   const hasKetuaKelompokTaniRole =
     values.roles && values.roles.some((role) => role == '3');
 
+  // Check if selected roles include "mitra pabrik"
+  const hasMitraPabrikRole =
+    values.roles && values.roles.some((role) => role == '6');
+
+  const [pabrikOptions, setPabrikOptions] = useState([]);
+  const [isLoadingPabrik, setIsLoadingPabrik] = useState(false);
+
+  useEffect(() => {
+    const fetchPabrik = async () => {
+      setIsLoadingPabrik(true);
+      try {
+        const response = await getListPabrik();
+        if (
+          response?.status === 200 &&
+          (response?.data?.status === 'success' || response?.data?.data)
+        ) {
+          const data =
+            response?.data?.data?.results || response?.data?.results || [];
+          const options = data.map((pabrik) => ({
+            value: String(pabrik.id),
+            label: pabrik.nama,
+          }));
+          setPabrikOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching pabrik list:', error);
+      } finally {
+        setIsLoadingPabrik(false);
+      }
+    };
+
+    fetchPabrik();
+  }, []);
+
   // Reset ketua_kelompok_tani field when role is deselected
   useEffect(() => {
     if (!hasKetuaKelompokTaniRole && values.ketua_kelompok_tani) {
       setFieldValue('ketua_kelompok_tani', '');
     }
   }, [hasKetuaKelompokTaniRole, values.ketua_kelompok_tani, setFieldValue]);
+
+  // Reset pabrik field when role is deselected
+  useEffect(() => {
+    if (!hasMitraPabrikRole && values.pabrik) {
+      setFieldValue('pabrik', '');
+    }
+  }, [hasMitraPabrikRole, values.pabrik, setFieldValue]);
 
   // Custom handler for Ketua Kelompok Tani to store the name instead of ID
   const handleKelompokTaniChange = (e) => {
@@ -152,6 +200,21 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
               )?.value || ''
             }
             onChange={handleKelompokTaniChange}
+            onBlur={handleBlur}
+            errors={errors}
+            touched={touched}
+            isRequired={true}
+            selectClassName={`h-[32px] min-h-[32px]`}
+          />
+        )}
+        {hasMitraPabrikRole && (
+          <Select
+            label="Pabrik"
+            name="pabrik"
+            placeholder="Pilih pabrik"
+            options={pabrikOptions}
+            value={values.pabrik}
+            onChange={handleChange}
             onBlur={handleBlur}
             errors={errors}
             touched={touched}
