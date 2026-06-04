@@ -12,6 +12,7 @@ import Sidebar from '@/components/organisms/Sidebar';
 import { MobileScreenProvider } from '@/components/providers/MobileScreenProvider';
 import size from '@/constants/size';
 import { ReduxProvider } from '@/libs/redux/provider';
+import { initChunkErrorHandler } from '@/utils/chunkErrorHandler';
 
 import '@/styles/globals.css';
 import '@/styles/globals.css';
@@ -104,6 +105,11 @@ export default function Layout({ children }) {
       router.replace('/login');
     }
   }, [pathname, router]);
+
+  // Handle ChunkLoadError dynamically to recover from new deployments
+  useEffect(() => {
+    return initChunkErrorHandler();
+  }, []);
 
   return (
     <html lang="en" className={DMSans.className}>
