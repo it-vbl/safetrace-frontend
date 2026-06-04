@@ -13,6 +13,7 @@ import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationMo
 import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
 import { MONTH_NAMES } from '@/constants/months';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   deleteProduksi,
   getDetailProduksiKebun,
@@ -28,6 +29,9 @@ const formatNumber = (num) =>
 const TraceabilityProduksiDetail = () => {
   const { id } = useParams();
   const router = useRouter();
+
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const [detail, setDetail] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -133,28 +137,30 @@ const TraceabilityProduksiDetail = () => {
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">TAHUN {yearData.tahun}</h3>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              className="text-sm font-medium text-red-600 underline hover:text-red-700"
-              onClick={() => {
-                setDeleteYearData(yearData);
-                setShowDeleteModal(true);
-              }}
-            >
-              Hapus
-            </button>
-            <button
-              type="button"
-              className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
-              onClick={() => {
-                setEditYearData(yearData);
-                setIsEditOpen(true);
-              }}
-            >
-              Ubah Data
-            </button>
-          </div>
+          {!isViewOnly && (
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                className="text-sm font-medium text-red-600 underline hover:text-red-700"
+                onClick={() => {
+                  setDeleteYearData(yearData);
+                  setShowDeleteModal(true);
+                }}
+              >
+                Hapus
+              </button>
+              <button
+                type="button"
+                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                onClick={() => {
+                  setEditYearData(yearData);
+                  setIsEditOpen(true);
+                }}
+              >
+                Ubah Data
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-700 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -182,21 +188,23 @@ const TraceabilityProduksiDetail = () => {
     <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:px-0">
       <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
-        <Button
-          variant="primary"
-          size="medium"
-          onClick={() => {
-            const kebunId = detail?.kebun?.id;
-            if (kebunId) {
-              router.push(`/traceability/gap/produksi/tambah?kebun=${kebunId}`);
-            } else {
-              router.push('/traceability/gap/produksi/tambah');
-            }
-          }}
-          className="whitespace-nowrap text-xs sm:text-sm"
-        >
-          Tambah Tahun Produksi
-        </Button>
+        {!isViewOnly && (
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={() => {
+              const kebunId = detail?.kebun?.id;
+              if (kebunId) {
+                router.push(`/traceability/gap/produksi/tambah?kebun=${kebunId}`);
+              } else {
+                router.push('/traceability/gap/produksi/tambah');
+              }
+            }}
+            className="whitespace-nowrap text-xs sm:text-sm"
+          >
+            Tambah Tahun Produksi
+          </Button>
+        )}
       </div>
 
       <div className="flex w-full flex-col gap-6">

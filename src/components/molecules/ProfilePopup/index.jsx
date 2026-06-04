@@ -107,12 +107,16 @@ const ProfilePopup = ({ children }) => {
       }
       Cookies.remove('token');
       Cookies.remove('refreshToken');
+      Cookies.remove('pabrik');
+      Cookies.remove('pabrik_id');
       toast.success('Anda telah logout');
       setIsLogoutConfirmOpen(false);
       router.replace('/login');
     } catch (err) {
       Cookies.remove('token');
       Cookies.remove('refreshToken');
+      Cookies.remove('pabrik');
+      Cookies.remove('pabrik_id');
       setIsLogoutConfirmOpen(false);
       router.replace('/login');
     }

@@ -18,6 +18,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -32,6 +33,12 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const PenjualanPage = () => {
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -59,7 +66,6 @@ const PenjualanPage = () => {
     fetchPabrikOptions();
   }, [fetchKelompokTani]);
 
-  // Auto-apply kelompok tani filter based on logged-in user
   const [isKetuaKelompokTani, setIsKetuaKelompokTani] = useState(false);
   const [isKelompokFilterInitialized, setIsKelompokFilterInitialized] =
     useState(false);
@@ -81,6 +87,28 @@ const PenjualanPage = () => {
       setIsKelompokFilterInitialized(true);
     }
   }, [kelompokTani]);
+
+  const [isMitraPabrik, setIsMitraPabrik] = useState(false);
+  const [isPabrikFilterInitialized, setIsPabrikFilterInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    const storedPabrik = Cookies.get('pabrik');
+    if (storedPabrik && pabrikOptions && pabrikOptions.length > 0) {
+      const pabrikOption = pabrikOptions.find(
+        (pabrik) => pabrik.label === storedPabrik
+      );
+      if (pabrikOption) {
+        setSelectedPabrik(pabrikOption.value);
+        setIsMitraPabrik(true);
+        setTimeout(() => setIsPabrikFilterInitialized(true), 100);
+      } else {
+        setIsPabrikFilterInitialized(true);
+      }
+    } else {
+      setIsPabrikFilterInitialized(true);
+    }
+  }, [pabrikOptions]);
 
   const fetchPabrikOptions = async () => {
     try {
@@ -189,7 +217,7 @@ const PenjualanPage = () => {
   };
 
   useEffect(() => {
-    if (isKelompokFilterInitialized) {
+    if (isKelompokFilterInitialized && isPabrikFilterInitialized) {
       const startDate = selectedDateRange.startDate
         ? moment(selectedDateRange.startDate).format('YYYY-MM-DD')
         : null;
@@ -209,6 +237,7 @@ const PenjualanPage = () => {
     }
   }, [
     isKelompokFilterInitialized,
+    isPabrikFilterInitialized,
     currentPage,
     pageSize,
     search,
@@ -310,15 +339,17 @@ const PenjualanPage = () => {
         >
           LIHAT
         </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
-          onClick={() => handleDeleteClicked(e.data)}
-        >
-          HAPUS
-        </div>
+        {!isViewOnly && (
+          <div
+            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            onClick={() => handleDeleteClicked(e.data)}
+          >
+            HAPUS
+          </div>
+        )}
       </div>
     );
-  }, []);
+  }, [isViewOnly]);
 
   const colDefs = useMemo(
     () => [
@@ -456,14 +487,15 @@ const PenjualanPage = () => {
                 />
 
                 <Select
-                  containerClassName="w-full sm:w-auto lg:w-[180px]"
+                  containerClassName="w-full sm:w-auto lg:w-[210px]"
                   placeholder="Pabrik"
                   options={pabrikOptions}
                   value={selectedPabrik}
                   onChange={handlePabrikChange}
+                  disabled={isMitraPabrik}
                 />
 
-                <div className="w-full sm:w-auto lg:w-[280px]">
+                <div className="w-full sm:w-auto lg:w-[230px]">
                   <DateRange
                     value={selectedDateRange}
                     onChange={handleDateRangeChange}
@@ -481,12 +513,14 @@ const PenjualanPage = () => {
                   icon={<DownloadCloudIcon size={18} />}
                   title="Export CSV"
                 />
-                <Button
-                  onClick={() => router.push('/traceability/penjualan/tambah')}
-                  className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
-                >
-                  Tambah Penjualan
-                </Button>
+                {!isViewOnly && (
+                  <Button
+                    onClick={() => router.push('/traceability/penjualan/tambah')}
+                    className="whitespace-nowrap text-xs sm:text-sm flex-[2] sm:flex-none justify-center"
+                  >
+                    Tambah Penjualan
+                  </Button>
+                )}
               </div>
             </div>
           </div>

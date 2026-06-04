@@ -20,7 +20,7 @@ import { CrossCircledIcon } from '@radix-ui/react-icons';
 
 const Select = ({
   label = '',
-  onChange = (e) => {},
+  onChange = (e) => { },
   disabled = false,
   options = [],
   placeholder = '',
@@ -36,7 +36,7 @@ const Select = ({
     visible: false,
     placeholder: 'Tambah opsi baru',
     isLoading: false,
-    onSubmitOption: () => {},
+    onSubmitOption: () => { },
     addButtonText: 'Tambah',
     cancelButtonText: 'Batalkan',
     applyButtonText: 'Terapkan',
@@ -48,7 +48,7 @@ const Select = ({
   showSearchBar = false,
   errors = {},
   touched = {},
-  onBlur = () => {},
+  onBlur = () => { },
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value);
@@ -64,6 +64,7 @@ const Select = ({
   const [isInsideModal, setIsInsideModal] = useState(false);
   const searchInputRef = useRef(null);
   const formAddOptionRef = useRef(null);
+  const dropdownMenuRef = useRef(null);
 
   useEffect(() => {
     if (value !== undefined) {
@@ -83,27 +84,32 @@ const Select = ({
   const calculateDropdownPosition = useCallback(() => {
     if (!dropdownRef.current) return;
 
-    const modalEl = document?.getElementById('modal');
     const selectRect = dropdownRef.current.getBoundingClientRect();
     const windowHeight = window.innerHeight;
-    const modalHeight = modalEl?.clientHeight;
-    const spaceBelow =
-      (modalEl ? modalHeight : windowHeight) - selectRect.bottom;
-    const dropdownHeight = 200;
+    const modalEl = document?.getElementById('modal');
 
-    const placement = spaceBelow < dropdownHeight ? 'top' : 'bottom';
+    const actualDropdownHeight = dropdownMenuRef.current
+      ? dropdownMenuRef.current.getBoundingClientRect().height
+      : 300;
 
-    const newPosition = {
+    const spaceBelow = windowHeight - selectRect.bottom;
+    const spaceAbove = selectRect.top;
+
+    const placement =
+      spaceBelow < actualDropdownHeight && spaceAbove > actualDropdownHeight
+        ? 'top'
+        : 'bottom';
+
+    setDropdownPosition({
       top:
         placement === 'top'
-          ? selectRect.top - dropdownHeight
+          ? selectRect.top - actualDropdownHeight
           : selectRect.bottom,
       left: selectRect.left,
       width: selectRect.width,
       placement,
-    };
+    });
 
-    setDropdownPosition(newPosition);
     setIsInsideModal(!!modalEl);
   }, []);
 
@@ -226,8 +232,8 @@ const Select = ({
     },
     validationSchema: allowAddOption.validationSchema
       ? Yup.object({
-          newOption: allowAddOption.validationSchema,
-        })
+        newOption: allowAddOption.validationSchema,
+      })
       : undefined,
     validateOnChange: true,
     validateOnBlur: true,
@@ -369,6 +375,7 @@ const Select = ({
         {isDropdownOpen &&
           createPortal(
             <div
+              ref={dropdownMenuRef}
               data-testid="dropdown-menu"
               style={{
                 position: 'fixed',

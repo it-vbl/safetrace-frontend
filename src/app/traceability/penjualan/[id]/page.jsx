@@ -12,17 +12,21 @@ import {
   PenjualanDetailKelompokCard,
   PenjualanDetailPabrikCard,
 } from '@/components/organisms/PenjualanDetail';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   getDetailPenjualanAngkutan,
   getDetailPenjualanKelompokPenyetor,
+  getDetailPenjualanLampiran,
   getDetailPenjualanPabrik,
 } from '@/services/penjualan';
 
 const PenjualanDetailPage = () => {
   const { id } = useParams();
   const router = useRouter();
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
 
   const [detailData, setDetailData] = useState(null);
+  const [lampiranData, setLampiranData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const crumbs = useMemo(
@@ -122,6 +126,38 @@ const PenjualanDetailPage = () => {
             }
           }
 
+          // Fetch lampiran detail using angkutan ID
+          try {
+            const lampiranResponse = await getDetailPenjualanLampiran(id);
+            if (
+              lampiranResponse?.status === 200 &&
+              (lampiranResponse?.data?.status === 'success' ||
+                lampiranResponse?.data?.data)
+            ) {
+              const lampiranRaw =
+                lampiranResponse?.data?.data || lampiranResponse?.data;
+
+              // Transform file_1…file_6 flat structure into an array
+              const lampiranArray = [];
+              for (let i = 1; i <= 6; i++) {
+                const fileUrl = lampiranRaw[`file_${i}`];
+                const thumbUrl = lampiranRaw[`thumb_${i}`];
+                if (fileUrl) {
+                  lampiranArray.push({
+                    id: `${lampiranRaw.id}-${i}`,
+                    index: i,
+                    file: fileUrl,
+                    thumb: thumbUrl || fileUrl,
+                  });
+                }
+              }
+              setLampiranData(lampiranArray);
+            }
+          } catch (error) {
+            // Lampiran might not exist yet — that's fine
+            console.error('Failed to fetch lampiran:', error);
+          }
+
           // Set the transformed data
           setDetailData({
             angkutan: {
@@ -178,36 +214,38 @@ const PenjualanDetailPage = () => {
           <div className="flex flex-col gap-6">
             <PenjualanDetailAngkutanCard
               data={dataToRender?.angkutan}
-              onEdit={() => handleEditData('angkutan')}
+              onEdit={isViewOnly ? undefined : () => handleEditData('angkutan')}
             />
             <PenjualanDetailKelompokCard
               data={dataToRender?.kelompok_tani}
-              onEdit={() => handleEditData('kelompok_tani')}
+              onEdit={isViewOnly ? undefined : () => handleEditData('kelompok_tani')}
             />
             <PenjualanDetailPabrikCard
               data={dataToRender?.pabrik}
-              onEdit={() => handleEditData('pabrik')}
+              onEdit={isViewOnly ? undefined : () => handleEditData('pabrik')}
             />
 
             <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
               <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN</h3>
-                <button
-                  onClick={() => handleEditData('lampiran')}
-                  className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
-                >
-                  Ubah Data
-                </button>
+                {!isViewOnly && (
+                  <button
+                    onClick={() => handleEditData('lampiran')}
+                    className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                  >
+                    Ubah Data
+                  </button>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {dataToRender?.angkutan?.lampiran && dataToRender.angkutan.lampiran.length > 0 ? (
-                  dataToRender.angkutan.lampiran.map((item, index) => (
+                {lampiranData.length > 0 ? (
+                  lampiranData.map((item) => (
                     <AttachmentViewer
-                      key={item.id || index}
-                      label={`Gambar ${index + 1}`}
-                      fileUrl={item.file || item.file_url || item.url || item}
-                      thumbUrl={item.thumb || item.file || item.file_url || item.url || item}
+                      key={item.id}
+                      label={`Lampiran ${item.index}`}
+                      fileUrl={item.file}
+                      thumbUrl={item.thumb}
                     />
                   ))
                 ) : (

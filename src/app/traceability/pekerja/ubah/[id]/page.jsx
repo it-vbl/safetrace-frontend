@@ -13,6 +13,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import DatePicker from '@/components/molecules/DatePicker';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
+import SelectMultiple from '@/components/molecules/SelectMultiple';
 import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
 import { getPekerjaById, updatePekerja } from '@/services/pekerja';
@@ -27,6 +28,8 @@ const validationSchema = Yup.object({
   noKK: Yup.string().required('No. KK wajib diisi'),
   statusPekerja: Yup.string().required('Status pekerja wajib dipilih'),
   noWA: Yup.string(),
+  jenisPekerjaan: Yup.array().of(Yup.string()),
+  jenisApd: Yup.array().of(Yup.string()),
 });
 
 export default function UbahPekerjaPage() {
@@ -50,17 +53,25 @@ function UbahPekerjaContent() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  
+
   // State for files
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
-  
+
   // State for existing file URLs
   const [existingKtpUrl, setExistingKtpUrl] = useState(null);
   const [existingKkUrl, setExistingKkUrl] = useState(null);
 
-  const { jenisKelamin, fetchJenisKelamin, statusPekerja, fetchStatusPekerja } =
-    useReferences();
+  const {
+    jenisKelamin,
+    fetchJenisKelamin,
+    statusPekerja,
+    fetchStatusPekerja,
+    jenisPekerjaan,
+    fetchJenisPekerjaan,
+    jenisApd,
+    fetchJenisApd,
+  } = useReferences();
 
   const crumbs = [
     { label: 'HOME', href: '/' },
@@ -80,35 +91,50 @@ function UbahPekerjaContent() {
       statusPekerja: '',
       noWA: '',
       petaniId: '',
+      jenisPekerjaan: [],
+      jenisApd: [],
     },
     validationSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const formData = {
-          petani_id: values.petaniId,
-          nama: values.nama,
-          jns_kelamin: values.jenisKelamin,
-          alamat: values.alamat,
-          no_ktp: values.noKTP,
-          tempat_lahir: values.tempatLahir,
-          tanggal_lahir: moment(values.tanggalLahir).format('YYYY-MM-DD'),
-          no_kk: values.noKK,
-          no_wa: values.noWA,
-          status_pekerja: values.statusPekerja,
-        };
+        const dataPayload = new FormData();
+        dataPayload.append('petani_id', values.petaniId);
+        dataPayload.append('nama', values.nama);
+        dataPayload.append('jns_kelamin', values.jenisKelamin);
+        dataPayload.append('alamat', values.alamat);
+        dataPayload.append('no_ktp', values.noKTP);
+        dataPayload.append('tempat_lahir', values.tempatLahir);
+        dataPayload.append('tanggal_lahir', moment(values.tanggalLahir).format('YYYY-MM-DD'));
+        dataPayload.append('no_kk', values.noKK);
+        if (values.noWA) {
+          dataPayload.append('no_wa', values.noWA);
+        }
+        dataPayload.append('status_pekerja', values.statusPekerja);
 
         // Only append files if they are new/changed
         // If ktpFile is not null, it means user selected a new file
         if (ktpFile) {
-          formData.file_ktp = ktpFile;
+          dataPayload.append('file_ktp', ktpFile);
         }
 
         if (kkFile) {
-          formData.file_kk = kkFile;
+          dataPayload.append('file_kk', kkFile);
         }
 
-        const response = await updatePekerja(id, formData);
+        // Add multi-value fields:
+        if (values.jenisPekerjaan && values.jenisPekerjaan.length > 0) {
+          values.jenisPekerjaan.forEach((item) => {
+            dataPayload.append('jenis_pekerjaan', item);
+          });
+        }
+        if (values.jenisApd && values.jenisApd.length > 0) {
+          values.jenisApd.forEach((item) => {
+            dataPayload.append('jenis_apd', item);
+          });
+        }
+
+        const response = await updatePekerja(id, dataPayload);
 
         if (response?.data?.status === 'success') {
           toast.success('Data pekerja berhasil diperbarui');
@@ -131,18 +157,20 @@ function UbahPekerjaContent() {
   useEffect(() => {
     fetchJenisKelamin();
     fetchStatusPekerja();
-  }, [fetchJenisKelamin, fetchStatusPekerja]);
+    fetchJenisPekerjaan();
+    fetchJenisApd();
+  }, [fetchJenisKelamin, fetchStatusPekerja, fetchJenisPekerjaan, fetchJenisApd]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
+
       setIsFetching(true);
       try {
         const response = await getPekerjaById(id);
         if (response?.data?.status === 'success') {
           const data = response.data.data;
-          
+
           formik.setValues({
             nama: data.nama || '',
             jenisKelamin: data.jns_kelamin || '',
@@ -154,6 +182,8 @@ function UbahPekerjaContent() {
             statusPekerja: data.status_pekerja || '',
             noWA: data.no_wa || '',
             petaniId: data.petani || '',
+            jenisPekerjaan: data.jenis_pekerjaan || [],
+            jenisApd: data.jenis_apd || [],
           });
 
           // Set existing file URLs
@@ -299,6 +329,34 @@ function UbahPekerjaContent() {
                 touched={formik.touched}
               />
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+              <SelectMultiple
+                label="Jenis Pekerjaan"
+                name="jenisPekerjaan"
+                placeholder="Pilih Jenis Pekerjaan"
+                options={jenisPekerjaan}
+                value={formik.values.jenisPekerjaan}
+                onChange={(e) =>
+                  formik.setFieldValue('jenisPekerjaan', e.target.value)
+                }
+                onBlur={formik.handleBlur}
+                isError={formik.touched.jenisPekerjaan && Boolean(formik.errors.jenisPekerjaan)}
+                helperText={formik.touched.jenisPekerjaan && formik.errors.jenisPekerjaan}
+              />
+              <SelectMultiple
+                label="Jenis APD"
+                name="jenisApd"
+                placeholder="Pilih Jenis APD"
+                options={jenisApd}
+                value={formik.values.jenisApd}
+                onChange={(e) =>
+                  formik.setFieldValue('jenisApd', e.target.value)
+                }
+                onBlur={formik.handleBlur}
+                isError={formik.touched.jenisApd && Boolean(formik.errors.jenisApd)}
+                helperText={formik.touched.jenisApd && formik.errors.jenisApd}
+              />
+            </div>
           </>
         </Accordion>
 
@@ -310,24 +368,24 @@ function UbahPekerjaContent() {
                 file={
                   ktpFile
                     ? {
-                        name: ktpFile.name,
-                        size: (ktpFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: ktpFile,
-                      }
+                      name: ktpFile.name,
+                      size: (ktpFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: ktpFile,
+                    }
                     : existingKtpUrl
-                    ? {
+                      ? {
                         name: 'Dokumen KTP Tersimpan',
                         value: new Blob(), // Dummy blob to satisfy prop types/logic if needed
                         // But actually we are relying on 'url' prop
                       }
-                    : null
+                      : null
                 }
                 url={ktpFile ? null : existingKtpUrl}
                 onChangeValue={(data) => setKtpFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                 // Required only if not already existing
+                // Required only if not already existing
                 keyField="ktp"
                 name="file_ktp"
               />
@@ -337,23 +395,23 @@ function UbahPekerjaContent() {
                 file={
                   kkFile
                     ? {
-                        name: kkFile.name,
-                        size: (kkFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: kkFile,
-                      }
+                      name: kkFile.name,
+                      size: (kkFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: kkFile,
+                    }
                     : existingKkUrl
-                    ? {
+                      ? {
                         name: 'Dokumen KK Tersimpan',
                         value: new Blob(),
                       }
-                    : null
+                      : null
                 }
                 url={kkFile ? null : existingKkUrl}
                 onChangeValue={(data) => setKkFile(data.value)}
                 allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
-                
+
                 keyField="kk"
                 name="file_kk"
               />

@@ -11,6 +11,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import ModalEditKebun from '@/components/molecules/ModalEditKebun';
 import ModalEditLampiran from '@/components/molecules/ModalEditLampiran';
 import ModalEditPeta from '@/components/molecules/ModalEditPeta';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import { downloadSHPKebun } from '@/services/kebun';
 import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
@@ -69,6 +70,7 @@ const Map = dynamic(() => import('@/components/organisms/MapView'), {
 
 const DetailKebunPage = () => {
   const { idKebun: id } = useParams();
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
   const [kebunData, setKebunData] = useState(null);
   const [lampiranData, setLampiranData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -233,12 +235,14 @@ const DetailKebunPage = () => {
         <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-semibold sm:text-lg">DETAIL KEBUN</h3>
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
-            >
-              Ubah Data
-            </button>
+            {!isViewOnly && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
+              >
+                Ubah Data
+              </button>
+            )}
           </div>
 
           {/* === GRID LAYOUT FOR KEBUN DETAIL === */}
@@ -289,15 +293,17 @@ const DetailKebunPage = () => {
                 >
                   Unduh SHP
                 </button>
-                <button
-                  onClick={() => setShowEditPetaModal(true)}
-                  className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
-                >
-                  Ubah Data
-                </button>
+                {!isViewOnly && (
+                  <button
+                    onClick={() => setShowEditPetaModal(true)}
+                    className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+                  >
+                    Ubah Data
+                  </button>
+                )}
               </div>
             )}
-            {!kebunData?.geom && (
+            {!kebunData?.geom && !isViewOnly && (
               <button
                 onClick={() => setShowEditPetaModal(true)}
                 className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
@@ -360,15 +366,7 @@ const DetailKebunPage = () => {
         <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="mb-2 text-base font-semibold sm:mb-4 sm:text-lg">LAMPIRAN</h3>
-            {lampiranData ? (
-              <button
-                onClick={() => setShowEditLampiranModal(true)}
-                className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
-              >
-                Ubah Data
-              </button>
-            ) : (
-              // If lampiranData is undefined/null, but there might still be "Ubah Data" needed... typically they should click Add Data but "Ubah Data" is here in previous.
+            {!isViewOnly && (
               <button
                 onClick={() => setShowEditLampiranModal(true)}
                 className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"

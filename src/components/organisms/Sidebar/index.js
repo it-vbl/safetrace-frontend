@@ -2,8 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import Cookies from 'js-cookie';
 import {
+  ChartLineIcon,
   ChevronRight,
   ContactIcon,
   Flag,
@@ -16,8 +16,7 @@ import {
   Smartphone,
   TrendingUp,
   UserCircle2Icon,
-  UsersIcon,
-} from 'lucide-react';
+  UsersIcon} from 'lucide-react';
 import { IoHomeOutline } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -32,8 +31,6 @@ import {
 } from '@radix-ui/react-icons';
 
 const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
-  const storedValue = Cookies.get('storeProfile');
-  const profile = storedValue ? JSON.parse(storedValue) : null;
   const [openSubMenu, setOpenSubMenu] = useState(null);
   const [isSubMenuOpened, setIsSubMenuOpened] = useState(false);
   const { sidebarOpen, sidebarCollapsed } = useSelector((state) => state.app);
@@ -170,6 +167,12 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         path: '/traceability/pekerja',
         permission: 'pekerja.view',
       },
+      {
+        label: 'Laporan',
+        icon: ChartLineIcon,
+        path: '/traceability/laporan',
+        permission: 'laporan.view',
+      },
     ],
     'kabar-tani': [
       {
@@ -294,20 +297,18 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
             (isMobileClient && !sidebarOpen) || !sidebarOpen
               ? 0
               : sidebarCollapsed
-              ? `${size.SIDEBAR_WIDTH_COLLAPSED}px`
-              : `${size.SIDEBAR_WIDTH}px`,
+                ? `${size.SIDEBAR_WIDTH_COLLAPSED}px`
+                : `${size.SIDEBAR_WIDTH}px`,
           transform:
             isMobileClient && !sidebarOpen
               ? 'translateX(-100%)'
               : 'translateX(0)',
         }}
-        className={`z-50 flex h-full flex-shrink-0 bg-white transition-all duration-300 ${
-          isMobileClient ? 'shadow-lg' : 'relative'
-        } ${
-          (isMobileClient && !sidebarOpen) || !sidebarOpen
+        className={`z-50 flex h-full flex-shrink-0 bg-white transition-all duration-300 ${isMobileClient ? 'shadow-lg' : 'relative'
+          } ${(isMobileClient && !sidebarOpen) || !sidebarOpen
             ? 'pointer-events-none overflow-hidden opacity-0'
             : 'overflow-visible opacity-100'
-        }`}
+          }`}
       >
         <div
           className="bg-primary700 flex h-full flex-col border-r border-r-gray-200 px-4 pt-8 text-white"
@@ -343,11 +344,9 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
               return (
                 <div key={item.label || item.path || index}>
                   <div
-                    className={`mb-2 flex cursor-pointer items-center p-2 ${
-                      isActive ? 'bg-primary text-white' : 'text-gray-900'
-                    } w-full rounded font-medium ${
-                      sidebarCollapsed ? 'justify-center' : 'justify-normal'
-                    } relative`}
+                    className={`mb-2 flex cursor-pointer items-center p-2 ${isActive ? 'bg-primary text-white' : 'text-gray-900'
+                      } w-full rounded font-medium ${sidebarCollapsed ? 'justify-center' : 'justify-normal'
+                      } relative`}
                     title={item.label}
                     aria-label={item.label}
                     onMouseEnter={(e) =>
@@ -403,11 +402,10 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                             subItem && (
                               <div
                                 key={subItem.label || subItem.path || subIndex}
-                                className={`relative mb-2 ml-1 flex cursor-pointer items-center p-2 ${
-                                  pathname?.includes(subItem?.path)
-                                    ? 'text-primary'
-                                    : 'text-gray-400'
-                                } hover:bg-primary500 rounded font-medium`}
+                                className={`relative mb-2 ml-1 flex cursor-pointer items-center p-2 ${pathname?.includes(subItem?.path)
+                                  ? 'text-primary'
+                                  : 'text-gray-400'
+                                  } hover:bg-primary500 rounded font-medium`}
                                 title={subItem.label}
                                 aria-label={subItem.label}
                                 onMouseEnter={(e) =>
@@ -472,11 +470,10 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                       .map((subItem, subIndex) => (
                         <div
                           key={subItem.label || subItem.path || subIndex}
-                          className={`mb-2 flex cursor-pointer items-center p-2 ${
-                            pathname?.includes(subItem?.path)
-                              ? 'text-white'
-                              : 'text-gray-400'
-                          } rounded hover:bg-[#151A2D]`}
+                          className={`mb-2 flex cursor-pointer items-center p-2 ${pathname?.includes(subItem?.path)
+                            ? 'text-white'
+                            : 'text-gray-400'
+                            } rounded hover:bg-[#151A2D]`}
                           onClick={() => handleMenuItemClick(subItem?.path)}
                         >
                           <span>{subItem.label}</span>
@@ -489,9 +486,8 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
           {!isMobileClient && (
             <div
               onClick={handleCollapse}
-              className={`mb-10 mt-auto flex cursor-pointer items-center rounded-[4px] p-2 transition-all duration-200 hover:bg-gray-100 ${
-                sidebarCollapsed ? 'justify-center' : 'justify-between'
-              }`}
+              className={`mb-10 mt-auto flex cursor-pointer items-center rounded-[4px] p-2 transition-all duration-200 hover:bg-gray-100 ${sidebarCollapsed ? 'justify-center' : 'justify-between'
+                }`}
             >
               {!sidebarCollapsed && (
                 <span className="text-sm font-medium text-black">COLLAPSE</span>
@@ -499,9 +495,8 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
               <ChevronRight
                 size={20}
                 color="black"
-                className={`transition-transform duration-200 ${
-                  sidebarCollapsed ? '' : 'rotate-180'
-                }`}
+                className={`transition-transform duration-200 ${sidebarCollapsed ? '' : 'rotate-180'
+                  }`}
               />
             </div>
           )}

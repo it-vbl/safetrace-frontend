@@ -16,6 +16,7 @@ import BaseModal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import YearCard from '@/components/molecules/YearCard';
 import { MONTH_NAMES } from '@/constants/months';
+import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import {
   deletePestisida,
   getDetailPestisidaKebun,
@@ -330,6 +331,9 @@ const TraceabilityPestisidaDetail = () => {
   const { id } = useParams();
   const router = useRouter();
 
+  // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
+  const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+
   const [detail, setDetail] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editYearData, setEditYearData] = useState(null);
@@ -460,23 +464,25 @@ const TraceabilityPestisidaDetail = () => {
     <div className="flex w-full min-w-[320px] max-w-full flex-col gap-6">
       <div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <BreadcrumbDetail items={crumbs} />
-        <Button
-          variant="primary"
-          size="medium"
-          onClick={() => {
-            const kebunId = detail?.kebun;
-            if (kebunId) {
-              router.push(
-                `/traceability/gap/pestisida/tambah?kebun=${kebunId}`
-              );
-            } else {
-              router.push('/traceability/gap/pestisida/tambah');
-            }
-          }}
-          className="whitespace-nowrap text-xs sm:text-sm"
-        >
-          Tambah Tahun Pestisida
-        </Button>
+        {!isViewOnly && (
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={() => {
+              const kebunId = detail?.kebun;
+              if (kebunId) {
+                router.push(
+                  `/traceability/gap/pestisida/tambah?kebun=${kebunId}`
+                );
+              } else {
+                router.push('/traceability/gap/pestisida/tambah');
+              }
+            }}
+            className="whitespace-nowrap text-xs sm:text-sm"
+          >
+            Tambah Tahun Pestisida
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -527,8 +533,8 @@ const TraceabilityPestisidaDetail = () => {
               className="mb-4"
               key={yearData.tahun}
               yearData={yearData}
-              onEdit={handleEditYear}
-              onDelete={handleDeleteYear}
+              onEdit={isViewOnly ? undefined : handleEditYear}
+              onDelete={isViewOnly ? undefined : handleDeleteYear}
               title="Penggunaan Pestisida"
               dataFields={[
                 { key: 'sistemik', label: '(Sistemik)', unit: 'Liter' },

@@ -43,22 +43,28 @@ const YearCard = ({
     >
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-semibold">TAHUN {yearData.tahun}</h3>
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            className="text-sm font-medium text-red-600 underline hover:text-red-700"
-            onClick={handleDelete}
-          >
-            Hapus
-          </button>
-          <button
-            type="button"
-            className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
-            onClick={handleEdit}
-          >
-            Ubah Data
-          </button>
-        </div>
+        {(onEdit || onDelete) && (
+          <div className="flex items-center gap-4">
+            {onDelete && (
+              <button
+                type="button"
+                className="text-sm font-medium text-red-600 underline hover:text-red-700"
+                onClick={handleDelete}
+              >
+                Hapus
+              </button>
+            )}
+            {onEdit && (
+              <button
+                type="button"
+                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                onClick={handleEdit}
+              >
+                Ubah Data
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex w-full flex-col gap-x-4 gap-y-3 text-sm text-gray-700 sm:flex-row">

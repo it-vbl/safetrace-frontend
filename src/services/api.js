@@ -51,10 +51,13 @@ api.interceptors.request.use(function (config) {
 const logout = () => {
   Cookies.remove('token');
   Cookies.remove('refreshToken');
+  Cookies.remove('pabrik');
+  Cookies.remove('pabrik_id');
+  Cookies.remove('ketua_kelompok_tani');
+
   const homeUrl = window?.location?.origin;
-  window.location.href = `${homeUrl}/login?redirect=${
-    window?.location?.pathname || ''
-  }${window?.location?.search || ''}`;
+  window.location.href = `${homeUrl}/login?redirect=${window?.location?.pathname || ''
+    }${window?.location?.search || ''}`;
 };
 
 const APIResponseValidation = async (
@@ -241,7 +244,7 @@ const APIInstance = {
     form = null,
     json = {},
     reqConfig = {},
-    onUploadProgress = () => {},
+    onUploadProgress = () => { },
     auth = true,
     showErrorPage = false,
     toastError = false,
