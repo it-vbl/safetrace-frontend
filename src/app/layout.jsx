@@ -15,6 +15,10 @@ export const metadata = {
   title: 'SIP - Dashboard',
 };
 
+// Prevent Next.js Full Route Cache from setting s-maxage=31536000 on HTML.
+// Without this, stale HTML is served after deploy causing ChunkLoadError 404.
+export const revalidate = 0;
+
 export default function Layout({ children }) {
   return (
     <html lang="en" className={DMSans.className}>

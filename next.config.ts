@@ -19,25 +19,26 @@ const nextConfig: NextConfig = {
   },
   // Configure output to avoid cache issues
   output: 'standalone',
-  // Add cache control headers
+  // Add cache control headers.
+  // NOTE: '/_next/static/:path*' must come AFTER '/(.*)?'
+  // so it overrides to immutable for hashed static assets.
   async headers() {
     return [
       {
-        source: '/:path*',
+        // '/(.*)?'  matches ALL routes including root '/'
+        // '/:path*' misses root '/' which caused s-maxage=31536000 on HTML
+        source: '/(.*)?',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
         ],
       },
       {
+        // Override for hashed chunks/assets — these are safe to cache forever
         source: '/_next/static/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ];
