@@ -43,25 +43,30 @@ const DataPekebunTable = ({
 }) => {
   return (
     <div
-      className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-hidden rounded-xl border bg-white p-4 duration-500 ease-in-out ${
-        showTable ? 'translate-y-0' : 'top-[200px] translate-y-full'
-      } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
+      className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] overflow-y-hidden rounded-xl border bg-white p-4 duration-500 ease-in-out ${showTable ? 'translate-y-0' : 'top-[200px] translate-y-full'
+        } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
     >
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-col gap-3">
-          <div className="flex flex-row items-center justify-between">
-            <Heading level={2}>Data Kebun</Heading>
-            <div className="flex flex-row items-center gap-8">
-              <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap">
+            <div className="order-1">
+              <Heading level={2}>Data Kebun</Heading>
+            </div>
+            <div className="order-2 flex-shrink-0 sm:order-3">
+              <Close onClick={onClose} className="cursor-pointer" />
+            </div>
+            <div className="order-3 flex w-full flex-row items-center gap-2 sm:order-2 sm:w-auto sm:gap-4">
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                 <SearchBar
                   placeholder="Cari..."
                   value={searchText}
                   onChange={onSearchTextChange}
+                  className="w-full sm:w-[180px] md:w-[200px] lg:w-[250px]"
                 />
                 <Select
                   value={filterKelompok}
                   onChange={onFilterKelompokChange}
-                  containerClassName="w-[150px]"
+                  containerClassName="w-[calc(50%-4px)] sm:w-[120px] md:w-[130px] lg:w-[150px]"
                   placeholder="Kelompok"
                   options={kelompokOptions}
                   disabled={disableKelompokFilter}
@@ -69,29 +74,28 @@ const DataPekebunTable = ({
                 <Select
                   value={filterRSPO}
                   onChange={onFilterRSPOChange}
-                  containerClassName="w-[120px]"
+                  containerClassName="w-[calc(50%-4px)] sm:w-[100px] md:w-[110px] lg:w-[120px]"
                   placeholder="RSPO"
                   options={rspoOptions}
                 />
                 <Select
                   value={filterISPO}
                   onChange={onFilterISPOChange}
-                  containerClassName="w-[120px]"
+                  containerClassName="w-[calc(50%-4px)] sm:w-[100px] md:w-[110px] lg:w-[120px]"
                   placeholder="ISPO"
                   options={ispoOptions}
                 />
                 <Select
                   value={filterLegalitas}
                   onChange={onFilterLegalitasChange}
-                  containerClassName="w-[150px]"
+                  containerClassName="w-[calc(50%-4px)] sm:w-[120px] md:w-[130px] lg:w-[150px]"
                   placeholder="Legalitas"
                   options={legalitasOptions}
                 />
               </div>
-              <Close onClick={onClose} />
             </div>
+
           </div>
-          {/* Filter Petani Badge */}
           {filterPetaniId && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Filter petani:</span>
@@ -109,6 +113,7 @@ const DataPekebunTable = ({
               </div>
             </div>
           )}
+
         </div>
         <div className="w-full flex-1">
           <SectionLoading loading={loading} />

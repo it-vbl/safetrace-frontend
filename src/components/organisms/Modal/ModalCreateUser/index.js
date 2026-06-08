@@ -200,9 +200,8 @@ const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
           onBlur={handleBlur}
           errors={errors}
           touched={touched}
-          isMulti={true}
           isRequired={true}
-          selectClassName={`h-[32px] min-h-[32px]`}
+          selectClassName={`h-[42px] min-h-[42px]`}
         />
         {hasKetuaKelompokTaniRole && (
           <Select
@@ -220,7 +219,7 @@ const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
             errors={errors}
             touched={touched}
             isRequired={true}
-            selectClassName={`h-[32px] min-h-[32px]`}
+            selectClassName={`h-[42px] min-h-[42px]`}
           />
         )}
         {hasMitraPabrikRole && (
@@ -235,7 +234,7 @@ const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
             errors={errors}
             touched={touched}
             isRequired={true}
-            selectClassName={`h-[32px] min-h-[32px]`}
+            selectClassName={`h-[42px] min-h-[42px]`}
           />
         )}
         <InputText
@@ -272,7 +271,7 @@ const ModalCreateUser = ({ open, setOpen, onSubmit }) => {
           errors={errors}
           touched={touched}
           isRequired={true}
-          selectClassName={`h-[32px] min-h-[32px]`}
+          selectClassName={`h-[42px] min-h-[42px]`}
         />
       </div>
       <div className="mt-4 flex flex-row justify-end gap-2">

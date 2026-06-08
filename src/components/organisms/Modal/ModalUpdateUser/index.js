@@ -16,11 +16,13 @@ const statusOptions = [
 ];
 
 const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
-  const { userRoles, kelompokTani, fetchKelompokTani } = useReferences();
+  const { userRoles, kelompokTani, fetchKelompokTani, fetchUserRoles } = useReferences();
 
   useEffect(() => {
     fetchKelompokTani();
-  }, [fetchKelompokTani]);
+    fetchUserRoles();
+  }, [fetchKelompokTani, fetchUserRoles]);
+
   const {
     values,
     handleChange,
@@ -30,13 +32,14 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
     errors,
     isSubmitting,
     setFieldValue,
+    resetForm,
   } = useFormik({
     initialValues: {
       id: userData?.id || '',
       nama: userData?.name || '',
       username: userData?.username || '',
       email: userData?.email || '',
-      roles: userData?.roles || [],
+      roles: userData?.roles ? userData.roles.map(String) : [],
       status: userData?.is_active === true ? 'true' : 'false',
       ketua_kelompok_tani: userData?.ketua_kelompok_tani || '',
       pabrik: userData?.pabrik?.id ? String(userData.pabrik.id) : '',
@@ -69,6 +72,13 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
     },
     enableReinitialize: true,
   });
+
+  // Reset form when modal is closed
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open, resetForm]);
 
   // Check if selected roles include "ketua kelompok tani"
   const hasKetuaKelompokTaniRole =
@@ -184,9 +194,8 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           onBlur={handleBlur}
           errors={errors}
           touched={touched}
-          isMulti={true}
           isRequired={true}
-          selectClassName={`h-[32px] min-h-[32px]`}
+          selectClassName={`h-[42px] min-h-[42px]`}
         />
         {hasKetuaKelompokTaniRole && (
           <Select
@@ -204,7 +213,7 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
             errors={errors}
             touched={touched}
             isRequired={true}
-            selectClassName={`h-[32px] min-h-[32px]`}
+            selectClassName={`h-[42px] min-h-[42px]`}
           />
         )}
         {hasMitraPabrikRole && (
@@ -219,7 +228,7 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
             errors={errors}
             touched={touched}
             isRequired={true}
-            selectClassName={`h-[32px] min-h-[32px]`}
+            selectClassName={`h-[42px] min-h-[42px]`}
           />
         )}
         <Select
@@ -232,7 +241,7 @@ const ModalUpdateUser = ({ open, setOpen, onSubmit, userData }) => {
           errors={errors}
           touched={touched}
           isRequired={true}
-          selectClassName={`h-[32px] min-h-[32px]`}
+          selectClassName={`h-[42px] min-h-[42px]`}
         />
       </div>
       <div className="mt-4 flex flex-row justify-end gap-2">
