@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
+import moment from 'moment';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
@@ -14,6 +16,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { downloadLaporan,getLaporanList } from '@/services/laporan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -22,6 +25,8 @@ const LaporanPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
+    const [laporanData, setLaporanData] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [showModalConfirmDeleteKontak, setShowModalConfirmDeleteKontak] =
         useState(false);
     const [selectedKontakToDelete, setSelectedKontakToDelete] = useState(null);
@@ -36,6 +41,54 @@ const LaporanPage = () => {
         setMounted(true);
     }, []);
 
+    const fetchLaporanData = async ({ page, page_size, search }) => {
+        setLoading(true);
+        try {
+            const params = {
+                page,
+                page_size,
+                ...(search && { search }),
+            };
+            const response = await getLaporanList(params);
+            if (response?.status === 200) {
+                const data = response?.data;
+                const results = data?.results || [];
+                const mappedData = results.map((item) => ({
+                    id: item.id,
+                    nama_laporan: item.judul || '-',
+                    jenis_laporan: 'Statistik Bulanan',
+                    keperluan: item.kebutuhan || '-',
+                    tanggal_dibuat: item.created_at ? moment(item.created_at).format('DD-MM-YYYY HH:mm') : '-',
+                    dibuat_oleh: '-',
+                    bulan: item.bulan,
+                    tahun: item.tahun,
+                    judul: item.judul,
+                    kebutuhan: item.kebutuhan,
+                }));
+                setLaporanData(mappedData);
+                setTotalItems(data?.count || 0);
+            } else {
+                setLaporanData([]);
+                setTotalItems(0);
+            }
+        } catch (error) {
+            console.error('Error fetching laporan data:', error);
+            toast.error('Gagal memuat data laporan');
+            setLaporanData([]);
+            setTotalItems(0);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLaporanData({
+            page: currentPage,
+            page_size: pageSize,
+            search,
+        });
+    }, [currentPage, pageSize, search]);
+
     const handleSearchTextChange = useCallback(
         debounce((value) => {
             setSearch(value);
@@ -44,8 +97,39 @@ const LaporanPage = () => {
         []
     );
 
-    const handleDownloadClicked = (data) => {
-        console.log(data);
+    const handleDownloadClicked = async (data) => {
+        if (!data?.id) {
+            toast.error('ID laporan tidak valid');
+            return;
+        }
+        setLoading(true);
+        try {
+            const payload = {
+                bulan: data.bulan,
+                tahun: data.tahun,
+                judul: data.judul,
+                kebutuhan: data.kebutuhan,
+            };
+            const response = await downloadLaporan(data.id, payload);
+            const url = window.URL.createObjectURL(
+                new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+            );
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute(
+                'download',
+                `${data.judul || 'laporan'}.xlsx`
+            );
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            toast.success('Laporan berhasil diunduh');
+        } catch (error) {
+            console.error('Error downloading report:', error);
+            toast.error('Gagal mengunduh laporan');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteClicked = (data) => {
@@ -90,7 +174,6 @@ const LaporanPage = () => {
 
     const handleDeleteLaporan = async () => {
         console.log("TODO: DELETE LAPORAN");
-
     };
 
     const colDefs = useMemo(() => {
@@ -196,6 +279,7 @@ const LaporanPage = () => {
                                 domLayout="autoHeight"
                                 rowHeight={isMobileScreen ? 36 : 40}
                                 columnDefs={colDefs}
+                                rowData={laporanData}
                             />
                         )}
                     </div>
@@ -205,7 +289,7 @@ const LaporanPage = () => {
                     <Pagination
                         currentPage={currentPage}
                         pageSize={pageSize}
-                        totalItems={0}
+                        totalItems={totalItems}
                         onPageChange={handlePageChange}
                         onPageSizeChange={handlePageSizeChange}
                         showRowsPerPage={true}

@@ -1,13 +1,15 @@
 'use client';
 
-import { Suspense, useEffect,useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Accordion from '@/components/molecules/Accordion';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
+import { createLaporan } from '@/services/laporan';
 
 const JENIS_LAPORAN_OPTIONS = [
     { value: 'statistik_bulanan', label: 'Statistik Bulanan' },
@@ -46,7 +48,7 @@ function buildNamaLaporan(jenisLaporan, extra) {
 
     if (jenisLaporan === 'statistik_bulanan') {
         const bulanLabel = BULAN_OPTIONS.find(o => o.value === extra.bulan)?.label ?? '';
-        if (bulanLabel && extra.tahun) return `${jenisLabel} Bulan ${bulanLabel}`;
+        if (bulanLabel && extra.tahun) return `${jenisLabel} Bulan ${bulanLabel} ${extra.tahun}`;
     }
     if (jenisLaporan === 'laporan_petani') {
         const petaniLabel = PETANI_OPTIONS.find(o => o.value === extra.petani)?.label ?? '';
@@ -113,7 +115,22 @@ function TambahLaporanContent() {
 
         setIsLoading(true);
         try {
-            router.push('/traceability/laporan');
+            const payload = {
+                bulan: parseInt(bulan, 10),
+                tahun: parseInt(tahun, 10),
+                judul: namaLaporan,
+                kebutuhan: kebutuhan,
+            };
+            const response = await createLaporan(payload);
+            if (response?.status === 201 || response?.status === 200) {
+                toast.success('Laporan berhasil disimpan');
+                router.push('/traceability/laporan');
+            } else {
+                toast.error(response?.data?.message || 'Gagal menyimpan laporan');
+            }
+        } catch (error) {
+            console.error('Error creating report:', error);
+            toast.error(error?.response?.data?.message || 'Gagal menyimpan laporan');
         } finally {
             setIsLoading(false);
         }
@@ -202,10 +219,10 @@ function TambahLaporanContent() {
     const secondaryField = renderSecondaryField();
     const hasSecondary = jenisLaporan && secondaryField !== null;
     const gridClass = hasSecondary
-        ? 'grid grid-cols-1 md:grid-cols-3 gap-6'
+        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'
         : jenisLaporan
-            ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
-            : 'grid grid-cols-1 md:grid-cols-3 gap-6';
+            ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6'
+            : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6';
 
     return (
         <div className="flex w-full flex-col gap-6">
