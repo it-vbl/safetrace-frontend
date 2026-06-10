@@ -1,204 +1,215 @@
-<p align="center">
-  <h1 align="center">next-supabase-stripe-starter</h1>
-  <p align="center">
-    <a href="https://twitter.com/KolbySisk"><img src="/delete-me/github-banner.png" /></a>
-  </p>
-</p>
+# Safe Traceability System — Frontend
 
-<p align="center">
-  <a href="https://twitter.com/kolbysisk" rel="nofollow"><img src="https://img.shields.io/badge/created%20by-@kolbysisk-e57060.svg" alt="Created by Kolby Sisk"></a>
-  <a href="https://opensource.org/licenses/MIT" rel="nofollow"><img src="https://img.shields.io/github/license/kolbysisk/next-supabase-stripe-starter" alt="License"></a>
-</p>
+Frontend for **SIP (Sistem Informasi Perkebunan)**, a web dashboard for palm-oil plantation traceability, STDB (Surat Tanda Daftar Budidaya) management, and farmer communication.
 
-<p align="center">
-  <a href="https://next-supabase-stripe-starter-demo-mnqz.vercel.app" style="font-weight: bold; font-size: 20px; text-decoration: underline;">See the demo</a>
-</p>
+## Overview
 
-## Introduction
+This application connects to a REST API backend and provides role-based access to:
 
-Bootstrap your SaaS with a modern tech stack built to move quick. Follow the guide to get started.
+- **Peta** — Interactive map dashboard with plantation (kebun) data, deforestation alerts, static layers, and custom map overlays
+- **Traceability** — Farmer, plantation, sales, GAP compliance (production, pesticides, fertilizer, hazardous waste), training, workers, and reporting
+- **Kabar Tani** — WhatsApp contact management, groups, broadcast messages, and device pairing
+- **STDB** — Registration, verification, issuance, and lifecycle tracking of plantation registration documents
+- **Settings** — User management, profile, and map overlay configuration
 
-### What's included
+Access to each module is controlled by a role-based permission matrix defined in `src/libs/permissions.js`.
 
-- Next.js 15
-- [Supabase](https://supabase.com) - Postgres database & user authentication
-- [Stripe](https://stripe.com) - [Checkout](https://stripe.com/docs/payments/checkout), [subscriptions](https://stripe.com/docs/billing/subscriptions/overview), and [customer portal](https://stripe.com/docs/customer-management)
-- [React Email](https://react.email/) - Easily build emails and send them with [Resend](https://resend.com)
-- [Tailwindcss](https://tailwindcss.com/) - CSS framework
-- [shadcn/ui](https://ui.shadcn.com) - Prebuilt accessible components
-- Webhooks to automatically synchronize Stripe with Supabase
-- Stripe fixture to bootstrap product data
-- Supabase migrations to bootstrap and manage your db schema
-- Responsive, performant, and accessible prebuilt pages
-- Animated button borders! Now you can look cool without nerds saying you shipped too late
+## Tech Stack
 
-## Getting started
+| Layer | Technology |
+| --- | --- |
+| Framework | [Next.js 15](https://nextjs.org) (App Router, Turbopack in dev) |
+| UI | [React 19](https://react.dev), [Tailwind CSS](https://tailwindcss.com) |
+| State | [Redux Toolkit](https://redux-toolkit.js.org) |
+| Data tables | [AG Grid](https://www.ag-grid.com) |
+| Maps | [Leaflet](https://leafletjs.com), [React Leaflet](https://react-leaflet.js.org), Turf.js |
+| Charts | Chart.js, D3, Nivo |
+| Forms | Formik, Yup |
+| HTTP | Axios |
+| Components | Atomic design (`atoms` / `molecules` / `organisms`), [Radix UI](https://www.radix-ui.com), [shadcn/ui](https://ui.shadcn.com) primitives |
+| Component dev | [Storybook 8](https://storybook.js.org) |
+| Language | JavaScript (`.jsx`) with partial TypeScript (`.ts` / `.tsx`) |
 
-### 1. Setup Supabase
+## Prerequisites
 
-1. Go to [supabase.com](https://supabase.com) and create a project
-1. Go to Project Settings → Database → Database password and click reset database password then click generate a new password. (I know you already made one, but this fixes a [bug with their CLI where it doesn't like special characters in the password](https://github.com/supabase/supabase/issues/15184))
-1. Save this password somewhere, you can't see it after closing the box
+- Node.js 18+
+- npm
+- A running backend API (see `NEXT_PUBLIC_BASE_URL`)
 
-### 2. Setup Stripe
+## Getting Started
 
-1. Go to [stripe.com](https://stripe.com) and create a project
-1. Go to [Customer Portal Settings](https://dashboard.stripe.com/test/settings/billing/portal) and click the `Active test link` button
+### 1. Install dependencies
 
-### 3. Setup Resend
-
-1. Go to [resend.com](https://resend.com) and create an account
-1. Go to the [API Keys page](https://resend.com/api-keys) and create an API Key
-1. Add the [Supabase Resend integration](https://supabase.com/partners/integrations/resend)
-
-### 4. Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKolbySisk%2Fnext-supabase-stripe-starter&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_PASSWORD,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET,RESEND_API_KEY&demo-title=AI%20Twitter%20Banner%20Demo&demo-url=https%3A%2F%2Fai-twitter-banner.vercel.app&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6)
-
-1. Next click the deploy button ⬆️
-1. On the form create a new repo and add the Supabase integration
-1. Add the environment variables that you have available. For the stripe webhook secret just put any value - we will come back to update this after configuring the webhook
-1. Click Deploy
-1. While you wait, clone your new repo and open it in your code editor. Then create a file named `.env.local`. Copy and pase the contents of `.env.local.example` into this file and add the correct values. They should be the same values you added in above.
-
-![Vercel env config](/delete-me/deplyoment-env.png)
-
-### 5. Stripe Webhook
-
-1. After deploying go to your Vercel dashboard and find your Vercel URL
-1. Next go to your Stripe dashboard, click `Developers` in the top nav, and then the `Webhooks` tab
-1. Add an endpoint. Enter your Vercel URL followed by `/api/webhooks`
-1. Click `Select events`
-1. Check `Select all events`
-1. Scroll to the bottom of the page and click `Add endpoint`
-1. Click to `Reveal` signing secret and copy it
-1. Go to your `Vercel project settings` → `Environment Variables`
-1. Update the value of the `STRIPE_WEBHOOK_SECRET` env with your newly acquired webhook secret. Press `Save`
-
-### 6. Run Supabase Migration
-
-Now we're going to run the initial [Supabase Migration](https://supabase.com/docs/reference/cli/supabase-migration-new) to create your database tables.
-
-1. Run `bunx supabase login`
-1. Run `bunx supabase init`
-1. Open your `package.json` and update both `UPDATE_THIS_WITH_YOUR_SUPABASE_PROJECT_ID` strings with your supabase project id
-1. Run `bun run supabase:link`
-1. Run `bun run migration:up`
-
-### 7. Run Stripe Fixture
-
-[Stripe fixtures](https://stripe.com/docs/cli/fixtures) are an easy way to configure your product offering without messing around in the Stripe UI.
-
-1. Install the [Stripe CLI](https://stripe.com/docs/stripe-cli#install). For Macs run: `brew install stripe/stripe-cli/stripe`
-1. Run (make sure to update the command with your Stripe sk) `stripe fixtures ./stripe-fixtures.json --api-key UPDATE_THIS_WITH_YOUR_STRIPE_SK`
-
-### 8. Last steps
-
-1. Do a `Search All` in your code editor for `UPDATE_THIS` and update all instances with the relevant value (**except for .env.local.example!**)
-1. Delete the `delete-me` dir
-
-### 9. Check it out!
-
-You did it! You should be able to look in your Stripe dashboard and see your products, and you should also see the same data has been populated in your Supabase database. Now let's test everything.
-
-1. Run `bun i`
-1. Run `bun run dev`.
-1. Go to the app and click `Get started for free` - this will take you to the login page
-1. We haven't configured auth providers, so for now click `Continue with Email` and submit your email address
-1. Click the link sent to your email and you should be redirected back to your app - authenticated
-1. Click `Get Started` on one of the plans. This will take you to a Stripe checkout page (In test mode)
-1. Enter `4242424242424242` as your credit card number. Fill out the rest of the form with any valid data and click Subscribe
-1. You should be redirect to the Account page where you can see your active subscription
-1. Click the `Manage your subscription` button
-
-**That's the end of the setup. The following are guides to help you code in your new codebase.**
-
----
-
-## Guides
-
-### Managing products
-
-Your products and prices are managed via the `stripe-fixtures.json` file. You can delete your test data in Stripe on the [Developers page](https://dashboard.stripe.com/test/developers), make the changes you'd like, and then run the fixture command from above. When changes are made in Stripe the webhook hits the api route at `src/app/api/webhooks`. The handler will synchronize the data sent from Stripe to your Supabase database.
-
-The `metadata` field in your fixture is where we can store info about the product that can be used in your app. For example, say you have a basic product, and one of the features of the product includes a max number of team invites. You can add a field to the metadata like `team_invites`. Then update the Zod schema in `src/features/pricing/models/product-metadata.ts`
-
-Then you can make use of it like this:
-
-```ts
-const products = await getProducts();
-const productMetadata = productMetadataSchema.parse(products[0].metadata); // Now it's typesafe 🙌!
-productMetadata.teamInvites; // The value you set in the fixture
+```bash
+npm install
 ```
 
-### Managing your database schema
+### 2. Configure environment
 
-[Migrations](https://supabase.com/docs/reference/cli/supabase-migration-new) are a powerful concept for managing your database schema. Any changes you make to your database schema should be done through migrations.
+Copy the example env file and set your values:
 
-Say you want to add a table named `invites`.
-
-First run `npm run migration:new add-invites-table`
-Then edit your file to include:
-
-```sql
-create table invites (
-  id uuid not null primary key default gen_random_uuid(),
-  email text not null,
-);
-alter table invites enable row level security;
+```bash
+cp .env.local.example .env.local
 ```
 
-Then run `npm run migration:up` and your table will be added.
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_BASE_URL` | Backend API base URL (required) |
+| `NEXT_PUBLIC_SITE_URL` | Frontend site URL (default: `http://localhost:3000`) |
+| `NEXT_PUBLIC_WHATSAPP_API_URL` | WhatsApp integration API URL (Kabar Tani module) |
+| `NEXT_PUBLIC_URL` | Legacy API URL used by some services |
 
-### Configuring auth providers
+### 3. Run the development server
 
-There are many auth providers you can choose from. [See the Supabase docs](https://supabase.com/docs/guides/auth#providers) for the full the list and their respective guides to configure them.
-
-### Styling
-
-- [Learn more about shadcn/ui components](https://ui.shadcn.com/docs)
-- [Learn more about theming with shadcn/ui](https://ui.shadcn.com/docs/theming)
-- [Learn more about the Tailwindcss theme config](https://tailwindcss.com/docs/theme)
-
-### Emails
-
-Your emails live in the `src/features/emails` dir. Emails are finicky and difficult to style correctly, so make sure to reference the [React Email docs](https://react.email/docs/introduction). After creating your email component, sending an email is as simple as:
-
-```ts
-import WelcomeEmail from '@/features/emails/welcome';
-import { resendClient } from '@/libs/resend/resend-client';
-
-resendClient.emails.send({
-  from: 'no-reply@your-domain.com',
-  to: userEmail,
-  subject: 'Welcome!',
-  react: <WelcomeEmail />,
-});
+```bash
+npm run dev
 ```
 
-### File structure
+Open [http://localhost:3000](http://localhost:3000). Unauthenticated users are redirected to `/login`.
 
-The file structure uses the group by `feature` concept. This is where you will colocate code related to a specific feature, with the exception of UI code. Typically you want to keep your UI code in the `app` dir, with the exception of reusable components. Most of the time reusable components will be agnostic to a feature and should live in the `components` dir. The `components/ui` dir is where `shadcn/ui` components are generated to.
+### 4. Build for production
 
-### Going live
+```bash
+npm run build
+npm start
+```
 
-Follow these steps when you're ready to go live:
+## Available Scripts
 
-1. Activate your Stripe account and set the dashboard to live mode
-1. Repeat the steps above to create a Stripe webhook in live mode, this time using your live url
-1. Update Vercel env variables with your live Stripe pk, sk, and whsec
-1. After Vercel has redeployed with your new env variables, run the fixture command using your Stripe sk
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start dev server with Turbopack |
+| `npm run build` | Production build (standalone output) |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run storybook` | Start Storybook on port 6006 |
+| `npm run build-storybook` | Build static Storybook |
 
----
+## Application Modules
 
-## Support
+### Peta (`/`)
 
-If you need help with the setup, or developing in the codebase, feel free to reach out to me on Twitter [@kolbysisk](https://twitter.com/KolbySisk) - I'm always happy to help.
+Map-first dashboard showing plantation polygons, filters (commodity, certification, legality), deforestation alert layers (GLAD, RADD, UMD), and configurable map overlays. Requires `peta.dashboard` permission.
 
-## Contribute
+### Traceability (`/traceability/*`)
 
-PRs are always welcome.
+| Route | Feature |
+| --- | --- |
+| `/traceability/dashboard/statistik` | STDB and plantation statistics |
+| `/traceability/dashboard/sankey` | Supply-chain Sankey diagram |
+| `/traceability/petani` | Farmer records |
+| `/traceability/kebun` | Plantation records with map geometry |
+| `/traceability/penjualan` | Sales transactions |
+| `/traceability/gap/produksi` | Production (GAP) |
+| `/traceability/gap/pestisida` | Pesticide usage |
+| `/traceability/gap/pupuk` | Fertilizer usage |
+| `/traceability/gap/lb3` | Hazardous waste (LB3) |
+| `/traceability/diklat` | Training records |
+| `/traceability/pekerja` | Worker records |
+| `/traceability/laporan` | Reports |
 
----
+### Kabar Tani (`/kabar-tani/*`)
 
-This project was inspired by Vercel's [nextjs-subscription-payments](https://github.com/vercel/nextjs-subscription-payments).
+| Route | Feature |
+| --- | --- |
+| `/kabar-tani/kontak` | Contact list |
+| `/kabar-tani/grup` | WhatsApp groups |
+| `/kabar-tani/blast-pesan` | Broadcast messages |
+| `/kabar-tani/kirim-pesan` | Direct messages |
+| `/kabar-tani/device` | WhatsApp device management |
+
+### STDB (`/stdb/*`)
+
+| Route | Feature |
+| --- | --- |
+| `/stdb/pendataan` | Registration and data collection |
+| `/stdb/verifikasi` | Verification workflow |
+| `/stdb/penerbitan` | Document issuance |
+| `/stdb/data-terbit` | Issued documents |
+| `/stdb/tidak-terbit` | Rejected documents |
+| `/stdb/data-berakhir` | Expired documents |
+| `/stdb/ringkasan` | Summary dashboard |
+
+### Settings (`/settings/*`)
+
+| Route | Feature |
+| --- | --- |
+| `/settings/profile` | User profile |
+| `/settings/users` | User management |
+| `/settings/peta-overlay` | Map overlay configuration |
+
+## Authentication
+
+Authentication uses JWT tokens stored in cookies (`token`, `refreshToken`). The client-side guard in `src/components/providers/ClientLayout.jsx` redirects unauthenticated users to `/login`.
+
+Supported auth flows:
+
+- Login — `/login`
+- OTP verification — `/otp`
+- Forgot password — `/forgot-password`, `/forgot-password/verify-otp`, `/forgot-password/reset-password`
+
+API calls attach the bearer token via an Axios interceptor in `src/services/api.js`. On `401` responses, the client attempts a token refresh before logging out.
+
+## Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router pages and layouts
+├── assets/               # Static icons and images
+├── components/
+│   ├── atoms/            # Smallest UI building blocks
+│   ├── molecules/        # Composed UI elements
+│   ├── organisms/        # Feature-level UI (forms, tables, modals, map)
+│   ├── providers/        # Client-side providers (layout, Redux, mobile)
+│   └── ui/               # shadcn/ui primitives
+├── constants/            # Shared constants
+├── hooks/                # Custom React hooks
+├── libs/                 # Utilities (permissions, Redux, formatting)
+├── services/             # API service modules (one file per domain)
+├── store/                # Redux store and slices
+├── styles/               # Global CSS
+└── utils/                # General helpers
+```
+
+### API services
+
+Domain logic is organized under `src/services/`:
+
+`api.js`, `auth.js`, `petani.js`, `kebun.js`, `stdb.js`, `penjualan.js`, `produksi.js`, `pestisida.js`, `pupuk.js`, `lb3.js`, `analisis.js`, `alert.js`, `petaOverlay.js`, `staticLayer.js`, `wilayah.js`, `referensi.js`, `user.js`, `grup.js`, `kontak.js`, `pesan.js`, `broadcast.js`, `device.js`, `wa.js`, `whatsapp.js`, and others.
+
+### Permissions
+
+Role IDs and the permission matrix live in `src/libs/permissions.js`. Sidebar and navbar items are filtered at runtime based on the logged-in user's roles (stored in cookies).
+
+## Docker
+
+A multi-stage Dockerfile builds the app with `output: 'standalone'` and runs it on port 3000:
+
+```bash
+docker build -t safe-tracibility-system-fe .
+docker run -p 3000:3000 -e NEXT_PUBLIC_BASE_URL=<api-url> safe-tracibility-system-fe
+```
+
+## CI/CD
+
+Deployment is configured via Jenkins (`.cicd/jenkinsfile-cd`). The pipeline builds a Docker image, pushes it to a container registry, and notifies Discord on build status.
+
+## Storybook
+
+UI components can be developed and reviewed in isolation:
+
+```bash
+npm run storybook
+```
+
+Stories live alongside components (e.g. `Button.stories.jsx`) and in `src/stories/`.
+
+## Notes
+
+- The production build uses `output: 'standalone'` with cache-control headers to prevent stale HTML after deploys.
+- A chunk-error handler (`src/utils/chunkErrorHandler.ts`) auto-reloads the page when a new deployment causes `ChunkLoadError`.
+- This project was originally bootstrapped from a Next.js + Supabase + Stripe starter template. Some legacy scripts (`email:*`, `stripe:*`, `migration:*`, `supabase:*`) remain in `package.json` but are not part of the core application workflow.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
