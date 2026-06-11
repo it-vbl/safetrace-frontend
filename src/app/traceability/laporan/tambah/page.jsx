@@ -1,14 +1,16 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
+import Heading from '@/components/atoms/Typography/Heading';
 import Accordion from '@/components/molecules/Accordion';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
+import useReferences from '@/hooks/useReferences';
 import { createLaporan } from '@/services/laporan';
 
 const JENIS_LAPORAN_OPTIONS = [
@@ -64,23 +66,40 @@ function buildNamaLaporan(jenisLaporan, extra) {
 export default function TambahLaporanPage() {
     return (
         <Suspense fallback={<div className="flex w-full justify-center py-10 text-sm text-gray-500">Memuat data...</div>}>
-            <TambahLaporanContent />
+            <TambahLaporanContent forcedType="bulanan" />
         </Suspense>
     );
 }
 
-function TambahLaporanContent() {
+export function TambahLaporanContent({ forcedType }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const typeParam = forcedType || searchParams.get('type') || 'bulanan';
+
+    // If typeParam is 'stdb', we show 'Laporan Petani' form
+    // If typeParam is 'petani', we show 'Statistik Bulanan' form
+    // If typeParam is 'bulanan', we show 'STDB' form
+    const initialJenis = typeParam === 'stdb' ? 'laporan_petani' : typeParam === 'petani' ? 'statistik_bulanan' : typeParam === 'bulanan' ? 'stdb' : '';
+
     const [isLoading, setIsLoading] = useState(false);
-    const [jenisLaporan, setJenisLaporan] = useState('');
+    const [jenisLaporan, setJenisLaporan] = useState(initialJenis);
     const [bulan, setBulan] = useState('');
     const [tahun, setTahun] = useState('');
     const [petani, setPetani] = useState('');
+    const [kelompokTaniSelected, setKelompokTaniSelected] = useState('');
     const [statusStdb, setStatusStdb] = useState('');
     const [namaLaporan, setNamaLaporan] = useState('');
     const [kebutuhan, setKebutuhan] = useState('');
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
+
+    const { kelompokTani, fetchKelompokTani } = useReferences();
+
+    useEffect(() => {
+        if (kelompokTani.length === 0) {
+            fetchKelompokTani();
+        }
+    }, [kelompokTani.length, fetchKelompokTani]);
 
     useEffect(() => {
         setNamaLaporan(buildNamaLaporan(jenisLaporan, { bulan, tahun, petani, statusStdb }));
@@ -88,7 +107,7 @@ function TambahLaporanContent() {
 
     const handleJenisChange = (val) => {
         setJenisLaporan(val);
-        setBulan(''); setTahun(''); setPetani(''); setStatusStdb('');
+        setBulan(''); setTahun(''); setPetani(''); setStatusStdb(''); setKelompokTaniSelected('');
         setNamaLaporan('');
     };
 
@@ -99,7 +118,10 @@ function TambahLaporanContent() {
             if (!bulan) e.bulan = 'Bulan wajib dipilih';
             if (!tahun) e.tahun = 'Tahun wajib dipilih';
         }
-        if (jenisLaporan === 'laporan_petani' && !petani) e.petani = 'Petani wajib dipilih';
+        if (jenisLaporan === 'laporan_petani') {
+            if (!petani) e.petani = 'Petani wajib dipilih';
+            if (!kelompokTaniSelected) e.kelompokTani = 'Kelompok Tani wajib dipilih';
+        }
         if (jenisLaporan === 'stdb' && !statusStdb) e.statusStdb = 'Status STDB wajib dipilih';
         if (!kebutuhan) e.kebutuhan = 'Kebutuhan wajib diisi';
         return e;
@@ -107,7 +129,7 @@ function TambahLaporanContent() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const allTouched = { jenisLaporan: true, bulan: true, tahun: true, petani: true, statusStdb: true, kebutuhan: true };
+        const allTouched = { jenisLaporan: true, bulan: true, tahun: true, petani: true, kelompokTani: true, statusStdb: true, kebutuhan: true };
         setTouched(allTouched);
         const errs = validate();
         setErrors(errs);
@@ -116,8 +138,8 @@ function TambahLaporanContent() {
         setIsLoading(true);
         try {
             const payload = {
-                bulan: parseInt(bulan, 10),
-                tahun: parseInt(tahun, 10),
+                bulan: bulan ? parseInt(bulan, 10) : new Date().getMonth() + 1,
+                tahun: tahun ? parseInt(tahun, 10) : new Date().getFullYear(),
                 judul: namaLaporan,
                 kebutuhan: kebutuhan,
             };
@@ -141,7 +163,7 @@ function TambahLaporanContent() {
         { label: 'TAMBAH LAPORAN' },
     ];
 
-    const renderSecondaryField = () => {
+    const renderSecondaryFields = () => {
         if (!jenisLaporan) return null;
 
         if (jenisLaporan === 'statistik_bulanan') {
@@ -183,17 +205,30 @@ function TambahLaporanContent() {
 
         if (jenisLaporan === 'laporan_petani') {
             return (
-                <Select
-                    label="Petani"
-                    name="petani"
-                    placeholder="Agustinus Nery"
-                    options={PETANI_OPTIONS}
-                    value={petani}
-                    onChange={(e) => { setPetani(e.target.value); setTouched(t => ({ ...t, petani: true })); }}
-                    errors={touched.petani ? { petani: errors.petani } : {}}
-                    touched={touched.petani ? { petani: true } : {}}
-                    isRequired
-                />
+                <>
+                    <Select
+                        label="Kelompok Tani"
+                        name="kelompokTani"
+                        placeholder="Pilih Kelompok Tani"
+                        options={kelompokTani || []}
+                        value={kelompokTaniSelected}
+                        onChange={(e) => { setKelompokTaniSelected(e.target.value); setTouched(t => ({ ...t, kelompokTani: true })); }}
+                        errors={touched.kelompokTani ? { kelompokTani: errors.kelompokTani } : {}}
+                        touched={touched.kelompokTani ? { kelompokTani: true } : {}}
+                        isRequired
+                    />
+                    <Select
+                        label="Petani"
+                        name="petani"
+                        placeholder="Agustinus Nery"
+                        options={PETANI_OPTIONS}
+                        value={petani}
+                        onChange={(e) => { setPetani(e.target.value); setTouched(t => ({ ...t, petani: true })); }}
+                        errors={touched.petani ? { petani: errors.petani } : {}}
+                        touched={touched.petani ? { petani: true } : {}}
+                        isRequired
+                    />
+                </>
             );
         }
 
@@ -216,17 +251,18 @@ function TambahLaporanContent() {
         return null;
     };
 
-    const secondaryField = renderSecondaryField();
-    const hasSecondary = jenisLaporan && secondaryField !== null;
-    const gridClass = hasSecondary
-        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'
-        : jenisLaporan
-            ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6'
-            : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6';
+    const secondaryFields = renderSecondaryFields();
+    const gridClass = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6';
 
     return (
         <div className="flex w-full flex-col gap-6">
-            <BreadcrumbDetail items={crumbs} />
+            {typeParam === 'stdb' ? (
+                <Heading className="uppercase tracking-[2px]" level={3}>
+                    LAPORAN STDB
+                </Heading>
+            ) : (
+                <BreadcrumbDetail items={crumbs} />
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Accordion defaultIsOpen title="IDENTITAS">
                     <>
@@ -243,9 +279,9 @@ function TambahLaporanContent() {
                                 isRequired
                             />
 
-                            {secondaryField}
+                            {jenisLaporan !== 'laporan_petani' && secondaryFields}
 
-                            {jenisLaporan && (
+                            {jenisLaporan && jenisLaporan !== 'laporan_petani' && (
                                 <InputText
                                     label="Nama Laporan"
                                     name="namaLaporan"
@@ -254,9 +290,33 @@ function TambahLaporanContent() {
                                     disabled
                                 />
                             )}
+
+                            {jenisLaporan === 'laporan_petani' && secondaryFields}
                         </div>
 
-                        {jenisLaporan && (
+                        {jenisLaporan && jenisLaporan === 'laporan_petani' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 py-4">
+                                <InputText
+                                    label="Nama Laporan"
+                                    name="namaLaporan"
+                                    placeholder="Terisi otomatis"
+                                    value={namaLaporan}
+                                    disabled
+                                />
+                                <InputText
+                                    label="Kebutuhan"
+                                    name="kebutuhan"
+                                    placeholder="Diminta Disbunak"
+                                    value={kebutuhan}
+                                    onChange={(e) => { setKebutuhan(e.target.value); setTouched(t => ({ ...t, kebutuhan: true })); }}
+                                    errors={touched.kebutuhan && errors.kebutuhan ? { kebutuhan: errors.kebutuhan } : {}}
+                                    touched={touched.kebutuhan ? { kebutuhan: true } : {}}
+                                    isRequired
+                                />
+                            </div>
+                        )}
+
+                        {jenisLaporan && jenisLaporan !== 'laporan_petani' && (
                             <div className="grid grid-cols-1 gap-6 py-4">
                                 <div className="flex flex-col gap-1">
                                     <label className="text-sm font-medium text-gray-700">

@@ -81,6 +81,14 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const isSubItemActive = (subPath) => {
+    if (!subPath) return false;
+    if (subPath === '/traceability/laporan') {
+      return pathname === '/traceability/laporan' || pathname === '/traceability/laporan/tambah';
+    }
+    return pathname === subPath;
+  };
+
   useEffect(() => {
     const currentRoles = getCurrentUserRoles();
     setRoles(currentRoles);
@@ -170,8 +178,24 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
       {
         label: 'Laporan',
         icon: ChartLineIcon,
-        path: '/traceability/laporan',
         permission: 'laporan.view',
+        subMenu: [
+          {
+            label: 'BULANAN',
+            path: '/traceability/laporan',
+            permission: 'laporan.view',
+          },
+          {
+            label: 'STDB',
+            path: '/traceability/laporan/stdb',
+            permission: 'laporan.view',
+          },
+          {
+            label: 'PETANI',
+            path: '/traceability/laporan/petani',
+            permission: 'laporan.view',
+          },
+        ],
       },
     ],
     'kabar-tani': [
@@ -336,11 +360,9 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                 pathname === item?.path ||
                 (item?.subMenu &&
                   item?.subMenu?.some((sub) =>
-                    pathname?.includes(sub?.path)
+                    isSubItemActive(sub?.path)
                   )) ||
-                pathname?.includes(
-                  item?.label?.replaceAll(' ', '-')?.toLowerCase()
-                );
+                (item?.path && item?.path !== '/' && pathname?.startsWith(item?.path + '/'));
               return (
                 <div key={item.label || item.path || index}>
                   <div
@@ -402,7 +424,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                             subItem && (
                               <div
                                 key={subItem.label || subItem.path || subIndex}
-                                className={`relative mb-2 ml-1 flex cursor-pointer items-center p-2 ${pathname?.includes(subItem?.path)
+                                className={`relative mb-2 ml-1 flex cursor-pointer items-center p-2 ${isSubItemActive(subItem?.path)
                                   ? 'text-primary'
                                   : 'text-gray-400'
                                   } hover:bg-primary500 rounded font-medium`}
@@ -470,7 +492,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                       .map((subItem, subIndex) => (
                         <div
                           key={subItem.label || subItem.path || subIndex}
-                          className={`mb-2 flex cursor-pointer items-center p-2 ${pathname?.includes(subItem?.path)
+                          className={`mb-2 flex cursor-pointer items-center p-2 ${isSubItemActive(subItem?.path)
                             ? 'text-white'
                             : 'text-gray-400'
                             } rounded hover:bg-[#151A2D]`}

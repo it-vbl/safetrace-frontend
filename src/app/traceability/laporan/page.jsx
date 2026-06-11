@@ -59,7 +59,7 @@ const LaporanPage = () => {
                     jenis_laporan: 'Statistik Bulanan',
                     keperluan: item.kebutuhan || '-',
                     tanggal_dibuat: item.created_at ? moment(item.created_at).format('DD-MM-YYYY HH:mm') : '-',
-                    dibuat_oleh: '-',
+                    dibuat_oleh: item.created_by?.name || item.created_by?.username || '-',
                     bulan: item.bulan,
                     tahun: item.tahun,
                     judul: item.judul,
