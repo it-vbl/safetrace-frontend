@@ -17,3 +17,9 @@ export const downloadLaporan = (id, payload = {}) => {
 
 export const createLaporan = (payload) =>
   api.post(`/laporan/statistik/create/`, null, payload);
+
+// *** DELETE ***
+
+export const deleteLaporan = (id, payload) =>
+  api.deleteData(`/laporan/statistik/${id}/delete/`, payload);
+

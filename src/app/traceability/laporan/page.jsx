@@ -16,7 +16,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
-import { downloadLaporan,getLaporanList } from '@/services/laporan';
+import { downloadLaporan,getLaporanList,deleteLaporan } from '@/services/laporan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -173,7 +173,33 @@ const LaporanPage = () => {
     }, []);
 
     const handleDeleteLaporan = async () => {
-        console.log("TODO: DELETE LAPORAN");
+        if (!selectedKontakToDelete?.id) return;
+        setLoading(true);
+        try {
+            const payload = {
+                bulan: selectedKontakToDelete.bulan,
+                tahun: selectedKontakToDelete.tahun,
+                judul: selectedKontakToDelete.judul,
+                kebutuhan: selectedKontakToDelete.kebutuhan,
+            };
+            const response = await deleteLaporan(selectedKontakToDelete.id, payload);
+            if (response?.status === 200 || response?.status === 204) {
+                toast.success('Laporan berhasil dihapus');
+                handleDeleteCancel();
+                fetchLaporanData({
+                    page: currentPage,
+                    page_size: pageSize,
+                    search,
+                });
+            } else {
+                toast.error('Gagal menghapus laporan');
+            }
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            toast.error('Gagal menghapus laporan');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const colDefs = useMemo(() => {
@@ -307,7 +333,7 @@ const LaporanPage = () => {
                 isOpen={showModalConfirmDeleteKontak}
                 onClose={handleDeleteCancel}
                 onConfirm={handleDeleteLaporan}
-                itemName={`kontak dengan nama ${selectedKontakToDelete?.nama}`}
+                itemName={`laporan dengan judul ${selectedKontakToDelete?.nama_laporan || ''}`}
                 isLoading={loading}
             />
         </div>

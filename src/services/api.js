@@ -391,9 +391,9 @@ const APIInstance = {
    *   id: [1,2,3]
    * }
    */
-  deleteData: (url, payload, auth = true, toastError = true) => {
+  deleteData: (url, payload, auth = true, toastError = true, showErrorPage = false) => {
     return api
-      .delete(url, { data: payload }, ((auth = true), (toastError = true)))
+      .delete(url, { data: payload })
       .then((response) => {
         return APIResponseValidation(
           response,
