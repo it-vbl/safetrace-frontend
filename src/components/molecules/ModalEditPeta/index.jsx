@@ -100,14 +100,14 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
       open={isOpen}
       setOpen={handleClose}
       label="UBAH PETA"
-      className="max-w-[75vw]"
+      className="w-[95vw] sm:w-[90vw] lg:w-[75vw] max-w-none"
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* DataPemetaan Component */}
         <DataPemetaan
           data={kebunData}
           formik={formik}
-          mode="edit"
+          mode="create"
           idKebun={kebunData?.id}
           petaniId={kebunData?.petani_id}
         />

@@ -64,7 +64,13 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
         }
       } catch (error) {
         console.error('Error uploading lampiran:', error);
-        toast.error('Gagal mengupload lampiran');
+        const errorData = error?.response?.data;
+        if (errorData?.errors?.kebun && errorData?.errors?.kebun[0]) {
+          toast.error(errorData.errors.kebun[0]);
+          router.push('/traceability/kebun');
+        } else {
+          toast.error(errorData?.message || 'Gagal mengupload lampiran');
+        }
       }
     },
   });
@@ -97,7 +103,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   petaFile
                     ? {
                         name: petaFile.name,
-                        size: (petaFile.size / 1048576).toFixed(1),
+                        size: petaFile.size,
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: petaFile,
                       }
@@ -112,7 +118,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                     formik.setFieldError('file_peta', '');
                   }
                 }}
-                allowedFiles={['image/jpeg', 'image/png', '.kml', 'application/vnd.google-earth.kml+xml']}
+                allowedFiles={['.zip', '.geojson', '.kml']}
                 maxSize={10}
                 keyField="peta"
                 name="file_peta"
@@ -122,6 +128,9 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   !petaFile
                 }
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Upload .zip / .geojson / .kml file yang sudah disiapkan.
+              </p>
               {formik.touched.file_peta &&
                 formik.errors.file_peta &&
                 !petaFile && (
@@ -137,7 +146,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   legalitasFile
                     ? {
                         name: legalitasFile.name,
-                        size: (legalitasFile.size / 1048576).toFixed(1),
+                        size: legalitasFile.size,
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: legalitasFile,
                       }
@@ -177,7 +186,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   stdbFile
                     ? {
                         name: stdbFile.name,
-                        size: (stdbFile.size / 1048576).toFixed(1),
+                        size: stdbFile.size,
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: stdbFile,
                       }
@@ -217,7 +226,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   rspoFile
                     ? {
                         name: rspoFile.name,
-                        size: (rspoFile.size / 1048576).toFixed(1),
+                        size: rspoFile.size,
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: rspoFile,
                       }
@@ -257,7 +266,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   ispoFile
                     ? {
                         name: ispoFile.name,
-                        size: (ispoFile.size / 1048576).toFixed(1),
+                        size: ispoFile.size,
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: ispoFile,
                       }

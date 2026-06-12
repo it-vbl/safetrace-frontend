@@ -16,6 +16,7 @@ import {
   getDetailPenjualanAngkutan,
   getDetailPenjualanKelompokPenyetor,
   getDetailPenjualanPabrik,
+  getDetailPenjualanLampiran,
   updateAngkutanPabrik,
   updatePenjualanAngkutan,
 } from '@/services/penjualan';
@@ -88,6 +89,7 @@ const EditPenjualanContent = () => {
         let formattedKelompokPenyetorData = null;
         let pabrikData = null;
         let formattedPabrikData = null;
+        let lampiranData = null;
 
         try {
           const angkutanResponse = await getDetailPenjualanAngkutan(
@@ -205,6 +207,21 @@ const EditPenjualanContent = () => {
               console.error(error)
             }
           }
+
+          // Fetch lampiran details
+          try {
+            const lampiranResponse = await getDetailPenjualanLampiran(idPenjualan);
+            if (
+              lampiranResponse?.status === 200 &&
+              (lampiranResponse?.data?.status === 'success' ||
+                lampiranResponse?.data?.data)
+            ) {
+              lampiranData =
+                lampiranResponse?.data?.data || lampiranResponse?.data;
+            }
+          } catch (error) {
+            console.error('Error fetching lampiran:', error);
+          }
         }
 
         // Determine current step based on what data exists and tab parameter
@@ -313,13 +330,13 @@ const EditPenjualanContent = () => {
           angkutan: angkutanData,
           kelompokTani: formattedKelompokPenyetorData,
           pabrik: formattedPabrikData,
-          lampiran: null, // Since we don't have lampiran fetched in edit
+          lampiran: lampiranData,
         });
         setPenjualanData({
           angkutan: angkutanData,
           kelompok_tani: formattedKelompokPenyetorData,
           pabrik: formattedPabrikData,
-          lampiran: null,
+          lampiran: lampiranData,
         });
 
         // Mark as initialized after setting initial state
