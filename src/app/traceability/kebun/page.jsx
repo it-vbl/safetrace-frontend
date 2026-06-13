@@ -14,6 +14,7 @@ import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationMo
 import SearchBar from '@/components/molecules/SearchBar';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import useReferences from '@/hooks/useReferences';
 import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
@@ -556,6 +557,7 @@ const KebunPage = () => {
 
         {/* === TABLE CONTAINER === */}
         <div className="relative w-full flex-1">
+          <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."

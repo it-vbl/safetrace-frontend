@@ -75,10 +75,6 @@ export function TambahLaporanContent({ forcedType }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const typeParam = forcedType || searchParams.get('type') || 'bulanan';
-
-    // If typeParam is 'stdb', we show 'Laporan Petani' form
-    // If typeParam is 'petani', we show 'Statistik Bulanan' form
-    // If typeParam is 'bulanan', we show 'STDB' form
     const initialJenis = typeParam === 'stdb' ? 'laporan_petani' : typeParam === 'petani' ? 'statistik_bulanan' : typeParam === 'bulanan' ? 'stdb' : '';
 
     const [isLoading, setIsLoading] = useState(false);

@@ -294,9 +294,9 @@ const DiklatPage = () => {
           toast.success('Berhasil mengubah data diklat');
 
           setDiklatData((prev) =>
-              prev.map((item) =>
-                item.id === selectedId ? { ...item, ...payload } : item
-              )
+            prev.map((item) =>
+              item.id === selectedId ? { ...item, ...payload } : item
+            )
           );
 
           setIsOpen(false);
@@ -406,7 +406,7 @@ const DiklatPage = () => {
         minWidth: 140,
       },
       {
-        field: 'jenis_kelamin',
+        field: 'jenis_kelamin_label',
         headerName: 'Jenis Kelamin',
         flex: 1,
         minWidth: 120,

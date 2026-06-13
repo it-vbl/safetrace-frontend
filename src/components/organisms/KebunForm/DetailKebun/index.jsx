@@ -250,6 +250,13 @@ const DetailKebun = ({
     if (Object.keys(errors).length === 0) {
       await onNext(formik.values);
     } else {
+      // Mark all fields as touched so that validation errors are displayed under each field
+      const touchedFields = {};
+      Object.keys(formik.values).forEach((key) => {
+        touchedFields[key] = true;
+      });
+      formik.setTouched(touchedFields);
+
       console.error(errors);
       toast.error('Data yang diisi belum lengkap');
     }
