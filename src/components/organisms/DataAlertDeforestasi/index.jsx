@@ -35,44 +35,51 @@ const DataAlertDeforestasi = ({
 }) => {
   return (
     <div
-      className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] rounded-xl border bg-white p-4 duration-500 ease-in-out ${
-        showTable ? 'translate-y-0' : 'top-[200px] translate-y-full'
-      } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
+      className={`border-gray absolute left-5 top-5 z-[1000] h-[calc(100%-40px)] max-h-[calc(100%-40px)] w-[calc(100%-40px)] rounded-xl border bg-white p-4 duration-500 ease-in-out ${showTable ? 'translate-y-0' : 'top-[200px] translate-y-full'
+        } xs:left-2 xs:top-2 xs:h-[calc(100%-16px)] xs:w-[calc(100%-16px)] xs:p-3`}
     >
       <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-row items-center justify-between">
-          <Heading level={2}>Data Alert Deforestasi</Heading>
-          <div className="flex flex-row items-center gap-8">
-            <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap">
+          <div className="order-1">
+            <Heading level={2}>Data Alert Deforestasi</Heading>
+          </div>
+
+          <div className="order-2 sm:order-3">
+            <Close onClick={onClose} className="cursor-pointer" />
+          </div>
+
+          <div className="order-3 flex w-full flex-row items-center gap-2 sm:order-2 sm:w-auto sm:gap-4">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
               <SearchBar
                 placeholder="Cari..."
                 value={searchText}
                 onChange={onSearchTextChange}
+                className="w-full sm:w-[180px] md:w-[200px] lg:w-[250px]"
               />
               <Select
                 value={filterAlertType}
                 onChange={onFilterAlertTypeChange}
-                containerClassName="w-[150px]"
+                containerClassName="w-[calc(50%-4px)] sm:w-[120px] md:w-[130px] lg:w-[150px]"
                 placeholder="Alert Type"
                 options={alertTypeOptions}
               />
               <Select
                 value={filterKabupaten}
                 onChange={onFilterKabupatenChange}
-                containerClassName="w-[150px]"
+                containerClassName="w-[calc(50%-4px)] sm:w-[120px] md:w-[130px] lg:w-[150px]"
                 placeholder="Kabupaten"
                 options={kabupatenOptions}
               />
               <Select
                 value={filterKecamatan}
                 onChange={onFilterKecamatanChange}
-                containerClassName="w-[150px]"
+                containerClassName="w-[calc(50%-4px)] sm:w-[120px] md:w-[130px] lg:w-[150px]"
                 placeholder="Kecamatan"
                 options={kecamatanOptions}
               />
             </div>
-            <Close onClick={onClose} />
           </div>
+
         </div>
         <div className="w-full flex-1">
           <SectionLoading loading={loading} />

@@ -645,7 +645,14 @@ const TraceabilityPetaniDetail = () => {
               {/* Row 3 */}
               <BorderBottomColData
                 label="Pendidikan Terakhir"
-                value={petani?.pendidikan_terakhir || '-'}
+                value={
+                  (() => {
+                    const eduObj = pendidikanTerakhir?.find(
+                      (item) => item.value == petani?.pendidikan_terakhir
+                    );
+                    return eduObj ? eduObj.label : (petani?.pendidikan_terakhir || '-');
+                  })()
+                }
               />
               <BorderBottomColData
                 label="No. Whatsapp"

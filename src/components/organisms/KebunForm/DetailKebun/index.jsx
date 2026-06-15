@@ -250,6 +250,13 @@ const DetailKebun = ({
     if (Object.keys(errors).length === 0) {
       await onNext(formik.values);
     } else {
+      // Mark all fields as touched so that validation errors are displayed under each field
+      const touchedFields = {};
+      Object.keys(formik.values).forEach((key) => {
+        touchedFields[key] = true;
+      });
+      formik.setTouched(touchedFields);
+
       console.error(errors);
       toast.error('Data yang diisi belum lengkap');
     }
@@ -337,7 +344,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="hidden lg:grid lg:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <div className="flex flex-row items-end gap-2">
             <Select
               label="Waktu Tanam"
@@ -377,6 +384,71 @@ const DetailKebun = ({
               isRequired
             />
           </div>
+          <Select
+            label="RSPO"
+            name="rspo"
+            placeholder="Pilih Status RSPO"
+            options={rspoOptions}
+            value={formik.values.rspo}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="ISPO"
+            name="ispo"
+            placeholder="Pilih Status ISPO"
+            options={ispoOptions}
+            value={formik.values.ispo}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+        </div>
+
+        {/* Tablet & Mobile Layout (2 Columns, 2 Rows on Tablet; 1 Column on Mobile) */}
+        <div className="grid lg:hidden grid-cols-1 md:grid-cols-2 gap-6 border-b border-dashed border-gray-300 py-4">
+          <Select
+            label="Bulan Tanam"
+            name="waktu_tanam_month"
+            placeholder="Pilih Bulan"
+            options={[
+              { label: 'Januari', value: '01' },
+              { label: 'Februari', value: '02' },
+              { label: 'Maret', value: '03' },
+              { label: 'April', value: '04' },
+              { label: 'Mei', value: '05' },
+              { label: 'Juni', value: '06' },
+              { label: 'Juli', value: '07' },
+              { label: 'Agustus', value: '08' },
+              { label: 'September', value: '09' },
+              { label: 'Oktober', value: '10' },
+              { label: 'November', value: '11' },
+              { label: 'Desember', value: '12' },
+            ]}
+            value={formik.values.waktu_tanam_month}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Tahun Tanam"
+            name="waktu_tanam_year"
+            placeholder="Pilih Tahun"
+            options={getYearOptions(2000).reverse()}
+            value={formik.values.waktu_tanam_year}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
           <Select
             label="RSPO"
             name="rspo"
@@ -555,7 +627,7 @@ const DetailKebun = ({
             isRequired
           />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
           <InputText
             label="Mitra Penjualan"

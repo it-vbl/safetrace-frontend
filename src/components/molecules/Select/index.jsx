@@ -64,13 +64,8 @@ const Select = ({
   const [isInsideModal, setIsInsideModal] = useState(false);
   const searchInputRef = useRef(null);
   const formAddOptionRef = useRef(null);
-  const dropdownMenuRef = useRef(null);
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setSelectedValue(value);
-    }
-  }, [value]);
+  const dropdownMenuRefVal = useRef(null);
+  const resizeObserverRef = useRef(null);
 
   const getDropdownZIndex = useCallback(() => {
     const modalEl = document?.getElementById('modal');
@@ -88,8 +83,8 @@ const Select = ({
     const windowHeight = window.innerHeight;
     const modalEl = document?.getElementById('modal');
 
-    const actualDropdownHeight = dropdownMenuRef.current
-      ? dropdownMenuRef.current.getBoundingClientRect().height
+    const actualDropdownHeight = dropdownMenuRefVal.current
+      ? dropdownMenuRefVal.current.getBoundingClientRect().height
       : 300;
 
     const spaceBelow = windowHeight - selectRect.bottom;
@@ -112,6 +107,30 @@ const Select = ({
 
     setIsInsideModal(!!modalEl);
   }, []);
+
+  const dropdownMenuRef = useCallback((node) => {
+    if (node !== null) {
+      dropdownMenuRefVal.current = node;
+
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+
+      const observer = new ResizeObserver(() => {
+        calculateDropdownPosition();
+      });
+      observer.observe(node);
+      resizeObserverRef.current = observer;
+
+      calculateDropdownPosition();
+    } else {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
+      dropdownMenuRefVal.current = null;
+    }
+  }, [calculateDropdownPosition]);
 
   useEffect(() => {
     if (!isDropdownOpen) return;

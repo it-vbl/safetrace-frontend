@@ -12,6 +12,7 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationModal';
 import SearchBar from '@/components/molecules/SearchBar';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
@@ -556,6 +557,7 @@ const KebunPage = () => {
 
         {/* === TABLE CONTAINER === */}
         <div className="relative w-full flex-1">
+          <SectionLoading loading={loading} />
           <AgGridReact
             loading={loading}
             overlayLoadingTemplate="."

@@ -29,6 +29,7 @@ const UserDetailPage = () => {
       is_active: values.status === 'true',
       roles: (values.roles || []).map((r) => parseInt(r, 10)),
       ketua_kelompok_tani: values.ketua_kelompok_tani,
+      pabrik: values.pabrik ? parseInt(values.pabrik, 10) : null,
     };
 
     try {
@@ -110,6 +111,12 @@ const UserDetailPage = () => {
               <ColData
                 label="Ketua Kelompok Tani"
                 value={detailUser?.ketua_kelompok_tani || '-'}
+              />
+            )}
+            {detailUser?.pabrik && (
+              <ColData
+                label="Pabrik"
+                value={detailUser?.pabrik?.nama || '-'}
               />
             )}
             <ColData

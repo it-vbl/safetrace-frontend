@@ -63,14 +63,6 @@ function buildNamaLaporan(jenisLaporan, extra) {
     return '';
 }
 
-export default function TambahLaporanPage() {
-    return (
-        <Suspense fallback={<div className="flex w-full justify-center py-10 text-sm text-gray-500">Memuat data...</div>}>
-            <TambahLaporanContent forcedType="bulanan" />
-        </Suspense>
-    );
-}
-
 function TambahLaporanContent({ forcedType }) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -351,5 +343,13 @@ function TambahLaporanContent({ forcedType }) {
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function LaporanPetaniPage() {
+    return (
+        <Suspense fallback={<div className="flex w-full justify-center py-10 text-sm text-gray-500">Memuat data...</div>}>
+            <TambahLaporanContent forcedType="petani" />
+        </Suspense>
     );
 }

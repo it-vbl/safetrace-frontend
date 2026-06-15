@@ -17,11 +17,12 @@ import SelectMultiple from '@/components/molecules/SelectMultiple';
 import Upload from '@/components/molecules/Upload';
 import useReferences from '@/hooks/useReferences';
 import { createPekerja } from '@/services/pekerja';
+import { getDetailPetani,getListPetani } from '@/services/petani';
 
 const validationSchema = Yup.object({
   nama: Yup.string().required('Nama wajib diisi'),
   jenisKelamin: Yup.string().required('Jenis kelamin wajib dipilih'),
-  // kelompokTani: Yup.string().required('Kelompok tani wajib dipilih'),
+  kelompokTani: Yup.string().required('Kelompok tani wajib dipilih'),
   alamat: Yup.string().required('Alamat wajib diisi'),
   noKTP: Yup.string().required('No. KTP wajib diisi'),
   tempatLahir: Yup.string().required('Tempat lahir wajib diisi'),
@@ -29,7 +30,7 @@ const validationSchema = Yup.object({
   noKK: Yup.string().required('No. KK wajib diisi'),
   statusPekerja: Yup.string().required('Status pekerja wajib dipilih'),
   noWA: Yup.string(),
-  // petaniId: Yup.string().required('Petani wajib dipilih'),
+  petaniId: Yup.string().required('Petani wajib dipilih'),
   jenisPekerjaan: Yup.array().of(Yup.string()),
   jenisApd: Yup.array().of(Yup.string()),
 });
@@ -55,6 +56,7 @@ function TambahPekerjaContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
+  const [petaniOptions, setPetaniOptions] = useState([]);
 
   const {
     jenisKelamin,
@@ -65,13 +67,36 @@ function TambahPekerjaContent() {
     fetchJenisPekerjaan,
     jenisApd,
     fetchJenisApd,
+    kelompokTani,
+    fetchKelompokTani,
   } = useReferences();
+
+  const fetchPetaniByKelompok = async (kelompokTaniValue) => {
+    if (kelompokTaniValue) {
+      try {
+        const response = await getListPetani({
+          kelompok_tani: kelompokTaniValue,
+          page_size: 100,
+        });
+        const options = response.data.data.results.map((item) => ({
+          label: item.nama,
+          value: item.id.toString(),
+        }));
+        setPetaniOptions(options);
+      } catch (error) {
+        console.error('Error fetching petani list:', error);
+        setPetaniOptions([]);
+      }
+    } else {
+      setPetaniOptions([]);
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
       nama: '',
       jenisKelamin: '',
-      // kelompokTani: '',
+      kelompokTani: '',
       alamat: '',
       noKTP: '',
       tempatLahir: '',
@@ -88,7 +113,7 @@ function TambahPekerjaContent() {
       setIsLoading(true);
       try {
         const dataPayload = new FormData();
-        dataPayload.append('petani_id', petaniParam || values.petaniId);
+        dataPayload.append('petani_id', values.petaniId);
         dataPayload.append('nama', values.nama);
         dataPayload.append('jns_kelamin', values.jenisKelamin);
         dataPayload.append('alamat', values.alamat);
@@ -151,12 +176,28 @@ function TambahPekerjaContent() {
     fetchStatusPekerja();
     fetchJenisPekerjaan();
     fetchJenisApd();
-  }, [fetchJenisKelamin, fetchStatusPekerja, fetchJenisPekerjaan, fetchJenisApd]);
+    fetchKelompokTani();
+  }, [fetchJenisKelamin, fetchStatusPekerja, fetchJenisPekerjaan, fetchJenisApd, fetchKelompokTani]);
 
   useEffect(() => {
-    if (petaniParam) {
-      setFieldValue('petaniId', petaniParam);
-    }
+    const loadPetaniDetail = async () => {
+      if (petaniParam) {
+        try {
+          const response = await getDetailPetani(petaniParam);
+          if (response?.data?.status === 'success') {
+            const petani = response.data.data;
+            if (petani?.nama_kelompok) {
+              setFieldValue('kelompokTani', petani.nama_kelompok);
+              await fetchPetaniByKelompok(petani.nama_kelompok);
+              setFieldValue('petaniId', petaniParam);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading detail petani:', error);
+        }
+      }
+    };
+    loadPetaniDetail();
   }, [petaniParam, setFieldValue]);
 
   const crumbs = petaniParam ? [
@@ -185,8 +226,39 @@ function TambahPekerjaContent() {
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+              <Select
+                label="Kelompok Tani"
+                name="kelompokTani"
+                placeholder="Bepekaek Besamo"
+                options={kelompokTani}
+                value={formik.values.kelompokTani}
+                onChange={(e) => {
+                  formik.setFieldValue('kelompokTani', e.target.value);
+                  formik.setFieldValue('petaniId', '');
+                  fetchPetaniByKelompok(e.target.value);
+                }}
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+              />
+              <Select
+                label="Nama Petani"
+                name="petaniId"
+                placeholder="Pilih Petani"
+                options={petaniOptions}
+                value={formik.values.petaniId}
+                onChange={(e) =>
+                  formik.setFieldValue('petaniId', e.target.value)
+                }
+                onBlur={formik.handleBlur}
+                errors={formik.errors}
+                touched={formik.touched}
+                isRequired
+                disabled={!formik.values.kelompokTani}
+              />
               <InputText
-                label="Nama"
+                label="Nama Pekerja"
                 name="nama"
                 placeholder="Agustinus Nery"
                 value={formik.values.nama}
@@ -196,6 +268,8 @@ function TambahPekerjaContent() {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <Select
                 label="Jenis Kelamin"
                 name="jenisKelamin"
@@ -221,38 +295,30 @@ function TambahPekerjaContent() {
                 touched={formik.touched}
                 isRequired
               />
-              {/* <Select
-                label="Kelompok Tani"
-                name="kelompokTani"
-                placeholder="Bepekaek Besamo"
-                options={kelompokTani}
-                value={formik.values.kelompokTani}
-                onChange={(e) => {
-                  formik.setFieldValue('kelompokTani', e.target.value);
-                  fetchPetaniList(e.target.value);
-                }}
+              <InputText
+                label="Tempat Lahir"
+                name="tempatLahir"
+                placeholder="Gonis Rabu"
+                value={formik.values.tempatLahir}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
-              /> */}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
-              {/* <Select
-                label="Petani Pemilik"
-                name="petaniId"
-                placeholder="Pilih Petani"
-                options={petaniOptions}
-                value={formik.values.petaniId}
-                onChange={(e) =>
-                  formik.setFieldValue('petaniId', e.target.value)
-                }
+              <DatePicker
+                label="Tanggal Lahir"
+                name="tanggalLahir"
+                placeholder="08/05/1989"
+                value={formik.values.tanggalLahir}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 errors={formik.errors}
                 touched={formik.touched}
                 isRequired
-                disabled={!formik.values.kelompokTani}
-              /> */}
+              />
               <InputText
                 label="No. KTP"
                 name="noKTP"
@@ -265,30 +331,6 @@ function TambahPekerjaContent() {
                 isRequired
               />
               <InputText
-                label="Tempat Lahir"
-                name="tempatLahir"
-                placeholder="Gonis Rabu"
-                value={formik.values.tempatLahir}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-              />
-              <DatePicker
-                label="Tanggal Lahir"
-                name="tanggalLahir"
-                placeholder="08/05/1989"
-                value={formik.values.tanggalLahir}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
-              <InputText
                 label="No. KK"
                 name="noKK"
                 placeholder="6109011711100021."
@@ -299,6 +341,8 @@ function TambahPekerjaContent() {
                 touched={formik.touched}
                 isRequired
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <Select
                 label="Status Pekerja"
                 name="statusPekerja"
@@ -313,18 +357,6 @@ function TambahPekerjaContent() {
                 touched={formik.touched}
                 isRequired
               />
-              <InputText
-                label="No. WA"
-                name="noWA"
-                placeholder="08123456789"
-                value={formik.values.noWA}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
               <SelectMultiple
                 label="Jenis Pekerjaan"
                 name="jenisPekerjaan"

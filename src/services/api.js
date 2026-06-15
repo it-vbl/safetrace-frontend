@@ -391,9 +391,9 @@ const APIInstance = {
    *   id: [1,2,3]
    * }
    */
-  deleteData: (url, payload, auth = true, toastError = true) => {
+  deleteData: (url, payload, auth = true, toastError = true, showErrorPage = false) => {
     return api
-      .delete(url, { data: payload }, ((auth = true), (toastError = true)))
+      .delete(url, { data: payload })
       .then((response) => {
         return APIResponseValidation(
           response,
@@ -471,7 +471,8 @@ const APIInstance = {
     data = {},
     customConfig = {},
     auth = true,
-    toastError = true
+    toastError = true,
+    showErrorPage = false
   ) => {
     api.defaults.headers['Content-Type'] = 'multipart/form-data';
     api.defaults.timeout = TIMEOUT;

@@ -73,7 +73,7 @@ const Navbar = () => {
   const canSeePeta = mounted && hasPermission(roles, 'peta.dashboard');
 
   return (
-    <div className="flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4">
+    <div className="relative z-50 flex h-[72px] w-full flex-row items-center justify-between border-b border-b-gray-200 bg-white px-4">
       {/* logo */}
 
       <div className="flex w-auto min-w-fit items-center md:flex-1">

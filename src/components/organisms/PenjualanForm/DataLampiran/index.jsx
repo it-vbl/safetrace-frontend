@@ -26,14 +26,24 @@ const DataLampiran = ({
   isSubmitting,
 }) => {
   // State for exactly 6 files
+  // State for exactly 6 files
   const [lampiranFiles, setLampiranFiles] = useState(() => {
     const initialFiles = Array(6).fill(null).map((_, i) => ({ id: i, file: null }));
-    if (lampiranData && lampiranData.length > 0) {
-      lampiranData.forEach((item, i) => {
-        if (i < 6) {
-          initialFiles[i] = { id: i, file: item.file || item };
+    if (lampiranData) {
+      if (Array.isArray(lampiranData) && lampiranData.length > 0) {
+        lampiranData.forEach((item, i) => {
+          if (i < 6) {
+            initialFiles[i] = { id: i, file: item.file || item };
+          }
+        });
+      } else if (typeof lampiranData === 'object') {
+        for (let i = 0; i < 6; i++) {
+          const key = `file_${i + 1}`;
+          if (lampiranData[key]) {
+            initialFiles[i] = { id: i, file: lampiranData[key] };
+          }
         }
-      });
+      }
     }
     return initialFiles;
   });
@@ -129,30 +139,20 @@ const DataLampiran = ({
                   item.file instanceof File
                     ? {
                         name: item.file.name,
-                        size: (item.file.size / 1048576).toFixed(1),
+                        size: item.file.size,
                         uploadDate: new Date().toLocaleDateString('en-US'),
                         value: item.file,
                       }
                     : typeof item.file === 'string'
-                      ? { name: `Lampiran ${index + 1}`, value: item.file }
+                      ? { name: item.file.split('/').pop() || `Lampiran ${index + 1}`, size: 0, value: item.file }
                       : item.file
                 }
                 onChangeValue={(data) => handleChangeFile(item.id, data)}
                 allowedFiles={['image/jpeg', 'image/png', 'application/pdf']}
                 maxSize={10}
                 keyField={`lampiran-${item.id}`}
+                url={typeof item.file === 'string' ? item.file : null}
               />
-              {item.file && (
-                <button
-                  type="button"
-                  onClick={() => handleRemoveFile(item.id)}
-                  className="absolute right-0 top-0 text-red-500 hover:text-red-700 font-bold"
-                  style={{ marginTop: '-4px' }}
-                  title="Hapus"
-                >
-                  ×
-                </button>
-              )}
             </div>
           ))}
         </div>

@@ -22,7 +22,7 @@ export const revalidate = 0;
 
 export default function Layout({ children }) {
   return (
-    <html lang="en" className={DMSans.className}>
+    <html lang="en" className={DMSans.className} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -33,7 +33,7 @@ export default function Layout({ children }) {
           href="//cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ReduxProvider>
           <MobileScreenProvider>
             <ClientLayout>{children}</ClientLayout>

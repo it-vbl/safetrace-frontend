@@ -196,7 +196,7 @@ const CreateKebunTraceabilityContent = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
       <BreadcrumbDetail items={crumbs} />
 
       {/* Stepper Navigation */}

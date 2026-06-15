@@ -11,7 +11,7 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
-import { hasPermission,isViewOnlyRole } from '@/libs/permissions';
+import { hasPermission, isViewOnlyRole } from '@/libs/permissions';
 import { login } from '@/services/auth';
 
 import LogoSipekebun from '../../../public/keling-kumang-logo.png';
@@ -115,7 +115,7 @@ const LoginPage = () => {
         <div className="w-full max-w-lg">
           {/* Logo */}
           <div className="m-4 flex items-center justify-center">
-            <Image src={LogoSipekebun} width="auto" height={38} alt="logo" />
+            <Image src={LogoSipekebun} alt="logo" style={{ height: '38px', width: 'auto' }} />
           </div>
 
           {/* Welcome Card */}
@@ -179,7 +179,7 @@ const LoginPage = () => {
           </div>
 
           <div className="m-4 flex justify-center px-4">
-            <Image src={ImagePartnership} width="auto" height={52} alt="logo" />
+            <Image src={ImagePartnership} alt="logo" style={{ height: '52px', width: 'auto' }} />
           </div>
 
           <div className="text-center text-xs font-medium text-gray-600">

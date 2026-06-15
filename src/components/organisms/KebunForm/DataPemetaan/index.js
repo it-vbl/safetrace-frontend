@@ -157,7 +157,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
           </div>
         </div>
       </div>
-      <div className="flex h-auto w-full flex-row gap-6">
+      <div className="flex h-auto w-full flex-col lg:flex-row gap-6">
         {isManual ? (
           <div className="flex flex-1 flex-col gap-4">
             <Paragraph level={4}>
@@ -172,7 +172,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
             )}
             {!drawFromMap ? (
               <div>
-                <div className="flex flex-row items-end gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-2">
                   <InputText
                     placeholder="Contoh: 1.239685"
                     name="latitude"
@@ -222,7 +222,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
                       return (
                         <div
                           key={`coord-${index}`}
-                          className="flex flex-row items-center gap-4"
+                          className="flex flex-col sm:flex-row sm:items-center gap-4"
                         >
                           {editingIndex === index ? (
                             <>

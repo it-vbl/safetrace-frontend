@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect,useState } from 'react';
+import { useEffect, useMemo,useState } from 'react';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -113,30 +113,97 @@ const ModalEditLampiran = ({
     onClose();
   };
 
+  const getExistingFile = (url, label) => {
+    if (!url) return null;
+    return {
+      name: url.split('/').pop() || label,
+      size: 0,
+      uploadDate: new Date().toISOString(),
+      value: url,
+    };
+  };
+
+  const petaFileData = useMemo(
+    () =>
+      petaFile
+        ? {
+            name: petaFile.name,
+            size: petaFile.size,
+            uploadDate: new Date().toISOString(),
+            value: petaFile,
+          }
+        : getExistingFile(lampiranData?.file_gambar_peta, 'File Peta saat ini'),
+    [petaFile, lampiranData?.file_gambar_peta]
+  );
+
+  const legalitasFileData = useMemo(
+    () =>
+      legalitasFile
+        ? {
+            name: legalitasFile.name,
+            size: legalitasFile.size,
+            uploadDate: new Date().toISOString(),
+            value: legalitasFile,
+          }
+        : getExistingFile(lampiranData?.file_legalitas, 'File Legalitas saat ini'),
+    [legalitasFile, lampiranData?.file_legalitas]
+  );
+
+  const stdbFileData = useMemo(
+    () =>
+      stdbFile
+        ? {
+            name: stdbFile.name,
+            size: stdbFile.size,
+            uploadDate: new Date().toISOString(),
+            value: stdbFile,
+          }
+        : getExistingFile(lampiranData?.file_stdb, 'File STDB saat ini'),
+    [stdbFile, lampiranData?.file_stdb]
+  );
+
+  const rspoFileData = useMemo(
+    () =>
+      rspoFile
+        ? {
+            name: rspoFile.name,
+            size: rspoFile.size,
+            uploadDate: new Date().toISOString(),
+            value: rspoFile,
+          }
+        : getExistingFile(lampiranData?.file_rspo, 'File RSPO saat ini'),
+    [rspoFile, lampiranData?.file_rspo]
+  );
+
+  const ispoFileData = useMemo(
+    () =>
+      ispoFile
+        ? {
+            name: ispoFile.name,
+            size: ispoFile.size,
+            uploadDate: new Date().toISOString(),
+            value: ispoFile,
+          }
+        : getExistingFile(lampiranData?.file_ispo, 'File ISPO saat ini'),
+    [ispoFile, lampiranData?.file_ispo]
+  );
+
   return (
     <BaseModal
       open={isOpen}
       setOpen={handleClose}
       label="UBAH LAMPIRAN KEBUN"
-      className="max-w-4xl"
+      className="w-[95vw] sm:w-[90vw] lg:max-w-4xl max-w-none"
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <div className="rounded-lg border border-gray-300 bg-white p-6">
           <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
-          <div className="grid grid-cols-2 gap-6 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
             <div>
               <Upload
                 label="File Peta"
-                file={
-                  petaFile
-                    ? {
-                        name: petaFile.name,
-                        size: (petaFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: petaFile,
-                      }
-                    : null
-                }
+                file={petaFileData}
+                url={lampiranData?.file_gambar_peta}
                 onChangeValue={(data) => {
                   setPetaFile(data.value);
                   formik.setFieldValue('file_peta', data.value);
@@ -146,7 +213,7 @@ const ModalEditLampiran = ({
                     formik.setFieldError('file_peta', '');
                   }
                 }}
-                allowedFiles={['image/jpeg', 'image/png', '.kml', 'application/vnd.google-earth.kml+xml']}
+                allowedFiles={['.zip', '.geojson', '.kml']}
                 maxSize={10}
                 keyField="peta"
                 name="file_peta"
@@ -156,6 +223,9 @@ const ModalEditLampiran = ({
                   !petaFile
                 }
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Upload .zip / .geojson / .kml file yang sudah disiapkan.
+              </p>
               {formik.touched.file_peta &&
                 formik.errors.file_peta &&
                 !petaFile && (
@@ -167,16 +237,8 @@ const ModalEditLampiran = ({
             <div>
               <Upload
                 label="File Legalitas"
-                file={
-                  legalitasFile
-                    ? {
-                        name: legalitasFile.name,
-                        size: (legalitasFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: legalitasFile,
-                      }
-                    : null
-                }
+                file={legalitasFileData}
+                url={lampiranData?.file_legalitas}
                 onChangeValue={(data) => {
                   setLegalitasFile(data.value);
                   formik.setFieldValue('file_legalitas', data.value);
@@ -207,16 +269,8 @@ const ModalEditLampiran = ({
             <div>
               <Upload
                 label="File STDB"
-                file={
-                  stdbFile
-                    ? {
-                        name: stdbFile.name,
-                        size: (stdbFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: stdbFile,
-                      }
-                    : null
-                }
+                file={stdbFileData}
+                url={lampiranData?.file_stdb}
                 onChangeValue={(data) => {
                   setStdbFile(data.value);
                   formik.setFieldValue('file_stdb', data.value);
@@ -247,16 +301,8 @@ const ModalEditLampiran = ({
             <div>
               <Upload
                 label="File RSPO"
-                file={
-                  rspoFile
-                    ? {
-                        name: rspoFile.name,
-                        size: (rspoFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: rspoFile,
-                      }
-                    : null
-                }
+                file={rspoFileData}
+                url={lampiranData?.file_rspo}
                 onChangeValue={(data) => {
                   setRspoFile(data.value);
                   formik.setFieldValue('file_rspo', data.value);
@@ -287,16 +333,8 @@ const ModalEditLampiran = ({
             <div>
               <Upload
                 label="File ISPO"
-                file={
-                  ispoFile
-                    ? {
-                        name: ispoFile.name,
-                        size: (ispoFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: ispoFile,
-                      }
-                    : null
-                }
+                file={ispoFileData}
+                url={lampiranData?.file_ispo}
                 onChangeValue={(data) => {
                   setIspoFile(data.value);
                   formik.setFieldValue('file_ispo', data.value);

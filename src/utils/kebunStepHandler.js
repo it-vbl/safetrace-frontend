@@ -87,22 +87,6 @@ export const handleStep2 = async () => {
 };
 
 export const handleStep3 = async (values, idKebun) => {
-  if (idKebun) {
-    const formData = new FormData();
-    formData.append('kebun_id', idKebun);
-
-    // Add coordinates data if available
-    if (values.peta && values.peta.length > 0) {
-      formData.append('coordinates', JSON.stringify(values.peta));
-    }
-
-    if (values.petaFile) formData.append('file_peta', values.petaFile);
-    if (values.legalitasFile)
-      formData.append('file_legalitas', values.legalitasFile);
-    if (values.stdbFile) formData.append('file_stdb', values.stdbFile);
-
-    await createKebun(formData);
-    toast.success('Data kebun berhasil dilengkapi');
-    return { success: true, redirect: true };
-  }
+  toast.success('Data kebun berhasil dilengkapi');
+  return { success: true, redirect: true };
 };

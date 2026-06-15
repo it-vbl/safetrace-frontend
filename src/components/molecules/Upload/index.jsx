@@ -30,13 +30,43 @@ const Upload = ({
 
   const validateFile = (file) => {
     if (!file || !file.name) return 'File tidak valid';
+    const _maxSize = maxSize * 1024 * 1024; // MB
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    // Check if allowed by extension or MIME type mapping
+    const isAllowedByExtension = allowedFiles?.some((allowed) => {
+      const cleanAllowed = allowed.toLowerCase();
+      if (cleanAllowed.startsWith('.')) {
+        return cleanAllowed === fileExtension;
+      }
+      if (cleanAllowed === 'application/pdf' && fileExtension === '.pdf') return true;
+      if ((cleanAllowed === 'image/jpeg' || cleanAllowed === 'image/jpg') && (fileExtension === '.jpg' || fileExtension === '.jpeg')) return true;
+      if (cleanAllowed === 'image/png' && fileExtension === '.png') return true;
+      if (cleanAllowed === 'image/webp' && fileExtension === '.webp') return true;
+      if (cleanAllowed === 'application/zip' && fileExtension === '.zip') return true;
+      if (cleanAllowed === 'application/vnd.google-earth.kml+xml' && fileExtension === '.kml') return true;
+      if (cleanAllowed === 'application/geo+json' && fileExtension === '.geojson') return true;
+      return false;
+    });
+
+    if (isAllowedByExtension) {
+      if (file.size > _maxSize) {
+        return `Batas maksimal file yang dapat diunggah yaitu ${maxSize}mb`;
+      }
+      return '';
+    }
+
     if (
       file.name.includes('.shp') ||
       file.name.includes('.zip') ||
       file.name.toLowerCase().endsWith('.kml')
     ) {
+      if (file.size > _maxSize) {
+        return `Batas maksimal file yang dapat diunggah yaitu ${maxSize}mb`;
+      }
       return '';
     }
+
     const validTypes = [
       'application/pdf',
       'image/jpeg',
@@ -65,7 +95,6 @@ const Upload = ({
     const selectedFileType = validTypes.filter((item) =>
       allowedFiles?.some((subString) => item?.includes(subString))
     );
-    const _maxSize = maxSize * 1024 * 1024; // MB
     const isCSVFile =
       file.name.toLowerCase().endsWith('.csv') ||
       file.type === 'text/csv' ||
@@ -202,16 +231,23 @@ const Upload = ({
       (file) => !file.includes('excel') && !file.includes('spreadsheetml')
     );
 
+    const getExtLabel = (file) => {
+      if (file.startsWith('.')) {
+        return file.slice(1).toUpperCase();
+      }
+      return file.split('/')?.[1]?.toUpperCase() || file.toUpperCase();
+    };
+
     if (excelFiles.length > 0) {
       const format = [
         'Excel',
-        ...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase()),
+        ...otherFiles.map(getExtLabel),
       ];
 
       return format.join(', ');
     } else {
       const format = [
-        ...otherFiles.map((file) => file.split('/')?.[1]?.toUpperCase()),
+        ...otherFiles.map(getExtLabel),
       ];
 
       return format.join(', ');
@@ -284,11 +320,14 @@ const Upload = ({
               data-testid="upload-file-size"
             >
               {valueFile
-                ? `Ukuran ${(getFileSize() / 1048576).toFixed(
-                    1
-                  )} MB • Diunggah ${moment(getUploadDate()).format(
-                    'DD/MM/YYYY'
-                  )}`
+                ? (() => {
+                    const sizeInBytes = getFileSize();
+                    const formattedSize = sizeInBytes >= 104858
+                      ? `${(sizeInBytes / 1048576).toFixed(1)} MB`
+                      : `${(sizeInBytes / 1024).toFixed(1)} KB`;
+                    const dateText = `Diunggah ${moment(getUploadDate()).format('DD/MM/YYYY')}`;
+                    return sizeInBytes > 0 ? `Ukuran ${formattedSize} • ${dateText}` : dateText;
+                  })()
                 : `Maksimal ukuran ${maxSize}MB`}
             </Paragraph>
           </div>
