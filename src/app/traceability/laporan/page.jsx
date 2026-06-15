@@ -16,7 +16,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
-import { downloadLaporan,getLaporanList,deleteLaporan } from '@/services/laporan';
+import { deleteLaporan,downloadLaporan,getLaporanList } from '@/services/laporan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 

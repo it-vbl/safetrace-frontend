@@ -71,7 +71,7 @@ export default function TambahLaporanPage() {
     );
 }
 
-export function TambahLaporanContent({ forcedType }) {
+function TambahLaporanContent({ forcedType }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const typeParam = forcedType || searchParams.get('type') || 'bulanan';

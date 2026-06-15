@@ -15,8 +15,8 @@ import {
   createPenjualanPabrik,
   getDetailPenjualanAngkutan,
   getDetailPenjualanKelompokPenyetor,
-  getDetailPenjualanPabrik,
   getDetailPenjualanLampiran,
+  getDetailPenjualanPabrik,
   updateAngkutanPabrik,
   updatePenjualanAngkutan,
 } from '@/services/penjualan';
