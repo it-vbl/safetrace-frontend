@@ -391,6 +391,10 @@ const DiklatPage = () => {
     );
   }, []);
 
+  const TrainerCellRenderer = useCallback((params) => {
+    return params.value || '-';
+  }, []);
+
   const colDefs = useMemo(() => {
     const base = [
       {
@@ -425,11 +429,25 @@ const DiklatPage = () => {
         cellRenderer: StatusCellRenderer,
       },
       {
+        field: 'sl_trainer',
+        headerName: 'SL Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
+      },
+      {
         field: 'pnc',
         headerName: 'P&C (RSPO/ISPO)',
         flex: 1,
         minWidth: 130,
         cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'pnc_trainer',
+        headerName: 'P&C Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
       },
       {
         field: 'pestisida',
@@ -439,11 +457,25 @@ const DiklatPage = () => {
         cellRenderer: StatusCellRenderer,
       },
       {
+        field: 'pestisida_trainer',
+        headerName: 'Pestisida Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
+      },
+      {
         field: 'k3',
         headerName: 'K3',
         flex: 0.6,
         minWidth: 80,
         cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'k3_trainer',
+        headerName: 'K3 Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
       },
       {
         field: 'sop',
@@ -453,11 +485,25 @@ const DiklatPage = () => {
         cellRenderer: StatusCellRenderer,
       },
       {
+        field: 'sop_trainer',
+        headerName: 'SOP Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
+      },
+      {
         field: 'pdg',
         headerName: 'PDG',
         flex: 0.6,
         minWidth: 80,
         cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'pdg_trainer',
+        headerName: 'PDG Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
       },
     ];
 
@@ -475,7 +521,7 @@ const DiklatPage = () => {
     }
 
     return base;
-  }, [ActionsCellRenderer, StatusCellRenderer, isViewOnly]);
+  }, [ActionsCellRenderer, StatusCellRenderer, TrainerCellRenderer, isViewOnly]);
 
   const autoSizeStrategy = useMemo(() => {
     return {
