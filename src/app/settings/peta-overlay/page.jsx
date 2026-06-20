@@ -157,6 +157,7 @@ const PetaOverlayPage = () => {
       minWidth: 150,
       maxWidth: 165,
       flex: 1,
+      pinned: 'left',
     },
     {
       field: 'id',

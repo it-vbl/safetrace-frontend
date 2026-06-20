@@ -137,6 +137,27 @@ const PesanBaruKirimPesanPage = () => {
 
       setIsSubmitting(true);
 
+      // Cek status perangkat Whacenter sebelum melakukan createPesan
+      try {
+        const deviceStatusRes = await WhatsAppService.getWhacenterDeviceStatus(noPengirim);
+        const deviceStatus = deviceStatusRes?.data || deviceStatusRes;
+        const isOnline =
+          typeof deviceStatus?.status === 'string'
+            ? ['online', 'connected', 'true'].includes(deviceStatus.status.toLowerCase())
+            : deviceStatus?.status ?? deviceStatus?.connected ?? false;
+
+        if (!isOnline) {
+          toast.error(deviceStatus?.message || 'device not connected or not found');
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to verify device status:', err);
+        toast.error('Gagal memverifikasi status device Whacenter');
+        setIsSubmitting(false);
+        return;
+      }
+
       const selectedDevice = deviceData.find(
         (d) => String(d.id_device) === String(noPengirim)
       );
@@ -184,7 +205,7 @@ const PesanBaruKirimPesanPage = () => {
         String(status || '').toLowerCase() === 'sent';
 
       toast[sent ? 'success' : 'error'](
-        sent ? 'Pesan WhatsApp terkirim' : 'Gagal mengirim pesan WhatsApp'
+        sent ? 'Pesan WhatsApp terkirim' : (resWa?.data?.message || 'Gagal mengirim pesan WhatsApp')
       );
       router.push('/kabar-tani/kirim-pesan');
     } catch (error) {

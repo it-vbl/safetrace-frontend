@@ -14,10 +14,10 @@ import InputText from '@/components/molecules/InputText';
 import MemberSelector from '@/components/molecules/MemberSelector';
 import RadioButton from '@/components/molecules/RadioButton';
 import Select from '@/components/molecules/Select';
-import { createBroadcast } from '@/services/broadcast';
+import { createBroadcast, updateBroadcast } from '@/services/broadcast';
 import { getDeviceList } from '@/services/device';
 import { getGrupKontakDetail, getGrupKontakList } from '@/services/grup';
-import { getKontakList } from '@/services/kontak';
+import { getKontakList, updateKontak } from '@/services/kontak';
 import WhatsAppService from '@/services/whatsapp';
 import { formatPhoneNumber } from '@/utils/whatsapp';
 
@@ -105,9 +105,75 @@ const PesanBaruPage = () => {
         const phone =
           member?.phone || member?.no_wa || member?.no_hp || member?.telepon;
         const name = member?.name || member?.nama || '';
-        if (!phone) continue;
-        const res = await sendWhatsAppMessage(deviceId, phone, message);
-        results.push({ name, phone, status: res?.data?.status || 'sent', res });
+        if (!phone) {
+          results.push({ name, phone, status: 'failed', error: new Error('Nomor telepon kosong') });
+          toast.error(`Gagal mengirim ke ${name || 'kontak'}: Nomor telepon kosong`);
+          continue;
+        }
+
+        const contactId = member?.id ?? member?.kontak_id ?? member?.id_kontak;
+        const orig = availableMembers.find((c) => String(c.id) === String(contactId));
+        if (orig?.wa_valid === false) {
+          results.push({ name, phone, status: 'failed', error: new Error('Nomor WhatsApp tidak valid') });
+          toast.error(`Gagal mengirim ke ${name || 'kontak'}: Nomor WhatsApp tidak valid`);
+          continue;
+        }
+
+        try {
+          const res = await sendWhatsAppMessage(deviceId, phone, message);
+          const isSent = res?.data?.status === true || String(res?.data?.status).toLowerCase() === 'success' || String(res?.data?.status).toLowerCase() === 'sent';
+          results.push({ name, phone, status: isSent ? 'sent' : 'failed', res });
+          if (isSent) {
+            toast.success(`Pesan terkirim ke ${phone}`);
+          } else {
+            const waMsg = res?.data?.message || 'Gagal mengirim pesan WhatsApp';
+            toast.error(`Gagal mengirim ke ${phone}: ${waMsg}`);
+
+            const isInvalidNumber =
+              String(waMsg).toLowerCase().includes('not valid') ||
+              String(waMsg).toLowerCase().includes('tidak valid') ||
+              String(waMsg).toLowerCase().includes('invalid');
+            if (isInvalidNumber && contactId) {
+              try {
+                const payload = {
+                  nama: orig?.nama || member?.nama || member?.name || '',
+                  no_wa: phone,
+                  jns_kelamin: orig?.jns_kelamin || member?.jns_kelamin || member?.gender || '1',
+                  sumber: orig?.sumber || member?.sumber || '1',
+                  wa_valid: false,
+                };
+                await updateKontak(contactId, payload);
+              } catch (updateErr) {
+                console.error('Failed to update contact wa_valid status:', updateErr);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`✗ Gagal kirim ke ${phone}:`, error);
+          results.push({ name, phone, status: 'failed', error });
+          const errMsg = error?.response?.data?.message || error?.message || 'Terjadi kesalahan';
+          toast.error(`Gagal mengirim ke ${phone}: ${errMsg}`);
+
+          const isInvalidNumber =
+            String(errMsg).toLowerCase().includes('not valid') ||
+            String(errMsg).toLowerCase().includes('tidak valid') ||
+            String(errMsg).toLowerCase().includes('invalid');
+          if (isInvalidNumber && contactId) {
+            try {
+              const payload = {
+                nama: orig?.nama || member?.nama || member?.name || '',
+                no_wa: phone,
+                jns_kelamin: orig?.jns_kelamin || member?.jns_kelamin || member?.gender || '1',
+                sumber: orig?.sumber || member?.sumber || '1',
+                wa_valid: false,
+              };
+              await updateKontak(contactId, payload);
+            } catch (updateErr) {
+              console.error('Failed to update contact wa_valid status:', updateErr);
+            }
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
       return { data: { results } };
     } catch (error) {
@@ -115,6 +181,7 @@ const PesanBaruPage = () => {
       throw error;
     }
   };
+
 
   const schemaValidation = Yup.object().shape({
     no_pengirim: Yup.string().required('No pengirim harus diisi'),
@@ -144,6 +211,27 @@ const PesanBaruPage = () => {
         setSubmitting(true);
         if (!values.no_pengirim) {
           toast.error('Pilih device pengirim terlebih dahulu');
+          setSubmitting(false);
+          return;
+        }
+
+        // Cek status perangkat Whacenter sebelum melakukan createBroadcast
+        try {
+          const deviceStatusRes = await WhatsAppService.getWhacenterDeviceStatus(values.no_pengirim);
+          const deviceStatus = deviceStatusRes?.data || deviceStatusRes;
+          const isOnline =
+            typeof deviceStatus?.status === 'string'
+              ? ['online', 'connected', 'true'].includes(deviceStatus.status.toLowerCase())
+              : deviceStatus?.status ?? deviceStatus?.connected ?? false;
+
+          if (!isOnline) {
+            toast.error(deviceStatus?.message || 'device not connected or not found');
+            setSubmitting(false);
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to verify device status:', err);
+          toast.error('Gagal memverifikasi status device Whacenter');
           setSubmitting(false);
           return;
         }
@@ -190,7 +278,7 @@ const PesanBaruPage = () => {
           jenis_penerima: jenisPenerima,
           device: selectedDevice?.id,
           kontak: recipientIds,
-          terkirim: true,
+          terkirim: false, // Set false initially
           ...(jenisPenerima === '2' && {
             grup: selectedGroups
               .map((g) => {
@@ -201,6 +289,8 @@ const PesanBaruPage = () => {
         };
 
         const response = await createBroadcast(payload);
+        const broadcastId = response?.data?.data?.id || response?.data?.id;
+
         if (
           response?.status === 200 ||
           response?.status === 201 ||
@@ -264,17 +354,78 @@ const PesanBaruPage = () => {
                   continue;
                 }
 
+                if (member?.wa_valid === false) {
+                  results.push({ success: false, phone });
+                  toast.error(`Gagal mengirim ke ${member?.nama || member?.name || 'kontak'}: Nomor WhatsApp tidak valid`);
+                  continue;
+                }
+
                 try {
-                  await sendWhatsAppMessage(
+                  const res = await sendWhatsAppMessage(
                     values.no_pengirim,
                     phone,
                     values.isi_pesan
                   );
-                  results.push({ success: true, phone });
+                  const isSent = res?.data?.status === true || String(res?.data?.status).toLowerCase() === 'success' || String(res?.data?.status).toLowerCase() === 'sent';
+                  results.push({ success: isSent, phone, res });
+                  if (isSent) {
+                    toast.success(`Pesan terkirim ke ${phone}`);
+                  } else {
+                    const waMsg = res?.data?.message || 'Gagal mengirim pesan WhatsApp';
+                    toast.error(`Gagal mengirim ke ${phone}: ${waMsg}`);
+
+                    const isInvalidNumber =
+                      String(waMsg).toLowerCase().includes('not valid') ||
+                      String(waMsg).toLowerCase().includes('tidak valid') ||
+                      String(waMsg).toLowerCase().includes('invalid');
+                    if (isInvalidNumber) {
+                      try {
+                        const contactId = member?.id ?? member?.kontak_id ?? member?.id_kontak;
+                        if (contactId) {
+                          const payload = {
+                            nama: member?.nama || member?.name || '',
+                            no_wa: phone,
+                            jns_kelamin: member?.jns_kelamin || member?.gender || '1',
+                            sumber: member?.sumber || '1',
+                            wa_valid: false,
+                          };
+                          await updateKontak(contactId, payload);
+                        }
+                      } catch (updateErr) {
+                        console.error('Failed to update contact wa_valid status:', updateErr);
+                      }
+                    }
+                  }
                 } catch (err) {
                   console.error(`✗ Gagal kirim ke ${phone}:`, err);
                   results.push({ success: false, phone, error: err });
+                  const errMsg = err?.response?.data?.message || err?.message || 'Terjadi kesalahan';
+                  toast.error(`Gagal mengirim ke ${phone}: ${errMsg}`);
+
+                  const isInvalidNumber =
+                    String(errMsg).toLowerCase().includes('not valid') ||
+                    String(errMsg).toLowerCase().includes('tidak valid') ||
+                    String(errMsg).toLowerCase().includes('invalid');
+                  if (isInvalidNumber) {
+                    try {
+                      const contactId = member?.id ?? member?.kontak_id ?? member?.id_kontak;
+                      if (contactId) {
+                        const payload = {
+                          nama: member?.nama || member?.name || '',
+                          no_wa: phone,
+                          jns_kelamin: member?.jns_kelamin || member?.gender || '1',
+                          sumber: member?.sumber || '1',
+                          wa_valid: false,
+                        };
+                        await updateKontak(contactId, payload);
+                      }
+                    } catch (updateErr) {
+                      console.error('Failed to update contact wa_valid status:', updateErr);
+                    }
+                  }
                 }
+                // Tambahkan delay 1 detik antar pesan untuk mencegah rate limiting
+                await new Promise((resolve) => setTimeout(resolve, 1000));
               }
 
               successCount = results.filter((r) => r.success).length;
@@ -288,9 +439,17 @@ const PesanBaruPage = () => {
                   }`
                 );
               } else {
-                toast.error(
-                  'Gagal mengirim pesan WhatsApp ke semua anggota grup'
-                );
+                const firstFailed = results.find((r) => !r.success && !r.skipped);
+                const errMsg = firstFailed?.res?.data?.message || firstFailed?.error?.response?.data?.message || firstFailed?.error?.message || 'Gagal mengirim pesan WhatsApp ke semua anggota grup';
+                toast.error(errMsg);
+              }
+
+              if (broadcastId) {
+                await updateBroadcast(broadcastId, {
+                  ...payload,
+                  terkirim: true,
+                  gagal: successCount === 0 && totalMembers > 0,
+                });
               }
             } catch (waError) {
               console.error('Gagal kirim WhatsApp ke anggota grup:', waError);
@@ -302,10 +461,6 @@ const PesanBaruPage = () => {
             setSubmitting(false);
             return;
           }
-
-          toast.success(
-            'Berhasil membuat campaign. Mengirim pesan WhatsApp ke penerima...'
-          );
 
           try {
             const deviceIdForWhatsApp = values.no_pengirim;
@@ -329,7 +484,17 @@ const PesanBaruPage = () => {
                 }`
               );
             } else {
-              toast.error('Gagal mengirim pesan WhatsApp ke semua penerima');
+              const firstFailed = waResults.find((r) => r.status === 'failed');
+              const errMsg = firstFailed?.res?.data?.message || firstFailed?.error?.response?.data?.message || firstFailed?.error?.message || 'Gagal mengirim pesan WhatsApp ke semua penerima';
+              toast.error(errMsg);
+            }
+
+            if (broadcastId) {
+              await updateBroadcast(broadcastId, {
+                ...payload,
+                terkirim: true,
+                gagal: successCount === 0 && selectedMembers.length > 0,
+              });
             }
           } catch (waError) {
             console.error('Gagal kirim WhatsApp:', waError);

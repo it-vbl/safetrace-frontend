@@ -107,6 +107,7 @@ const Users = () => {
       headerName: '',
       cellRenderer: ActionsCellRenderer,
       width: 128,
+      pinned: 'left',
     },
     { field: 'username', headerName: 'Username' },
     { field: 'email', headerName: 'Email' },

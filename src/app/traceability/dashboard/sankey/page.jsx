@@ -135,11 +135,37 @@ const SankeyPage = () => {
   }, [startDate, endDate, selectedKelompok, selectedPabrik]);
 
   const handleChangeStartDate = (e) => {
-    setStartDate(moment(e.target.value).format('DD-MM-YYYY'));
+    const newStart = moment(e.target.value);
+    const today = moment();
+    
+    const startToSet = newStart.isAfter(today) ? today : newStart;
+    setStartDate(startToSet.format('DD-MM-YYYY'));
+
+    const currentEnd = moment(endDate, 'DD-MM-YYYY');
+    if (currentEnd.isBefore(startToSet) || currentEnd.diff(startToSet, 'days') > 31) {
+      let newEnd = moment(startToSet).add(30, 'days');
+      if (newEnd.isAfter(today)) {
+        newEnd = today;
+      }
+      if (newEnd.isBefore(startToSet)) {
+        newEnd = startToSet;
+      }
+      setEndDate(newEnd.format('DD-MM-YYYY'));
+    }
   };
 
   const handleChangeEndDate = (e) => {
-    setEndDate(moment(e.target.value).format('DD-MM-YYYY'));
+    const newEnd = moment(e.target.value);
+    const today = moment();
+
+    const endToSet = newEnd.isAfter(today) ? today : newEnd;
+    setEndDate(endToSet.format('DD-MM-YYYY'));
+
+    const currentStart = moment(startDate, 'DD-MM-YYYY');
+    if (currentStart.isAfter(endToSet) || endToSet.diff(currentStart, 'days') > 31) {
+      const newStart = moment(endToSet).subtract(30, 'days');
+      setStartDate(newStart.format('DD-MM-YYYY'));
+    }
   };
 
   const handleExportPDF = async () => {
@@ -271,10 +297,7 @@ const SankeyPage = () => {
                     value={startDate}
                     onChange={handleChangeStartDate}
                     inputContainerClassName="!h-[40px]"
-                    maxDate={moment(endDate, 'DD-MM-YYYY').format('YYYY-MM-DD')}
-                    minDate={moment(endDate, 'DD-MM-YYYY')
-                      .subtract(31, 'days')
-                      .format('YYYY-MM-DD')}
+                    maxDate={moment().format('YYYY-MM-DD')}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -287,12 +310,7 @@ const SankeyPage = () => {
                     value={endDate}
                     onChange={handleChangeEndDate}
                     inputContainerClassName="!h-[40px]"
-                    minDate={moment(startDate, 'DD-MM-YYYY').format(
-                      'YYYY-MM-DD'
-                    )}
-                    maxDate={moment(startDate, 'DD-MM-YYYY')
-                      .add(31, 'days')
-                      .format('YYYY-MM-DD')}
+                    maxDate={moment().format('YYYY-MM-DD')}
                   />
                 </div>
               </div>

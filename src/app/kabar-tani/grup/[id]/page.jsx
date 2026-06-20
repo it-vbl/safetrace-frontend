@@ -38,7 +38,9 @@ const GrupDetailPage = () => {
   const [membersPageSize, setMembersPageSize] = useState(10);
 
   const autoSizeStrategy = useMemo(() => {
-    return { type: 'fitCellContents' };
+    return {
+      type: 'fitGridWidth',
+    };
   }, []);
 
   const colDefs = [
@@ -49,7 +51,6 @@ const GrupDetailPage = () => {
       minWidth: 220,
       headerClass: 'text-xs text-gray-600',
       cellClass: 'text-sm text-gray-800',
-      suppressSizeToFit: true,
     },
     {
       field: 'nomor_wa',
@@ -58,7 +59,6 @@ const GrupDetailPage = () => {
       minWidth: 180,
       headerClass: 'text-xs text-gray-600',
       cellClass: 'text-sm text-gray-800',
-      suppressSizeToFit: true,
     },
   ];
 
@@ -261,14 +261,12 @@ const GrupDetailPage = () => {
                     </span>
                   )}
                   {!loading && !error && members.length > 0 && (
-                    <div className="ag-theme-quartz relative w-full overflow-x-auto">
-                      <div className="min-w-[320px]">
+                    <div className="ag-theme-quartz relative w-full">
                         <AgGridReact
                           loading={loading}
                           overlayLoadingTemplate="."
                           autoSizeStrategy={autoSizeStrategy}
                           domLayout="autoHeight"
-                          rowHeight={36}
                           defaultColDef={defaultColDef}
                           rowData={members
                             .slice(
@@ -300,7 +298,6 @@ const GrupDetailPage = () => {
                             }}
                           />
                         </div>
-                      </div>
                     </div>
                   )}
                 </div>

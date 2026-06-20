@@ -37,23 +37,20 @@ const KirimPesanPage = () => {
         const createdAt = item?.created_at || item?.waktu_pengiriman;
         const waktuPengiriman = createdAt
           ? new Date(createdAt).toLocaleString('id-ID', {
-              hour: '2-digit',
-              minute: '2-digit',
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            })
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
           : '-';
-
-        const pengirimNama = item?.device_data?.nama;
-        const pengirimNo = item?.device_data?.no_wa;
 
         const statusLabel =
           item?.terkirim === true
             ? 'Terkirim'
             : item?.gagal === true
-            ? 'Gagal'
-            : 'Dalam Antrian';
+              ? 'Gagal'
+              : 'Dalam Antrian';
 
         return {
           id: item?.id,
@@ -63,8 +60,10 @@ const KirimPesanPage = () => {
               .toString()
               .padStart(4, '0')}`,
           no_pengirim:
-            `${pengirimNama || '-'}` + (pengirimNo ? ` - ${pengirimNo}` : ''),
-          no_penerima: item?.kontak_data?.no_wa || '-',
+            `${item?.device_data?.nama || '-'}` + (item?.device_data?.no_wa ? ` - ${item.device_data.no_wa}` : ''),
+          no_penerima:
+            `${item?.kontak_data?.nama || '-'}` +
+            (item?.kontak_data?.no_wa ? ` - ${item.kontak_data.no_wa}` : ''),
           waktu_pengiriman: waktuPengiriman,
           status: statusLabel,
         };
@@ -130,7 +129,7 @@ const KirimPesanPage = () => {
     setSelectedItem(null);
   };
 
-  const actionsCellRenderer = (params) => {
+  const ActionsCellRenderer = (params) => {
     return (
       <div className="flex h-full items-center gap-2">
         <button
@@ -163,38 +162,55 @@ const KirimPesanPage = () => {
 
   const colDefs = [
     {
+      field: 'actions',
       headerName: '',
-      cellRenderer: actionsCellRenderer,
-      flex: 0.8,
-      minWidth: 30,
-      sortable: false,
-      filter: false,
+      cellRenderer: ActionsCellRenderer,
+      width: 120,
+      minWidth: 100,
+      maxWidth: 150,
       suppressSizeToFit: false,
       pinned: 'left',
     },
-    { field: 'id_pesan', headerName: 'Id Pesan', flex: 1, minWidth: 120 },
+    {
+      field: 'id_pesan',
+      headerName: 'Id Pesan',
+      width: 140,
+      minWidth: 120,
+      maxWidth: 160,
+    },
     {
       field: 'no_pengirim',
       headerName: 'No. Pengirim',
-      flex: 2,
-      minWidth: 220,
+      flex: 4,
+      minWidth: 320,
     },
     {
       field: 'no_penerima',
       headerName: 'No. Penerima',
-      flex: 1.5,
-      minWidth: 180,
+      flex: 4,
+      minWidth: 320,
     },
     {
       field: 'waktu_pengiriman',
       headerName: 'Waktu Pengiriman',
-      flex: 1.5,
-      minWidth: 180,
+      width: 180,
+      minWidth: 150,
+      maxWidth: 200,
     },
-    { field: 'status', headerName: 'Status', flex: 1, minWidth: 120 },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      minWidth: 100,
+      maxWidth: 140,
+    },
   ];
 
-  const autoSizeStrategy = useMemo(() => ({ type: 'fitCellContents' }), []);
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitGridWidth',
+    };
+  }, []);
 
   return (
     <div className="relative !min-h-[calc(100%-72px)] w-full max-w-full">
@@ -223,20 +239,17 @@ const KirimPesanPage = () => {
         </div>
 
         {/* Tabel */}
-        <div className="relative w-full flex-1 overflow-x-auto">
+        <div className="relative w-full flex-1">
           <SectionLoading loading={loading} />
-          <div className="min-w-[320px]">
-            <AgGridReact
-              loading={loading}
-              overlayLoadingTemplate="."
-              autoSizeStrategy={autoSizeStrategy}
-              defaultColDef={defaultColDef}
-              domLayout="autoHeight"
-              rowHeight={36}
-              rowData={rows}
-              columnDefs={colDefs}
-            />
-          </div>
+          <AgGridReact
+            loading={loading}
+            overlayLoadingTemplate="."
+            autoSizeStrategy={autoSizeStrategy}
+            defaultColDef={defaultColDef}
+            domLayout="autoHeight"
+            rowData={rows}
+            columnDefs={colDefs}
+          />
         </div>
 
         {/* Pagination */}

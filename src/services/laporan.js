@@ -13,6 +13,16 @@ export const downloadLaporan = (id, payload = {}) => {
   });
 };
 
+export const downloadLaporanStdb = (status) => {
+  return api.get(`/laporan/stdb/excel/`, {
+    params: { status },
+    responseType: 'blob',
+  });
+};
+
+export const getLaporanPetani = (id) =>
+  api.get(`/laporan/petani/${id}/`);
+
 // *** POST ***
 
 export const createLaporan = (payload) =>
@@ -22,4 +32,5 @@ export const createLaporan = (payload) =>
 
 export const deleteLaporan = (id, payload) =>
   api.deleteData(`/laporan/statistik/${id}/delete/`, payload);
+
 

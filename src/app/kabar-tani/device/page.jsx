@@ -156,9 +156,11 @@ const DevicePage = () => {
           ? ['online', 'connected', 'true'].includes(data.status.toLowerCase())
           : data?.status ?? data?.connected ?? false;
 
-      toast[statusVal ? 'success' : 'info'](
-        statusVal ? 'Perangkat terhubung' : 'Perangkat belum terhubung'
-      );
+      if (statusVal) {
+        toast.success('Perangkat terhubung');
+      } else {
+        toast.error(data?.message || 'Perangkat belum terhubung');
+      }
 
       try {
         const payload = {
@@ -182,7 +184,7 @@ const DevicePage = () => {
       );
     } catch (error) {
       console.error('Gagal cek status perangkat:', error);
-      toast.error('Gagal cek status perangkat');
+      toast.error(error?.response?.data?.message || error?.message || 'Gagal cek status perangkat');
     }
   };
 
@@ -194,7 +196,17 @@ const DevicePage = () => {
     }
     try {
       setIsGeneratingQR(true);
-      await WhatsAppService.relogWhacenterDevice(whacenterId);
+      const res = await WhatsAppService.relogWhacenterDevice(whacenterId);
+      const data = res?.data || res;
+      const ok =
+        data?.status === true ||
+        String(data?.status || '').toLowerCase() === 'success';
+
+      if (!ok) {
+        toast.error(data?.message || 'Gagal melakukan relog perangkat');
+        return;
+      }
+
       await new Promise((r) => setTimeout(r, 1500));
       const qrUrl = `${WhatsAppService.getWhacenterQRCodeUrl(
         whacenterId
@@ -205,7 +217,7 @@ const DevicePage = () => {
       toast.info('QR siap dipindai. Buka aplikasi WhatsApp untuk scan.');
     } catch (error) {
       console.error('Gagal relog perangkat:', error);
-      toast.error('Gagal melakukan relog perangkat');
+      toast.error(error?.response?.data?.message || error?.message || 'Gagal melakukan relog perangkat');
     } finally {
       setIsGeneratingQR(false);
     }
@@ -217,7 +229,7 @@ const DevicePage = () => {
     setSelectedItem(null);
   };
 
-  const actionsCellRenderer = (params) => {
+  const ActionsCellRenderer = (params) => {
     return (
       <div className="flex h-full items-center gap-2">
         <button
@@ -257,36 +269,40 @@ const DevicePage = () => {
 
   const colDefs = [
     {
+      field: 'actions',
       headerName: '',
-      cellRenderer: actionsCellRenderer,
-      flex: 1.5,
-      minWidth: 180,
-      sortable: false,
-      filter: false,
+      cellRenderer: ActionsCellRenderer,
+      width: 320,
+      minWidth: 300,
+      maxWidth: 350,
+      suppressSizeToFit: false,
+      pinned: 'left',
     },
     {
       field: 'id_device',
       headerName: 'Id Device',
-      flex: 1,
-      minWidth: 120,
+      flex: 3,
+      minWidth: 280,
     },
     {
       field: 'nama_device',
       headerName: 'Nama Device',
       flex: 2,
-      minWidth: 200,
+      minWidth: 150,
     },
     {
       field: 'no_handphone',
       headerName: 'No. Handphone',
-      flex: 2,
-      minWidth: 200,
+      width: 160,
+      minWidth: 140,
+      maxWidth: 180,
     },
     {
       field: 'status',
       headerName: 'Status',
-      flex: 1,
-      minWidth: 100,
+      width: 130,
+      minWidth: 110,
+      maxWidth: 150,
       cellRenderer: (params) => {
         const status = params.value;
         const statusClass =
@@ -307,7 +323,7 @@ const DevicePage = () => {
 
   const autoSizeStrategy = useMemo(() => {
     return {
-      type: 'fitCellContents',
+      type: 'fitGridWidth',
     };
   }, []);
 
@@ -679,19 +695,16 @@ const DevicePage = () => {
         </div>
 
         {/* Table section */}
-        <div className="relative w-full flex-1 overflow-x-auto">
+        <div className="relative w-full flex-1">
           <SectionLoading loading={loading} />
-          <div className="min-w-[320px]">
-            <AgGridReact
-              loading={loading}
-              columnDefs={colDefs}
-              overlayLoadingTemplate="."
-              autoSizeStrategy={autoSizeStrategy}
-              domLayout="autoHeight"
-              rowHeight={36}
-              rowData={deviceData}
-            />
-          </div>
+          <AgGridReact
+            loading={loading}
+            columnDefs={colDefs}
+            overlayLoadingTemplate="."
+            autoSizeStrategy={autoSizeStrategy}
+            domLayout="autoHeight"
+            rowData={deviceData}
+          />
         </div>
 
         {/* Pagination section */}

@@ -297,7 +297,7 @@ const PekerjaPage = () => {
         </div>
         {!isViewOnly && (
           <div
-            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            className="cursor-pointer text-[10px] font-bold uppercase text-red-600 underline hover:text-red-700 sm:text-[12px]"
             onClick={() => handleDeleteClicked(e.data)}
           >
             HAPUS
@@ -313,10 +313,11 @@ const PekerjaPage = () => {
         field: 'actions',
         headerName: '',
         cellRenderer: ActionsCellRenderer,
-        width: 80,
+        width: 120,
         minWidth: 100,
-        maxWidth: 130,
+        maxWidth: 150,
         suppressSizeToFit: false,
+        pinned: 'left',
       },
       {
         field: 'pemilik_kebun',
@@ -454,37 +455,37 @@ const PekerjaPage = () => {
             title="Total Pekerja"
             value={statistik.total_pekerja}
             isActive={false}
-            onClick={() => {}}
+            onClick={() => { }}
           />
           <StatCard
             title="Laki - Laki"
             value={statistik.total_pekerja_pria}
             isActive={false}
-            onClick={() => {}}
+            onClick={() => { }}
           />
           <StatCard
             title="Perempuan"
             value={statistik.total_pekerja_wanita}
             isActive={false}
-            onClick={() => {}}
+            onClick={() => { }}
           />
           <StatCard
             title="Keluarga"
             value={statistik.total_status_pekerja_keluarga}
             isActive={false}
-            onClick={() => {}}
+            onClick={() => { }}
           />
           <StatCard
             title="Buruh Tetap"
             value={statistik.total_status_pekerja_buruh_tetap}
             isActive={false}
-            onClick={() => {}}
+            onClick={() => { }}
           />
           <StatCard
             title="Buruh Lepas"
             value={statistik.total_status_pekerja_buruh_harian_lepas}
             isActive={false}
-            onClick={() => {}}
+            onClick={() => { }}
           />
         </div>
 

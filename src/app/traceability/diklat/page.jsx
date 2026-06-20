@@ -359,7 +359,7 @@ const DiklatPage = () => {
     return (
       <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
         <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-blue-600 underline hover:text-blue-800 sm:text-[12px]"
+          className="cursor-pointer text-[10px] font-bold uppercase text-primary underline hover:text-primary/80 sm:text-[12px]"
           onClick={() => handleUbahClicked(e.data)}
         >
           UBAH
@@ -512,12 +512,12 @@ const DiklatPage = () => {
         field: 'actions',
         headerName: '',
         cellRenderer: ActionsCellRenderer,
-        width: 80,
-        minWidth: 70,
-        maxWidth: 100,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 150,
         suppressSizeToFit: false,
         pinned: 'left',
-      });
+      },);
     }
 
     return base;
