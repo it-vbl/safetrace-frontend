@@ -442,7 +442,6 @@ const D3Sankey = ({ data }) => {
     content: null,
   });
   const [sankeyGraph, setSankeyGraph] = useState({ nodes: [], links: [] });
-  const totalValueRef = useRef(0);
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -531,7 +530,6 @@ const D3Sankey = ({ data }) => {
       .nodeId((d) => d.id);
 
     const graph = sankeyGenerator(sankeyData);
-    totalValueRef.current = graph.links.reduce((sum, l) => sum + l.value, 0);
     setSankeyGraph(graph);
   }, [data, dimensions]);
 
@@ -539,7 +537,6 @@ const D3Sankey = ({ data }) => {
     if (sankeyGraph.nodes.length === 0) return;
 
     const { nodes, links } = sankeyGraph;
-    const totalValue = totalValueRef.current;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
@@ -563,7 +560,6 @@ const D3Sankey = ({ data }) => {
           target: { id: d.target.id },
           value: d.value,
         });
-        const percentage = ((d.value / totalValue) * 100).toFixed(1);
         setTooltip({
           visible: true,
           x: event.pageX,
@@ -573,7 +569,6 @@ const D3Sankey = ({ data }) => {
             source: d.source.id,
             target: d.target.id,
             value: d.value,
-            percentage,
           },
         });
       })
@@ -603,7 +598,6 @@ const D3Sankey = ({ data }) => {
       .on('mouseenter', function (event, d) {
         setHoveredNode(d.id);
         const nodeValue = d.value || 0;
-        const percentage = ((nodeValue / totalValue) * 100).toFixed(1);
         setTooltip({
           visible: true,
           x: event.pageX,
@@ -613,7 +607,6 @@ const D3Sankey = ({ data }) => {
             name: d.id,
             category: d.category,
             value: nodeValue,
-            percentage,
             sourceLinks: d.sourceLinks?.length || 0,
             targetLinks: d.targetLinks?.length || 0,
           },
@@ -790,10 +783,6 @@ const Tooltip = ({ x, y, content, containerRef }) => {
             <p>
               Volume: <span className="font-medium">{content.value}</span>
             </p>
-            <p>
-              % Total:{' '}
-              <span className="font-medium">{content.percentage}%</span>
-            </p>
           </div>
         </>
       ) : (
@@ -804,10 +793,6 @@ const Tooltip = ({ x, y, content, containerRef }) => {
           <div className="mt-2 border-t border-gray-100 pt-2 text-xs text-gray-600">
             <p>
               Volume: <span className="font-medium">{content.value}</span>
-            </p>
-            <p>
-              % Total:{' '}
-              <span className="font-medium">{content.percentage}%</span>
             </p>
           </div>
         </>
