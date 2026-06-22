@@ -11,49 +11,29 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
-import { createLaporan } from '@/services/laporan';
+import { getLaporanPetani } from '@/services/laporan';
+import { getListPetani } from '@/services/petani';
+import { generateLaporanPetaniPDF } from '@/utils/generateLaporanPetaniPDF';
 
-const JENIS_LAPORAN_OPTIONS = [
-    { value: 'statistik_bulanan', label: 'Statistik Bulanan' },
-    { value: 'laporan_petani', label: 'Laporan Petani' },
-    { value: 'stdb', label: 'STDB' },
-];
-
-const BULAN_OPTIONS = [
-    { value: '01', label: 'Januari' }, { value: '02', label: 'Februari' },
-    { value: '03', label: 'Maret' }, { value: '04', label: 'April' },
-    { value: '05', label: 'Mei' }, { value: '06', label: 'Juni' },
-    { value: '07', label: 'Juli' }, { value: '08', label: 'Agustus' },
-    { value: '09', label: 'September' }, { value: '10', label: 'Oktober' },
-    { value: '11', label: 'November' }, { value: '12', label: 'Desember' },
-];
 
 const TAHUN_OPTIONS = Array.from({ length: 10 }, (_, i) => {
     const y = new Date().getFullYear() - i;
     return { value: String(y), label: String(y) };
 });
 
-const PETANI_OPTIONS = [
-    { value: '1', label: 'Agustinus Nery' },
-    { value: '2', label: 'Budi Santoso' },
-    { value: '3', label: 'Citra Dewi' },
-];
-
 const STATUS_STDB_OPTIONS = [
     { value: 'belum_terbit', label: 'Belum Terbit' },
     { value: 'sudah_terbit', label: 'Sudah Terbit' },
-    { value: 'proses', label: 'Dalam Proses' },
 ];
 
 function buildNamaLaporan(jenisLaporan, extra) {
-    const jenisLabel = JENIS_LAPORAN_OPTIONS.find(o => o.value === jenisLaporan)?.label ?? '';
 
     if (jenisLaporan === 'statistik_bulanan') {
-        const bulanLabel = BULAN_OPTIONS.find(o => o.value === extra.bulan)?.label ?? '';
-        if (bulanLabel && extra.tahun) return `${jenisLabel} Bulan ${bulanLabel} ${extra.tahun}`;
+        const bulanLabel = (extra.pilihanBulan || []).find(o => o.value === extra.bulan)?.label ?? '';
+        if (bulanLabel && extra.tahun) return `Laporan Statistik ${bulanLabel} ${extra.tahun}`;
     }
     if (jenisLaporan === 'laporan_petani') {
-        const petaniLabel = PETANI_OPTIONS.find(o => o.value === extra.petani)?.label ?? '';
+        const petaniLabel = extra.petaniOptions?.find(o => o.value === extra.petani)?.label ?? '';
         if (petaniLabel) return `Laporan Petani - ${petaniLabel}`;
     }
     if (jenisLaporan === 'stdb') {
@@ -67,7 +47,7 @@ function TambahLaporanContent({ forcedType }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const typeParam = forcedType || searchParams.get('type') || 'bulanan';
-    const initialJenis = typeParam === 'stdb' ? 'laporan_petani' : typeParam === 'petani' ? 'statistik_bulanan' : typeParam === 'bulanan' ? 'stdb' : '';
+    const initialJenis = typeParam === 'stdb' ? 'stdb' : typeParam === 'petani' ? 'laporan_petani' : typeParam === 'bulanan' ? 'statistik_bulanan' : '';
 
     const [isLoading, setIsLoading] = useState(false);
     const [jenisLaporan, setJenisLaporan] = useState(initialJenis);
@@ -80,24 +60,46 @@ function TambahLaporanContent({ forcedType }) {
     const [kebutuhan, setKebutuhan] = useState('');
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
+    const [petaniOptions, setPetaniOptions] = useState([]);
 
-    const { kelompokTani, fetchKelompokTani } = useReferences();
+    const { kelompokTani, fetchKelompokTani, pilihanBulan, fetchPilihanBulan } = useReferences();
 
     useEffect(() => {
-        if (kelompokTani.length === 0) {
-            fetchKelompokTani();
-        }
+        if (kelompokTani.length === 0) fetchKelompokTani();
     }, [kelompokTani.length, fetchKelompokTani]);
 
     useEffect(() => {
-        setNamaLaporan(buildNamaLaporan(jenisLaporan, { bulan, tahun, petani, statusStdb }));
-    }, [jenisLaporan, bulan, tahun, petani, statusStdb]);
+        if (pilihanBulan.length === 0) fetchPilihanBulan();
+    }, [pilihanBulan.length, fetchPilihanBulan]);
 
-    const handleJenisChange = (val) => {
-        setJenisLaporan(val);
-        setBulan(''); setTahun(''); setPetani(''); setStatusStdb(''); setKelompokTaniSelected('');
-        setNamaLaporan('');
-    };
+    useEffect(() => {
+        const fetchPetaniByKelompok = async () => {
+            if (kelompokTaniSelected) {
+                try {
+                    const response = await getListPetani({
+                        kelompok_tani: kelompokTaniSelected,
+                        page_size: 100,
+                    });
+                    const options = response?.data?.data?.results?.map((item) => ({
+                        label: item.nama,
+                        value: item.id.toString(),
+                    })) || [];
+                    setPetaniOptions(options);
+                } catch (error) {
+                    console.error('Error fetching petani list:', error);
+                    setPetaniOptions([]);
+                }
+            } else {
+                setPetaniOptions([]);
+            }
+        };
+        fetchPetaniByKelompok();
+        setPetani('');
+    }, [kelompokTaniSelected]);
+
+    useEffect(() => {
+        setNamaLaporan(buildNamaLaporan(jenisLaporan, { bulan, tahun, petani, statusStdb, petaniOptions, pilihanBulan }));
+    }, [jenisLaporan, bulan, tahun, petani, statusStdb, petaniOptions, pilihanBulan]);
 
     const validate = () => {
         const e = {};
@@ -125,22 +127,16 @@ function TambahLaporanContent({ forcedType }) {
 
         setIsLoading(true);
         try {
-            const payload = {
-                bulan: bulan ? parseInt(bulan, 10) : new Date().getMonth() + 1,
-                tahun: tahun ? parseInt(tahun, 10) : new Date().getFullYear(),
-                judul: namaLaporan,
-                kebutuhan: kebutuhan,
-            };
-            const response = await createLaporan(payload);
-            if (response?.status === 201 || response?.status === 200) {
-                toast.success('Laporan berhasil disimpan');
-                router.push('/traceability/laporan');
+            const response = await getLaporanPetani(petani);
+            if (response?.status === 200) {
+                generateLaporanPetaniPDF(response.data, namaLaporan);
+                toast.success('Laporan berhasil diunduh');
             } else {
-                toast.error(response?.data?.message || 'Gagal menyimpan laporan');
+                toast.error('Gagal mengunduh laporan petani');
             }
         } catch (error) {
-            console.error('Error creating report:', error);
-            toast.error(error?.response?.data?.message || 'Gagal menyimpan laporan');
+            console.error('Error downloading report:', error);
+            toast.error(error?.response?.data?.message || 'Gagal mengunduh laporan petani');
         } finally {
             setIsLoading(false);
         }
@@ -165,7 +161,7 @@ function TambahLaporanContent({ forcedType }) {
                             <Select
                                 name="bulanLaporan"
                                 placeholder="September"
-                                options={BULAN_OPTIONS}
+                                options={pilihanBulan}
                                 value={bulan}
                                 onChange={(e) => { setBulan(e.target.value); setTouched(t => ({ ...t, bulan: true })); }}
                                 errors={touched.bulan && errors.bulan ? { bulanLaporan: errors.bulan } : {}}
@@ -208,13 +204,14 @@ function TambahLaporanContent({ forcedType }) {
                     <Select
                         label="Petani"
                         name="petani"
-                        placeholder="Agustinus Nery"
-                        options={PETANI_OPTIONS}
+                        placeholder="Pilih Petani"
+                        options={petaniOptions}
                         value={petani}
                         onChange={(e) => { setPetani(e.target.value); setTouched(t => ({ ...t, petani: true })); }}
                         errors={touched.petani ? { petani: errors.petani } : {}}
                         touched={touched.petani ? { petani: true } : {}}
                         isRequired
+                        disabled={!kelompokTaniSelected}
                     />
                 </>
             );
@@ -255,76 +252,52 @@ function TambahLaporanContent({ forcedType }) {
                 <Accordion defaultIsOpen title="IDENTITAS">
                     <>
                         <div className={`${gridClass} border-b border-dashed border-gray-300 py-4`}>
-                            <Select
-                                label="Jenis Laporan"
-                                name="jenisLaporan"
-                                placeholder="Pilih Jenis Laporan"
-                                options={JENIS_LAPORAN_OPTIONS}
-                                value={jenisLaporan}
-                                onChange={(e) => handleJenisChange(e.target.value)}
-                                errors={touched.jenisLaporan ? { jenisLaporan: errors.jenisLaporan } : {}}
-                                touched={touched.jenisLaporan ? { jenisLaporan: true } : {}}
-                                isRequired
-                            />
-
-                            {jenisLaporan !== 'laporan_petani' && secondaryFields}
-
-                            {jenisLaporan && jenisLaporan !== 'laporan_petani' && (
-                                <InputText
-                                    label="Nama Laporan"
-                                    name="namaLaporan"
-                                    placeholder="Terisi otomatis"
-                                    value={namaLaporan}
-                                    disabled
-                                />
+                            {jenisLaporan !== 'laporan_petani' && (
+                                <>
+                                    {secondaryFields}
+                                    <InputText
+                                        label="Nama Laporan"
+                                        name="namaLaporan"
+                                        placeholder="Terisi otomatis"
+                                        value={namaLaporan}
+                                        disabled
+                                    />
+                                </>
                             )}
 
-                            {jenisLaporan === 'laporan_petani' && secondaryFields}
+                            {jenisLaporan === 'laporan_petani' && (
+                                <>
+                                    {secondaryFields}
+                                    <InputText
+                                        label="Nama Laporan"
+                                        name="namaLaporan"
+                                        placeholder="Terisi otomatis"
+                                        value={namaLaporan}
+                                        disabled
+                                    />
+                                </>
+                            )}
                         </div>
 
-                        {jenisLaporan && jenisLaporan === 'laporan_petani' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 py-4">
-                                <InputText
-                                    label="Nama Laporan"
-                                    name="namaLaporan"
-                                    placeholder="Terisi otomatis"
-                                    value={namaLaporan}
-                                    disabled
-                                />
-                                <InputText
-                                    label="Kebutuhan"
+                        <div className="grid grid-cols-1 gap-6 py-4">
+                            <div className="flex flex-col gap-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                    Kebutuhan <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
                                     name="kebutuhan"
                                     placeholder="Diminta Disbunak"
                                     value={kebutuhan}
                                     onChange={(e) => { setKebutuhan(e.target.value); setTouched(t => ({ ...t, kebutuhan: true })); }}
-                                    errors={touched.kebutuhan && errors.kebutuhan ? { kebutuhan: errors.kebutuhan } : {}}
-                                    touched={touched.kebutuhan ? { kebutuhan: true } : {}}
-                                    isRequired
+                                    rows={3}
+                                    className={`w-full rounded-md border px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${touched.kebutuhan && errors.kebutuhan ? 'border-red-400' : 'border-gray-300'
+                                        }`}
                                 />
+                                {touched.kebutuhan && errors.kebutuhan && (
+                                    <p className="text-xs text-red-500">{errors.kebutuhan}</p>
+                                )}
                             </div>
-                        )}
-
-                        {jenisLaporan && jenisLaporan !== 'laporan_petani' && (
-                            <div className="grid grid-cols-1 gap-6 py-4">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-sm font-medium text-gray-700">
-                                        Kebutuhan <span className="text-red-500">*</span>
-                                    </label>
-                                    <textarea
-                                        name="kebutuhan"
-                                        placeholder="Diminta Disbunak"
-                                        value={kebutuhan}
-                                        onChange={(e) => { setKebutuhan(e.target.value); setTouched(t => ({ ...t, kebutuhan: true })); }}
-                                        rows={3}
-                                        className={`w-full rounded-md border px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${touched.kebutuhan && errors.kebutuhan ? 'border-red-400' : 'border-gray-300'
-                                            }`}
-                                    />
-                                    {touched.kebutuhan && errors.kebutuhan && (
-                                        <p className="text-xs text-red-500">{errors.kebutuhan}</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </>
                 </Accordion>
 

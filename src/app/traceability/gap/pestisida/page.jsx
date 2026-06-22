@@ -208,6 +208,7 @@ const PestisidaPage = () => {
         minWidth: 100,
         maxWidth: 150,
         suppressSizeToFit: false,
+        pinned: 'left',
       },
       { field: 'idKebun', headerName: 'Id Kebun', flex: 1 },
       { field: 'namaPetani', headerName: 'Nama Petani', flex: 1 },

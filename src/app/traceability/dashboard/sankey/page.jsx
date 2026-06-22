@@ -135,11 +135,37 @@ const SankeyPage = () => {
   }, [startDate, endDate, selectedKelompok, selectedPabrik]);
 
   const handleChangeStartDate = (e) => {
-    setStartDate(moment(e.target.value).format('DD-MM-YYYY'));
+    const newStart = moment(e.target.value);
+    const today = moment();
+    
+    const startToSet = newStart.isAfter(today) ? today : newStart;
+    setStartDate(startToSet.format('DD-MM-YYYY'));
+
+    const currentEnd = moment(endDate, 'DD-MM-YYYY');
+    if (currentEnd.isBefore(startToSet) || currentEnd.diff(startToSet, 'days') > 31) {
+      let newEnd = moment(startToSet).add(30, 'days');
+      if (newEnd.isAfter(today)) {
+        newEnd = today;
+      }
+      if (newEnd.isBefore(startToSet)) {
+        newEnd = startToSet;
+      }
+      setEndDate(newEnd.format('DD-MM-YYYY'));
+    }
   };
 
   const handleChangeEndDate = (e) => {
-    setEndDate(moment(e.target.value).format('DD-MM-YYYY'));
+    const newEnd = moment(e.target.value);
+    const today = moment();
+
+    const endToSet = newEnd.isAfter(today) ? today : newEnd;
+    setEndDate(endToSet.format('DD-MM-YYYY'));
+
+    const currentStart = moment(startDate, 'DD-MM-YYYY');
+    if (currentStart.isAfter(endToSet) || endToSet.diff(currentStart, 'days') > 31) {
+      const newStart = moment(endToSet).subtract(30, 'days');
+      setStartDate(newStart.format('DD-MM-YYYY'));
+    }
   };
 
   const handleExportPDF = async () => {
@@ -271,10 +297,7 @@ const SankeyPage = () => {
                     value={startDate}
                     onChange={handleChangeStartDate}
                     inputContainerClassName="!h-[40px]"
-                    maxDate={moment(endDate, 'DD-MM-YYYY').format('YYYY-MM-DD')}
-                    minDate={moment(endDate, 'DD-MM-YYYY')
-                      .subtract(31, 'days')
-                      .format('YYYY-MM-DD')}
+                    maxDate={moment().format('YYYY-MM-DD')}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -287,12 +310,7 @@ const SankeyPage = () => {
                     value={endDate}
                     onChange={handleChangeEndDate}
                     inputContainerClassName="!h-[40px]"
-                    minDate={moment(startDate, 'DD-MM-YYYY').format(
-                      'YYYY-MM-DD'
-                    )}
-                    maxDate={moment(startDate, 'DD-MM-YYYY')
-                      .add(31, 'days')
-                      .format('YYYY-MM-DD')}
+                    maxDate={moment().format('YYYY-MM-DD')}
                   />
                 </div>
               </div>
@@ -424,7 +442,6 @@ const D3Sankey = ({ data }) => {
     content: null,
   });
   const [sankeyGraph, setSankeyGraph] = useState({ nodes: [], links: [] });
-  const totalValueRef = useRef(0);
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -513,7 +530,6 @@ const D3Sankey = ({ data }) => {
       .nodeId((d) => d.id);
 
     const graph = sankeyGenerator(sankeyData);
-    totalValueRef.current = graph.links.reduce((sum, l) => sum + l.value, 0);
     setSankeyGraph(graph);
   }, [data, dimensions]);
 
@@ -521,7 +537,6 @@ const D3Sankey = ({ data }) => {
     if (sankeyGraph.nodes.length === 0) return;
 
     const { nodes, links } = sankeyGraph;
-    const totalValue = totalValueRef.current;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
@@ -545,7 +560,6 @@ const D3Sankey = ({ data }) => {
           target: { id: d.target.id },
           value: d.value,
         });
-        const percentage = ((d.value / totalValue) * 100).toFixed(1);
         setTooltip({
           visible: true,
           x: event.pageX,
@@ -555,7 +569,6 @@ const D3Sankey = ({ data }) => {
             source: d.source.id,
             target: d.target.id,
             value: d.value,
-            percentage,
           },
         });
       })
@@ -585,7 +598,6 @@ const D3Sankey = ({ data }) => {
       .on('mouseenter', function (event, d) {
         setHoveredNode(d.id);
         const nodeValue = d.value || 0;
-        const percentage = ((nodeValue / totalValue) * 100).toFixed(1);
         setTooltip({
           visible: true,
           x: event.pageX,
@@ -595,7 +607,6 @@ const D3Sankey = ({ data }) => {
             name: d.id,
             category: d.category,
             value: nodeValue,
-            percentage,
             sourceLinks: d.sourceLinks?.length || 0,
             targetLinks: d.targetLinks?.length || 0,
           },
@@ -772,10 +783,6 @@ const Tooltip = ({ x, y, content, containerRef }) => {
             <p>
               Volume: <span className="font-medium">{content.value}</span>
             </p>
-            <p>
-              % Total:{' '}
-              <span className="font-medium">{content.percentage}%</span>
-            </p>
           </div>
         </>
       ) : (
@@ -786,10 +793,6 @@ const Tooltip = ({ x, y, content, containerRef }) => {
           <div className="mt-2 border-t border-gray-100 pt-2 text-xs text-gray-600">
             <p>
               Volume: <span className="font-medium">{content.value}</span>
-            </p>
-            <p>
-              % Total:{' '}
-              <span className="font-medium">{content.percentage}%</span>
             </p>
           </div>
         </>

@@ -5,7 +5,6 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useFormik } from 'formik';
 import debounce from 'lodash/debounce';
-import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -56,7 +55,6 @@ const KontakPage = () => {
   const [errorPage, setErrorPage] = useState(1);
   const [errorPageSize, setErrorPageSize] = useState(10);
   const { jenisKelamin, sumberKontak, fetchJenisKelamin, fetchSumberKontak } = useReferences();
-  const isMobileScreen = useSelector((state) => state.app.isMobileScreen);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -156,18 +154,18 @@ const KontakPage = () => {
   const ActionsCellRenderer = useCallback((e) => {
     return (
       <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-blue-500 underline hover:text-blue-600 sm:text-[12px]"
+        <button
+          className="py-1 text-xs font-bold text-primaryDark1 underline"
           onClick={() => handleEditClicked(e.data)}
         >
           EDIT
-        </div>
-        <div
-          className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+        </button>
+        <button
+          className="py-1 text-xs font-bold text-error5 underline"
           onClick={() => handleDeleteClicked(e.data)}
         >
           HAPUS
-        </div>
+        </button>
       </div>
     );
   }, []);
@@ -217,74 +215,68 @@ const KontakPage = () => {
         field: 'actions',
         headerName: '',
         cellRenderer: ActionsCellRenderer,
-        width: isMobileScreen ? 80 : 120,
-        minWidth: isMobileScreen ? 70 : 100,
+        width: 120,
+        minWidth: 100,
         maxWidth: 150,
         suppressSizeToFit: false,
         pinned: 'left',
       },
       {
+        field: 'id',
+        headerName: 'ID Kontak',
+        width: 120,
+        minWidth: 100,
+        maxWidth: 140,
+      },
+      {
         field: 'nama',
         headerName: 'Nama',
-        flex: 2,
-        minWidth: isMobileScreen ? 120 : 150,
+        flex: 1,
+        minWidth: 150,
       },
       {
         field: 'no_wa',
-        headerName: 'No. WhatsApp',
+        headerName: 'No. Handphone',
         flex: 2,
-        minWidth: isMobileScreen ? 120 : 150,
+        minWidth: 150,
+      },
+      {
+        field: 'jns_kelamin',
+        headerName: 'Jenis Kelamin',
+        width: 150,
+        minWidth: 140,
+        maxWidth: 165,
+        cellRenderer: (params) => {
+          return params.value === '1' ? 'Laki-laki' : 'Perempuan';
+        },
+      },
+      {
+        field: 'sumber',
+        headerName: 'Sumber',
+        width: 120,
+        minWidth: 100,
+        maxWidth: 140,
+        cellRenderer: (params) => {
+          const matched = sumberKontak?.find((s) => s.value === params.value);
+          return matched
+            ? matched.label
+            : params.value === '1'
+              ? 'Manual'
+              : params.value === '2'
+                ? 'Upload CSV'
+                : params.value === '3'
+                  ? 'API'
+                  : params.value;
+        },
       },
     ];
 
-    if (!isMobileScreen) {
-      base.push(
-        { field: 'id', headerName: 'ID Kontak', flex: 1, minWidth: 100 },
-        {
-          field: 'jns_kelamin',
-          headerName: 'Jenis Kelamin',
-          flex: 1,
-          minWidth: 120,
-          cellRenderer: (params) => {
-            return params.value === '1' ? 'Laki-laki' : 'Perempuan';
-          },
-        },
-        {
-          field: 'sumber',
-          headerName: 'Sumber',
-          flex: 1,
-          minWidth: 120,
-          cellRenderer: (params) => {
-            const matched = sumberKontak?.find((s) => s.value === params.value);
-            return matched
-              ? matched.label
-              : params.value === '1'
-                ? 'Manual'
-                : params.value === '2'
-                  ? 'Upload CSV'
-                  : params.value === '3'
-                    ? 'API'
-                    : params.value;
-          },
-        },
-        {
-          field: 'wa_valid',
-          headerName: 'Status WA',
-          flex: 1,
-          minWidth: 100,
-          cellRenderer: (params) => {
-            return params.value ? 'Valid' : 'Tidak Valid';
-          },
-        }
-      );
-    }
-
     return base;
-  }, [isMobileScreen, ActionsCellRenderer, sumberKontak]);
+  }, [ActionsCellRenderer, sumberKontak]);
 
   const autoSizeStrategy = useMemo(() => {
     return {
-      type: 'fitCellContents',
+      type: 'fitGridWidth',
     };
   }, []);
 
@@ -841,22 +833,19 @@ const KontakPage = () => {
           </div>
         </div>
 
-        <div className="relative w-full flex-1 overflow-x-auto">
+        <div className="relative w-full flex-1">
           <SectionLoading loading={loading} />
-          <div className="min-w-[320px]">
-            {mounted && (
-              <AgGridReact
-                loading={loading}
-                overlayLoadingTemplate="."
-                autoSizeStrategy={autoSizeStrategy}
-                defaultColDef={defaultColDef}
-                domLayout="autoHeight"
-                rowHeight={isMobileScreen ? 36 : 40}
-                rowData={kontakData}
-                columnDefs={colDefs}
-              />
-            )}
-          </div>
+          {mounted && (
+            <AgGridReact
+              loading={loading}
+              overlayLoadingTemplate="."
+              autoSizeStrategy={autoSizeStrategy}
+              defaultColDef={defaultColDef}
+              domLayout="autoHeight"
+              rowData={kontakData}
+              columnDefs={colDefs}
+            />
+          )}
         </div>
 
         <div className="flex justify-center sm:justify-end">

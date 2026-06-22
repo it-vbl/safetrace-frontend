@@ -1,10 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 
 import Heading from '@/components/atoms/Typography/Heading';
+import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputMessage from '@/components/molecules/InputMessage';
 import SectionLoading from '@/components/molecules/SectionLoading';
@@ -46,12 +47,12 @@ const DetailPesanPage = () => {
         const createdAt = data?.created_at || data?.waktu_pengiriman;
         const waktuPengiriman = createdAt
           ? new Date(createdAt).toLocaleString('id-ID', {
-              hour: '2-digit',
-              minute: '2-digit',
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            })
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
           : '-';
         const jumlahPenerima =
           data?.jumlah_penerima ??
@@ -107,12 +108,12 @@ const DetailPesanPage = () => {
             r?.time;
           const sendTime = rawTime
             ? new Date(rawTime).toLocaleString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })
+              hour: '2-digit',
+              minute: '2-digit',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
             : '-';
 
           let status =
@@ -123,11 +124,11 @@ const DetailPesanPage = () => {
             '';
 
           if (!status) {
-            if (data?.terkirim === true && r?.wa_valid === true) {
-              status = 'Terkirim';
-            } else if (r?.gagal === true || r?.wa_valid === false) {
+            if (r?.gagal === true || r?.wa_valid === false) {
               status = 'Gagal';
             } else if (r?.terkirim === true) {
+              status = 'Terkirim';
+            } else if (data?.terkirim === true && r?.wa_valid === true) {
               status = 'Terkirim';
             } else {
               status = 'Menunggu';
@@ -186,6 +187,12 @@ const DetailPesanPage = () => {
     setCurrentPage(1);
   };
 
+  const autoSizeStrategy = useMemo(() => {
+    return {
+      type: 'fitGridWidth',
+    };
+  }, []);
+
   const paginatedRecipients = recipients.slice(
     (currentPage - 1) * pageSize,
     (currentPage - 1) * pageSize + pageSize
@@ -207,58 +214,61 @@ const DetailPesanPage = () => {
             LOG
           </Heading>
 
-          <div className="mb-6 overflow-x-auto px-6">
-            {/* Header Row */}
-            <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-2 text-xs font-medium text-gray-600 sm:grid-cols-3 sm:text-sm md:grid-cols-6">
-              <div>Id Pesan</div>
-              <div>Nama Pesan</div>
-              <div>Grup Penerima</div>
-              <div>Jumlah Penerima</div>
-              <div>Waktu Pengiriman</div>
-              <div>Status</div>
+          <div className="mb-6 px-6 space-y-6">
+            {/* Top Details Grid */}
+            <div className="grid grid-cols-1 gap-x-3 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
+              <BorderBottomColData
+                label="Id Pesan"
+                value={detail?.id_pesan || '-'}
+              />
+              <BorderBottomColData
+                label="Nama Pesan"
+                value={detail?.nama_pesan || '-'}
+              />
+              <BorderBottomColData
+                label="Grup Penerima"
+                value={detail?.grup_penerima || '-'}
+              />
+              <BorderBottomColData
+                label="Jumlah Penerima"
+                value={String(detail?.jumlah_penerima ?? 0)}
+              />
+              <BorderBottomColData
+                label="Waktu Pengiriman"
+                value={detail?.waktu_pengiriman || '-'}
+              />
+              <BorderBottomColData
+                label="Status"
+                value={detail?.status || '-'}
+              />
             </div>
 
-            {/* Data Row */}
-            <div className="grid grid-cols-2 gap-4 py-3 text-xs sm:grid-cols-3 sm:text-sm md:grid-cols-6">
-              <div className="text-gray-800">{detail?.id_pesan || '-'}</div>
-              <div className="text-gray-800">{detail?.nama_pesan || '-'}</div>
-              <div className="text-gray-800">
-                {detail?.grup_penerima || '-'}
+            {/* Bottom Summary Grid */}
+            <div className="grid grid-cols-12 gap-x-3 gap-y-4 break-words text-sm text-gray-700 sm:gap-x-4 md:gap-x-6">
+              <div className="col-span-12 sm:col-span-4 md:col-span-2">
+                <BorderBottomColData
+                  label="Total Berhasil"
+                  value={String(summaryCounts.success)}
+                />
               </div>
-              <div className="text-gray-800">
-                {detail?.jumlah_penerima ?? 0}
+              <div className="col-span-12 sm:col-span-4 md:col-span-2">
+                <BorderBottomColData
+                  label="Total Gagal"
+                  value={String(summaryCounts.failed)}
+                />
               </div>
-              <div className="text-gray-800">
-                {detail?.waktu_pengiriman || '-'}
+              <div className="col-span-12 sm:col-span-4 md:col-span-2">
+                <BorderBottomColData
+                  label="Total Berjalan"
+                  value={String(summaryCounts.pending)}
+                />
               </div>
-              <div className="text-gray-800">{detail?.status || '-'}</div>
-            </div>
-
-            {/* Summary Row */}
-            <div className="mt-4 grid grid-cols-2 gap-4 border-t border-gray-200 pt-4 text-xs sm:text-sm md:grid-cols-4">
-              <div>
-                <span className="text-gray-600">Total Berhasil</span>
-                <div className="font-medium text-gray-800">
-                  {summaryCounts.success}
-                </div>
-              </div>
-              <div>
-                <span className="text-gray-600">Total Gagal</span>
-                <div className="font-medium text-gray-800">
-                  {summaryCounts.failed}
-                </div>
-              </div>
-              <div>
-                <span className="text-gray-600">Total Berjalan</span>
-                <div className="font-medium text-gray-800">
-                  {summaryCounts.pending}
-                </div>
-              </div>
-              <div>
-                <span className="text-gray-600">Pengirim</span>
-                <div className="font-medium text-gray-800">
-                  {detail?.sender || '-'}
-                </div>
+              <div className="col-span-12 sm:col-span-12 md:col-span-6">
+                <BorderBottomColData
+                  className="line-clamp-none"
+                  label="Pengirim"
+                  value={detail?.sender || '-'}
+                />
               </div>
             </div>
           </div>
@@ -274,17 +284,26 @@ const DetailPesanPage = () => {
           </Heading>
 
           <div className="mb-6 px-6">
-            <InputMessage
-              value={detail?.isi_pesan || ''}
-              showInput={false}
-              editable={false}
-              showCharCount={false}
-              previewContainerClassName="w-full"
-            />
-            <div className="mt-2 flex justify-end">
-              <span className="text-xs text-gray-500">
-                {detail?.waktu_pengiriman || ''}
-              </span>
+            <div className="flex flex-col gap-6 lg:flex-row">
+              {/* Left Side: Message Content Card */}
+              <div className="min-h-[298px] w-full lg:w-1/2 rounded-[4px] border border-gray-200 bg-white p-6 text-sm text-gray-800 whitespace-pre-line break-words leading-relaxed">
+                {detail?.isi_pesan || '-'}
+              </div>
+
+              {/* Right Side: WhatsApp-style Preview Card */}
+              <div className="min-h-[298px] w-full lg:w-1/2 rounded-[4px] border border-gray-200 bg-[#faf1dc] p-6 flex flex-col">
+                <span className="block text-sm font-bold text-gray-800 mb-4">
+                  Preview
+                </span>
+                <div className="relative max-w-[90%] sm:max-w-[80%] rounded-[8px] bg-white p-4 shadow-sm w-fit self-start">
+                  <p className="whitespace-pre-line break-words text-sm text-gray-800 leading-relaxed">
+                    {detail?.isi_pesan || 'Preview pesan akan muncul di sini...'}
+                  </p>
+                  <div className="text-[10px] text-gray-400 text-right mt-2 font-medium">
+                    {detail?.waktu_pengiriman?.split(', ')?.[1] || '07.00'}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -302,7 +321,7 @@ const DetailPesanPage = () => {
             <div className="ag-theme-quartz relative w-full">
               <AgGridReact
                 overlayLoadingTemplate="."
-                autoSizeStrategy={{ type: 'fitCellContents' }}
+                autoSizeStrategy={autoSizeStrategy}
                 defaultColDef={{
                   resizable: true,
                   minWidth: 100,
@@ -310,7 +329,6 @@ const DetailPesanPage = () => {
                   autoHeight: true,
                 }}
                 domLayout="autoHeight"
-                rowHeight={40}
                 rowData={paginatedRecipients}
                 columnDefs={[
                   {

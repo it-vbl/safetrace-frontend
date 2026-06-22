@@ -346,7 +346,6 @@ const KebunPage = () => {
         </div>
         {!isViewOnly && (
           <>
-            <div className="text-gray-400">|</div>
             <div
               className="cursor-pointer text-[10px] font-bold uppercase text-red-600 underline hover:text-red-700 sm:text-[12px]"
               onClick={() => handleDeleteClicked(e.data)}
@@ -365,9 +364,8 @@ const KebunPage = () => {
 
     return (
       <span
-        className={`text-xs font-medium ${
-          isSuccess ? 'text-green-600' : 'text-red-600'
-        }`}
+        className={`text-xs font-medium ${isSuccess ? 'text-green-600' : 'text-red-600'
+          }`}
       >
         {status}
       </span>

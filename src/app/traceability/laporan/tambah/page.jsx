@@ -19,14 +19,6 @@ const JENIS_LAPORAN_OPTIONS = [
     { value: 'stdb', label: 'STDB' },
 ];
 
-const BULAN_OPTIONS = [
-    { value: '01', label: 'Januari' }, { value: '02', label: 'Februari' },
-    { value: '03', label: 'Maret' }, { value: '04', label: 'April' },
-    { value: '05', label: 'Mei' }, { value: '06', label: 'Juni' },
-    { value: '07', label: 'Juli' }, { value: '08', label: 'Agustus' },
-    { value: '09', label: 'September' }, { value: '10', label: 'Oktober' },
-    { value: '11', label: 'November' }, { value: '12', label: 'Desember' },
-];
 
 const TAHUN_OPTIONS = Array.from({ length: 10 }, (_, i) => {
     const y = new Date().getFullYear() - i;
@@ -49,8 +41,8 @@ function buildNamaLaporan(jenisLaporan, extra) {
     const jenisLabel = JENIS_LAPORAN_OPTIONS.find(o => o.value === jenisLaporan)?.label ?? '';
 
     if (jenisLaporan === 'statistik_bulanan') {
-        const bulanLabel = BULAN_OPTIONS.find(o => o.value === extra.bulan)?.label ?? '';
-        if (bulanLabel && extra.tahun) return `${jenisLabel} Bulan ${bulanLabel} ${extra.tahun}`;
+        const bulanLabel = (extra.pilihanBulan || []).find(o => o.value === extra.bulan)?.label ?? '';
+        if (bulanLabel && extra.tahun) return `Laporan Statistik ${bulanLabel} ${extra.tahun}`;
     }
     if (jenisLaporan === 'laporan_petani') {
         const petaniLabel = PETANI_OPTIONS.find(o => o.value === extra.petani)?.label ?? '';
@@ -75,7 +67,7 @@ function TambahLaporanContent({ forcedType }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const typeParam = forcedType || searchParams.get('type') || 'bulanan';
-    const initialJenis = typeParam === 'stdb' ? 'laporan_petani' : typeParam === 'petani' ? 'statistik_bulanan' : typeParam === 'bulanan' ? 'stdb' : '';
+    const initialJenis = typeParam === 'stdb' ? 'stdb' : typeParam === 'petani' ? 'laporan_petani' : typeParam === 'bulanan' ? 'statistik_bulanan' : '';
 
     const [isLoading, setIsLoading] = useState(false);
     const [jenisLaporan, setJenisLaporan] = useState(initialJenis);
@@ -89,17 +81,19 @@ function TambahLaporanContent({ forcedType }) {
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
 
-    const { kelompokTani, fetchKelompokTani } = useReferences();
+    const { kelompokTani, fetchKelompokTani, pilihanBulan, fetchPilihanBulan } = useReferences();
 
     useEffect(() => {
-        if (kelompokTani.length === 0) {
-            fetchKelompokTani();
-        }
+        if (kelompokTani.length === 0) fetchKelompokTani();
     }, [kelompokTani.length, fetchKelompokTani]);
 
     useEffect(() => {
-        setNamaLaporan(buildNamaLaporan(jenisLaporan, { bulan, tahun, petani, statusStdb }));
-    }, [jenisLaporan, bulan, tahun, petani, statusStdb]);
+        if (pilihanBulan.length === 0) fetchPilihanBulan();
+    }, [pilihanBulan.length, fetchPilihanBulan]);
+
+    useEffect(() => {
+        setNamaLaporan(buildNamaLaporan(jenisLaporan, { bulan, tahun, petani, statusStdb, pilihanBulan }));
+    }, [jenisLaporan, bulan, tahun, petani, statusStdb, pilihanBulan]);
 
     const handleJenisChange = (val) => {
         setJenisLaporan(val);
@@ -173,7 +167,7 @@ function TambahLaporanContent({ forcedType }) {
                             <Select
                                 name="bulanLaporan"
                                 placeholder="September"
-                                options={BULAN_OPTIONS}
+                                options={pilihanBulan}
                                 value={bulan}
                                 onChange={(e) => { setBulan(e.target.value); setTouched(t => ({ ...t, bulan: true })); }}
                                 errors={touched.bulan && errors.bulan ? { bulanLaporan: errors.bulan } : {}}
@@ -263,76 +257,52 @@ function TambahLaporanContent({ forcedType }) {
                 <Accordion defaultIsOpen title="IDENTITAS">
                     <>
                         <div className={`${gridClass} border-b border-dashed border-gray-300 py-4`}>
-                            <Select
-                                label="Jenis Laporan"
-                                name="jenisLaporan"
-                                placeholder="Pilih Jenis Laporan"
-                                options={JENIS_LAPORAN_OPTIONS}
-                                value={jenisLaporan}
-                                onChange={(e) => handleJenisChange(e.target.value)}
-                                errors={touched.jenisLaporan ? { jenisLaporan: errors.jenisLaporan } : {}}
-                                touched={touched.jenisLaporan ? { jenisLaporan: true } : {}}
-                                isRequired
-                            />
-
-                            {jenisLaporan !== 'laporan_petani' && secondaryFields}
-
-                            {jenisLaporan && jenisLaporan !== 'laporan_petani' && (
-                                <InputText
-                                    label="Nama Laporan"
-                                    name="namaLaporan"
-                                    placeholder="Terisi otomatis"
-                                    value={namaLaporan}
-                                    disabled
-                                />
+                            {jenisLaporan !== 'laporan_petani' && (
+                                <>
+                                    {secondaryFields}
+                                    <InputText
+                                        label="Nama Laporan"
+                                        name="namaLaporan"
+                                        placeholder="Terisi otomatis"
+                                        value={namaLaporan}
+                                        disabled
+                                    />
+                                </>
                             )}
 
-                            {jenisLaporan === 'laporan_petani' && secondaryFields}
+                            {jenisLaporan === 'laporan_petani' && (
+                                <>
+                                    {secondaryFields}
+                                    <InputText
+                                        label="Nama Laporan"
+                                        name="namaLaporan"
+                                        placeholder="Terisi otomatis"
+                                        value={namaLaporan}
+                                        disabled
+                                    />
+                                </>
+                            )}
                         </div>
 
-                        {jenisLaporan && jenisLaporan === 'laporan_petani' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 py-4">
-                                <InputText
-                                    label="Nama Laporan"
-                                    name="namaLaporan"
-                                    placeholder="Terisi otomatis"
-                                    value={namaLaporan}
-                                    disabled
-                                />
-                                <InputText
-                                    label="Kebutuhan"
+                        <div className="grid grid-cols-1 gap-6 py-4">
+                            <div className="flex flex-col gap-1">
+                                <label className="text-sm font-medium text-gray-700">
+                                    Kebutuhan <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
                                     name="kebutuhan"
                                     placeholder="Diminta Disbunak"
                                     value={kebutuhan}
                                     onChange={(e) => { setKebutuhan(e.target.value); setTouched(t => ({ ...t, kebutuhan: true })); }}
-                                    errors={touched.kebutuhan && errors.kebutuhan ? { kebutuhan: errors.kebutuhan } : {}}
-                                    touched={touched.kebutuhan ? { kebutuhan: true } : {}}
-                                    isRequired
+                                    rows={3}
+                                    className={`w-full rounded-md border px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${touched.kebutuhan && errors.kebutuhan ? 'border-red-400' : 'border-gray-300'
+                                        }`}
                                 />
+                                {touched.kebutuhan && errors.kebutuhan && (
+                                    <p className="text-xs text-red-500">{errors.kebutuhan}</p>
+                                )}
                             </div>
-                        )}
-
-                        {jenisLaporan && jenisLaporan !== 'laporan_petani' && (
-                            <div className="grid grid-cols-1 gap-6 py-4">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-sm font-medium text-gray-700">
-                                        Kebutuhan <span className="text-red-500">*</span>
-                                    </label>
-                                    <textarea
-                                        name="kebutuhan"
-                                        placeholder="Diminta Disbunak"
-                                        value={kebutuhan}
-                                        onChange={(e) => { setKebutuhan(e.target.value); setTouched(t => ({ ...t, kebutuhan: true })); }}
-                                        rows={3}
-                                        className={`w-full rounded-md border px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${touched.kebutuhan && errors.kebutuhan ? 'border-red-400' : 'border-gray-300'
-                                            }`}
-                                    />
-                                    {touched.kebutuhan && errors.kebutuhan && (
-                                        <p className="text-xs text-red-500">{errors.kebutuhan}</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </>
                 </Accordion>
 

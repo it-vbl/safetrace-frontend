@@ -45,12 +45,12 @@ const BlastPesanPage = () => {
           const createdAt = item?.created_at || item?.waktu_pengiriman;
           const waktuPengiriman = createdAt
             ? new Date(createdAt).toLocaleString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })
+              hour: '2-digit',
+              minute: '2-digit',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
             : '-';
 
           const jumlahPenerima =
@@ -66,8 +66,8 @@ const BlastPesanPage = () => {
           const statusLabel = item?.terkirim
             ? 'Terkirim'
             : item?.gagal === true
-            ? 'Gagal'
-            : 'Dalam Antrian';
+              ? 'Gagal'
+              : 'Dalam Antrian';
 
           return {
             id: item?.id,
@@ -97,7 +97,7 @@ const BlastPesanPage = () => {
       setTotalKontak(0);
       toast.error(
         error?.response?.data?.message ||
-          'Terjadi kesalahan saat mengambil data'
+        'Terjadi kesalahan saat mengambil data'
       );
       console.error('Error fetching broadcast list:', error);
     } finally {
@@ -162,7 +162,7 @@ const BlastPesanPage = () => {
     setSelectedItem(null);
   };
 
-  const actionsCellRenderer = (params) => {
+  const ActionsCellRenderer = (params) => {
     return (
       <div className="flex h-full items-center gap-2">
         <button
@@ -195,63 +195,68 @@ const BlastPesanPage = () => {
 
   const colDefs = [
     {
+      field: 'actions',
       headerName: '',
-      cellRenderer: actionsCellRenderer,
-      flex: 1,
-      minWidth: 30,
-      sortable: false,
-      filter: false,
+      cellRenderer: ActionsCellRenderer,
+      width: 120,
+      minWidth: 100,
+      maxWidth: 150,
       suppressSizeToFit: false,
       pinned: 'left',
     },
     {
       field: 'id_pesan',
       headerName: 'Id Pesan',
-      flex: 1,
-      minWidth: 120,
+      width: 100,
+      minWidth: 80,
+      maxWidth: 120,
     },
     {
       field: 'nama_pesan',
       headerName: 'Nama Pesan',
       flex: 2,
-      minWidth: 200,
+      minWidth: 150,
     },
     {
       field: 'no_pengirim',
       headerName: 'No. Pengirim',
-      flex: 2,
-      minWidth: 200,
+      flex: 4,
+      minWidth: 350,
     },
     {
       field: 'grup_penerima',
       headerName: 'Jenis Penerima',
-      flex: 2,
-      minWidth: 200,
+      width: 150,
+      minWidth: 130,
+      maxWidth: 180,
     },
     {
       field: 'jumlah_penerima',
       headerName: 'Jumlah Penerima',
-      flex: 1,
-      minWidth: 150,
+      width: 160,
+      minWidth: 140,
+      maxWidth: 180,
       headerClass: 'text-center',
     },
     {
       field: 'waktu_pengiriman',
       headerName: 'Waktu Pengiriman',
-      flex: 1.5,
-      minWidth: 150,
+      width: 160,
+      minWidth: 140,
+      maxWidth: 180,
     },
     {
       field: 'status',
       headerName: 'Status',
-      flex: 1,
+      width: 120,
       minWidth: 100,
+      maxWidth: 140,
     },
   ];
 
   const autoSizeStrategy = useMemo(() => {
     return {
-      type: 'fitCellContents',
+      type: 'fitGridWidth',
     };
   }, []);
 
@@ -288,20 +293,17 @@ const BlastPesanPage = () => {
         </div>
 
         {/* Table section */}
-        <div className="relative w-full flex-1 overflow-x-auto">
+        <div className="relative w-full flex-1">
           <SectionLoading loading={loading} />
-          <div className="min-w-[320px]">
-            <AgGridReact
-              loading={loading}
-              columnDefs={colDefs}
-              overlayLoadingTemplate="."
-              autoSizeStrategy={autoSizeStrategy}
-              defaultColDef={defaultColDef}
-              domLayout="autoHeight"
-              rowHeight={36}
-              rowData={kontakData}
-            />
-          </div>
+          <AgGridReact
+            loading={loading}
+            columnDefs={colDefs}
+            overlayLoadingTemplate="."
+            autoSizeStrategy={autoSizeStrategy}
+            defaultColDef={defaultColDef}
+            domLayout="autoHeight"
+            rowData={kontakData}
+          />
         </div>
 
         {/* Pagination section */}

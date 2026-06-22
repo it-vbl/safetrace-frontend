@@ -1,4 +1,5 @@
 'use client';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
@@ -131,7 +132,7 @@ const GrupPage = () => {
     setSelectedItem(null);
   };
 
-  const actionsCellRenderer = (params) => {
+  const ActionsCellRenderer = (params) => {
     return (
       <div className="flex h-full items-center gap-2">
         <button
@@ -164,20 +165,21 @@ const GrupPage = () => {
 
   const colDefs = [
     {
+      field: 'actions',
       headerName: '',
-      cellRenderer: actionsCellRenderer,
-      flex: 0.9,
+      cellRenderer: ActionsCellRenderer,
+      width: 120,
       minWidth: 100,
-      sortable: false,
-      filter: false,
+      maxWidth: 150,
       suppressSizeToFit: false,
       pinned: 'left',
     },
     {
       field: 'id_group',
       headerName: 'Id Grup',
-      flex: 1,
+      width: 140,
       minWidth: 120,
+      maxWidth: 160,
     },
     {
       field: 'nama_grup',
@@ -188,8 +190,9 @@ const GrupPage = () => {
     {
       field: 'jumlah_penerima',
       headerName: 'Jumlah Penerima',
-      flex: 1.5,
-      minWidth: 150,
+      width: 160,
+      minWidth: 140,
+      maxWidth: 180,
       headerClass: 'text-center',
     },
     {
@@ -202,7 +205,7 @@ const GrupPage = () => {
 
   const autoSizeStrategy = useMemo(() => {
     return {
-      type: 'fitCellContents',
+      type: 'fitGridWidth',
     };
   }, []);
 
@@ -240,20 +243,17 @@ const GrupPage = () => {
         </div>
 
         {/* Table section */}
-        <div className="relative w-full flex-1 overflow-x-auto">
+        <div className="relative w-full flex-1">
           <SectionLoading loading={loading} />
-          <div className="min-w-[320px]">
-            <AgGridReact
-              loading={loading}
-              overlayLoadingTemplate="."
-              autoSizeStrategy={autoSizeStrategy}
-              defaultColDef={defaultColDef}
-              domLayout="autoHeight"
-              rowHeight={36}
-              rowData={kontakData}
-              columnDefs={colDefs}
-            />
-          </div>
+          <AgGridReact
+            loading={loading}
+            overlayLoadingTemplate="."
+            autoSizeStrategy={autoSizeStrategy}
+            defaultColDef={defaultColDef}
+            domLayout="autoHeight"
+            rowData={kontakData}
+            columnDefs={colDefs}
+          />
         </div>
 
         {/* Pagination section */}

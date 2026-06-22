@@ -100,6 +100,7 @@ const MapDashboard = () => {
       field: 'actions',
       headerName: 'Actions',
       cellRenderer: ActionsCellRenderer,
+      pinned: 'left',
     },
     { field: 'id', headerName: 'ID Kebun' },
     {

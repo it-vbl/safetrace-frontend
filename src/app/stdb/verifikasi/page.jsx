@@ -63,6 +63,7 @@ const ListVerifikasi = () => {
       headerName: '',
       cellRenderer: ActionsCellRenderer,
       width: 80,
+      pinned: 'left',
     },
     { field: 'pekebun.nama', headerName: 'Pekebun' },
     { field: 'pekebun.nik', headerName: 'NIK' },

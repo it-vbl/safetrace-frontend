@@ -101,6 +101,7 @@ const MapDashboard = () => {
       minWidth: 100,
       maxWidth: 150,
       suppressSizeToFit: false,
+      pinned: 'left',
     },
     {
       field: 'pekebun.nama',
