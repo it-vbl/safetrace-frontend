@@ -11,7 +11,7 @@ import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
-import { hasPermission, isViewOnlyRole } from '@/libs/permissions';
+import { hasPermission, isViewOnlyRole, normalizeRoles } from '@/libs/permissions';
 import { login } from '@/services/auth';
 
 import LogoSipekebun from '../../../public/keling-kumang-logo.png';
@@ -63,17 +63,8 @@ const LoginPage = () => {
 
           toast.success('Login berhasil');
 
-          // Normalize roles to numbers for comparison
-          const normalizedRoles = roles
-            .map((r) => {
-              if (r === null || r === undefined) return null;
-              let val = r;
-              if (typeof r === 'object' && 'id' in r) {
-                val = r.id;
-              }
-              return typeof val === 'number' ? val : parseInt(val, 10);
-            })
-            .filter((r) => r !== null && !Number.isNaN(r));
+          // Normalize roles using permissions.js to ensure consistency (and name fallbacks)
+          const normalizedRoles = normalizeRoles(roles);
 
           const onlyRole2 =
             normalizedRoles.length === 1 && normalizedRoles[0] === 2;

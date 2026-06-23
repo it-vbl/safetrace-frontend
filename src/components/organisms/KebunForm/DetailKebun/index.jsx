@@ -8,6 +8,7 @@ import Button from '@/components/atoms/Button';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
+import useWilayah from '@/hooks/useWilayah';
 import { getListPetani } from '@/services/petani';
 import getYearOptions from '@/utils/getYearOptions';
 
@@ -46,6 +47,8 @@ const DetailKebun = ({
     fetchJenisPupuk,
   } = useReferences();
 
+  const { listKecamatan, listDesa, fetchListKecamatan, fetchListDesa } = useWilayah();
+
   useEffect(() => {
     if (kelompokTani.length === 0) fetchKelompokTani();
     if (jenisLegalitas.length === 0) fetchJenisLegalitas();
@@ -54,6 +57,7 @@ const DetailKebun = ({
     if (jenisLahan.length === 0) fetchJenisLahan();
     if (asalBenih.length === 0) fetchAsalBenih();
     if (jenisPupuk.length === 0) fetchJenisPupuk();
+    fetchListKecamatan(6105);
   }, [
     kelompokTani.length,
     jenisLegalitas.length,
@@ -106,6 +110,8 @@ const DetailKebun = ({
     kelompok_tani: Yup.string().required('Kelompok Tani harus diisi'),
     petani_id: Yup.string().required('Nama Petani harus diisi'),
     lokasi_kebun: Yup.string().required('Lokasi Kebun harus diisi'),
+    kecamatan: Yup.string().required('Kecamatan harus diisi'),
+    desa: Yup.string().required('Kelurahan harus diisi'),
     luas: Yup.string()
       .required('Luas Kebun harus diisi')
       .test('is-number', 'Luas kebun harus berupa angka', (value) => {
@@ -145,6 +151,8 @@ const DetailKebun = ({
       kelompok_tani: kebunData?.kelompok_tani || kebunData?.kelompok || null,
       petani_id: kebunData?.petani_id?.toString() || '',
       lokasi_kebun: kebunData?.lokasi_kebun || '',
+      kecamatan: kebunData?.kecamatan?.toString() || '',
+      desa: kebunData?.desa?.toString() || '',
       luas: kebunData?.luas?.toString() || '',
       luas_peta: kebunData?.luas_peta?.toString() || '',
       waktu_tanam_month: kebunData?.waktu_tanam
@@ -182,6 +190,8 @@ const DetailKebun = ({
         kelompok_tani: kebunData.kelompok_tani || kebunData.kelompok || '-',
         petani_id: kebunData.petani_id?.toString() || '',
         lokasi_kebun: kebunData.lokasi_kebun || '',
+        kecamatan: kebunData.kecamatan?.toString() || '',
+        desa: kebunData.desa?.toString() || '',
         luas: kebunData.luas?.toString() || '',
         luas_peta: kebunData.luas_peta?.toString() || '',
         waktu_tanam_month: kebunData.waktu_tanam
@@ -206,6 +216,10 @@ const DetailKebun = ({
         jenis_pupuk: kebunData.jenis_pupuk?.toString() || '',
         mitra_penjualan: kebunData.mitra_penjualan || '',
       });
+      // Fetch desa list if kecamatan already exists
+      if (kebunData.kecamatan) {
+        fetchListDesa(kebunData.kecamatan);
+      }
     }
   }, [kebunData]);
 
@@ -316,6 +330,40 @@ const DetailKebun = ({
             touched={formik.touched}
             isRequired
           />
+          <Select
+            label="Kecamatan"
+            name="kecamatan"
+            placeholder="Pilih Kecamatan"
+            options={listKecamatan}
+            value={formik.values.kecamatan}
+            onChange={(e) => {
+              const val = e.target.value;
+              formik.setFieldValue('kecamatan', val);
+              formik.setFieldTouched('kecamatan', false);
+              formik.setFieldValue('desa', '');
+              formik.setFieldTouched('desa', false);
+              fetchListDesa(val);
+            }}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Kelurahan"
+            name="desa"
+            placeholder="Pilih Kelurahan"
+            options={listDesa}
+            value={formik.values.desa}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
           <InputText
             label="Luas Kebun (Ha)"
             name="luas"
