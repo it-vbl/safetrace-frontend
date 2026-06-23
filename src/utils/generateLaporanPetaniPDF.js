@@ -34,10 +34,6 @@ const fmtKeanggotaan = (val) => {
     return fmt(val);
 };
 
-const fmtRp = (n) => {
-    if (n === null || n === undefined) return '-';
-    return `Rp ${Number(n).toLocaleString('id-ID')}`;
-};
 
 // ── PDF Generator ──────────────────────────────────────────────────────────────
 export const generateLaporanPetaniPDF = (data, namaLaporan) => {
@@ -48,7 +44,6 @@ export const generateLaporanPetaniPDF = (data, namaLaporan) => {
         data_pestisida = [],
         data_pupuk = [],
         data_lb3 = [],
-        data_penjualan = [],
         data_pekerja = [],
         data_diklat = [],
     } = data;
@@ -306,14 +301,13 @@ export const generateLaporanPetaniPDF = (data, namaLaporan) => {
             const prod = data_produksi.find(pr => pr.kebun_id === k.id);
             subHdr(`Kebun ${idx + 1} — ${fmt(k.id_kebun)}`);
             infoGrid([
-                [['Id Kebun', fmt(k.id_kebun)],       ['Petani Pemilik', fmt(k.nama_petani)],   ['Kelompok Tani', fmt(k.kelompok_tani)]],
-                [['Lokasi Kebun', fmt(k.lokasi_kebun)],['Luas Kebun', k.luas_kebun ? `${fmtNum(k.luas_kebun)} Ha` : '-'], ['Luas Peta', k.luas_peta ? `${fmtNum(parseFloat(k.luas_peta))} Ha` : '-']],
-                [['Waktu Tanam', fmt(k.waktu_tanam)], ['Komoditas', fmt(k.komoditas) !== '-' ? fmt(k.komoditas) : 'Kelapa Sawit'], ['Pola Tanam', fmt(k.pola_tanam)]],
-                [['Jenis Lahan', fmt(k.jenis_lahan)], ['Jumlah Pohon', fmtNum(k.jumlah_pohon)],['Tahun Peremajaan', fmt(k.tahun_peremajaan)]],
-                [['Asal Benih', fmt(k.asal_benih)],   ['Jenis Pupuk', fmt(k.jenis_pupuk)],     ['Mitra Penjualan', fmt(k.mitra_penjualan)]],
-                [['RSPO', fmtBool(k.is_rspo)],        ['ISPO', fmtBool(k.is_ispo)],            ['Jenis Legalitas', fmt(k.jenis_legalitas_label)]],
-                [['No. Legalitas', fmt(k.nomor_legalitas)], ['Pemilik Legalitas', fmt(k.pemilik_legalitas)], ['No. STDB', fmt(k.nomor_stdb)]],
-                [['Total Produksi', prod?.total_produksi ? `${fmtNum(prod.total_produksi)} Kg/Tahun` : '-'], ['', ''], ['', '']],
+                [['Id Kebun', fmt(k.id_kebun)],         ['Petani Pemilik', fmt(k.nama_petani)],   ['Kelompok Tani', fmt(k.kelompok_tani)]],
+                [['Lokasi Kebun', fmt(k.lokasi_kebun)], ['Luas Kebun', k.luas_kebun ? `${fmtNum(k.luas_kebun)} Ha` : '-'], ['Luas Peta', k.luas_peta ? `${fmtNum(parseFloat(k.luas_peta))} Ha` : '-']],
+                [['Waktu Tanam', fmt(k.waktu_tanam)],   ['RSPO', fmtBool(k.is_rspo)],            ['ISPO', fmtBool(k.is_ispo)]],
+                [['Jenis Legalitas', fmt(k.jenis_legalitas_label)], ['No. Legalitas', fmt(k.nomor_legalitas)], ['Pemilik Legalitas', fmt(k.pemilik_legalitas)]],
+                [['No. STDB', fmt(k.nomor_stdb)],       ['Total Produksi', prod?.total_produksi ? `${fmtNum(prod.total_produksi)} Kg/Tahun` : '-'], ['', '']],
+                [['Risiko Deforestasi', fmt(k.risiko_deforestasi)], ['Risk A-Crop', fmt(k.risk_acrop) || '-'], ['Risk P-Crop', fmt(k.risk_pcrop) || '-']],
+                [['Risk Timber', fmt(k.risk_timber) || '-'], ['', ''], ['', '']],
             ]);
         });
     }
@@ -450,64 +444,42 @@ export const generateLaporanPetaniPDF = (data, namaLaporan) => {
     spacer();
 
     // ════════════════════════════════════════════════════════════════════════════
-    // 7. DATA PENJUALAN
+    // 7. DATA PEKERJA
     // ════════════════════════════════════════════════════════════════════════════
-    secHeader(`7. DATA PENJUALAN (${data_penjualan.length} Transaksi)`);
-    if (!data_penjualan.length) {
-        noData('Tidak ada data penjualan');
-    } else {
-        const totalPj = data_penjualan.reduce((s, r) => s + (Number(r.total_penjualan) || 0), 0);
-        drawTable(
-            ['Tanggal','No. Registrasi','Kelompok','Driver','No. Polisi','Jml Tandan','Berat Bersih','Harga/Kg','Total Penjualan','Pabrik'],
-            [
-                ...data_penjualan.map(pj => [
-                    fmtDate(pj.tanggal), fmt(pj.no_registrasi), fmt(pj.kelompok),
-                    fmt(pj.driver), fmt(pj.no_polisi), fmtNum(pj.jml_tandan),
-                    pj.berat_bersih ? `${fmtNum(pj.berat_bersih)} Kg` : '-',
-                    fmtRp(pj.harga_per_kg), fmtRp(pj.total_penjualan), fmt(pj.pabrik),
-                ]),
-                ['','','','','','','','TOTAL', fmtRp(totalPj),''],
-            ],
-            [20,30,26,18,18,16,18,16,24,20],
-            6.5
-        );
-    }
-    spacer();
-
-    // ════════════════════════════════════════════════════════════════════════════
-    // 8. DATA PEKERJA
-    // ════════════════════════════════════════════════════════════════════════════
-    secHeader(`8. DATA PEKERJA (${data_pekerja.length} Orang)`);
+    secHeader(`7. DATA PEKERJA (${data_pekerja.length} Orang)`);
     if (!data_pekerja.length) {
         noData('Tidak ada data pekerja');
     } else {
         drawTable(
-            ['Nama','Jenis Kelamin','Status','Umur','Jenis Pekerjaan','APD yang Digunakan'],
+            ['Nama Pekerja','Jenis Kelamin','Status','No. KTP','No. KK','Umur'],
             data_pekerja.map(w => [
-                fmt(w.nama), fmtGender(w.jenis_kelamin, null), fmt(w.status),
+                fmt(w.nama_pekerja),
+                fmt(w.jenis_kelamin_label),
+                fmt(w.status_pekerja_label),
+                fmt(w.no_ktp),
+                fmt(w.no_kk),
                 w.umur ? `${w.umur} Tahun` : '-',
-                fmt(w.jenis_pekerjaan), fmt(w.apd),
             ]),
-            [30,24,20,16,40,56]
+            [36,26,24,32,32,36]
         );
     }
     spacer();
 
     // ════════════════════════════════════════════════════════════════════════════
-    // 9. DIKLAT
+    // 8. DIKLAT
     // ════════════════════════════════════════════════════════════════════════════
-    secHeader('9. DIKLAT (PELATIHAN)');
+    secHeader('8. DIKLAT (PELATIHAN)');
     if (!data_diklat.length) {
         noData('Tidak ada data diklat');
     } else {
         const d = data_diklat[0];
         const fields = [
             ['SL',               d.sl],
-            ['P&C (RSPO/ISPO)',  d.pandc ?? d.p_and_c ?? d.pc],
+            ['P&C (RSPO/ISPO)',  d.pnc ?? d.pandc ?? d.p_and_c ?? d.pc],
             ['Pestisida',        d.pestisida],
             ['K3',               d.k3],
             ['SOP',              d.sop],
-            ['PDG/FDG',          d.pdg_fdg ?? d.pdgfdg],
+            ['PDG/FDG',          d.pdg ?? d.pdg_fdg ?? d.pdgfdg],
         ];
         const colW = CW / fields.length;
 

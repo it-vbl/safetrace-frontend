@@ -2,7 +2,7 @@ import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
-import { submitPemetaan } from '@/services/kebun';
+import { submitPemetaan, uploadShapefile } from '@/services/kebun';
 
 const useFormPemetaan = ({
   pekebunId,
@@ -16,10 +16,29 @@ const useFormPemetaan = ({
     // Use the data prop for initial values
     initialValues: {
       peta: data?.peta || [],
+      uploaded_file: null,
     },
     // Your provided onSubmit logic
     onSubmit: async (values, { setSubmitting }) => {
       try {
+        if (values.uploaded_file) {
+          submitCallback();
+          const formData = new FormData();
+          formData.append('petani_id', pekebunId || 1);
+          formData.append('shapefile_upload', values.uploaded_file);
+
+          const toastId = toast.loading('Mengunggah file pemetaan...');
+          const response = await uploadShapefile(kebunId, formData);
+
+          if (response?.data?.status === 'success' || response?.status === 200 || response?.status === 201) {
+            toast.update(toastId, { render: 'Data peta berhasil ditambahkan', type: 'success', isLoading: false, autoClose: 3000 });
+            successCallback(response?.data?.data?.id || kebunId);
+          } else {
+            throw new Error(response?.data?.message || 'Gagal mengunggah file pemetaan');
+          }
+          return;
+        }
+
         if (!values?.peta || values?.peta?.filter((coord) => coord !== null).length == 0) {
           toast.error('Peta tidak boleh kosong');
           return;
@@ -50,7 +69,8 @@ const useFormPemetaan = ({
         }
       } catch (error) {
         failedCallback();
-        toast.error(error?.response?.data?.message);
+        toast.dismiss();
+        toast.error(error?.response?.data?.message || error?.message || 'Gagal mengunggah file pemetaan');
         console.error(error);
       }
     },

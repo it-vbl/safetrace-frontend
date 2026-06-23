@@ -102,11 +102,11 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                 file={
                   petaFile
                     ? {
-                        name: petaFile.name,
-                        size: petaFile.size,
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: petaFile,
-                      }
+                      name: petaFile.name,
+                      size: petaFile.size,
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: petaFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => {
@@ -118,7 +118,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                     formik.setFieldError('file_peta', '');
                   }
                 }}
-                allowedFiles={['.zip', '.geojson', '.kml']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 keyField="peta"
                 name="file_peta"
@@ -128,9 +128,6 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                   !petaFile
                 }
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Upload .zip / .geojson / .kml file yang sudah disiapkan.
-              </p>
               {formik.touched.file_peta &&
                 formik.errors.file_peta &&
                 !petaFile && (
@@ -145,11 +142,11 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                 file={
                   legalitasFile
                     ? {
-                        name: legalitasFile.name,
-                        size: legalitasFile.size,
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: legalitasFile,
-                      }
+                      name: legalitasFile.name,
+                      size: legalitasFile.size,
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: legalitasFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => {
@@ -185,11 +182,11 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                 file={
                   stdbFile
                     ? {
-                        name: stdbFile.name,
-                        size: stdbFile.size,
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: stdbFile,
-                      }
+                      name: stdbFile.name,
+                      size: stdbFile.size,
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: stdbFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => {
@@ -225,11 +222,11 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                 file={
                   rspoFile
                     ? {
-                        name: rspoFile.name,
-                        size: rspoFile.size,
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: rspoFile,
-                      }
+                      name: rspoFile.name,
+                      size: rspoFile.size,
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: rspoFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => {
@@ -265,11 +262,11 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
                 file={
                   ispoFile
                     ? {
-                        name: ispoFile.name,
-                        size: ispoFile.size,
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: ispoFile,
-                      }
+                      name: ispoFile.name,
+                      size: ispoFile.size,
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: ispoFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => {

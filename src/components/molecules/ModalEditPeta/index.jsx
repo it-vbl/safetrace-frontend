@@ -8,7 +8,7 @@ import * as Yup from 'yup';
 import Button from '@/components/atoms/Button';
 import BaseModal from '@/components/molecules/Modal';
 import DataPemetaan from '@/components/organisms/KebunForm/DataPemetaan';
-import { updateKebunPeta } from '@/services/kebun';
+import { updateKebunPeta, uploadShapefile } from '@/services/kebun';
 
 const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,14 +20,17 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
     return {
       petani_id: data.petani_id || '',
       peta: data.peta || null,
+      uploaded_file: null,
     };
   };
 
   const validationSchema = Yup.object({
     petani_id: Yup.string().required('Petani ID wajib diisi'),
-    peta: Yup.array()
-      .min(3, 'Minimal 3 titik koordinat diperlukan')
-      .required('Peta wajib diisi'),
+    peta: Yup.array().when('uploaded_file', {
+      is: (val) => !val,
+      then: () => Yup.array().min(3, 'Minimal 3 titik koordinat diperlukan').required('Peta wajib diisi'),
+      otherwise: () => Yup.array().nullable(),
+    }),
   });
 
   const formik = useFormik({
@@ -38,44 +41,67 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
       try {
         setIsLoading(true);
 
-        // Convert coordinates to the expected format
-        const coordinates = values.peta?.map((coord) => [coord.lng, coord.lat]);
+        if (values.uploaded_file) {
+          const formData = new FormData();
+          formData.append('petani_id', values.petani_id || kebunData?.petani_id || 1);
+          formData.append('shapefile_upload', values.uploaded_file);
 
-        // Ensure the polygon is closed (first and last coordinates are the same)
-        if (coordinates.length > 0) {
-          const firstCoord = coordinates[0];
-          const lastCoord = coordinates[coordinates.length - 1];
-          if (
-            firstCoord[0] !== lastCoord[0] ||
-            firstCoord[1] !== lastCoord[1]
-          ) {
-            coordinates.push([...firstCoord]);
+          if (!kebunData?.id) {
+            toast.error('Gagal mengunggah: ID Kebun tidak ditemukan');
+            return;
           }
-        }
 
-        // Prepare API payload
-        const payload = {
-          petani_id: parseInt(values.petani_id),
-          geom: {
-            type: 'Polygon',
-            coordinates: [coordinates],
-          },
-        };
+          const toastId = toast.loading('Mengunggah file pemetaan...');
+          const response = await uploadShapefile(kebunData.id, formData);
 
-        // Call API
-        const response = await updateKebunPeta(kebunData?.id, payload);
-
-        if (response?.data?.status === 'success') {
-          toast.success('Data peta berhasil diperbarui');
-          onSuccess?.();
-          onClose();
+          if (response?.data?.status === 'success' || response?.status === 200 || response?.status === 201) {
+            toast.update(toastId, { render: 'Data peta berhasil diperbarui', type: 'success', isLoading: false, autoClose: 3000 });
+            onSuccess?.();
+            onClose();
+          } else {
+            throw new Error(response?.data?.message || 'Gagal mengunggah file pemetaan');
+          }
         } else {
-          throw new Error(
-            response?.data?.message || 'Gagal memperbarui data peta'
-          );
+          // Convert coordinates to the expected format
+          const coordinates = values.peta?.map((coord) => [coord.lng, coord.lat]);
+
+          // Ensure the polygon is closed (first and last coordinates are the same)
+          if (coordinates.length > 0) {
+            const firstCoord = coordinates[0];
+            const lastCoord = coordinates[coordinates.length - 1];
+            if (
+              firstCoord[0] !== lastCoord[0] ||
+              firstCoord[1] !== lastCoord[1]
+            ) {
+              coordinates.push([...firstCoord]);
+            }
+          }
+
+          // Prepare API payload
+          const payload = {
+            petani_id: parseInt(values.petani_id),
+            geom: {
+              type: 'Polygon',
+              coordinates: [coordinates],
+            },
+          };
+
+          // Call API
+          const response = await updateKebunPeta(kebunData?.id, payload);
+
+          if (response?.data?.status === 'success') {
+            toast.success('Data peta berhasil diperbarui');
+            onSuccess?.();
+            onClose();
+          } else {
+            throw new Error(
+              response?.data?.message || 'Gagal memperbarui data peta'
+            );
+          }
         }
       } catch (error) {
         console.error('Error updating peta:', error);
+        toast.dismiss();
         toast.error(error.message || 'Gagal memperbarui data peta');
       } finally {
         setIsLoading(false);

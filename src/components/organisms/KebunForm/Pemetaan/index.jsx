@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 
 import Button from '@/components/atoms/Button';
 import DataPemetaan from '@/components/organisms/KebunForm/DataPemetaan';
-import { updateKebunPeta } from '@/services/kebun';
+import { updateKebunPeta, uploadShapefile } from '@/services/kebun';
 
 const Pemetaan = ({
   idKebun,
@@ -37,12 +37,17 @@ const Pemetaan = ({
   };
 
   const validationSchema = Yup.object().shape({
-    peta: Yup.array().min(1, 'Harap tambahkan koordinat untuk pemetaan'),
+    peta: Yup.array().when('uploaded_file', {
+      is: (val) => !val,
+      then: () => Yup.array().min(1, 'Harap tambahkan koordinat untuk pemetaan'),
+      otherwise: () => Yup.array().nullable(),
+    }),
   });
 
   const formik = useFormik({
     initialValues: {
       peta: getInitialCoordinates(),
+      uploaded_file: null,
     },
     validationSchema,
     enableReinitialize: true,
@@ -63,6 +68,23 @@ const Pemetaan = ({
     try {
       if (!idKebun) {
         toast.error('ID Kebun tidak ditemukan untuk pemetaan.');
+        return;
+      }
+
+      if (values.uploaded_file) {
+        const formData = new FormData();
+        formData.append('petani_id', kebunData?.petani_id || 1);
+        formData.append('shapefile_upload', values.uploaded_file);
+
+        const toastId = toast.loading('Mengunggah file pemetaan...');
+        const response = await uploadShapefile(idKebun, formData);
+
+        if (response?.data?.status === 'success' || response?.status === 200 || response?.status === 201) {
+          toast.update(toastId, { render: 'Data pemetaan berhasil disimpan', type: 'success', isLoading: false, autoClose: 3000 });
+          await onNext(values);
+        } else {
+          throw new Error(response?.data?.message || 'Gagal mengunggah file pemetaan');
+        }
         return;
       }
 
@@ -92,7 +114,8 @@ const Pemetaan = ({
       await onNext(values);
     } catch (error) {
       console.error('Error in handleSubmit:', error);
-      toast.error('Gagal menyimpan data pemetaan');
+      toast.dismiss();
+      toast.error(error.message || 'Gagal menyimpan data pemetaan');
     }
   };
 
