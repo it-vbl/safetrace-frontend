@@ -7,7 +7,6 @@ import { AgGridReact } from 'ag-grid-react';
 import Heading from '@/components/atoms/Typography/Heading';
 import BorderBottomColData from '@/components/molecules/BorderBottomColData';
 import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
-import InputMessage from '@/components/molecules/InputMessage';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import {
@@ -200,7 +199,7 @@ const DetailPesanPage = () => {
 
   return (
     <div className="relative w-full bg-gray-50">
-      <SectionLoading loading={loading} />
+      <SectionLoading loading={loading} fixed />
       <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />

@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import debounce from 'lodash/debounce';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -32,6 +33,13 @@ const PesanBaruPage = () => {
   const [deviceOptions, setDeviceOptions] = useState([]);
   const [deviceData, setDeviceData] = useState([]);
   const [groupOptions, setGroupOptions] = useState([]);
+
+  // Pagination and Search state for contacts
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState('');
+  const [loadingContacts, setLoadingContacts] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -589,8 +597,14 @@ const PesanBaruPage = () => {
   useEffect(() => {
     let mounted = true;
     const fetchContacts = async () => {
+      setLoadingContacts(true);
       try {
-        const response = await getKontakList({});
+        const params = {
+          page: currentPage,
+          page_size: pageSize,
+          ...(search && { search }),
+        };
+        const response = await getKontakList(params);
         const data = response?.data?.data;
         const list = Array.isArray(data?.results)
           ? data.results
@@ -599,19 +613,47 @@ const PesanBaruPage = () => {
             : Array.isArray(response?.data)
               ? response?.data
               : [];
-        if (mounted) setAvailableMembers(list);
+        const count = typeof data?.count === 'number'
+          ? data.count
+          : typeof response?.data?.count === 'number'
+            ? response.data.count
+            : list.length;
+
+        if (mounted) {
+          setAvailableMembers(list);
+          setTotalItems(count);
+        }
       } catch (err) {
-        if (mounted) setAvailableMembers([]);
+        if (mounted) {
+          setAvailableMembers([]);
+          setTotalItems(0);
+        }
+      } finally {
+        if (mounted) {
+          setLoadingContacts(false);
+        }
       }
     };
     fetchContacts();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentPage, pageSize, search]);
+
+  const handleSearchTextChange = useMemo(
+    () =>
+      debounce((value) => {
+        setSearch(value);
+        setCurrentPage(1);
+      }, 300),
+    []
+  );
 
   useEffect(() => {
     setSelectedMembers([]);
+    setSelectedGroups([]);
+    setSearch('');
+    setCurrentPage(1);
   }, [activeTile]);
 
   return (
@@ -681,14 +723,27 @@ const PesanBaruPage = () => {
 
               {activeTile === 'personal' ? (
                 <MemberSelector
+                  key="personal"
                   selectedMembers={selectedMembers}
                   availableMembers={availableMembers}
                   onMembersChange={handleMembersChange}
                   label="Penerima Pesan"
+                  serverSide={true}
+                  totalItems={totalItems}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageChange={(page) => setCurrentPage(page)}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                  onSearchChange={handleSearchTextChange}
+                  loading={loadingContacts}
                 />
               ) : (
                 <div className="flex w-full flex-col gap-1">
                   <MemberSelector
+                    key="group"
                     selectedMembers={selectedGroups}
                     availableMembers={groupOptions}
                     onMembersChange={setSelectedGroups}

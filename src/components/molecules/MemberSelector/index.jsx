@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { User, X } from 'lucide-react';
 
 import SearchBar from '@/components/molecules/SearchBar';
+import Pagination from '@/components/organisms/Pagination';
 
 const MemberSelector = ({
   selectedMembers = [],
@@ -13,6 +14,13 @@ const MemberSelector = ({
   showSearch = true,
   searchPlaceholder = 'Cari kontak',
   type = 'member',
+  serverSide = false,
+  totalItems = 0,
+  currentPage = 1,
+  pageSize = 10,
+  onPageChange,
+  onPageSizeChange,
+  onSearchChange,
 }) => {
   const [checkedMembers, setCheckedMembers] = useState({});
   const [internalMembers, setInternalMembers] = useState([]);
@@ -37,6 +45,7 @@ const MemberSelector = ({
   }, [availableMembers]);
 
   const filteredMembers = useMemo(() => {
+    if (serverSide) return internalMembers || [];
     if (!search) return internalMembers || [];
     const q = search.toLowerCase();
     return (internalMembers || []).filter(
@@ -44,7 +53,7 @@ const MemberSelector = ({
         (m?.name || '')?.toLowerCase().includes(q) ||
         (m?.phone || '')?.toLowerCase().includes(q)
     );
-  }, [internalMembers, search]);
+  }, [internalMembers, search, serverSide]);
 
   const handleRemoveSelectedMember = (memberId) => {
     const updatedMembers = selectedMembers.filter(
@@ -138,7 +147,13 @@ const MemberSelector = ({
             <SearchBar
               placeholder={searchPlaceholder}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearch(value);
+                if (serverSide) {
+                  onSearchChange?.(value);
+                }
+              }}
               className="w-full"
             />
           </div>
@@ -214,6 +229,24 @@ const MemberSelector = ({
             </tbody>
           </table>
         </div>
+        {serverSide && totalItems > 0 && (
+          <div className="border-t border-gray-200 p-2">
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={totalItems}
+              onPageChange={onPageChange}
+              onPageSizeChange={onPageSizeChange}
+              showRowsPerPage={true}
+              labels={{
+                rowsPerPage: 'Baris per halaman',
+                showing: 'Menampilkan',
+                of: 'dari',
+              }}
+              className="text-xs"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

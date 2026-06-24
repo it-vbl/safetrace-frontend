@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import debounce from 'lodash/debounce';
 import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
@@ -73,10 +74,15 @@ const PesanBaruKirimPesanPage = () => {
     }
   };
 
-  const fetchKontak = async () => {
+  const fetchKontak = async (searchQuery = '') => {
     setLoadingKontak(true);
     try {
-      const res = await getKontakList({ page: 1, page_size: 100 });
+      const params = {
+        page: 1,
+        page_size: 100,
+        ...(searchQuery && { search: searchQuery }),
+      };
+      const res = await getKontakList(params);
       const data = res?.data?.data || res?.data || {};
       const results = data?.results || [];
 
@@ -95,7 +101,7 @@ const PesanBaruKirimPesanPage = () => {
 
       setKontakData(mappedKontak);
       setKontakOptions(options);
-      if (options.length > 0 && !noPenerima) {
+      if (options.length > 0 && !noPenerima && !searchQuery) {
         setNoPenerima(options[0].value);
       }
     } catch (err) {
@@ -106,6 +112,19 @@ const PesanBaruKirimPesanPage = () => {
       setLoadingKontak(false);
     }
   };
+
+  const fetchKontakRef = useRef(fetchKontak);
+  useEffect(() => {
+    fetchKontakRef.current = fetchKontak;
+  });
+
+  const handleSearchChange = useMemo(
+    () =>
+      debounce((val) => {
+        fetchKontakRef.current(val);
+      }, 300),
+    []
+  );
 
   useEffect(() => {
     fetchDevices();
@@ -271,6 +290,7 @@ const PesanBaruKirimPesanPage = () => {
                     onChange={handleSelectChange}
                     disabled={loadingKontak}
                     showSearchBar={true}
+                    onSearchChange={handleSearchChange}
                   />
                 </div>
               </div>
