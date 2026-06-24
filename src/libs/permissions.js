@@ -117,13 +117,13 @@ export const PERMISSIONS = {
   'pekerja.search': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU],
   'pekerja.download': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU],
 
-  // TRACEABILITY - PEKERJA
-  'laporan.view': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  // TRACEABILITY - LAPORAN
+  'laporan.view': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU],
   'laporan.create': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
   'laporan.update': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
   'laporan.delete': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
-  'laporan.search': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
-  'laporan.download': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
+  'laporan.search': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU],
+  'laporan.download': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU],
 
   // TRACEABILITY - PENGGUNA
   'pengguna.view': [ROLE_IDS.ADMIN],
@@ -138,7 +138,7 @@ export const PERMISSIONS = {
   'peta.delete': [ROLE_IDS.ADMIN],
 
   // TRACEABILITY - MAP DASHBOARD (root MapView page)
-  'peta.dashboard': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.MITRA_PABRIK],
+  'peta.dashboard': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
 
   // TRACEABILITY - PROFIL
   'profil.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
@@ -148,7 +148,7 @@ export const PERMISSIONS = {
   'password.update': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
 };
 
-const normalizeRoles = (roles) => {
+export const normalizeRoles = (roles) => {
   if (!roles) return [];
   const list = Array.isArray(roles) ? roles : [roles];
 
@@ -156,7 +156,14 @@ const normalizeRoles = (roles) => {
     .map((r) => {
       if (r === null || r === undefined) return null;
       let val = r;
-      if (typeof r === 'object' && 'id' in r) {
+      if (typeof r === 'object') {
+        const name = (r.name || r.role_name || '').toLowerCase();
+        if (name.includes('kalbar')) return ROLE_IDS.DISBUNAK_KALBAR;
+        if (name.includes('sekadau')) return ROLE_IDS.DISBUNAK_SEKADAU;
+        if (name.includes('mitra pabrik')) return ROLE_IDS.MITRA_PABRIK;
+        if (name.includes('ketua kelompok')) return ROLE_IDS.KETUA_KELOMPOK_TANI;
+        if (name.includes('kabar tani')) return ROLE_IDS.PEGAWAI_KABAR_TANI;
+        if (name === 'admin' || name === 'administrator' || name === 'super admin') return ROLE_IDS.ADMIN;
         val = r.id;
       }
       if (typeof val === 'number') return val;

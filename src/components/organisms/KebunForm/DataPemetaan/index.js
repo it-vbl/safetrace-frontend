@@ -51,9 +51,9 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
       coords.map((coord, i) =>
         i === index
           ? {
-              lat: editingCoord.lat || coord.lat,
-              lng: editingCoord.lng || coord.lng,
-            }
+            lat: editingCoord.lat || coord.lat,
+            lng: editingCoord.lng || coord.lng,
+          }
           : coord
       )
     );
@@ -69,7 +69,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
   const handleFileUpload = async (file) => {
     setUploadedFile(file.value);
     const blobFile = file.value;
-    const fileType = blobFile.name.split('.').pop();
+    const fileType = blobFile.name.split('.').pop()?.toLowerCase();
     if (fileType === 'geojson') {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -81,32 +81,11 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
       };
       reader.readAsText(blobFile);
       setIsManual(true);
-    } else if (fileType === 'shp' || fileType === 'zip') {
-      try {
-        const formData = new FormData();
-        formData.append('petani_id', petaniId || 1);
-        formData.append('shapefile_upload', blobFile);
-
-        if (!idKebun) {
-          toast.error('Gagal mengunggah: ID Kebun tidak ditemukan');
-          return;
-        }
-
-        const toastId = toast.loading('Mengunggah shapefile...');
-        const response = await uploadShapefile(idKebun, formData);
-        toast.update(toastId, { render: 'Shapefile berhasil diunggah', type: 'success', isLoading: false, autoClose: 3000 });
-
-        if (response?.data?.data?.geom?.coordinates?.[0]) {
-          const newCoords = response.data.data.geom.coordinates[0].map(
-            (coord) => ({ lng: coord[0], lat: coord[1] })
-          );
-          setCoords(newCoords);
-        }
-      } catch (error) {
-        console.error('Error uploading shapefile:', error);
-        toast.dismiss();
-        toast.error('Gagal mengunggah file shapefile');
-      }
+      formik?.setFieldValue('uploaded_file', null);
+    } else if (fileType === 'shp' || fileType === 'zip' || fileType === 'kml') {
+      formik?.setFieldValue('uploaded_file', blobFile);
+      formik?.setFieldValue('peta', null);
+      setCoords([]);
     }
   };
 
@@ -134,24 +113,36 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
     formik?.setValues({ ...formik.values, peta: coords });
   }, [coords]);
 
+  useEffect(() => {
+    if (!formik?.values?.uploaded_file) {
+      setUploadedFile(null);
+    }
+  }, [formik?.values?.uploaded_file]);
+
   return (
     <div className="flex w-full flex-col">
       <div className="font-border-l-destructive mb-4 flex flex-1 items-center justify-between">
         <div className="flex flex-1 font-bold">Informasi Pemetaan</div>
         <div className="flex flex-row items-center rounded-[4px] bg-primary/10 px-2 py-2">
           <div
-            className={`flex flex-1 cursor-pointer items-center justify-center rounded-[4px] px-2 py-1 text-[12px] ${
-              isManual ? 'bg-white text-primary' : 'text-primary'
-            }`}
-            onClick={() => setIsManual(true)}
+            className={`flex flex-1 cursor-pointer items-center justify-center rounded-[4px] px-2 py-1 text-[12px] ${isManual ? 'bg-white text-primary' : 'text-primary'
+              }`}
+            onClick={() => {
+              setIsManual(true);
+              formik?.setFieldValue('uploaded_file', null);
+              setUploadedFile(null);
+            }}
           >
             Manual
           </div>
           <div
-            className={`flex flex-1 cursor-pointer items-center justify-center rounded-[4px] px-2 py-1 text-[12px] ${
-              !isManual ? 'bg-white text-primary' : 'text-primary'
-            }`}
-            onClick={() => setIsManual(false)}
+            className={`flex flex-1 cursor-pointer items-center justify-center rounded-[4px] px-2 py-1 text-[12px] ${!isManual ? 'bg-white text-primary' : 'text-primary'
+              }`}
+            onClick={() => {
+              setIsManual(false);
+              formik?.setFieldValue('peta', null);
+              setCoords([]);
+            }}
           >
             Upload
           </div>
@@ -219,70 +210,70 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
               <div className="flex flex-col gap-4">
                 {coords?.length > 0
                   ? coords?.map((coord, index) => {
-                      return (
-                        <div
-                          key={`coord-${index}`}
-                          className="flex flex-col sm:flex-row sm:items-center gap-4"
-                        >
-                          {editingIndex === index ? (
-                            <>
-                              <InputText
-                                placeholder="Latitude"
-                                value={editingCoord.lat}
-                                onChange={(e) =>
-                                  setEditingCoord({
-                                    ...editingCoord,
-                                    lat: e.target.value,
-                                  })
-                                }
-                                type="latitude"
-                              />
-                              <InputText
-                                placeholder="Longitude"
-                                value={editingCoord.lng}
-                                onChange={(e) =>
-                                  setEditingCoord({
-                                    ...editingCoord,
-                                    lng: e.target.value,
-                                  })
-                                }
-                                type="longitude"
-                              />
-                              <Button
-                                size="small"
-                                onClick={() => handleSaveEdit(index)}
-                              >
-                                Save
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Paragraph
-                                level={3}
-                                className="flex flex-1 font-bold"
-                              >
-                                {coord.lat}, {coord.lng}
-                              </Paragraph>
-                              {!drawFromMap && (
-                                <>
-                                  <Button
-                                    size="small"
-                                    onClick={() => handleEditCoord(index)}
-                                  >
-                                    Edit
-                                  </Button>
-                                  <div className="flex h-6 w-6 items-center justify-center rounded-[4px] border border-primary text-primary">
-                                    <BiTrash
-                                      onClick={() => handleDeleteCoord(index)}
-                                    />
-                                  </div>
-                                </>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      );
-                    })
+                    return (
+                      <div
+                        key={`coord-${index}`}
+                        className="flex flex-col sm:flex-row sm:items-center gap-4"
+                      >
+                        {editingIndex === index ? (
+                          <>
+                            <InputText
+                              placeholder="Latitude"
+                              value={editingCoord.lat}
+                              onChange={(e) =>
+                                setEditingCoord({
+                                  ...editingCoord,
+                                  lat: e.target.value,
+                                })
+                              }
+                              type="latitude"
+                            />
+                            <InputText
+                              placeholder="Longitude"
+                              value={editingCoord.lng}
+                              onChange={(e) =>
+                                setEditingCoord({
+                                  ...editingCoord,
+                                  lng: e.target.value,
+                                })
+                              }
+                              type="longitude"
+                            />
+                            <Button
+                              size="small"
+                              onClick={() => handleSaveEdit(index)}
+                            >
+                              Save
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Paragraph
+                              level={3}
+                              className="flex flex-1 font-bold"
+                            >
+                              {coord.lat}, {coord.lng}
+                            </Paragraph>
+                            {!drawFromMap && (
+                              <>
+                                <Button
+                                  size="small"
+                                  onClick={() => handleEditCoord(index)}
+                                >
+                                  Edit
+                                </Button>
+                                <div className="flex h-6 w-6 items-center justify-center rounded-[4px] border border-primary text-primary">
+                                  <BiTrash
+                                    onClick={() => handleDeleteCoord(index)}
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })
                   : '-'}
               </div>
             </div>
@@ -290,7 +281,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
         ) : (
           <div className="flex flex-1 flex-col gap-4">
             <div className="text-[12px]">
-              Upload <b>.zip / .geojson</b> file yang sudah disiapkan.
+              Upload <b>.zip / .geojson / .kml</b> file yang sudah disiapkan.
             </div>
             <div>
               <Upload
@@ -302,6 +293,8 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
                   '.zip',
                   'application/zip',
                   'application/x-zip-compressed',
+                  '.kml',
+                  'application/vnd.google-earth.kml+xml',
                 ]}
                 onChangeValue={(file) => handleFileUpload(file)}
               />
@@ -314,9 +307,9 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
             position={
               data?.peta?.titik_koordinat
                 ? [
-                    data?.peta?.titik_koordinat?.coordinates[1],
-                    data?.peta?.titik_koordinat?.coordinates[0],
-                  ]
+                  data?.peta?.titik_koordinat?.coordinates[1],
+                  data?.peta?.titik_koordinat?.coordinates[0],
+                ]
                 : [-0.5, 114.9]
             }
             enableDrawPolygon={

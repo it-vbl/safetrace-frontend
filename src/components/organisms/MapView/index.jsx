@@ -62,9 +62,9 @@ const tileLayers = {
 };
 
 const DrawControl = ({
-  onCreate = (e) => {},
-  onEditPath = (e) => {},
-  onDeleted = (e) => {},
+  onCreate = (e) => { },
+  onEditPath = (e) => { },
+  onDeleted = (e) => { },
   disableDrawPolygon = true,
   disableEditDeletePath = true,
   polygons = [],
@@ -108,22 +108,22 @@ const DrawControl = ({
   }, [polygons, featureGroupRef?.current]);
 
   return (
-    <FeatureGroup onMounted={(a) => {}} ref={featureGroupRef}>
+    <FeatureGroup onMounted={(a) => { }} ref={featureGroupRef}>
       <EditControl
         onMounted={setEditRef}
         position="topleft"
         draw={{
           polygon: !disableDrawPolygon
             ? {
-                allowIntersection: false,
-                showArea: true,
-                shapeOptions: {
-                  color: 'green', // set the border color
-                  fillColor: 'rgba(0, 0, 255)', // optional fill color
-                  fillOpacity: 0.9,
-                  weight: 0.5,
-                },
-              }
+              allowIntersection: false,
+              showArea: true,
+              shapeOptions: {
+                color: 'green', // set the border color
+                fillColor: 'rgba(0, 0, 255)', // optional fill color
+                fillOpacity: 0.9,
+                weight: 0.5,
+              },
+            }
             : false,
           rectangle: false,
           circle: false,
@@ -183,7 +183,7 @@ const toggleIcon = `
   </svg>`;
 
 function CustomButtonControl({
-  onFilterChange = (e) => {},
+  onFilterChange = (e) => { },
   activeFilter = '',
 }) {
   const map = useMap();
@@ -335,14 +335,14 @@ export default function MyMap(props) {
     highlightedPolygon = null,
     mapClassName = '',
     showPolygonPopup = true,
-    onDrawCreate = () => {},
-    onEditPath = () => {},
-    onDeletePath = () => {},
+    onDrawCreate = () => { },
+    onEditPath = () => { },
+    onDeletePath = () => { },
     enableDrawPolygon = false,
     enableEditDeletePath = false,
     showCustomControls = false,
     showDrawControls = false,
-    onFilterChange = (e) => {},
+    onFilterChange = (e) => { },
     activeFilter = '',
     tileLayer = 'osm',
     staticLayers = null,
@@ -491,9 +491,8 @@ export default function MyMap(props) {
                             month: 'long',
                           });
                           const year = date.getFullYear();
-                          return `${
-                            month.charAt(0).toUpperCase() + month.slice(1)
-                          }, ${year}`;
+                          return `${month.charAt(0).toUpperCase() + month.slice(1)
+                            }, ${year}`;
                         } catch {
                           return dateString || '-';
                         }
@@ -517,9 +516,9 @@ export default function MyMap(props) {
                               <Paragraph className="!m-0 text-[14px]">
                                 {data?.peta?.titik_koordinat?.coordinates
                                   ? convertCoordsToDMS(
-                                      data.peta.titik_koordinat.coordinates[0],
-                                      data.peta.titik_koordinat.coordinates[1]
-                                    )
+                                    data.peta.titik_koordinat.coordinates[0],
+                                    data.peta.titik_koordinat.coordinates[1]
+                                  )
                                   : '-'}
                               </Paragraph>
                             </div>
@@ -584,11 +583,10 @@ export default function MyMap(props) {
                                 RSPO
                               </Paragraph>
                               <Paragraph
-                                className={`!m-0 text-[14px] ${
-                                  data?.is_rspo || data?.rspo === 'Sudah'
+                                className={`!m-0 text-[14px] ${data?.is_rspo || data?.rspo === 'Sudah'
                                     ? 'text-green-600 font-semibold'
                                     : ''
-                                }`}
+                                  }`}
                               >
                                 {data?.is_rspo
                                   ? 'Sudah'
@@ -627,8 +625,8 @@ export default function MyMap(props) {
                                 {data?.luas_kebun
                                   ? parseFloat(data.luas_kebun).toFixed(2)
                                   : data?.lahan?.luas_lahan
-                                  ? convertToHa(data.lahan.luas_lahan)
-                                  : '0.00'}
+                                    ? convertToHa(data.lahan.luas_lahan)
+                                    : '0.00'}
                               </Paragraph>
                             </div>
                             <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
@@ -636,11 +634,10 @@ export default function MyMap(props) {
                                 ISPO
                               </Paragraph>
                               <Paragraph
-                                className={`!m-0 text-[14px] ${
-                                  data?.is_ispo || data?.ispo === 'Sudah'
+                                className={`!m-0 text-[14px] ${data?.is_ispo || data?.ispo === 'Sudah'
                                     ? 'text-green-600 font-semibold'
                                     : ''
-                                }`}
+                                  }`}
                               >
                                 {data?.is_ispo
                                   ? 'Sudah'
@@ -687,9 +684,9 @@ export default function MyMap(props) {
         const createAlertPopupHtml = (alert) => {
           const lokasiCoords = alert?.titik_lokasi?.coordinates
             ? convertCoordsToDMS(
-                alert.titik_lokasi.coordinates[0],
-                alert.titik_lokasi.coordinates[1]
-              )
+              alert.titik_lokasi.coordinates[0],
+              alert.titik_lokasi.coordinates[1]
+            )
             : '-';
 
           return `
@@ -717,9 +714,8 @@ export default function MyMap(props) {
                     </div>
                     <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
                       <p class="m-0 text-[12px] font-bold text-gray-400">Area Deforestasi</p>
-                      <p class="m-0 text-[14px]">${
-                        alert?.area_ha ? `${alert.area_ha.toFixed(1)} Ha` : '-'
-                      }</p>
+                      <p class="m-0 text-[14px]">${alert?.area_ha ? `${alert.area_ha.toFixed(1)} Ha` : '-'
+            }</p>
                     </div>
                     <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
                       <p class="m-0 text-[12px] font-bold text-gray-400">Tanggal Terdeteksi</p>
@@ -727,9 +723,8 @@ export default function MyMap(props) {
                     </div>
                     <div class="flex flex-col py-0">
                       <p class="m-0 text-[12px] font-bold text-gray-400">Alert Type</p>
-                      <p class="m-0 text-[14px] font-semibold text-red-600">${
-                        alert?.source_type?.toUpperCase() || '-'
-                      }</p>
+                      <p class="m-0 text-[14px] font-semibold text-red-600">${alert?.source_type?.toUpperCase() || '-'
+            }</p>
                     </div>
                   </div>
 
@@ -753,16 +748,15 @@ export default function MyMap(props) {
                   </div>
                 </div>
 
-                ${
-                  alert?.obyek_terdampak
-                    ? `<div class="mt-3 pt-3 border-t border-dashed border-gray-300">
+                ${alert?.obyek_terdampak
+              ? `<div class="mt-3 pt-3 border-t border-dashed border-gray-300">
                         <div class="flex flex-col">
                           <p class="m-0 text-[12px] font-bold text-gray-400">Obyek Terdampak</p>
                           <p class="m-0 text-[14px]">${alert.obyek_terdampak}</p>
                         </div>
                       </div>`
-                    : ''
-                }
+              : ''
+            }
               </div>
             </div>
           `;

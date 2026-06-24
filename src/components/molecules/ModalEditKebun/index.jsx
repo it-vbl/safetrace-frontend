@@ -10,12 +10,15 @@ import InputText from '@/components/molecules/InputText';
 import BaseModal from '@/components/molecules/Modal';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
+import useWilayah from '@/hooks/useWilayah';
 import { updateKebun } from '@/services/kebun';
 import { getListPetani } from '@/services/petani';
 
 const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [petaniOptions, setPetaniOptions] = useState([]);
+
+  const { listKecamatan, listDesa, fetchListKecamatan, fetchListDesa } = useWilayah();
 
   // Get references for dropdown options
   const {
@@ -98,9 +101,14 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       fetchJenisLahan();
       fetchAsalBenih();
       fetchJenisPupuk();
+      fetchListKecamatan(6105);
       // Fetch petani if kebunData has kelompok_tani
       if (kebunData?.kelompok_tani) {
         fetchPetaniByKelompok(kebunData.kelompok_tani);
+      }
+      // Fetch desa if kebunData has kecamatan
+      if (kebunData?.kecamatan) {
+        fetchListDesa(kebunData.kecamatan);
       }
     }
   }, [
@@ -141,6 +149,8 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       petani_id: petaniValue,
       kelompok_tani: data.kelompok_tani || '',
       lokasi_kebun: data.lokasi_kebun || '',
+      kecamatan: data.kecamatan?.toString() || '',
+      desa: data.desa?.toString() || '',
       luas_kebun: data.luas || '',
       luas_peta: data.luas_peta || '',
       waktu_tanam_month: waktuTanamMonth,
@@ -167,6 +177,8 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     id_kebun: Yup.string().required('Id Kebun wajib diisi'),
     petani_id: Yup.string().required('Nama Petani wajib diisi'),
     lokasi_kebun: Yup.string().required('Lokasi Kebun wajib diisi'),
+    kecamatan: Yup.string().required('Kecamatan wajib dipilih'),
+    desa: Yup.string().required('Kelurahan wajib dipilih'),
     luas_kebun: Yup.string().required('Luas Kebun wajib diisi'),
     luas_peta: Yup.string().required('Luas Peta wajib diisi'),
     waktu_tanam_month: Yup.string().required('Bulan tanam wajib dipilih'),
@@ -204,6 +216,8 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
           id_kebun: values.id_kebun,
           petani_id: values.petani_id,
           lokasi_kebun: values.lokasi_kebun,
+          kecamatan: values.kecamatan,
+          desa: values.desa,
           luas: values.luas_kebun,
           luas_peta: values.luas_peta,
           waktu_tanam: waktuTanam,
@@ -252,6 +266,10 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       // Fetch petani options if kelompok_tani is set
       if (kebunData.kelompok_tani) {
         fetchPetaniByKelompok(kebunData.kelompok_tani);
+      }
+      // Fetch desa list if kecamatan is set
+      if (kebunData.kecamatan) {
+        fetchListDesa(kebunData.kecamatan);
       }
     }
   }, [isOpen, kebunData]);
@@ -501,6 +519,41 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
               isError={
                 formik.touched.lokasi_kebun && formik.errors.lokasi_kebun
               }
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Kecamatan */}
+            <Select
+              label="Kecamatan"
+              name="kecamatan"
+              value={formik.values.kecamatan}
+              onChange={(e) => {
+                const val = e.target.value;
+                formik.setFieldValue('kecamatan', val);
+                formik.setFieldTouched('kecamatan', false);
+                formik.setFieldValue('desa', '');
+                formik.setFieldTouched('desa', false);
+                fetchListDesa(val);
+              }}
+              onBlur={formik.handleBlur}
+              options={listKecamatan}
+              placeholder="Pilih Kecamatan"
+              isError={formik.touched.kecamatan && formik.errors.kecamatan}
+              errors={formik.errors}
+              touched={formik.touched}
+            />
+
+            {/* Kelurahan */}
+            <Select
+              label="Kelurahan"
+              name="desa"
+              value={formik.values.desa}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              options={listDesa}
+              placeholder="Pilih Kelurahan"
+              isError={formik.touched.desa && formik.errors.desa}
               errors={formik.errors}
               touched={formik.touched}
             />

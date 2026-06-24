@@ -216,20 +216,28 @@ const ProfilePopup = ({ children }) => {
             document.body
           )}
       </div>
-      <ModalGantiKataSandi
-        open={isPasswordModalOpen}
-        setOpen={setIsPasswordModalOpen}
-        onSubmit={handlePasswordSubmit}
-      />
-      <ModalConfirmation
-        open={isLogoutConfirmOpen}
-        setOpen={handleConfirmLogout}
-        title="KELUAR"
-        message="Apakah kamu yakin ingin keluar dari aplikasi?"
-        confirmText="Batalkan"
-        cancelText="Ya, Keluar"
-        onConfirm={setIsLogoutConfirmOpen}
-      />
+      {isPasswordModalOpen && typeof window !== 'undefined' &&
+        createPortal(
+          <ModalGantiKataSandi
+            open={isPasswordModalOpen}
+            setOpen={setIsPasswordModalOpen}
+            onSubmit={handlePasswordSubmit}
+          />,
+          document.body
+        )}
+      {isLogoutConfirmOpen && typeof window !== 'undefined' &&
+        createPortal(
+          <ModalConfirmation
+            open={isLogoutConfirmOpen}
+            setOpen={setIsLogoutConfirmOpen}
+            title="KELUAR"
+            message="Apakah kamu yakin ingin keluar dari aplikasi?"
+            confirmText="Ya, Keluar"
+            cancelText="Batalkan"
+            onConfirm={handleConfirmLogout}
+          />,
+          document.body
+        )}
     </>
   );
 };

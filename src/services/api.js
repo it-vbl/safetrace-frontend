@@ -476,15 +476,22 @@ const APIInstance = {
   ) => {
     api.defaults.headers['Content-Type'] = 'multipart/form-data';
     api.defaults.timeout = TIMEOUT;
-    const formData = new FormData();
-    const keys = Object.keys(data);
-    keys.map((key) => {
-      data[key] instanceof File
-        ? formData.append(key, data[key], data[key].name)
-        : formData.append(key, data[key]);
-    });
+
+    let payload;
+    if (data instanceof FormData) {
+      payload = data;
+    } else {
+      payload = new FormData();
+      const keys = Object.keys(data);
+      keys.forEach((key) => {
+        data[key] instanceof File
+          ? payload.append(key, data[key], data[key].name)
+          : payload.append(key, data[key]);
+      });
+    }
+
     return api
-      .put(url, formData, { ...customConfig })
+      .put(url, payload, { ...customConfig })
       .then((response) => {
         return APIResponseValidation(
           response,

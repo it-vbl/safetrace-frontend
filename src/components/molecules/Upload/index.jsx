@@ -13,7 +13,7 @@ import Toast from '../Toast';
 const Upload = ({
   error = false,
   file = null,
-  onChangeValue = (e) => {},
+  onChangeValue = (e) => { },
   label = '',
   isRequired = false,
   allowedFiles = ['image/jpeg', 'image/png', 'image/jpg'],
@@ -235,20 +235,27 @@ const Upload = ({
       if (file.startsWith('.')) {
         return file.slice(1).toUpperCase();
       }
+      const mime = file.toLowerCase();
+      if (mime === 'application/pdf') return 'PDF';
+      if (mime === 'image/jpeg' || mime === 'image/jpg') return 'JPG';
+      if (mime === 'image/png') return 'PNG';
+      if (mime === 'image/webp') return 'WEBP';
+      if (mime === 'application/zip' || mime === 'application/x-zip-compressed') return 'ZIP';
+      if (mime === 'application/vnd.google-earth.kml+xml') return 'KML';
+      if (mime === 'application/geo+json') return 'GEOJSON';
+      if (mime === 'text/csv') return 'CSV';
       return file.split('/')?.[1]?.toUpperCase() || file.toUpperCase();
     };
 
     if (excelFiles.length > 0) {
       const format = [
         'Excel',
-        ...otherFiles.map(getExtLabel),
+        ...Array.from(new Set(otherFiles.map(getExtLabel))),
       ];
 
       return format.join(', ');
     } else {
-      const format = [
-        ...otherFiles.map(getExtLabel),
-      ];
+      const format = Array.from(new Set(otherFiles.map(getExtLabel)));
 
       return format.join(', ');
     }
@@ -286,9 +293,8 @@ const Upload = ({
     <div className="flex flex-col gap-1" data-testid="upload">
       {label && <Label isRequired={isRequired}>{label}</Label>}
       <div
-        className={`flex items-center justify-between rounded-md border-2 px-3 py-3 md:px-6 md:py-[21px] ${
-          error ? 'border-error5' : 'border-gray-400'
-        } gap-x-2 border-dashed ${disabled ? 'bg-gray-200' : ''}`}
+        className={`flex items-center justify-between rounded-md border-2 px-3 py-3 md:px-6 md:py-[21px] ${error ? 'border-error5' : 'border-gray-400'
+          } gap-x-2 border-dashed ${disabled ? 'bg-gray-200' : ''}`}
         data-testid="upload-container"
       >
         <div className="flex flex-col overflow-hidden">
@@ -321,13 +327,13 @@ const Upload = ({
             >
               {valueFile
                 ? (() => {
-                    const sizeInBytes = getFileSize();
-                    const formattedSize = sizeInBytes >= 104858
-                      ? `${(sizeInBytes / 1048576).toFixed(1)} MB`
-                      : `${(sizeInBytes / 1024).toFixed(1)} KB`;
-                    const dateText = `Diunggah ${moment(getUploadDate()).format('DD/MM/YYYY')}`;
-                    return sizeInBytes > 0 ? `Ukuran ${formattedSize} • ${dateText}` : dateText;
-                  })()
+                  const sizeInBytes = getFileSize();
+                  const formattedSize = sizeInBytes >= 104858
+                    ? `${(sizeInBytes / 1048576).toFixed(1)} MB`
+                    : `${(sizeInBytes / 1024).toFixed(1)} KB`;
+                  const dateText = `Diunggah ${moment(getUploadDate()).format('DD/MM/YYYY')}`;
+                  return sizeInBytes > 0 ? `Ukuran ${formattedSize} • ${dateText}` : dateText;
+                })()
                 : `Maksimal ukuran ${maxSize}MB`}
             </Paragraph>
           </div>
@@ -347,11 +353,10 @@ const Upload = ({
             <UploadAction
               disabled={disabled}
               onChange={handleOnFileChange}
-              className={`h-auto cursor-pointer rounded-md border border-primary px-2 py-1 text-[10px] font-bold leading-[14px] text-primary sm:px-4 sm:py-[7px] sm:text-[12px] ${
-                !disabled
+              className={`h-auto cursor-pointer rounded-md border border-primary px-2 py-1 text-[10px] font-bold leading-[14px] text-primary sm:px-4 sm:py-[7px] sm:text-[12px] ${!disabled
                   ? 'hover:bg-primaryLight1'
                   : '!border-gray-400 text-gray-400'
-              } md:h-7`}
+                } md:h-7`}
               id={`upload-file-${keyField}`}
               label="Unggah File"
               allowedFiles={allowedFiles}

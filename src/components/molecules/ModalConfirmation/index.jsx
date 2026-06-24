@@ -33,6 +33,7 @@ const ModalConfirmation = ({
   return (
     <Modal
       open={open}
+      setOpen={setOpen}
       onclose={handleOnClose}
       className="!w-[400px]"
       label={title}

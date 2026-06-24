@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo,useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -127,11 +127,11 @@ const ModalEditLampiran = ({
     () =>
       petaFile
         ? {
-            name: petaFile.name,
-            size: petaFile.size,
-            uploadDate: new Date().toISOString(),
-            value: petaFile,
-          }
+          name: petaFile.name,
+          size: petaFile.size,
+          uploadDate: new Date().toISOString(),
+          value: petaFile,
+        }
         : getExistingFile(lampiranData?.file_gambar_peta, 'File Peta saat ini'),
     [petaFile, lampiranData?.file_gambar_peta]
   );
@@ -140,11 +140,11 @@ const ModalEditLampiran = ({
     () =>
       legalitasFile
         ? {
-            name: legalitasFile.name,
-            size: legalitasFile.size,
-            uploadDate: new Date().toISOString(),
-            value: legalitasFile,
-          }
+          name: legalitasFile.name,
+          size: legalitasFile.size,
+          uploadDate: new Date().toISOString(),
+          value: legalitasFile,
+        }
         : getExistingFile(lampiranData?.file_legalitas, 'File Legalitas saat ini'),
     [legalitasFile, lampiranData?.file_legalitas]
   );
@@ -153,11 +153,11 @@ const ModalEditLampiran = ({
     () =>
       stdbFile
         ? {
-            name: stdbFile.name,
-            size: stdbFile.size,
-            uploadDate: new Date().toISOString(),
-            value: stdbFile,
-          }
+          name: stdbFile.name,
+          size: stdbFile.size,
+          uploadDate: new Date().toISOString(),
+          value: stdbFile,
+        }
         : getExistingFile(lampiranData?.file_stdb, 'File STDB saat ini'),
     [stdbFile, lampiranData?.file_stdb]
   );
@@ -166,11 +166,11 @@ const ModalEditLampiran = ({
     () =>
       rspoFile
         ? {
-            name: rspoFile.name,
-            size: rspoFile.size,
-            uploadDate: new Date().toISOString(),
-            value: rspoFile,
-          }
+          name: rspoFile.name,
+          size: rspoFile.size,
+          uploadDate: new Date().toISOString(),
+          value: rspoFile,
+        }
         : getExistingFile(lampiranData?.file_rspo, 'File RSPO saat ini'),
     [rspoFile, lampiranData?.file_rspo]
   );
@@ -179,11 +179,11 @@ const ModalEditLampiran = ({
     () =>
       ispoFile
         ? {
-            name: ispoFile.name,
-            size: ispoFile.size,
-            uploadDate: new Date().toISOString(),
-            value: ispoFile,
-          }
+          name: ispoFile.name,
+          size: ispoFile.size,
+          uploadDate: new Date().toISOString(),
+          value: ispoFile,
+        }
         : getExistingFile(lampiranData?.file_ispo, 'File ISPO saat ini'),
     [ispoFile, lampiranData?.file_ispo]
   );
@@ -213,7 +213,7 @@ const ModalEditLampiran = ({
                     formik.setFieldError('file_peta', '');
                   }
                 }}
-                allowedFiles={['.zip', '.geojson', '.kml']}
+                allowedFiles={['application/pdf', 'image/jpeg', 'image/png', 'image/webp']}
                 maxSize={10}
                 keyField="peta"
                 name="file_peta"
@@ -223,9 +223,6 @@ const ModalEditLampiran = ({
                   !petaFile
                 }
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Upload .zip / .geojson / .kml file yang sudah disiapkan.
-              </p>
               {formik.touched.file_peta &&
                 formik.errors.file_peta &&
                 !petaFile && (
