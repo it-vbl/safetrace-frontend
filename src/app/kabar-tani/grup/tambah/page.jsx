@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
+import debounce from 'lodash/debounce';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -20,6 +21,13 @@ const TambahGrupPage = () => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [availableMembers, setAvailableMembers] = useState([]);
 
+  // Pagination and Search state for contacts
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState('');
+  const [loadingContacts, setLoadingContacts] = useState(false);
+
   const handleMembersChange = (newMembers) => {
     setSelectedMembers(newMembers);
   };
@@ -36,8 +44,14 @@ const TambahGrupPage = () => {
   useEffect(() => {
     let mounted = true;
     const fetchContacts = async () => {
+      setLoadingContacts(true);
       try {
-        const response = await getKontakList({});
+        const params = {
+          page: currentPage,
+          page_size: pageSize,
+          ...(search && { search }),
+        };
+        const response = await getKontakList(params);
         const data = response?.data?.data;
         const list = Array.isArray(data?.results)
           ? data.results
@@ -46,16 +60,41 @@ const TambahGrupPage = () => {
           : Array.isArray(response?.data)
           ? response?.data
           : [];
-        if (mounted) setAvailableMembers(list);
+        const count = typeof data?.count === 'number'
+          ? data.count
+          : typeof response?.data?.count === 'number'
+          ? response.data.count
+          : list.length;
+
+        if (mounted) {
+          setAvailableMembers(list);
+          setTotalItems(count);
+        }
       } catch (err) {
-        if (mounted) setAvailableMembers([]);
+        if (mounted) {
+          setAvailableMembers([]);
+          setTotalItems(0);
+        }
+      } finally {
+        if (mounted) {
+          setLoadingContacts(false);
+        }
       }
     };
     fetchContacts();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentPage, pageSize, search]);
+
+  const handleSearchTextChange = useMemo(
+    () =>
+      debounce((value) => {
+        setSearch(value);
+        setCurrentPage(1);
+      }, 300),
+    []
+  );
 
   const schemaValidation = Yup.object().shape({
     group_name: Yup.string().required('Nama grup harus diisi'),
@@ -158,7 +197,17 @@ const TambahGrupPage = () => {
                 availableMembers={availableMembers}
                 onMembersChange={handleMembersChange}
                 label="Anggota"
-                loading={isSubmitting}
+                serverSide={true}
+                totalItems={totalItems}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                onPageChange={(page) => setCurrentPage(page)}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+                onSearchChange={handleSearchTextChange}
+                loading={loadingContacts}
               />
             </div>
           </div>

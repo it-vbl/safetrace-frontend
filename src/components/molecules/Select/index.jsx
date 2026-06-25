@@ -49,6 +49,7 @@ const Select = ({
   errors = {},
   touched = {},
   onBlur = () => { },
+  onSearchChange = () => { },
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value);
@@ -184,6 +185,12 @@ const Select = ({
   useEffect(() => {
     setSelectedValue(value);
   }, [value]);
+
+  useEffect(() => {
+    if (showSearchBar) {
+      onSearchChange(searchTerm);
+    }
+  }, [searchTerm, showSearchBar, onSearchChange]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {

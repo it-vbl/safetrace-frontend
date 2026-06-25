@@ -43,7 +43,7 @@ const DetailKirimPesanPage = () => {
 
   return (
     <div className="relative w-full bg-gray-50">
-      <SectionLoading loading={loading} />
+      <SectionLoading loading={loading} fixed />
       <div className="mx-auto flex w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />

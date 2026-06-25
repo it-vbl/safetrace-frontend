@@ -1,9 +1,10 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useFormik } from 'formik';
+import debounce from 'lodash/debounce';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -13,6 +14,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import MemberSelector from '@/components/molecules/MemberSelector';
 import Modal from '@/components/molecules/Modal';
+import SectionLoading from '@/components/molecules/SectionLoading';
 import TextArea from '@/components/molecules/TextArea';
 import Pagination from '@/components/organisms/Pagination';
 import { getGrupKontakDetail, updateGrupKontak } from '@/services/grup';
@@ -36,6 +38,12 @@ const GrupDetailPage = () => {
   const [error, setError] = useState(null);
   const [membersPage, setMembersPage] = useState(1);
   const [membersPageSize, setMembersPageSize] = useState(10);
+
+  // Pagination and Search state for contacts inside edit modal
+  const [contactsPage, setContactsPage] = useState(1);
+  const [contactsPageSize, setContactsPageSize] = useState(10);
+  const [contactsTotalItems, setContactsTotalItems] = useState(0);
+  const [contactsSearch, setContactsSearch] = useState('');
 
   const autoSizeStrategy = useMemo(() => {
     return {
@@ -107,6 +115,8 @@ const GrupDetailPage = () => {
   const handleOpenEdit = () => {
     setIsEditOpen(true);
     setSelectedMembersEdit(members || []);
+    setContactsSearch('');
+    setContactsPage(1);
   };
 
   useEffect(() => {
@@ -115,7 +125,12 @@ const GrupDetailPage = () => {
       if (!isEditOpen) return;
       try {
         setLoadingMembers(true);
-        const response = await getKontakList({});
+        const params = {
+          page: contactsPage,
+          page_size: contactsPageSize,
+          ...(contactsSearch && { search: contactsSearch }),
+        };
+        const response = await getKontakList(params);
         const data = response?.data?.data;
         const list = Array.isArray(data?.results)
           ? data.results
@@ -124,9 +139,21 @@ const GrupDetailPage = () => {
           : Array.isArray(response?.data)
           ? response?.data
           : [];
-        if (mounted) setAvailableMembers(list);
+        const count = typeof data?.count === 'number'
+          ? data.count
+          : typeof response?.data?.count === 'number'
+          ? response.data.count
+          : list.length;
+
+        if (mounted) {
+          setAvailableMembers(list);
+          setContactsTotalItems(count);
+        }
       } catch (err) {
-        if (mounted) setAvailableMembers([]);
+        if (mounted) {
+          setAvailableMembers([]);
+          setContactsTotalItems(0);
+        }
       } finally {
         if (mounted) setLoadingMembers(false);
       }
@@ -135,7 +162,16 @@ const GrupDetailPage = () => {
     return () => {
       mounted = false;
     };
-  }, [isEditOpen]);
+  }, [isEditOpen, contactsPage, contactsPageSize, contactsSearch]);
+
+  const handleSearchTextChange = useMemo(
+    () =>
+      debounce((value) => {
+        setContactsSearch(value);
+        setContactsPage(1);
+      }, 300),
+    []
+  );
 
   const schemaValidation = Yup.object().shape({
     group_name: Yup.string().required('Nama grup harus diisi'),
@@ -188,6 +224,7 @@ const GrupDetailPage = () => {
 
   return (
     <div className="relative w-full bg-gray-50">
+      <SectionLoading loading={loading} fixed />
       <div className="mx-auto flex h-full w-full min-w-[320px] max-w-7xl flex-col gap-6 p-2">
         {/* Breadcrumb */}
         <BreadcrumbDetail items={breadcrumbItems} />
@@ -345,10 +382,21 @@ const GrupDetailPage = () => {
                   </span>
                 ) : (
                   <MemberSelector
+                    key={isEditOpen ? "open" : "closed"}
                     selectedMembers={selectedMembersEdit}
                     availableMembers={availableMembers}
                     onMembersChange={setSelectedMembersEdit}
                     label=""
+                    serverSide={true}
+                    totalItems={contactsTotalItems}
+                    currentPage={contactsPage}
+                    pageSize={contactsPageSize}
+                    onPageChange={(page) => setContactsPage(page)}
+                    onPageSizeChange={(size) => {
+                      setContactsPageSize(size);
+                      setContactsPage(1);
+                    }}
+                    onSearchChange={handleSearchTextChange}
                     loading={loadingMembers}
                   />
                 )}
