@@ -19,7 +19,7 @@ import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -47,6 +47,7 @@ const DiklatPage = () => {
   }, []);
 
   const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'diklat.download') : false;
 
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -766,12 +767,14 @@ const DiklatPage = () => {
 
               {/* === ACTION BUTTON === */}
               <div className="flex flex-row flex-wrap items-center justify-end gap-2">
-                <Button
-                  className="!px-2 sm:!px-3"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export Excel"
-                  onClick={handleExportExcel}
-                />
+                {canDownload && (
+                  <Button
+                    className="!px-2 sm:!px-3"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export Excel"
+                    onClick={handleExportExcel}
+                  />
+                )}
               </div>
             </div>
           </div>

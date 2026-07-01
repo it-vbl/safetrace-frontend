@@ -121,12 +121,11 @@ const CreatePetaniTraceability = () => {
     tanggal_keluar: Yup.date().nullable(),
     no_whatsapp: Yup.string(),
     status_keanggotaan: Yup.string().required('Status Keanggotaan harus diisi'),
-    luas_kebun: Yup.number().required('Luas Kebun harus diisi').typeError('Luas Kebun harus berupa angka'),
     pendidikan_terakhir: Yup.string().required('Pendidikan Terakhir harus diisi'),
     provinsi: Yup.string().required('Provinsi harus diisi'),
     kabupaten: Yup.string().required('Kabupaten harus diisi'),
     kecamatan: Yup.string().required('Kecamatan harus diisi'),
-    desa: Yup.string().required('Desa harus diisi'),
+    desa: Yup.string().required('Desa/Kelurahan harus diisi'),
   });
 
   const formik = useFormik({
@@ -147,7 +146,6 @@ const CreatePetaniTraceability = () => {
       tanggal_keluar: '',
       no_whatsapp: '',
       status_keanggotaan: '',
-      luas_kebun: '',
       pendidikan_terakhir: '',
       provinsi: '',
       kabupaten: '',
@@ -186,7 +184,6 @@ const CreatePetaniTraceability = () => {
           tanggal_keluar: values.tanggal_keluar
             ? formatDate(values.tanggal_keluar)
             : null,
-          luas_kebun: parseFloat(values.luas_kebun),
           pendidikan_terakhir: values.pendidikan_terakhir,
           provinsi: parseInt(values.provinsi, 10),
           kabupaten: parseInt(values.kabupaten, 10),
@@ -232,7 +229,7 @@ const CreatePetaniTraceability = () => {
             console.error(errUpload);
             toast.error(
               errUpload?.response?.data?.message ||
-                'Terjadi kesalahan saat mengunggah lampiran'
+              'Terjadi kesalahan saat mengunggah lampiran'
             );
             return;
           }
@@ -359,18 +356,6 @@ const CreatePetaniTraceability = () => {
                 showSearchBar
               />
               <InputText
-                label="Luas Kebun (Ha)"
-                name="luas_kebun"
-                type="number"
-                placeholder="Masukan Luas Kebun"
-                value={formik.values.luas_kebun}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                errors={formik.errors}
-                touched={formik.touched}
-                isRequired
-              />
-              <InputText
                 label="Alamat"
                 name="alamat"
                 placeholder="Masukan Alamat"
@@ -418,9 +403,9 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
               <Select
-                label="Desa"
+                label="Desa/Kelurahan"
                 name="desa"
-                placeholder="Pilih Desa"
+                placeholder="Pilih Desa/Kelurahan"
                 options={listDesa}
                 value={formik.values.desa}
                 onChange={formik.handleChange}
@@ -460,8 +445,8 @@ const CreatePetaniTraceability = () => {
                 value={
                   formik.values.tanggal_lahir
                     ? moment(formik.values.tanggal_lahir, 'YYYY-MM-DD').format(
-                        'DD-MM-YYYY'
-                      )
+                      'DD-MM-YYYY'
+                    )
                     : ''
                 }
                 onChange={formik.handleChange}
@@ -524,9 +509,9 @@ const CreatePetaniTraceability = () => {
                 value={
                   formik.values.tanggal_terbit_sppl
                     ? moment(
-                        formik.values.tanggal_terbit_sppl,
-                        'YYYY-MM-DD'
-                      ).format('DD-MM-YYYY')
+                      formik.values.tanggal_terbit_sppl,
+                      'YYYY-MM-DD'
+                    ).format('DD-MM-YYYY')
                     : ''
                 }
                 onChange={formik.handleChange}
@@ -543,9 +528,9 @@ const CreatePetaniTraceability = () => {
                 value={
                   formik.values.tanggal_bergabung
                     ? moment(
-                        formik.values.tanggal_bergabung,
-                        'YYYY-MM-DD'
-                      ).format('DD-MM-YYYY')
+                      formik.values.tanggal_bergabung,
+                      'YYYY-MM-DD'
+                    ).format('DD-MM-YYYY')
                     : ''
                 }
                 onChange={formik.handleChange}
@@ -560,8 +545,8 @@ const CreatePetaniTraceability = () => {
                 value={
                   formik.values.tanggal_keluar
                     ? moment(formik.values.tanggal_keluar, 'YYYY-MM-DD').format(
-                        'DD-MM-YYYY'
-                      )
+                      'DD-MM-YYYY'
+                    )
                     : ''
                 }
                 onChange={formik.handleChange}
@@ -605,11 +590,11 @@ const CreatePetaniTraceability = () => {
                 file={
                   ktpFile
                     ? {
-                        name: ktpFile.name,
-                        size: (ktpFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: ktpFile,
-                      }
+                      name: ktpFile.name,
+                      size: (ktpFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: ktpFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => setKtpFile(data.value)}
@@ -624,11 +609,11 @@ const CreatePetaniTraceability = () => {
                 file={
                   kkFile
                     ? {
-                        name: kkFile.name,
-                        size: (kkFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: kkFile,
-                      }
+                      name: kkFile.name,
+                      size: (kkFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: kkFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => setKkFile(data.value)}
@@ -643,11 +628,11 @@ const CreatePetaniTraceability = () => {
                 file={
                   nibFile
                     ? {
-                        name: nibFile.name,
-                        size: (nibFile.size / 1048576).toFixed(1),
-                        uploadDate: new Date().toLocaleDateString('en-US'),
-                        value: nibFile,
-                      }
+                      name: nibFile.name,
+                      size: (nibFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: nibFile,
+                    }
                     : null
                 }
                 onChangeValue={(data) => setNibFile(data.value)}

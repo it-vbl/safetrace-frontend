@@ -17,12 +17,19 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import { downloadListProduksi, getListProduksi } from '@/services/produksi';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const ProduksiPage = () => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'produksi.download') : false;
 
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
@@ -300,14 +307,16 @@ const ProduksiPage = () => {
 
               {/* Action Buttons - Responsive */}
               <div className="flex flex-row flex-wrap items-center justify-end gap-2">
-                <Button
-                  className="!px-2 sm:!px-3"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export Excel"
-                  onClick={handleExportExcel}
-                  isLoading={isExportingExcel}
-                  disabled={isExportingExcel || loading}
-                />
+                {canDownload && (
+                  <Button
+                    className="!px-2 sm:!px-3"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export Excel"
+                    onClick={handleExportExcel}
+                    isLoading={isExportingExcel}
+                    disabled={isExportingExcel || loading}
+                  />
+                )}
               </div>
             </div>
           </div>

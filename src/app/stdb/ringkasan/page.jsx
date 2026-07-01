@@ -9,6 +9,7 @@ import Button from '@/components/atoms/Button';
 import RingkasanCard from '@/components/molecules/RingkasanCard';
 import Select from '@/components/molecules/Select';
 import useRingkasan from '@/hooks/useRingkasan';
+import { getCurrentUserRoles, isDisbunak } from '@/libs/permissions';
 
 const periodeOptions = [
   { value: '1week', label: '1 Minggu' },
@@ -19,6 +20,12 @@ const periodeOptions = [
 
 const RingkasanPage = () => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDisbunakUser = mounted ? isDisbunak(getCurrentUserRoles()) : false;
   const [komoditas, setKomoditas] = useState('');
   const [periode, setPeriode] = useState('1month');
 
@@ -229,15 +236,17 @@ const RingkasanPage = () => {
           >
             {loading ? 'Loading...' : 'Filter'}
           </Button>
-          <Button
-            icon={<DownloadIcon width={16} height={16} />}
-            variant="primary"
-            size="medium"
-            onClick={handleDownloadPdf}
-            disabled={loading}
-          >
-            Unduh Pdf
-          </Button>
+          {!isDisbunakUser && (
+            <Button
+              icon={<DownloadIcon width={16} height={16} />}
+              variant="primary"
+              size="medium"
+              onClick={handleDownloadPdf}
+              disabled={loading}
+            >
+              Unduh Pdf
+            </Button>
+          )}
         </div>
       </div>
 

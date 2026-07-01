@@ -286,7 +286,7 @@ export const generateLaporanPetaniPDF = (data, namaLaporan) => {
         [['No. WhatsApp', fmt(p.no_wa)],         ['Tempat Lahir', fmt(p.tempat)],             ['Tanggal Lahir', fmtDate(p.tanggal_lahir)]],
         [['No. KTP', fmt(p.no_ktp)],             ['No. KK', fmt(p.no_kk)],                   ['No. NIB', fmt(p.no_nib)]],
         [['Provinsi', fmt(p.provinsi_nama)],     ['Kabupaten/Kota', fmt(p.kabupaten_nama)],   ['Kecamatan', fmt(p.kecamatan_nama)]],
-        [['Desa', fmt(p.desa_nama)],             ['Alamat Lengkap', fmt(p.alamat)],           ['', '']],
+        [['Desa/Kelurahan', fmt(p.desa_nama)],             ['Alamat Lengkap', fmt(p.alamat)],           ['', '']],
     ]);
     spacer();
 

@@ -18,7 +18,16 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [petaniOptions, setPetaniOptions] = useState([]);
 
-  const { listKecamatan, listDesa, fetchListKecamatan, fetchListDesa } = useWilayah();
+  const {
+    listProvinsi,
+    listKota,
+    listKecamatan,
+    listDesa,
+    fetchListProvinsi,
+    fetchListKota,
+    fetchListKecamatan,
+    fetchListDesa,
+  } = useWilayah();
 
   // Get references for dropdown options
   const {
@@ -101,14 +110,19 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       fetchJenisLahan();
       fetchAsalBenih();
       fetchJenisPupuk();
-      fetchListKecamatan(6105);
+      fetchListProvinsi();
       // Fetch petani if kebunData has kelompok_tani
       if (kebunData?.kelompok_tani) {
         fetchPetaniByKelompok(kebunData.kelompok_tani);
       }
-      // Fetch desa if kebunData has kecamatan
+      // Fetch dependent lists if kebunData has kecamatan
       if (kebunData?.kecamatan) {
-        fetchListDesa(kebunData.kecamatan);
+        const kecStr = kebunData.kecamatan.toString();
+        const provId = kecStr.substring(0, 2);
+        const kabId = kecStr.substring(0, 4);
+        fetchListKota(provId);
+        fetchListKecamatan(kabId);
+        fetchListDesa(kecStr);
       }
     }
   }, [
@@ -121,6 +135,11 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     fetchAsalBenih,
     fetchJenisPupuk,
     kebunData?.kelompok_tani,
+    kebunData?.kecamatan,
+    fetchListProvinsi,
+    fetchListKota,
+    fetchListKecamatan,
+    fetchListDesa,
   ]);
 
   // Parse existing data for form initialization
@@ -149,6 +168,8 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
       petani_id: petaniValue,
       kelompok_tani: data.kelompok_tani || '',
       lokasi_kebun: data.lokasi_kebun || '',
+      provinsi: data.kecamatan ? data.kecamatan.toString().substring(0, 2) : '',
+      kabupaten: data.kecamatan ? data.kecamatan.toString().substring(0, 4) : '',
       kecamatan: data.kecamatan?.toString() || '',
       desa: data.desa?.toString() || '',
       luas_kebun: data.luas || '',
@@ -177,8 +198,10 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     id_kebun: Yup.string().required('Id Kebun wajib diisi'),
     petani_id: Yup.string().required('Nama Petani wajib diisi'),
     lokasi_kebun: Yup.string().required('Lokasi Kebun wajib diisi'),
+    provinsi: Yup.string().required('Provinsi wajib dipilih'),
+    kabupaten: Yup.string().required('Kabupaten wajib dipilih'),
     kecamatan: Yup.string().required('Kecamatan wajib dipilih'),
-    desa: Yup.string().required('Kelurahan wajib dipilih'),
+    desa: Yup.string().required('Desa/Kelurahan wajib dipilih'),
     luas_kebun: Yup.string().required('Luas Kebun wajib diisi'),
     luas_peta: Yup.string().required('Luas Peta wajib diisi'),
     waktu_tanam_month: Yup.string().required('Bulan tanam wajib dipilih'),
@@ -298,6 +321,33 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     onClose();
   };
 
+  const handleProvinsiChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kabupaten', '');
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKota(e.target.value);
+    }
+  };
+
+  const handleKotaChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKecamatan(e.target.value);
+    }
+  };
+
+  const handleKecamatanChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListDesa(e.target.value);
+    }
+  };
+
   return (
     <BaseModal
       open={isOpen}
@@ -307,385 +357,374 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* Form Fields Grid */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-4">
-            {/* Id Kebun */}
-            <InputText
-              label="Id Kebun"
-              name="id_kebun"
-              value={formik.values.id_kebun}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              isError={formik.touched.id_kebun && formik.errors.id_kebun}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+          {/* Row 1: Id Kebun | Kelompok Tani */}
+          <InputText
+            label="Id Kebun"
+            name="id_kebun"
+            value={formik.values.id_kebun}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            isError={formik.touched.id_kebun && formik.errors.id_kebun}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <Select
+            label="Kelompok Tani"
+            name="kelompok_tani"
+            value={formik.values.kelompok_tani}
+            onChange={(e) => {
+              formik.handleChange(e);
+              const newKelompokTani = e.target.value;
+              // Reset petani when kelompok tani changes
+              formik.setFieldValue('petani_id', '');
+              // Fetch petani options for the new kelompok tani
+              fetchPetaniByKelompok(newKelompokTani);
+            }}
+            onBlur={formik.handleBlur}
+            options={kelompokTani}
+            placeholder="Pilih Kelompok Tani"
+            isError={
+              formik.touched.kelompok_tani && formik.errors.kelompok_tani
+            }
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Nama Petani */}
-            <Select
-              label="Nama Petani"
-              name="petani_id"
-              value={formik.values.petani_id}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={petaniOptions}
-              placeholder="Pilih Nama Petani"
-              isError={formik.touched.petani_id && formik.errors.petani_id}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 2: Nama Petani | Lokasi Kebun */}
+          <Select
+            label="Nama Petani"
+            name="petani_id"
+            value={formik.values.petani_id}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={petaniOptions}
+            placeholder="Pilih Nama Petani"
+            isError={formik.touched.petani_id && formik.errors.petani_id}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <InputText
+            label="Lokasi Kebun"
+            name="lokasi_kebun"
+            value={formik.values.lokasi_kebun}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            isError={
+              formik.touched.lokasi_kebun && formik.errors.lokasi_kebun
+            }
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Luas Kebun */}
-            <InputText
-              label="Luas Kebun (Ha)"
-              name="luas_kebun"
-              type="number"
-              value={formik.values.luas_kebun}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="0.00"
-              isError={formik.touched.luas_kebun && formik.errors.luas_kebun}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 3: Provinsi | Kabupaten */}
+          <Select
+            label="Provinsi"
+            name="provinsi"
+            value={formik.values.provinsi}
+            onChange={handleProvinsiChange}
+            onBlur={formik.handleBlur}
+            options={listProvinsi}
+            placeholder="Pilih Provinsi"
+            isError={formik.touched.provinsi && formik.errors.provinsi}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <Select
+            label="Kabupaten"
+            name="kabupaten"
+            value={formik.values.kabupaten}
+            onChange={handleKotaChange}
+            onBlur={formik.handleBlur}
+            options={listKota}
+            placeholder="Pilih Kabupaten"
+            isError={formik.touched.kabupaten && formik.errors.kabupaten}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Waktu Tanam */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Waktu Tanam
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <Select
-                  name="waktu_tanam_month"
-                  value={formik.values.waktu_tanam_month}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  options={monthOptions}
-                  placeholder="Bulan"
-                  isError={
-                    formik.touched.waktu_tanam_month &&
-                    formik.errors.waktu_tanam_month
-                  }
-                  errors={formik.errors}
-                  touched={formik.touched}
-                />
-                <Select
-                  name="waktu_tanam_year"
-                  value={formik.values.waktu_tanam_year}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  options={yearOptions}
-                  placeholder="Tahun"
-                  isError={
-                    formik.touched.waktu_tanam_year &&
-                    formik.errors.waktu_tanam_year
-                  }
-                  errors={formik.errors}
-                  touched={formik.touched}
-                />
-              </div>
+          {/* Row 4: Kecamatan | Desa/Kelurahan */}
+          <Select
+            label="Kecamatan"
+            name="kecamatan"
+            value={formik.values.kecamatan}
+            onChange={handleKecamatanChange}
+            onBlur={formik.handleBlur}
+            options={listKecamatan}
+            placeholder="Pilih Kecamatan"
+            isError={formik.touched.kecamatan && formik.errors.kecamatan}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <Select
+            label="Desa/Kelurahan"
+            name="desa"
+            value={formik.values.desa}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={listDesa}
+            placeholder="Pilih Desa/Kelurahan"
+            isError={formik.touched.desa && formik.errors.desa}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+
+          {/* Row 5: Luas Kebun (Ha) | Luas Peta (Ha) */}
+          <InputText
+            label="Luas Kebun (Ha)"
+            name="luas_kebun"
+            type="number"
+            value={formik.values.luas_kebun}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="0.00"
+            isError={formik.touched.luas_kebun && formik.errors.luas_kebun}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <InputText
+            label="Luas Peta (Ha)"
+            name="luas_peta"
+            type="number"
+            value={formik.values.luas_peta}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="0.00"
+            isError={formik.touched.luas_peta && formik.errors.luas_peta}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+
+          {/* Row 6: Waktu Tanam | Komoditas */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Waktu Tanam
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <Select
+                name="waktu_tanam_month"
+                value={formik.values.waktu_tanam_month}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                options={monthOptions}
+                placeholder="Bulan"
+                isError={
+                  formik.touched.waktu_tanam_month &&
+                  formik.errors.waktu_tanam_month
+                }
+                errors={formik.errors}
+                touched={formik.touched}
+              />
+              <Select
+                name="waktu_tanam_year"
+                value={formik.values.waktu_tanam_year}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                options={yearOptions}
+                placeholder="Tahun"
+                isError={
+                  formik.touched.waktu_tanam_year &&
+                  formik.errors.waktu_tanam_year
+                }
+                errors={formik.errors}
+                touched={formik.touched}
+              />
             </div>
-
-            {/* ISPO */}
-            <Select
-              label="ISPO"
-              name="is_ispo"
-              value={formik.values.is_ispo}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={statusOptions}
-              placeholder="Pilih Status"
-              isError={formik.touched.is_ispo && formik.errors.is_ispo}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* No. Legalitas */}
-            <InputText
-              label="No. Legalitas"
-              name="nomor_legalitas"
-              value={formik.values.nomor_legalitas}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              isError={
-                formik.touched.nomor_legalitas && formik.errors.nomor_legalitas
-              }
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* STDB */}
-            <InputText
-              label="STDB"
-              name="nomor_stdb"
-              value={formik.values.nomor_stdb}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              isError={formik.touched.nomor_stdb && formik.errors.nomor_stdb}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Komoditas */}
-            <Select
-              label="Komoditas"
-              name="komoditas"
-              value={formik.values.komoditas}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={komoditas}
-              placeholder="Pilih Komoditas"
-              isError={formik.touched.komoditas && formik.errors.komoditas}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Total Produksi */}
-            <InputText
-              label="Total Produksi 1 Tahun (Kg)"
-              name="total_prod_per_tahun"
-              type="number"
-              value={formik.values.total_prod_per_tahun}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="18000"
-              isError={formik.touched.total_prod_per_tahun && formik.errors.total_prod_per_tahun}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Tahun Peremajaan */}
-            <InputText
-              label="Tahun Peremajaan"
-              name="tahun_peremajaan"
-              type="number"
-              value={formik.values.tahun_peremajaan}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="2020"
-              isError={formik.touched.tahun_peremajaan && formik.errors.tahun_peremajaan}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Jumlah Pohon */}
-            <InputText
-              label="Jumlah Pohon"
-              name="jumlah_pokok"
-              type="number"
-              value={formik.values.jumlah_pokok}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="300"
-              isError={formik.touched.jumlah_pokok && formik.errors.jumlah_pokok}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
           </div>
+          <Select
+            label="Komoditas"
+            name="komoditas"
+            value={formik.values.komoditas}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={komoditas}
+            placeholder="Pilih Komoditas"
+            isError={formik.touched.komoditas && formik.errors.komoditas}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-          {/* Right Column */}
-          <div className="space-y-4">
-            {/* Kelompok Tani */}
-            <Select
-              label="Kelompok Tani"
-              name="kelompok_tani"
-              value={formik.values.kelompok_tani}
-              onChange={(e) => {
-                formik.handleChange(e);
-                const newKelompokTani = e.target.value;
-                // Reset petani when kelompok tani changes
-                formik.setFieldValue('petani_id', '');
-                // Fetch petani options for the new kelompok tani
-                fetchPetaniByKelompok(newKelompokTani);
-              }}
-              onBlur={formik.handleBlur}
-              options={kelompokTani}
-              placeholder="Pilih Kelompok Tani"
-              isError={
-                formik.touched.kelompok_tani && formik.errors.kelompok_tani
-              }
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 7: Total Produksi 1 Tahun (Kg) | Jumlah Pohon */}
+          <InputText
+            label="Total Produksi 1 Tahun (Kg)"
+            name="total_prod_per_tahun"
+            type="number"
+            value={formik.values.total_prod_per_tahun}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="18000"
+            isError={formik.touched.total_prod_per_tahun && formik.errors.total_prod_per_tahun}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <InputText
+            label="Jumlah Pohon"
+            name="jumlah_pokok"
+            type="number"
+            value={formik.values.jumlah_pokok}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="300"
+            isError={formik.touched.jumlah_pokok && formik.errors.jumlah_pokok}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Lokasi Kebun */}
-            <InputText
-              label="Lokasi Kebun"
-              name="lokasi_kebun"
-              value={formik.values.lokasi_kebun}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              isError={
-                formik.touched.lokasi_kebun && formik.errors.lokasi_kebun
-              }
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 8: Pola Tanam | Jenis Lahan */}
+          <Select
+            label="Pola Tanam"
+            name="pola_tanam"
+            value={formik.values.pola_tanam}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={polaTanam}
+            placeholder="Pilih Pola Tanam"
+            isError={formik.touched.pola_tanam && formik.errors.pola_tanam}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <Select
+            label="Jenis Lahan"
+            name="jenis_lahan"
+            value={formik.values.jenis_lahan}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={jenisLahan}
+            placeholder="Pilih Jenis Lahan"
+            isError={formik.touched.jenis_lahan && formik.errors.jenis_lahan}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Kecamatan */}
-            <Select
-              label="Kecamatan"
-              name="kecamatan"
-              value={formik.values.kecamatan}
-              onChange={(e) => {
-                const val = e.target.value;
-                formik.setFieldValue('kecamatan', val);
-                formik.setFieldTouched('kecamatan', false);
-                formik.setFieldValue('desa', '');
-                formik.setFieldTouched('desa', false);
-                fetchListDesa(val);
-              }}
-              onBlur={formik.handleBlur}
-              options={listKecamatan}
-              placeholder="Pilih Kecamatan"
-              isError={formik.touched.kecamatan && formik.errors.kecamatan}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 9: Asal Benih | Jenis Pupuk */}
+          <Select
+            label="Asal Benih"
+            name="asal_benih"
+            value={formik.values.asal_benih}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={asalBenih}
+            placeholder="Pilih Asal Benih"
+            isError={formik.touched.asal_benih && formik.errors.asal_benih}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <Select
+            label="Jenis Pupuk"
+            name="jenis_pupuk"
+            value={formik.values.jenis_pupuk}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={jenisPupuk}
+            placeholder="Pilih Jenis Pupuk"
+            isError={formik.touched.jenis_pupuk && formik.errors.jenis_pupuk}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Kelurahan */}
-            <Select
-              label="Kelurahan"
-              name="desa"
-              value={formik.values.desa}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={listDesa}
-              placeholder="Pilih Kelurahan"
-              isError={formik.touched.desa && formik.errors.desa}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 10: Jenis Legalitas | No. Legalitas */}
+          <Select
+            label="Jenis Legalitas"
+            name="jenis_legalitas"
+            value={formik.values.jenis_legalitas}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={jenisLegalitas}
+            placeholder="Pilih Jenis"
+            isError={
+              formik.touched.jenis_legalitas && formik.errors.jenis_legalitas
+            }
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <InputText
+            label="No. Legalitas"
+            name="nomor_legalitas"
+            value={formik.values.nomor_legalitas}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            isError={
+              formik.touched.nomor_legalitas && formik.errors.nomor_legalitas
+            }
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Luas Peta */}
-            <InputText
-              label="Luas Peta (Ha)"
-              name="luas_peta"
-              type="number"
-              value={formik.values.luas_peta}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="0.00"
-              isError={formik.touched.luas_peta && formik.errors.luas_peta}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 11: Pemilik Legalitas | STDB */}
+          <InputText
+            label="Pemilik Legalitas"
+            name="pemilik_legalitas"
+            value={formik.values.pemilik_legalitas}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            isError={
+              formik.touched.pemilik_legalitas &&
+              formik.errors.pemilik_legalitas
+            }
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <InputText
+            label="STDB"
+            name="nomor_stdb"
+            value={formik.values.nomor_stdb}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            isError={formik.touched.nomor_stdb && formik.errors.nomor_stdb}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* RSPO */}
-            <Select
-              label="RSPO"
-              name="is_rspo"
-              value={formik.values.is_rspo}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={statusOptions}
-              placeholder="Pilih Status"
-              isError={formik.touched.is_rspo && formik.errors.is_rspo}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
+          {/* Row 12: RSPO | ISPO */}
+          <Select
+            label="RSPO"
+            name="is_rspo"
+            value={formik.values.is_rspo}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={statusOptions}
+            placeholder="Pilih Status"
+            isError={formik.touched.is_rspo && formik.errors.is_rspo}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <Select
+            label="ISPO"
+            name="is_ispo"
+            value={formik.values.is_ispo}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            options={statusOptions}
+            placeholder="Pilih Status"
+            isError={formik.touched.is_ispo && formik.errors.is_ispo}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
 
-            {/* Jenis Legalitas */}
-            <Select
-              label="Jenis Legalitas"
-              name="jenis_legalitas"
-              value={formik.values.jenis_legalitas}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={jenisLegalitas}
-              placeholder="Pilih Jenis"
-              isError={
-                formik.touched.jenis_legalitas && formik.errors.jenis_legalitas
-              }
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Pemilik Legalitas */}
-            <InputText
-              label="Pemilik Legalitas"
-              name="pemilik_legalitas"
-              value={formik.values.pemilik_legalitas}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              isError={
-                formik.touched.pemilik_legalitas &&
-                formik.errors.pemilik_legalitas
-              }
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Pola Tanam */}
-            <Select
-              label="Pola Tanam"
-              name="pola_tanam"
-              value={formik.values.pola_tanam}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={polaTanam}
-              placeholder="Pilih Pola Tanam"
-              isError={formik.touched.pola_tanam && formik.errors.pola_tanam}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Jenis Lahan */}
-            <Select
-              label="Jenis Lahan"
-              name="jenis_lahan"
-              value={formik.values.jenis_lahan}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={jenisLahan}
-              placeholder="Pilih Jenis Lahan"
-              isError={formik.touched.jenis_lahan && formik.errors.jenis_lahan}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Asal Benih */}
-            <Select
-              label="Asal Benih"
-              name="asal_benih"
-              value={formik.values.asal_benih}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={asalBenih}
-              placeholder="Pilih Asal Benih"
-              isError={formik.touched.asal_benih && formik.errors.asal_benih}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Jenis Pupuk */}
-            <Select
-              label="Jenis Pupuk"
-              name="jenis_pupuk"
-              value={formik.values.jenis_pupuk}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              options={jenisPupuk}
-              placeholder="Pilih Jenis Pupuk"
-              isError={formik.touched.jenis_pupuk && formik.errors.jenis_pupuk}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-
-            {/* Mitra Penjualan */}
-            <InputText
-              label="Mitra Penjualan"
-              name="mitra_penjualan"
-              value={formik.values.mitra_penjualan}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Masukan Mitra Penjualan"
-              isError={formik.touched.mitra_penjualan && formik.errors.mitra_penjualan}
-              errors={formik.errors}
-              touched={formik.touched}
-            />
-          </div>
+          {/* Row 13: Tahun Peremajaan | Mitra Penjualan */}
+          <InputText
+            label="Tahun Peremajaan"
+            name="tahun_peremajaan"
+            type="number"
+            value={formik.values.tahun_peremajaan}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="2020"
+            isError={formik.touched.tahun_peremajaan && formik.errors.tahun_peremajaan}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+          <InputText
+            label="Mitra Penjualan"
+            name="mitra_penjualan"
+            value={formik.values.mitra_penjualan}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="Masukan Mitra Penjualan"
+            isError={formik.touched.mitra_penjualan && formik.errors.mitra_penjualan}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
         </div>
 
         {/* Action Buttons */}

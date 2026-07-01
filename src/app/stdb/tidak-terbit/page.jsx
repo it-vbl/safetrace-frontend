@@ -16,7 +16,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useSTDB from '@/hooks/useSTDB';
-import { setFilterKomoditas } from '@/store/slices/stdb';
+import { getCurrentUserRoles, isDisbunak } from '@/libs/permissions';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -24,6 +24,12 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const ListVerifikasi = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDisbunakUser = mounted ? isDisbunak(getCurrentUserRoles()) : false;
 
   const [search, setSearch] = useState('');
   const [selectedKomoditas, setSelectedKomoditas] = useState(null);
@@ -74,7 +80,7 @@ const ListVerifikasi = () => {
     { field: 'jumlah_dipetakan', headerName: 'Jumlah Dipetakan' },
     { field: 'total_luas_kebun', headerName: 'Total Luas(m2)' },
     { field: 'kecamatan_label', headerName: 'Kecamatan' },
-    { field: 'desa_label', headerName: 'Desa' },
+    { field: 'desa_label', headerName: 'Desa/Kelurahan' },
     { field: 'updated_at', headerName: 'Terakhir Update' },
   ];
 
@@ -121,7 +127,9 @@ const ListVerifikasi = () => {
                 options={[]}
                 placeholder='Semua Komoditas'
               />
-              <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />
+              {!isDisbunakUser && (
+                <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />
+              )}
             </div>
           </div>
         </div>

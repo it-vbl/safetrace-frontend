@@ -31,7 +31,7 @@ const validationSchema = Yup.object({
   provinsi: Yup.string().required('Provinsi is required'),
   kabupaten: Yup.string().required('Kabupaten is required'),
   kecamatan: Yup.string().required('Kecamatan is required'),
-  desa: Yup.string().required('Desa is required'),
+  desa: Yup.string().required('Desa/Kelurahan is required'),
 });
 
 const EditPetaniModal = ({
@@ -248,7 +248,7 @@ const EditPetaniModal = ({
           isRequired
         />
         <Select
-          label="Desa"
+          label="Desa/Kelurahan"
           name="desa"
           value={formik.values.desa}
           onChange={formik.handleChange}

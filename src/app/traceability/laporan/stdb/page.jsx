@@ -11,6 +11,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import InputText from '@/components/molecules/InputText';
 import Select from '@/components/molecules/Select';
 import useReferences from '@/hooks/useReferences';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import { downloadLaporanStdb } from '@/services/laporan';
 
 const JENIS_LAPORAN_OPTIONS = [
@@ -327,6 +328,23 @@ function TambahLaporanContent({ forcedType }) {
 }
 
 export default function LaporanStdbPage() {
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        const roles = getCurrentUserRoles();
+        if (!hasPermission(roles, 'laporan.view')) {
+            router.replace('/traceability/petani');
+        }
+    }, [router]);
+
+    const canSeeLaporan = mounted ? hasPermission(getCurrentUserRoles(), 'laporan.view') : false;
+
+    if (mounted && !canSeeLaporan) {
+        return null;
+    }
+
     return (
         <Suspense fallback={<div className="flex w-full justify-center py-10 text-sm text-gray-500">Memuat data...</div>}>
             <TambahLaporanContent forcedType="stdb" />

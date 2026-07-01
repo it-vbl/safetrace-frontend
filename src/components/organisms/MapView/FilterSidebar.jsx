@@ -54,7 +54,7 @@ const FilterSidebar = ({
       label: 'Peta Izin Usaha Perkebunan',
       value: 'peta-izin-usaha-perkebunan',
     },
-    { label: 'Batas Desa', value: 'batas-desa' },
+    { label: 'Batas Desa/Kelurahan', value: 'batas-desa' },
     { label: 'Batas Kecamatan', value: 'batas-kecamatan' },
     { label: 'Batas Kabupaten', value: 'batas-kabupaten' },
     { label: 'Kawasan Hutan', value: 'kawasan-hutan' },

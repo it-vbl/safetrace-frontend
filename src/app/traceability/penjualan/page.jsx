@@ -18,7 +18,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -39,6 +39,7 @@ const PenjualanPage = () => {
   }, []);
 
   const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'penjualan.download') : false;
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -508,12 +509,14 @@ const PenjualanPage = () => {
 
               {/* Action Buttons - Responsive */}
               <div className="flex w-full flex-row items-center justify-between gap-2 sm:w-auto sm:justify-end">
-                <Button
-                  onClick={handleExportCSV}
-                  className="!px-3 flex-1 sm:flex-none justify-center"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export CSV"
-                />
+                {canDownload && (
+                  <Button
+                    onClick={handleExportCSV}
+                    className="!px-3 flex-1 sm:flex-none justify-center"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export CSV"
+                  />
+                )}
                 {!isViewOnly && (
                   <Button
                     onClick={() => router.push('/traceability/penjualan/tambah')}

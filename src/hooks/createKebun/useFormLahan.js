@@ -28,7 +28,7 @@ const useFormLahan = ({
       luas_lahan: Yup.number().required('Luas Lahan is required').positive('Must be positive'),
       no_dokumen: Yup.string().required('No Dokumen is required'),
       kecamatan: Yup.string().required('Kecamatan is required'),
-      desa: Yup.string().required('Desa is required'),
+      desa: Yup.string().required('Desa/Kelurahan is required'),
     }),
     // Your provided onSubmit logic
     onSubmit: async (values, { setSubmitting }) => {

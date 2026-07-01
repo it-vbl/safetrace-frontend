@@ -17,7 +17,7 @@ import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -49,6 +49,7 @@ const PetaniPage = () => {
 
   // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
   const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'petani.download') : false;
 
   const {
     kelompokTani,
@@ -526,12 +527,14 @@ const PetaniPage = () => {
 
               {/* Action Buttons - Responsive */}
               <div className="flex w-full flex-row items-center justify-between gap-2 sm:w-auto sm:justify-end">
-                <Button
-                  onClick={handleExportExcel}
-                  className="!px-3 flex-1 sm:flex-none justify-center"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export Excel"
-                />
+                {canDownload && (
+                  <Button
+                    onClick={handleExportExcel}
+                    className="!px-3 flex-1 sm:flex-none justify-center"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export Excel"
+                  />
+                )}
                 {!isViewOnly && (
                   <Button
                     onClick={() => router.push('/traceability/petani/tambah')}
