@@ -16,7 +16,7 @@ import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
 import {
   deleteKebun,
@@ -68,6 +68,7 @@ const KebunPage = () => {
 
   // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
   const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'kebun.download') : false;
 
   const { kelompokTani, fetchKelompokTani } = useReferences();
   const [search, setSearch] = useState('');
@@ -534,12 +535,14 @@ const KebunPage = () => {
 
               {/* === ACTION BUTTON === */}
               <div className="flex flex-row items-center justify-end gap-2">
-                <Button
-                  className="!px-2 sm:!px-3"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export Excel"
-                  onClick={handleExportExcel}
-                />
+                {canDownload && (
+                  <Button
+                    className="!px-2 sm:!px-3"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export Excel"
+                    onClick={handleExportExcel}
+                  />
+                )}
                 {!isViewOnly && (
                   <Button
                     onClick={() => router.push('/traceability/kebun/tambah')}

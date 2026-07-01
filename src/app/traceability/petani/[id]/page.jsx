@@ -634,7 +634,7 @@ const TraceabilityPetaniDetail = () => {
                 value={petani?.kecamatan_nama || '-'}
               />
               <BorderBottomColData
-                label="Desa"
+                label="Desa/Kelurahan"
                 value={petani?.desa_nama || '-'}
               />
               <BorderBottomColData

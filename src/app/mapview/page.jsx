@@ -114,7 +114,7 @@ const MapDashboard = () => {
     { field: 'komoditas_info', headerName: 'Komoditas' },
     { field: 'lahan.luas_lahan', headerName: 'Luas Lahan(m2)' },
     { field: 'lahan.kecamatan_label', headerName: 'Kecamatan' },
-    { field: 'lahan.desa_label', headerName: 'Kelurahan' },
+    { field: 'lahan.desa_label', headerName: 'Desa/Kelurahan' },
     { field: 'lahan.data_peta', headerName: 'Data Peta' },
     { field: 'pekebun.nama', headerName: 'Pekebun' },
     {

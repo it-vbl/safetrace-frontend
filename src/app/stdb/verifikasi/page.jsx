@@ -14,12 +14,19 @@ import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
+import { getCurrentUserRoles, isDisbunak } from '@/libs/permissions';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const ListVerifikasi = () => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDisbunakUser = mounted ? isDisbunak(getCurrentUserRoles()) : false;
 
   const [search, setSearch] = useState('');
 
@@ -72,7 +79,7 @@ const ListVerifikasi = () => {
     { field: 'jumlah_dipetakan', headerName: 'Jumlah Dipetakan' },
     { field: 'total_luas_kebun', headerName: 'Total Luas(m2)' },
     { field: 'kecamatan_label', headerName: 'Kecamatan' },
-    { field: 'desa_label', headerName: 'Desa' },
+    { field: 'desa_label', headerName: 'Desa/Kelurahan' },
     { field: 'updated_at', headerName: 'Terakhir Update' },
   ];
 
@@ -106,7 +113,9 @@ const ListVerifikasi = () => {
           <div className='flex flex-row items-center gap-8'>
             <div className='flex flex-row items-center gap-2'>
               <SearchBar onChange={handleSearchTextChange} placeholder='Cari Pekebun' />
-              <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />
+              {!isDisbunakUser && (
+                <Button className='!px-3' icon={<DownloadCloudIcon size={20} />} />
+              )}
             </div>
           </div>
         </div>

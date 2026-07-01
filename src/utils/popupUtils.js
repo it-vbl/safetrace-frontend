@@ -3,7 +3,7 @@ export function getPopupHtml(layerId, featureProperties) {
   const fieldMappings = [
     { displayText: 'Wilayah Administrasi Kabupaten', key: 'NAMOBJ' },
     { displayText: 'Wilayah Administrasi Kecamatan', key: 'DistrictID' },
-    { displayText: 'Wilayah Administrasi Desa', key: 'VillageID' },
+    { displayText: 'Wilayah Administrasi Desa/Kelurahan', key: 'VillageID' },
     { displayText: 'Kawasan Hutan', key: 'Deskripsi' },
     { displayText: 'Perizinan Perkebunan Sawit (ILOK/IUP)', key: 'name' },
     { displayText: 'Hak Guna Usaha (HGU)', key: 'NAMA' },

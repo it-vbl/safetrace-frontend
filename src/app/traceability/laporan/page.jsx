@@ -14,7 +14,7 @@ import DeleteConfirmationModal from '@/components/molecules/DeleteConfirmationMo
 import SearchBar from '@/components/molecules/SearchBar';
 import SectionLoading from '@/components/molecules/SectionLoading';
 import Pagination from '@/components/organisms/Pagination';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 import { deleteLaporan, downloadLaporan, getLaporanList } from '@/services/laporan';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -34,10 +34,19 @@ const LaporanPage = () => {
 
     // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
     const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
+    const canSeeLaporan = mounted ? hasPermission(getCurrentUserRoles(), 'laporan.view') : false;
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+        const roles = getCurrentUserRoles();
+        if (!hasPermission(roles, 'laporan.view')) {
+            router.replace('/traceability/petani');
+        }
+    }, [router]);
+
+    if (mounted && !canSeeLaporan) {
+        return null;
+    }
 
     const fetchLaporanData = async ({ page, page_size, search }) => {
         setLoading(true);

@@ -69,12 +69,12 @@ const DataLahan = ({ formik }) => {
         />
         <Select
           name='desa'
-          label='Kelurahan'
+          label='Desa/Kelurahan'
           value={formik.values.desa}
           options={listDesa}
           onChange={formik.handleChange}
           selectClassName='!min-h-[30px] h-[30px]'
-          placeholder='Pilih Kelurahan'
+          placeholder='Pilih Desa/Kelurahan'
           onBlur={formik.handleBlur}
           errors={formik.errors}
           touched={formik.touched}

@@ -24,7 +24,7 @@ const DataLahan = ({ mode = 'pendataan', data, onVerifyChange = (e) => {}, verif
         <BorderBottomColData label='Luas Lahan(m2)' value={data?.lahan?.luas_lahan} />
         <BorderBottomColData label='No Dokumen' value={data?.lahan?.no_dokumen} />
         <BorderBottomColData label='Kecamatan' value={data?.lahan?.kecamatan_label} />
-        <BorderBottomColData label='Kelurahan' value={data?.lahan?.desa_label} />
+        <BorderBottomColData label='Desa/Kelurahan' value={data?.lahan?.desa_label} />
       </div>
     </div>
   );

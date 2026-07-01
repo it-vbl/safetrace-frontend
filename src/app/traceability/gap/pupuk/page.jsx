@@ -16,6 +16,7 @@ import Select from '@/components/molecules/Select';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
 import useYearOptions from '@/hooks/useYearOptions';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import { downloadListPupuk, getListPupuk } from '@/services/pupuk';
 
 // Register all Community features
@@ -23,6 +24,12 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 const PupukPage = () => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'pupuk.download') : false;
 
   // Get options from hooks
   const tahunOptions = useYearOptions();
@@ -343,14 +350,16 @@ const PupukPage = () => {
 
               {/* === ACTION BUTTON === */}
               <div className="flex flex-row items-center justify-end gap-2">
-                <Button
-                  className="!px-2 sm:!px-3"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export Excel"
-                  onClick={handleExportExcel}
-                  isLoading={isExportingExcel}
-                  disabled={isExportingExcel || loading}
-                />
+                {canDownload && (
+                  <Button
+                    className="!px-2 sm:!px-3"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export Excel"
+                    onClick={handleExportExcel}
+                    isLoading={isExportingExcel}
+                    disabled={isExportingExcel || loading}
+                  />
+                )}
               </div>
             </div>
           </div>

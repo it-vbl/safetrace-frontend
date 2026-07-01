@@ -5,12 +5,14 @@ import { toast } from 'react-toastify';
 
 import Checkbox from '@/components/atoms/Checkbox';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
+import { getCurrentUserRoles, hasPermission } from '@/libs/permissions';
 import convertCoordToDMS from '@/libs/utils/convertCoordToDMS';
 import { downloadSHPKebun } from '@/services/kebun';
 
 import BorderBottomColData from '../../../molecules/BorderBottomColData';
 
 const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChange = (e) => { } }) => {
+  const canDownload = hasPermission(getCurrentUserRoles(), 'kebun.download');
   const Map = useMemo(
     () =>
       dynamic(() => import('@/components/organisms/MapView'), {
@@ -63,22 +65,24 @@ const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChan
         <BorderBottomColData label='Luas (m2)' value={data?.peta?.luas_area_geom} />
         <BorderBottomColData label='Keliling (m2)' value={data?.peta?.keliling_area_geom} />
       </div>
-      <div className='my-4 grid h-auto w-full grid-cols-3'>
-        <div className='flex flex-col gap-y-[2px]'>
-          <Paragraph level={3} className='line-clamp-1 text-[12px] font-bold text-neutral7'>
-            File
-          </Paragraph>
-          <div
-            onClick={() => {
-              handleDownloadPeta();
-            }}
-            className='flex cursor-pointer flex-row gap-2 text-[14px] font-bold text-primary'
-          >
-            <DownloadCloud width={24} height={24} className='text-primary' />
-            Unduh SHP Per Kebun
+      {canDownload && (
+        <div className='my-4 grid h-auto w-full grid-cols-3'>
+          <div className='flex flex-col gap-y-[2px]'>
+            <Paragraph level={3} className='line-clamp-1 text-[12px] font-bold text-neutral7'>
+              File
+            </Paragraph>
+            <div
+              onClick={() => {
+                handleDownloadPeta();
+              }}
+              className='flex cursor-pointer flex-row gap-2 text-[14px] font-bold text-primary'
+            >
+              <DownloadCloud width={24} height={24} className='text-primary' />
+              Unduh SHP Per Kebun
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <div className='h-[256px] w-full '>
         <Map mapClassName='h-full' highlightedPolygon={data?.peta?.geom?.coordinates} position={null} data={[data]} />
       </div>

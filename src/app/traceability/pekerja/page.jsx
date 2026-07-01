@@ -17,7 +17,7 @@ import Select from '@/components/molecules/Select';
 import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
 import useReferences from '@/hooks/useReferences';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 import { deletePekerja, downloadListPekerja, getListPekerja, getStatistikPekerja } from '@/services/pekerja';
 
 // Register all Community features
@@ -34,6 +34,7 @@ const PekerjaPage = () => {
 
   // Determine if the current user is view-only (Disbunak Kalbar / Disbunak Sekadau)
   const isViewOnly = mounted ? isViewOnlyRole(getCurrentUserRoles()) : false;
+  const canDownload = mounted ? hasPermission(getCurrentUserRoles(), 'pekerja.download') : false;
 
   const [search, setSearch] = useState('');
   const [selectedKelompok, setSelectedKelompok] = useState(null);
@@ -430,12 +431,14 @@ const PekerjaPage = () => {
 
               {/* === ACTION BUTTON === */}
               <div className="flex flex-row items-center justify-end gap-2">
-                <Button
-                  className="!px-2 sm:!px-3"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Export Excel"
-                  onClick={handleExportExcel}
-                />
+                {canDownload && (
+                  <Button
+                    className="!px-2 sm:!px-3"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Export Excel"
+                    onClick={handleExportExcel}
+                  />
+                )}
 
                 {!isViewOnly && (
                   <Button

@@ -55,7 +55,7 @@ const CreatePekebun = () => {
     provinsi: Yup.number().required('Provinsi harus diisi'),
     kabupaten: Yup.number().required('Kabupaten harus diisi'),
     kecamatan: Yup.number().required('Kecamatan harus diisi'),
-    desa: Yup.number().required('Desa harus diisi'),
+    desa: Yup.number().required('Desa/Kelurahan harus diisi'),
     alamat_ktp: Yup.string().required('Alamat KTP harus diisi'),
   });
 

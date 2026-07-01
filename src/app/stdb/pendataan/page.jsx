@@ -20,8 +20,8 @@ import useKecamatanSanggau from '@/hooks/useKecamatanSanggau';
 import useKomoditas from '@/hooks/useKomoditas';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
+import { getCurrentUserRoles, isDisbunak } from '@/libs/permissions';
 import { deletePekebun } from '@/services/pekebun';
-import { setFilterKomoditas } from '@/store/slices/stdb';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -29,6 +29,12 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const MapDashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDisbunakUser = mounted ? isDisbunak(getCurrentUserRoles()) : false;
   const [showModalConfirmDeletePekebun, setShowModalConfirmDeletePekebun] =
     useState(false);
   const [selectedPekebunToDelete, setSelectedPekebunToDelete] = useState(false);
@@ -133,7 +139,7 @@ const MapDashboard = () => {
     },
     {
       field: 'desa_label',
-      headerName: 'Desa',
+      headerName: 'Desa/Kelurahan',
     },
     {
       field: 'updated_at',
@@ -235,11 +241,13 @@ const MapDashboard = () => {
 
               {/* Action Buttons - Responsive */}
               <div className="flex flex-row items-center gap-2 justify-end">
-                <Button
-                  className="!px-2 sm:!px-3"
-                  icon={<DownloadCloudIcon size={18} />}
-                  title="Download"
-                />
+                {!isDisbunakUser && (
+                  <Button
+                    className="!px-2 sm:!px-3"
+                    icon={<DownloadCloudIcon size={18} />}
+                    title="Download"
+                  />
+                )}
                 <Button
                   onClick={() => router.push(`/stdb/pendataan/tambah-pekebun`)}
                   className="text-xs sm:text-sm whitespace-nowrap"

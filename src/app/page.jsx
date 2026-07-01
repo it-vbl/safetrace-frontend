@@ -367,7 +367,7 @@ const MapDashboard = () => {
       width: 160,
     },
     {
-      headerName: 'Desa',
+      headerName: 'Desa/Kelurahan',
       field: 'desa',
       width: 160,
     },

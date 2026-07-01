@@ -47,7 +47,16 @@ const DetailKebun = ({
     fetchJenisPupuk,
   } = useReferences();
 
-  const { listKecamatan, listDesa, fetchListKecamatan, fetchListDesa } = useWilayah();
+  const {
+    listProvinsi,
+    listKota,
+    listKecamatan,
+    listDesa,
+    fetchListProvinsi,
+    fetchListKota,
+    fetchListKecamatan,
+    fetchListDesa,
+  } = useWilayah();
 
   useEffect(() => {
     if (kelompokTani.length === 0) fetchKelompokTani();
@@ -57,7 +66,7 @@ const DetailKebun = ({
     if (jenisLahan.length === 0) fetchJenisLahan();
     if (asalBenih.length === 0) fetchAsalBenih();
     if (jenisPupuk.length === 0) fetchJenisPupuk();
-    fetchListKecamatan(6105);
+    fetchListProvinsi();
   }, [
     kelompokTani.length,
     jenisLegalitas.length,
@@ -73,6 +82,7 @@ const DetailKebun = ({
     fetchJenisLahan,
     fetchAsalBenih,
     fetchJenisPupuk,
+    fetchListProvinsi,
   ]);
 
   useEffect(() => {
@@ -110,8 +120,10 @@ const DetailKebun = ({
     kelompok_tani: Yup.string().required('Kelompok Tani harus diisi'),
     petani_id: Yup.string().required('Nama Petani harus diisi'),
     lokasi_kebun: Yup.string().required('Lokasi Kebun harus diisi'),
+    provinsi: Yup.string().required('Provinsi harus diisi'),
+    kabupaten: Yup.string().required('Kabupaten harus diisi'),
     kecamatan: Yup.string().required('Kecamatan harus diisi'),
-    desa: Yup.string().required('Kelurahan harus diisi'),
+    desa: Yup.string().required('Desa/Kelurahan harus diisi'),
     luas: Yup.string()
       .required('Luas Kebun harus diisi')
       .test('is-number', 'Luas kebun harus berupa angka', (value) => {
@@ -151,6 +163,8 @@ const DetailKebun = ({
       kelompok_tani: kebunData?.kelompok_tani || kebunData?.kelompok || null,
       petani_id: kebunData?.petani_id?.toString() || '',
       lokasi_kebun: kebunData?.lokasi_kebun || '',
+      provinsi: kebunData?.kecamatan ? kebunData.kecamatan.toString().substring(0, 2) : '',
+      kabupaten: kebunData?.kecamatan ? kebunData.kecamatan.toString().substring(0, 4) : '',
       kecamatan: kebunData?.kecamatan?.toString() || '',
       desa: kebunData?.desa?.toString() || '',
       luas: kebunData?.luas?.toString() || '',
@@ -185,12 +199,18 @@ const DetailKebun = ({
 
   useEffect(() => {
     if (kebunData) {
+      const kecStr = kebunData.kecamatan ? kebunData.kecamatan.toString() : '';
+      const provId = kecStr ? kecStr.substring(0, 2) : '';
+      const kabId = kecStr ? kecStr.substring(0, 4) : '';
+
       formik.setValues({
         id_kebun: kebunData.id_kebun || '',
         kelompok_tani: kebunData.kelompok_tani || kebunData.kelompok || '-',
         petani_id: kebunData.petani_id?.toString() || '',
         lokasi_kebun: kebunData.lokasi_kebun || '',
-        kecamatan: kebunData.kecamatan?.toString() || '',
+        provinsi: provId,
+        kabupaten: kabId,
+        kecamatan: kecStr,
         desa: kebunData.desa?.toString() || '',
         luas: kebunData.luas?.toString() || '',
         luas_peta: kebunData.luas_peta?.toString() || '',
@@ -216,9 +236,11 @@ const DetailKebun = ({
         jenis_pupuk: kebunData.jenis_pupuk?.toString() || '',
         mitra_penjualan: kebunData.mitra_penjualan || '',
       });
-      // Fetch desa list if kecamatan already exists
-      if (kebunData.kecamatan) {
-        fetchListDesa(kebunData.kecamatan);
+
+      if (kecStr) {
+        fetchListKota(provId);
+        fetchListKecamatan(kabId);
+        fetchListDesa(kecStr);
       }
     }
   }, [kebunData]);
@@ -243,6 +265,33 @@ const DetailKebun = ({
     formik.setFieldValue('petani_id', '');
 
     fetchPetaniByKelompok(value);
+  };
+
+  const handleProvinsiChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kabupaten', '');
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKota(e.target.value);
+    }
+  };
+
+  const handleKotaChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('kecamatan', '');
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListKecamatan(e.target.value);
+    }
+  };
+
+  const handleKecamatanChange = (e) => {
+    formik.handleChange(e);
+    formik.setFieldValue('desa', '');
+    if (e.target.value) {
+      fetchListDesa(e.target.value);
+    }
   };
 
   const handleSubmit = async () => {
@@ -331,28 +380,45 @@ const DetailKebun = ({
             isRequired
           />
           <Select
-            label="Kecamatan"
-            name="kecamatan"
-            placeholder="Pilih Kecamatan"
-            options={listKecamatan}
-            value={formik.values.kecamatan}
-            onChange={(e) => {
-              const val = e.target.value;
-              formik.setFieldValue('kecamatan', val);
-              formik.setFieldTouched('kecamatan', false);
-              formik.setFieldValue('desa', '');
-              formik.setFieldTouched('desa', false);
-              fetchListDesa(val);
-            }}
+            label="Provinsi"
+            name="provinsi"
+            placeholder="Pilih Provinsi"
+            options={listProvinsi}
+            value={formik.values.provinsi}
+            onChange={handleProvinsiChange}
             onBlur={formik.handleBlur}
             errors={formik.errors}
             touched={formik.touched}
             isRequired
           />
           <Select
-            label="Kelurahan"
+            label="Kabupaten"
+            name="kabupaten"
+            placeholder="Pilih Kabupaten"
+            options={listKota}
+            value={formik.values.kabupaten}
+            onChange={handleKotaChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Kecamatan"
+            name="kecamatan"
+            placeholder="Pilih Kecamatan"
+            options={listKecamatan}
+            value={formik.values.kecamatan}
+            onChange={handleKecamatanChange}
+            onBlur={formik.handleBlur}
+            errors={formik.errors}
+            touched={formik.touched}
+            isRequired
+          />
+          <Select
+            label="Desa/Kelurahan"
             name="desa"
-            placeholder="Pilih Kelurahan"
+            placeholder="Pilih Desa/Kelurahan"
             options={listDesa}
             value={formik.values.desa}
             onChange={formik.handleChange}

@@ -11,7 +11,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import ModalEditKebun from '@/components/molecules/ModalEditKebun';
 import ModalEditLampiran from '@/components/molecules/ModalEditLampiran';
 import ModalEditPeta from '@/components/molecules/ModalEditPeta';
-import { getCurrentUserRoles, isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
 import { downloadSHPKebun } from '@/services/kebun';
 import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
@@ -71,6 +71,7 @@ const Map = dynamic(() => import('@/components/organisms/MapView'), {
 const DetailKebunPage = () => {
   const { idKebun: id } = useParams();
   const isViewOnly = isViewOnlyRole(getCurrentUserRoles());
+  const canDownload = hasPermission(getCurrentUserRoles(), 'kebun.download');
   const [kebunData, setKebunData] = useState(null);
   const [lampiranData, setLampiranData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -251,7 +252,7 @@ const DetailKebunPage = () => {
             <BorderBottomColData label="Id Kebun" value={kebunData.id_kebun || '-'} />
             <BorderBottomColData label="Petani" value={kebunData.nama_petani || '-'} />
             <BorderBottomColData label="Kelompok Tani" value={kebunData.kelompok_tani || '-'} />
-            <BorderBottomColData label="Kelurahan" value={kebunData.desa_nama || '-'} />
+            <BorderBottomColData label="Desa/Kelurahan" value={kebunData.desa_nama || '-'} />
             <BorderBottomColData label="Lokasi Kebun" value={kebunData.lokasi_kebun || '-'} />
             <BorderBottomColData label="Luas Kebun (Ha)" value={kebunData.luas || '-'} />
 
@@ -286,13 +287,15 @@ const DetailKebunPage = () => {
             <h3 className="text-base font-semibold sm:text-lg">PETA</h3>
             {kebunData?.geom && (
               <div className="flex gap-3 self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={handleDownloadPeta}
-                  className="text-sm font-medium text-green-700 underline hover:text-green-800"
-                >
-                  Unduh SHP
-                </button>
+                {canDownload && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadPeta}
+                    className="text-sm font-medium text-green-700 underline hover:text-green-800"
+                  >
+                    Unduh SHP
+                  </button>
+                )}
                 {!isViewOnly && (
                   <button
                     onClick={() => setShowEditPetaModal(true)}

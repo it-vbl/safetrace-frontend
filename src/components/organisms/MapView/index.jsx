@@ -742,7 +742,7 @@ export default function MyMap(props) {
                       <p class="m-0 text-[14px]">${alert?.kecamatan || '-'}</p>
                     </div>
                     <div class="flex flex-col py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Desa</p>
+                      <p class="m-0 text-[12px] font-bold text-gray-400">Desa/Kelurahan</p>
                       <p class="m-0 text-[14px]">${alert?.desa || '-'}</p>
                     </div>
                   </div>
