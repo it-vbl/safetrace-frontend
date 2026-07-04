@@ -151,9 +151,9 @@ const KontakPage = () => {
     setSelectedKontakToDelete(null);
   };
 
-  const ActionsCellRenderer = useCallback((e) => {
+  const ActionsCellRenderer = (e) => {
     return (
-      <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
+      <div className="flex h-full items-center gap-2">
         <button
           className="py-1 text-xs font-bold text-primaryDark1 underline"
           onClick={() => handleEditClicked(e.data)}
@@ -168,7 +168,7 @@ const KontakPage = () => {
         </button>
       </div>
     );
-  }, []);
+  };
 
   const handlePageChange = useCallback((newPage) => {
     setCurrentPage(newPage);
