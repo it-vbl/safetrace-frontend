@@ -15,8 +15,10 @@ const WhatsAppService = {
 
   getWhacenterQRCodeUrl: (deviceId) => {
     let base =
-      process.env.NEXT_PUBLIC_WHATSAPP_API_URL ||
-      'https://app.whacenter.com/api/';
+      typeof window !== 'undefined'
+        ? '/api/wa-proxy' // browser → proxy lokal (hindari CORS)
+        : process.env.NEXT_PUBLIC_WHATSAPP_API_URL ||
+          'https://app.whacenter.com/api/';
     if (!base.endsWith('/')) base = `${base}/`;
     return `${base}qr?device_id=${deviceId}`;
   },
