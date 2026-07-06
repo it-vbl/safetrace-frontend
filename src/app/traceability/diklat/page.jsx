@@ -19,7 +19,7 @@ import SectionLoading from '@/components/molecules/SectionLoading';
 import Select from '@/components/molecules/Select';
 import StatCard from '@/components/molecules/StatCard';
 import Pagination from '@/components/organisms/Pagination';
-import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission, isViewOnlyRole } from '@/libs/permissions';
 
 import useReferences from '../../../hooks/useReferences';
 import {
@@ -66,6 +66,9 @@ const DiklatPage = () => {
     k3: false,
     sop: false,
     pdg: false,
+    manajemen_api: false,
+    pengendalian_hpt: false,
+    nkt: false,
   });
 
   const handleToggleCardFilter = (key) => {
@@ -80,6 +83,9 @@ const DiklatPage = () => {
     k3: 0,
     sop: 0,
     fdg: 0,
+    manajemenApi: 0,
+    pengendalianHpt: 0,
+    nkt: 0,
   });
 
   useEffect(() => {
@@ -130,6 +136,9 @@ const DiklatPage = () => {
           k3: data.k3?.sudah || 0,
           sop: data.sop?.sudah || 0,
           fdg: data.pdg?.sudah || data.fdg?.sudah || 0,
+          manajemenApi: data.manajemen_api?.sudah || 0,
+          pengendalianHpt: data.pengendalian_hpt?.sudah || 0,
+          nkt: data.nkt?.sudah || 0,
         });
       }
     } catch (error) {
@@ -264,6 +273,12 @@ const DiklatPage = () => {
       sop_trainer: '',
       pdg: null,
       pdg_trainer: '',
+      manajemen_api: null,
+      manajemen_api_trainer: '',
+      pengendalian_hpt: null,
+      pengendalian_hpt_trainer: '',
+      nkt: null,
+      nkt_trainer: '',
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!selectedId) return;
@@ -283,6 +298,12 @@ const DiklatPage = () => {
           sop_trainer: values.sop_trainer || null,
           pdg: values.pdg,
           pdg_trainer: values.pdg_trainer || null,
+          manajemen_api: values.manajemen_api,
+          manajemen_api_trainer: values.manajemen_api_trainer || null,
+          pengendalian_hpt: values.pengendalian_hpt,
+          pengendalian_hpt_trainer: values.pengendalian_hpt_trainer || null,
+          nkt: values.nkt,
+          nkt_trainer: values.nkt_trainer || null,
         };
 
         const response = await updateDiklat(selectedId, payload);
@@ -342,6 +363,12 @@ const DiklatPage = () => {
           sop_trainer: detail.sop_trainer || '',
           pdg: detail.pdg ?? detail.fgd,
           pdg_trainer: detail.pdg_trainer || detail.fgd_trainer || '',
+          manajemen_api: detail.manajemen_api,
+          manajemen_api_trainer: detail.manajemen_api_trainer || '',
+          pengendalian_hpt: detail.pengendalian_hpt,
+          pengendalian_hpt_trainer: detail.pengendalian_hpt_trainer || '',
+          nkt: detail.nkt,
+          nkt_trainer: detail.nkt_trainer || '',
         });
       }
     } catch (error) {
@@ -494,14 +521,56 @@ const DiklatPage = () => {
       },
       {
         field: 'pdg',
-        headerName: 'PDG',
+        headerName: 'FDG',
         flex: 0.6,
         minWidth: 80,
         cellRenderer: StatusCellRenderer,
       },
       {
         field: 'pdg_trainer',
-        headerName: 'PDG Trainer',
+        headerName: 'FDG Trainer',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
+      },
+      {
+        field: 'manajemen_api',
+        headerName: 'Manajemen API',
+        flex: 1,
+        minWidth: 130,
+        cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'manajemen_api_trainer',
+        headerName: 'Trainer Manajemen API',
+        flex: 1,
+        minWidth: 160,
+        cellRenderer: TrainerCellRenderer,
+      },
+      {
+        field: 'pengendalian_hpt',
+        headerName: 'Pengendalian HPT',
+        flex: 1,
+        minWidth: 140,
+        cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'pengendalian_hpt_trainer',
+        headerName: 'Trainer HPT',
+        flex: 0.8,
+        minWidth: 120,
+        cellRenderer: TrainerCellRenderer,
+      },
+      {
+        field: 'nkt',
+        headerName: 'NKT',
+        flex: 0.6,
+        minWidth: 80,
+        cellRenderer: StatusCellRenderer,
+      },
+      {
+        field: 'nkt_trainer',
+        headerName: 'Trainer NKT',
         flex: 0.8,
         minWidth: 120,
         cellRenderer: TrainerCellRenderer,
@@ -594,16 +663,16 @@ const DiklatPage = () => {
         setOpen={handleCancel}
         isShowLabel={false}
         isShowCloseIcon={false}
-        className="flex max-w-2xl flex-col"
+        className="flex w-[calc(100vw-32px)] max-w-2xl flex-col"
       >
         <form onSubmit={handleSubmit}>
           <Heading
             level={4}
-            className="text-lg font-bold text-gray-800 sm:text-xl md:text-2xl"
+            className="text-base font-bold text-gray-800 sm:text-lg md:text-xl"
           >
             UBAH STATUS DIKLAT
           </Heading>
-          <div className="my-4 flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-2">
+          <div className="my-3 flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1 sm:my-4 sm:gap-4 sm:pr-2">
             {/* SL */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
               <Select
@@ -723,24 +792,84 @@ const DiklatPage = () => {
                 onBlur={handleBlur}
               />
             </div>
+
+            {/* Manajemen API */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+              <Select
+                label="Manajemen API"
+                containerClassName="w-full"
+                placeholder="Pilih Manajemen API"
+                options={statusOption}
+                value={values.manajemen_api}
+                onChange={(e) => setFieldValue('manajemen_api', e.target.value)}
+              />
+              <InputText
+                label="Trainer Manajemen API"
+                name="manajemen_api_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.manajemen_api_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
+
+            {/* Pengendalian HPT */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+              <Select
+                label="Pengendalian HPT"
+                containerClassName="w-full"
+                placeholder="Pilih Pengendalian HPT"
+                options={statusOption}
+                value={values.pengendalian_hpt}
+                onChange={(e) => setFieldValue('pengendalian_hpt', e.target.value)}
+              />
+              <InputText
+                label="Trainer HPT"
+                name="pengendalian_hpt_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.pengendalian_hpt_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
+
+            {/* NKT (Nilai Konservasi Tinggi) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+              <Select
+                label="NKT (Nilai Konservasi Tinggi)"
+                containerClassName="w-full"
+                placeholder="Pilih NKT"
+                options={statusOption}
+                value={values.nkt}
+                onChange={(e) => setFieldValue('nkt', e.target.value)}
+              />
+              <InputText
+                label="Trainer NKT"
+                name="nkt_trainer"
+                placeholder="Masukkan nama trainer"
+                value={values.nkt_trainer}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
           </div>
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="danger" onClick={handleCancel}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+            <Button type="button" variant="danger" onClick={handleCancel} className="w-full sm:w-auto">
               Batalkan
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
               {isSubmitting ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>
         </form>
       </BaseModal>
 
-      <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
+      <div className="flex h-full flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col gap-2 p-2 sm:gap-3 sm:p-3 md:gap-4 md:p-4">
           {/* === HEADER === */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <Heading
-              className=" flex flex-1 uppercase tracking-[2px]"
+              className="flex flex-1 text-base uppercase tracking-[2px] sm:text-lg md:text-xl"
               level={3}
             >
               DIKLAT
@@ -780,17 +909,20 @@ const DiklatPage = () => {
           </div>
 
           {/* === STATISTICS CARDS === */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <StatCard title="SL" value={statistik.sl} isActive={cardFilters.sl} onClick={() => handleToggleCardFilter('sl')} />
-            <StatCard title="P&C (RSPO/ISPO)" value={statistik.pcRspoIspo} isActive={cardFilters.pnc} onClick={() => handleToggleCardFilter('pnc')} />
-            <StatCard title="Pestisida" value={statistik.pestisida} isActive={cardFilters.pestida} onClick={() => handleToggleCardFilter('pestida')} />
-            <StatCard title="K3" value={statistik.k3} isActive={cardFilters.k3} onClick={() => handleToggleCardFilter('k3')} />
-            <StatCard title="SOP" value={statistik.sop} isActive={cardFilters.sop} onClick={() => handleToggleCardFilter('sop')} />
-            <StatCard title="FDG" value={statistik.fdg} isActive={cardFilters.pdg} onClick={() => handleToggleCardFilter('pdg')} />
+          <div className="flex gap-3 overflow-x-auto pt-1 pb-1 sm:gap-4 scrollbar-thin">
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="SL" value={statistik.sl} isActive={cardFilters.sl} onClick={() => handleToggleCardFilter('sl')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="P&C (RSPO/ISPO)" value={statistik.pcRspoIspo} isActive={cardFilters.pnc} onClick={() => handleToggleCardFilter('pnc')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="Pestisida" value={statistik.pestisida} isActive={cardFilters.pestida} onClick={() => handleToggleCardFilter('pestida')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="K3" value={statistik.k3} isActive={cardFilters.k3} onClick={() => handleToggleCardFilter('k3')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="SOP" value={statistik.sop} isActive={cardFilters.sop} onClick={() => handleToggleCardFilter('sop')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="FDG" value={statistik.fdg} isActive={cardFilters.pdg} onClick={() => handleToggleCardFilter('pdg')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="Manajemen API" value={statistik.manajemenApi} isActive={cardFilters.manajemen_api} onClick={() => handleToggleCardFilter('manajemen_api')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="Pengendalian HPT" value={statistik.pengendalianHpt} isActive={cardFilters.pengendalian_hpt} onClick={() => handleToggleCardFilter('pengendalian_hpt')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="NKT" value={statistik.nkt} isActive={cardFilters.nkt} onClick={() => handleToggleCardFilter('nkt')} /></div>
           </div>
         </div>
 
-        <div className="relative flex min-h-[350px] w-full flex-1 flex-col overflow-hidden">
+        <div className="relative flex min-h-[250px] w-full flex-1 flex-col overflow-hidden sm:min-h-[350px]">
           <div className="flex-1 overflow-x-auto overflow-y-auto">
             <SectionLoading loading={loading} />
             <AgGridReact

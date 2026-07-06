@@ -10,17 +10,22 @@ import {
 
 let controller = new AbortController();
 
-const BASE_URL = process.env.NEXT_PUBLIC_WHATSAPP_API_URL;
+// Gunakan proxy Next.js (/api/wa-proxy) agar tidak terkena CORS.
+// Next.js server-side yang meneruskan request ke whacenter.com.
+const BASE_URL =
+  typeof window !== 'undefined'
+    ? '/api/wa-proxy' // browser → proxy lokal
+    : process.env.NEXT_PUBLIC_WHATSAPP_API_URL; // SSR → langsung ke origin
 const TIMEOUT = 200000;
 
 const isServer = typeof window === 'undefined';
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: TIMEOUT,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  },
+  // headers: {
+  //   Accept: 'application/json',
+  //   'Content-Type': 'application/json',
+  // },
   paramsSerializer: (params) => {
     if (params instanceof URLSearchParams) {
       return params.toString();

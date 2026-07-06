@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
   },
   // Configure output to avoid cache issues
   output: 'standalone',
+  // Proxy WhatsApp API calls server-side to avoid CORS issues.
+  // Browser calls /api/wa-proxy/... → Next.js server forwards to whacenter.com.
+  async rewrites() {
+    return [
+      {
+        source: '/api/wa-proxy/:path*',
+        destination: 'https://app.whacenter.com/api/:path*',
+      },
+    ];
+  },
   // Add cache control headers.
   // NOTE: '/_next/static/:path*' must come AFTER '/(.*)?'
   // so it overrides to immutable for hashed static assets.
