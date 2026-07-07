@@ -65,7 +65,7 @@ const DiklatPage = () => {
     pestida: false,
     k3: false,
     sop: false,
-    pdg: false,
+    fdg: false,
     manajemen_api: false,
     pengendalian_hpt: false,
     nkt: false,
@@ -135,7 +135,7 @@ const DiklatPage = () => {
           pestisida: data.pestisida?.sudah || 0,
           k3: data.k3?.sudah || 0,
           sop: data.sop?.sudah || 0,
-          fdg: data.pdg?.sudah || data.fdg?.sudah || 0,
+          fdg: data.fdg?.sudah || data.pdg?.sudah || 0,
           manajemenApi: data.manajemen_api?.sudah || 0,
           pengendalianHpt: data.pengendalian_hpt?.sudah || 0,
           nkt: data.nkt?.sudah || 0,
@@ -271,8 +271,8 @@ const DiklatPage = () => {
       k3_trainer: '',
       sop: null,
       sop_trainer: '',
-      pdg: null,
-      pdg_trainer: '',
+      fdg: null,
+      fdg_trainer: '',
       manajemen_api: null,
       manajemen_api_trainer: '',
       pengendalian_hpt: null,
@@ -296,8 +296,8 @@ const DiklatPage = () => {
           k3_trainer: values.k3_trainer || null,
           sop: values.sop,
           sop_trainer: values.sop_trainer || null,
-          pdg: values.pdg,
-          pdg_trainer: values.pdg_trainer || null,
+          fdg: values.fdg,
+          fdg_trainer: values.fdg_trainer || null,
           manajemen_api: values.manajemen_api,
           manajemen_api_trainer: values.manajemen_api_trainer || null,
           pengendalian_hpt: values.pengendalian_hpt,
@@ -361,8 +361,8 @@ const DiklatPage = () => {
           k3_trainer: detail.k3_trainer || '',
           sop: detail.sop,
           sop_trainer: detail.sop_trainer || '',
-          pdg: detail.pdg ?? detail.fgd,
-          pdg_trainer: detail.pdg_trainer || detail.fgd_trainer || '',
+          fdg: detail.fdg ?? detail.fgd,
+          fdg_trainer: detail.fdg_trainer || detail.fgd_trainer || '',
           manajemen_api: detail.manajemen_api,
           manajemen_api_trainer: detail.manajemen_api_trainer || '',
           pengendalian_hpt: detail.pengendalian_hpt,
@@ -520,14 +520,14 @@ const DiklatPage = () => {
         cellRenderer: TrainerCellRenderer,
       },
       {
-        field: 'pdg',
+        field: 'fdg',
         headerName: 'FDG',
         flex: 0.6,
         minWidth: 80,
         cellRenderer: StatusCellRenderer,
       },
       {
-        field: 'pdg_trainer',
+        field: 'fdg_trainer',
         headerName: 'FDG Trainer',
         flex: 0.8,
         minWidth: 120,
@@ -760,14 +760,14 @@ const DiklatPage = () => {
                 containerClassName="w-full"
                 placeholder="Pilih FGD"
                 options={statusOption}
-                value={values.pdg}
-                onChange={(e) => setFieldValue('pdg', e.target.value)}
+                value={values.fdg}
+                onChange={(e) => setFieldValue('fdg', e.target.value)}
               />
               <InputText
                 label="FGD Trainer"
-                name="pdg_trainer"
+                name="fdg_trainer"
                 placeholder="Masukkan nama trainer"
-                value={values.pdg_trainer}
+                value={values.fdg_trainer}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
@@ -915,7 +915,7 @@ const DiklatPage = () => {
             <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="Pestisida" value={statistik.pestisida} isActive={cardFilters.pestida} onClick={() => handleToggleCardFilter('pestida')} /></div>
             <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="K3" value={statistik.k3} isActive={cardFilters.k3} onClick={() => handleToggleCardFilter('k3')} /></div>
             <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="SOP" value={statistik.sop} isActive={cardFilters.sop} onClick={() => handleToggleCardFilter('sop')} /></div>
-            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="FDG" value={statistik.fdg} isActive={cardFilters.pdg} onClick={() => handleToggleCardFilter('pdg')} /></div>
+            <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="FDG" value={statistik.fdg} isActive={cardFilters.fdg} onClick={() => handleToggleCardFilter('fdg')} /></div>
             <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="Manajemen API" value={statistik.manajemenApi} isActive={cardFilters.manajemen_api} onClick={() => handleToggleCardFilter('manajemen_api')} /></div>
             <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="Pengendalian HPT" value={statistik.pengendalianHpt} isActive={cardFilters.pengendalian_hpt} onClick={() => handleToggleCardFilter('pengendalian_hpt')} /></div>
             <div className="min-w-[120px] flex-shrink-0 sm:min-w-[140px]"><StatCard title="NKT" value={statistik.nkt} isActive={cardFilters.nkt} onClick={() => handleToggleCardFilter('nkt')} /></div>
