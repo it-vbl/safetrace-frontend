@@ -1,18 +1,17 @@
 # Safe Traceability System — Frontend
 
-Frontend for **SIP (Sistem Informasi Perkebunan)**, a web dashboard for palm-oil plantation traceability, STDB (Surat Tanda Daftar Budidaya) management, and farmer communication.
+Open-source frontend for a **GIS-based plantation traceability dashboard**. Connect it to your own REST API backend to manage farmers, plantations, STDB documents, GAP compliance, and interactive map layers.
 
 ## Overview
 
-This application connects to a REST API backend and provides role-based access to:
+This application provides role-based access to:
 
-- **Peta** — Interactive map dashboard with plantation (kebun) data, deforestation alerts, static layers, and custom map overlays
-- **Traceability** — Farmer, plantation, sales, GAP compliance (production, pesticides, fertilizer, hazardous waste), training, workers, and reporting
-- **Kabar Tani** — WhatsApp contact management, groups, broadcast messages, and device pairing
+- **Peta** — Interactive map dashboard with plantation polygons, deforestation alerts, static layers, and custom map overlays
+- **Traceability** — Farmers, plantations, sales, GAP compliance (production, pesticides, fertilizer, hazardous waste), training, workers, and reporting
 - **STDB** — Registration, verification, issuance, and lifecycle tracking of plantation registration documents
 - **Settings** — User management, profile, and map overlay configuration
 
-Access to each module is controlled by a role-based permission matrix defined in `src/libs/permissions.js`.
+Access to each module is controlled by a role-based permission matrix in [`src/libs/permissions.js`](src/libs/permissions.js).
 
 ## Tech Stack
 
@@ -27,14 +26,12 @@ Access to each module is controlled by a role-based permission matrix defined in
 | Forms | Formik, Yup |
 | HTTP | Axios |
 | Components | Atomic design (`atoms` / `molecules` / `organisms`), [Radix UI](https://www.radix-ui.com), [shadcn/ui](https://ui.shadcn.com) primitives |
-| Component dev | [Storybook 8](https://storybook.js.org) |
-| Language | JavaScript (`.jsx`) with partial TypeScript (`.ts` / `.tsx`) |
 
 ## Prerequisites
 
 - Node.js 18+
 - npm
-- A running backend API (see `NEXT_PUBLIC_BASE_URL`)
+- A running REST API backend compatible with this frontend
 
 ## Getting Started
 
@@ -56,8 +53,7 @@ cp .env.local.example .env.local
 | --- | --- |
 | `NEXT_PUBLIC_BASE_URL` | Backend API base URL (required) |
 | `NEXT_PUBLIC_SITE_URL` | Frontend site URL (default: `http://localhost:3000`) |
-| `NEXT_PUBLIC_WHATSAPP_API_URL` | WhatsApp integration API URL (Kabar Tani module) |
-| `NEXT_PUBLIC_URL` | Legacy API URL used by some services |
+| `NEXT_PUBLIC_IMAGE_DOMAIN` | Comma-separated hostnames allowed for Next.js `<Image>` (e.g. your backend CDN) |
 
 ### 3. Run the development server
 
@@ -74,141 +70,131 @@ npm run build
 npm start
 ```
 
-## Available Scripts
+## Customization
 
-| Script | Description |
-| --- | --- |
-| `npm run dev` | Start dev server with Turbopack |
-| `npm run build` | Production build (standalone output) |
-| `npm start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run storybook` | Start Storybook on port 6006 |
-| `npm run build-storybook` | Build static Storybook |
+This repo is designed so deployers can re-brand without touching component code.
+
+### Brand colors and app name
+
+Edit [`src/config/brand.ts`](src/config/brand.ts):
+
+```ts
+const brand = {
+  appName: 'Your App Name',
+  appDescription: 'Your app description',
+  colors: {
+    primary: '#2559A6',
+    secondary: '#D1FBED',
+    tertiary: '#D8F733',
+    bgColor: '#EDF5F7',
+    checkbox: '#0c7c59',
+    layoutBg: '#F7F9FD',
+  },
+};
+```
+
+- Tailwind classes (`bg-primary`, `text-primary`, `bg-layoutBg`, etc.) are generated from this file via [`tailwind.config.ts`](tailwind.config.ts).
+- Update `--color-checkbox` in [`src/styles/globals.css`](src/styles/globals.css) to match `brand.colors.checkbox` for checkbox styling.
+
+### Logos and images
+
+Edit [`src/config/assets.ts`](src/config/assets.ts) to point to your asset paths:
+
+```ts
+const assets = {
+  navbar: {
+    logo: '/sistem-informasi-petani.png',
+    logoMobile: '/sistem-informasi-petani-mobile.png',
+    logoCompact: '/your-logo.png',
+  },
+  login: {
+    logo: '/your-logo.png',
+    background: '/login-bg.png',
+    partnership: '/partnership.png',
+  },
+  sidebar: {
+    institutionalLogos: ['/logos/logo1.png', '/logos/logo2.png'],
+  },
+};
+```
+
+Replace or add files under [`public/`](public/). Institutional logos live in [`public/logos/`](public/logos/).
 
 ## Application Modules
 
 ### Peta (`/`)
 
-Map-first dashboard showing plantation polygons, filters (commodity, certification, legality), deforestation alert layers (GLAD, RADD, UMD), and configurable map overlays. Requires `peta.dashboard` permission.
+Map-first dashboard showing plantation polygons, filters, deforestation alert layers, and configurable map overlays.
 
 ### Traceability (`/traceability/*`)
 
-| Route | Feature |
-| --- | --- |
-| `/traceability/dashboard/statistik` | STDB and plantation statistics |
-| `/traceability/dashboard/sankey` | Supply-chain Sankey diagram |
-| `/traceability/petani` | Farmer records |
-| `/traceability/kebun` | Plantation records with map geometry |
-| `/traceability/penjualan` | Sales transactions |
-| `/traceability/gap/produksi` | Production (GAP) |
-| `/traceability/gap/pestisida` | Pesticide usage |
-| `/traceability/gap/pupuk` | Fertilizer usage |
-| `/traceability/gap/lb3` | Hazardous waste (LB3) |
-| `/traceability/diklat` | Training records |
-| `/traceability/pekerja` | Worker records |
-| `/traceability/laporan` | Reports |
-
-### Kabar Tani (`/kabar-tani/*`)
-
-| Route | Feature |
-| --- | --- |
-| `/kabar-tani/kontak` | Contact list |
-| `/kabar-tani/grup` | WhatsApp groups |
-| `/kabar-tani/blast-pesan` | Broadcast messages |
-| `/kabar-tani/kirim-pesan` | Direct messages |
-| `/kabar-tani/device` | WhatsApp device management |
+Farmer records, plantation management with map geometry, sales, GAP compliance modules, training, workers, and reports.
 
 ### STDB (`/stdb/*`)
 
-| Route | Feature |
-| --- | --- |
-| `/stdb/pendataan` | Registration and data collection |
-| `/stdb/verifikasi` | Verification workflow |
-| `/stdb/penerbitan` | Document issuance |
-| `/stdb/data-terbit` | Issued documents |
-| `/stdb/tidak-terbit` | Rejected documents |
-| `/stdb/data-berakhir` | Expired documents |
-| `/stdb/ringkasan` | Summary dashboard |
+Registration, verification, issuance, and lifecycle tracking of plantation registration documents.
 
 ### Settings (`/settings/*`)
 
-| Route | Feature |
+User profile, user management, and map overlay configuration.
+
+## Roles
+
+Defined in [`src/libs/permissions.js`](src/libs/permissions.js):
+
+| Role ID | Role |
 | --- | --- |
-| `/settings/profile` | User profile |
-| `/settings/users` | User management |
-| `/settings/peta-overlay` | Map overlay configuration |
+| 1 | Admin |
+| 3 | Ketua Kelompok Tani |
+| 4 | Disbunak Kalbar |
+| 5 | Disbunak Sekadau |
+| 6 | Mitra Pabrik |
+
+Sidebar and navbar items are filtered at runtime based on the logged-in user's roles (stored in cookies).
 
 ## Authentication
 
-Authentication uses JWT tokens stored in cookies (`token`, `refreshToken`). The client-side guard in `src/components/providers/ClientLayout.jsx` redirects unauthenticated users to `/login`.
+Authentication uses JWT tokens stored in cookies (`token`, `refreshToken`). The client-side guard in [`src/components/providers/ClientLayout.jsx`](src/components/providers/ClientLayout.jsx) redirects unauthenticated users to `/login`.
 
-Supported auth flows:
-
-- Login — `/login`
-- OTP verification — `/otp`
-- Forgot password — `/forgot-password`, `/forgot-password/verify-otp`, `/forgot-password/reset-password`
-
-API calls attach the bearer token via an Axios interceptor in `src/services/api.js`. On `401` responses, the client attempts a token refresh before logging out.
+API calls attach the bearer token via an Axios interceptor in [`src/services/api.js`](src/services/api.js). On `401` responses, the client attempts a token refresh before logging out.
 
 ## Project Structure
 
 ```
 src/
 ├── app/                  # Next.js App Router pages and layouts
-├── assets/               # Static icons and images
+├── config/               # Brand and asset configuration (customize here)
 ├── components/
-│   ├── atoms/            # Smallest UI building blocks
-│   ├── molecules/        # Composed UI elements
-│   ├── organisms/        # Feature-level UI (forms, tables, modals, map)
-│   ├── providers/        # Client-side providers (layout, Redux, mobile)
-│   └── ui/               # shadcn/ui primitives
-├── constants/            # Shared constants
-├── hooks/                # Custom React hooks
-├── libs/                 # Utilities (permissions, Redux, formatting)
+│   ├── atoms/
+│   ├── molecules/
+│   ├── organisms/
+│   ├── providers/
+│   └── ui/
+├── constants/
+├── hooks/
+├── libs/                 # Permissions, utilities
 ├── services/             # API service modules (one file per domain)
 ├── store/                # Redux store and slices
 ├── styles/               # Global CSS
-└── utils/                # General helpers
+└── utils/
+public/
+├── logos/                # Institutional logos (swap these)
+└── ...                   # Login background, navbar logos, etc.
 ```
-
-### API services
-
-Domain logic is organized under `src/services/`:
-
-`api.js`, `auth.js`, `petani.js`, `kebun.js`, `stdb.js`, `penjualan.js`, `produksi.js`, `pestisida.js`, `pupuk.js`, `lb3.js`, `analisis.js`, `alert.js`, `petaOverlay.js`, `staticLayer.js`, `wilayah.js`, `referensi.js`, `user.js`, `grup.js`, `kontak.js`, `pesan.js`, `broadcast.js`, `device.js`, `wa.js`, `whatsapp.js`, and others.
-
-### Permissions
-
-Role IDs and the permission matrix live in `src/libs/permissions.js`. Sidebar and navbar items are filtered at runtime based on the logged-in user's roles (stored in cookies).
 
 ## Docker
 
-A multi-stage Dockerfile builds the app with `output: 'standalone'` and runs it on port 3000:
-
 ```bash
 docker build -t safe-tracibility-system-fe .
-docker run -p 3000:3000 -e NEXT_PUBLIC_BASE_URL=<api-url> safe-tracibility-system-fe
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_BASE_URL=<api-url> \
+  -e NEXT_PUBLIC_IMAGE_DOMAIN=<image-host> \
+  safe-tracibility-system-fe
 ```
 
-## CI/CD
+## Backend API
 
-Deployment is configured via Jenkins (`.cicd/jenkinsfile-cd`). The pipeline builds a Docker image, pushes it to a container registry, and notifies Discord on build status.
-
-## Storybook
-
-UI components can be developed and reviewed in isolation:
-
-```bash
-npm run storybook
-```
-
-Stories live alongside components (e.g. `Button.stories.jsx`) and in `src/stories/`.
-
-## Notes
-
-- The production build uses `output: 'standalone'` with cache-control headers to prevent stale HTML after deploys.
-- A chunk-error handler (`src/utils/chunkErrorHandler.ts`) auto-reloads the page when a new deployment causes `ChunkLoadError`.
-- This project was originally bootstrapped from a Next.js + Supabase + Stripe starter template. Some legacy scripts (`email:*`, `stripe:*`, `migration:*`, `supabase:*`) remain in `package.json` but are not part of the core application workflow.
+This frontend expects a REST API backend. Domain logic is organized under [`src/services/`](src/services/) — one module per resource (`petani.js`, `kebun.js`, `stdb.js`, `wilayah.js`, etc.). Point `NEXT_PUBLIC_BASE_URL` at your backend instance.
 
 ## License
 

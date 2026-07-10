@@ -88,7 +88,7 @@ export default function ClientLayout({ children }) {
           className="flex w-full max-w-full flex-1 flex-col bg-slate-600 transition-all duration-300"
         >
           <div
-            className={`flex max-w-full flex-1 overflow-y-auto bg-[#F7F9FD] ${
+            className={`flex max-w-full flex-1 overflow-y-auto bg-layoutBg ${
               noPadding ? 'p-0' : 'p-4 md:p-8'
             }`}
           >

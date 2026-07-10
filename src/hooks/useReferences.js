@@ -14,7 +14,6 @@ import {
   getKelompokTani,
   getKomoditas,
   getPendidikanTerakhir,
-  getPenerimaBroadcast,
   getPilihanBulan,
   getPolaTanam,
   getRegisteredVia,
@@ -23,7 +22,6 @@ import {
   getStatusLahan,
   getStatusPekerja,
   getStatusPerkawinan,
-  getSumberKontak,
   getUserRoles,
   getWhispStatus,
 } from '../services/referensi';
@@ -40,7 +38,6 @@ import {
   setKelompokTani,
   setKomoditas,
   setPendidikanTerakhir,
-  setPenerimaBroadcast,
   setPilihanBulan,
   setPolaTanam,
   setRegisteredVia,
@@ -49,7 +46,6 @@ import {
   setStatusLahan,
   setStatusPekerja,
   setStatusPerkawinan,
-  setSumberKontak,
   setUserRoles,
   setWhispStatus,
 } from '../store/slices/referensi';
@@ -73,12 +69,10 @@ const useReferences = () => {
     statusPerkawinan,
     statusPekerja,
     kelompokTani,
-    sumberKontak,
     jenisLegalitas,
     statusKeanggotaan,
     registeredVia,
     requestOtpVia,
-    penerimaBroadcast,
     whispStatus,
     pilihanBulan,
     deforestationAlertType,
@@ -160,10 +154,6 @@ const useReferences = () => {
     () => fetchData(getKelompokTani, setKelompokTani),
     [fetchData]
   );
-  const fetchSumberKontak = useCallback(
-    () => fetchData(getSumberKontak, setSumberKontak),
-    [fetchData]
-  );
   const fetchJenisLegalitas = useCallback(
     () => fetchData(getJenisLegalitas, setJenisLegalitas),
     [fetchData]
@@ -178,10 +168,6 @@ const useReferences = () => {
   );
   const fetchRequestOtpVia = useCallback(
     () => fetchData(getRequestOtpVia, setRequestOtpVia),
-    [fetchData]
-  );
-  const fetchPenerimaBroadcast = useCallback(
-    () => fetchData(getPenerimaBroadcast, setPenerimaBroadcast),
     [fetchData]
   );
   const fetchWhispStatus = useCallback(
@@ -224,12 +210,10 @@ const useReferences = () => {
     statusPerkawinan,
     statusPekerja,
     kelompokTani,
-    sumberKontak,
     jenisLegalitas,
     statusKeanggotaan,
     registeredVia,
     requestOtpVia,
-    penerimaBroadcast,
     whispStatus,
     pilihanBulan,
     deforestationAlertType,
@@ -248,12 +232,10 @@ const useReferences = () => {
     fetchStatusPerkawinan,
     fetchStatusPekerja,
     fetchKelompokTani,
-    fetchSumberKontak,
     fetchJenisLegalitas,
     fetchStatusKeanggotaan,
     fetchRegisteredVia,
     fetchRequestOtpVia,
-    fetchPenerimaBroadcast,
     fetchWhispStatus,
     fetchPilihanBulan,
     fetchDeforestationAlertType,

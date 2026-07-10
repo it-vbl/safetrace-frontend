@@ -3,44 +3,15 @@ import Cookies from 'js-cookie';
 // Role ID mapping (from SAFE role specification)
 export const ROLE_IDS = {
   ADMIN: 1,
-  PEGAWAI_KABAR_TANI: 2,
   KETUA_KELOMPOK_TANI: 3,
   DISBUNAK_KALBAR: 4,
   DISBUNAK_SEKADAU: 5,
   MITRA_PABRIK: 6,
 };
 
-// Permission matrix using pattern like "kontak.view", "kontak.create", etc.
+// Permission matrix using pattern like "petani.view", "petani.create", etc.
 // Values are arrays of role IDs that are allowed for that permission.
 export const PERMISSIONS = {
-  // KABAR TANI - KONTAK
-  'kontak.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'kontak.create': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'kontak.update': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'kontak.delete': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-
-  // KABAR TANI - GRUP
-  'grup.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'grup.create': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'grup.update': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'grup.delete': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-
-  // KABAR TANI - BLAST PESAN
-  'blastpesan.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'blastpesan.create': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'blastpesan.delete': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-
-  // KABAR TANI - KIRIM PESAN
-  'kirimpesan.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'kirimpesan.create': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'kirimpesan.delete': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-
-  // KABAR TANI - DEVICE
-  'device.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'device.create': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'device.update': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-  'device.delete': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.ADMIN],
-
   // TRACEABILITY - PETANI
   'petani.view': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
   'petani.create': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN],
@@ -141,11 +112,11 @@ export const PERMISSIONS = {
   'peta.dashboard': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
 
   // TRACEABILITY - PROFIL
-  'profil.view': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
-  'profil.update': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
+  'profil.view': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
+  'profil.update': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
 
   // TRACEABILITY - GANTI PASSWORD
-  'password.update': [ROLE_IDS.PEGAWAI_KABAR_TANI, ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
+  'password.update': [ROLE_IDS.KETUA_KELOMPOK_TANI, ROLE_IDS.ADMIN, ROLE_IDS.DISBUNAK_KALBAR, ROLE_IDS.DISBUNAK_SEKADAU, ROLE_IDS.MITRA_PABRIK],
 };
 
 export const normalizeRoles = (roles) => {
@@ -162,7 +133,6 @@ export const normalizeRoles = (roles) => {
         if (name.includes('sekadau')) return ROLE_IDS.DISBUNAK_SEKADAU;
         if (name.includes('mitra pabrik')) return ROLE_IDS.MITRA_PABRIK;
         if (name.includes('ketua kelompok')) return ROLE_IDS.KETUA_KELOMPOK_TANI;
-        if (name.includes('kabar tani')) return ROLE_IDS.PEGAWAI_KABAR_TANI;
         if (name === 'admin' || name === 'administrator' || name === 'super admin') return ROLE_IDS.ADMIN;
         val = r.id;
       }
@@ -180,7 +150,7 @@ export const normalizeRoles = (roles) => {
  * Check if a user (by roles) has a given permission key.
  *
  * @param {number[] | string[] | number | string} roles - Single role ID or array of role IDs.
- * @param {string} permissionKey - Permission key, e.g. "kontak.view".
+ * @param {string} permissionKey - Permission key, e.g. "petani.view".
  * @returns {boolean}
  */
 export const hasPermission = (roles, permissionKey) => {

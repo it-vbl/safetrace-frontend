@@ -45,14 +45,6 @@ const Navbar = () => {
     setMounted(true);
   }, []);
 
-  const canSeeKabarTani = mounted && hasAnyPermission(roles, [
-    'kontak.view',
-    'grup.view',
-    'blastpesan.view',
-    'kirimpesan.view',
-    'device.view',
-  ]);
-
   const canSeeTraceability = mounted && hasAnyPermission(roles, [
     'petani.view',
     'kebun.view',
@@ -115,24 +107,6 @@ const Navbar = () => {
             </div>
           </>
         )}
-        {canSeeKabarTani && (
-          <div
-            className={`cursor-pointer text-[14px] tracking-[1px] ${getMenuClassName(
-              '/kabar-tani/'
-            )} `}
-            onClick={() => handleMenuClick('/kabar-tani/kontak')}
-          >
-            Kabar Tani
-          </div>
-        )}
-        {/* <div
-          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-            '/koperasi'
-          )}`}
-          onClick={() => handleMenuClick('/koperasi')}
-        >
-          Koperasi
-        </div> */}
       </div>
 
       {/* Mobile center menu */}
@@ -160,24 +134,6 @@ const Navbar = () => {
             </div>
           </>
         )}
-        {canSeeKabarTani && (
-          <div
-            className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-              '/kabar-tani/'
-            )}`}
-            onClick={() => handleMenuClick('/kabar-tani/kontak')}
-          >
-            Kabar Tani
-          </div>
-        )}
-        {/* <div
-          className={`cursor-pointer tracking-[1px] ${getMenuClassName(
-            '/koperasi'
-          )}`}
-          onClick={() => handleMenuClick('/koperasi')}
-        >
-          Koperasi
-        </div> */}
       </div>
 
       {/* Desktop menu items */}

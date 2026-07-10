@@ -2,6 +2,8 @@ import type { Config } from 'tailwindcss';
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import TailwindAnimate from 'tailwindcss-animate';
 
+import brand from './src/config/brand';
+
 /** @type {import('tailwindcss').Config} */
 const config: Config = {
   darkMode: ['class'],
@@ -46,10 +48,11 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        primary: '#2559A6',
-        secondary: '#D1FBED',
-        tertiary: '#D8F733',
-        bgColor: '#EDF5F7',
+        primary: brand.colors.primary,
+        secondary: brand.colors.secondary,
+        tertiary: brand.colors.tertiary,
+        bgColor: brand.colors.bgColor,
+        layoutBg: brand.colors.layoutBg,
         primaryLight10: '#2a70f8',
         primaryLight9: '#4180f9',
         primaryLight8: '#4d91fa',

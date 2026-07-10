@@ -4,7 +4,6 @@ import { Bar } from 'react-chartjs-2';
 
 import Heading from '@/components/atoms/Typography/Heading';
 import theme from '@/utils/tailwindTheme';
-import { faker } from '@faker-js/faker';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
@@ -36,12 +35,12 @@ export const data = {
   datasets: [
     {
       label: 'Pekebun',
-      data: labels.map(() => faker.number.int({ min: 0, max: 5000 })),
+      data: labels.map(() => 0),
       backgroundColor: theme.colors.primary,
     },
     {
       label: 'Kebun',
-      data: labels.map(() => faker.number.int({ min: 0, max: 5000 })),
+      data: labels.map(() => 0),
       backgroundColor: `${theme.colors.primary}80`,
     },
   ],

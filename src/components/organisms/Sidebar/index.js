@@ -5,19 +5,13 @@ import { usePathname } from 'next/navigation';
 import {
   ChartLineIcon,
   ChevronRight,
-  ContactIcon,
   Flag,
-  FolderIcon,
   MapIcon,
   MedalIcon,
-  MegaphoneIcon,
-  MessageSquareIcon,
   PieChart,
-  Smartphone,
   TrendingUp,
   UserCircle2Icon,
   UsersIcon} from 'lucide-react';
-import { IoHomeOutline } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 
 import LogoLembaga from '@/components/atoms/LogoLembaga';
@@ -27,7 +21,6 @@ import { setSidebarCollapsed, setSidebarOpen } from '@/store/slices/app';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  DashboardIcon,
 } from '@radix-ui/react-icons';
 
 const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
@@ -209,61 +202,10 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
         ],
       },
     ],
-    'kabar-tani': [
-      {
-        label: 'Kontak',
-        icon: ContactIcon,
-        path: '/kabar-tani/kontak',
-        permission: 'kontak.view',
-      },
-      {
-        label: 'Grup',
-        icon: FolderIcon,
-        path: '/kabar-tani/grup',
-        permission: 'grup.view',
-      },
-      {
-        label: 'Blast Pesan',
-        icon: MegaphoneIcon,
-        path: '/kabar-tani/blast-pesan',
-        permission: 'blastpesan.view',
-      },
-      {
-        label: 'Kirim Pesan',
-        icon: MessageSquareIcon,
-        path: '/kabar-tani/kirim-pesan',
-        permission: 'kirimpesan.view',
-      },
-      {
-        label: 'Device',
-        icon: Smartphone,
-        path: '/kabar-tani/device',
-        permission: 'device.view',
-      },
-    ],
-    koperasi: [
-      {
-        label: 'Dummy Menu 1',
-        icon: DashboardIcon,
-        path: '/koperasi/dummy1',
-      },
-      {
-        label: 'Dummy Menu 2',
-        icon: IoHomeOutline,
-        path: '/koperasi/dummy2',
-      },
-      {
-        label: 'Dummy Menu 3',
-        icon: IoHomeOutline,
-        path: '/koperasi/dummy3',
-      },
-    ],
   };
 
   const currentMainMenu = useMemo(() => {
     if (pathname.startsWith('/traceability')) return 'traceability';
-    if (pathname.startsWith('/kabar-tani')) return 'kabar-tani';
-    if (pathname.startsWith('/koperasi')) return 'koperasi';
     return 'traceability';
   }, [pathname]);
 

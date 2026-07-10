@@ -6,37 +6,21 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   images: {
-    domains: ['cukk-be.buatin.com', 'api.cukk-dashboard.com'],
+    domains: (process.env.NEXT_PUBLIC_IMAGE_DOMAIN || '')
+      .split(',')
+      .map((domain) => domain.trim())
+      .filter(Boolean),
   },
-  // Disable ESLint during production builds
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Generate unique build ID to prevent chunk loading errors
   generateBuildId: async () => {
-    // Use timestamp to ensure each build has a unique ID
     return `build-${Date.now()}`;
   },
-  // Configure output to avoid cache issues
   output: 'standalone',
-  // Proxy WhatsApp API calls server-side to avoid CORS issues.
-  // Browser calls /api/wa-proxy/... → Next.js server forwards to whacenter.com.
-  async rewrites() {
-    return [
-      {
-        source: '/api/wa-proxy/:path*',
-        destination: 'https://app.whacenter.com/api/:path*',
-      },
-    ];
-  },
-  // Add cache control headers.
-  // NOTE: '/_next/static/:path*' must come AFTER '/(.*)?'
-  // so it overrides to immutable for hashed static assets.
   async headers() {
     return [
       {
-        // '/(.*)?'  matches ALL routes including root '/'
-        // '/:path*' misses root '/' which caused s-maxage=31536000 on HTML
         source: '/(.*)?',
         headers: [
           { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
@@ -45,7 +29,6 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Override for hashed chunks/assets — these are safe to cache forever
         source: '/_next/static/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },

@@ -15,12 +15,10 @@ export const referensiSlice = createSlice({
     statusPerkawinan: [],
     statusPekerja: [],
     kelompokTani: [],
-    sumberKontak: [],
     jenisLegalitas: [],
     statusKeanggotaan: [],
     registeredVia: [],
     requestOtpVia: [],
-    penerimaBroadcast: [],
     whispStatus: [],
     pilihanBulan: [],
     deforestationAlertType: [],
@@ -65,9 +63,6 @@ export const referensiSlice = createSlice({
     setKelompokTani: (state, action) => {
       state.kelompokTani = action.payload;
     },
-    setSumberKontak: (state, action) => {
-      state.sumberKontak = action.payload;
-    },
     setJenisLegalitas: (state, action) => {
       state.jenisLegalitas = action.payload;
     },
@@ -79,9 +74,6 @@ export const referensiSlice = createSlice({
     },
     setRequestOtpVia: (state, action) => {
       state.requestOtpVia = action.payload;
-    },
-    setPenerimaBroadcast: (state, action) => {
-      state.penerimaBroadcast = action.payload;
     },
     setWhispStatus: (state, action) => {
       state.whispStatus = action.payload;
@@ -117,12 +109,10 @@ export const {
   setStatusPerkawinan,
   setStatusPekerja,
   setKelompokTani,
-  setSumberKontak,
   setJenisLegalitas,
   setStatusKeanggotaan,
   setRegisteredVia,
   setRequestOtpVia,
-  setPenerimaBroadcast,
   setWhispStatus,
   setPilihanBulan,
   setDeforestationAlertType,
