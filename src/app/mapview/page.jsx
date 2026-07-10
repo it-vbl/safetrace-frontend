@@ -8,6 +8,7 @@ import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
 
 import Checkbox from '@/components/atoms/Checkbox';
+import Button from '@/components/atoms/Button';
 import Close from '@/components/atoms/Icons/Close';
 import Statistic from '@/components/atoms/Icons/Statistic';
 import STDBStatusChip from '@/components/atoms/STDBStatusChip';
@@ -30,7 +31,6 @@ import {
   setFilterKomoditas,
   setFilterSTDBStatus,
 } from '@/store/slices/stdb';
-import { Button } from '@/stories/Button';
 import getPolygonCenter from '@/utils/getPolygonCenter';
 import theme from '@/utils/tailwindTheme';
 
@@ -74,10 +74,11 @@ const MapDashboard = () => {
     (e) => {
       return (
         <Button
-          label="Lihat"
-          size={'small'}
+          size="small"
           onClick={() => handleOnLihatClicked(e.data)}
-        />
+        >
+          Lihat
+        </Button>
       );
     },
     [stdb]

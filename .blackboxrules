@@ -1,5 +1,0 @@
-Always use formik to handle Form ( useFormik )
-
-Reuse any Input component that already exist on folder components ( atoms, molecules, organism )
-
-Always put the generated component to folder /components ( atomic design ) with sample pattern => /components/atoms/[componentName]/index.js|jsx
