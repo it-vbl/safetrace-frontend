@@ -50,15 +50,15 @@ const TextArea = ({
   };
 
   const inputStyles = cn(
-    'w-full px-3 w-full h-[100px] py-2.5 border rounded-[4px] hover:outline-none focus:border-blue6 focus:outline-none placeholder:text-neutral6',
+    'w-full px-3 w-full h-[100px] py-2.5 border rounded-[4px] hover:outline-none focus:border-primary focus:outline-none placeholder:text-neutral-400',
     {
-      '!border-error5': hasError,
+      '!border-tertiary': hasError,
       'border-[#D9D9D9]': !hasError,
-      'border-neutral6': inputValue !== '',
-      'bg-white hover:border-blue6': !disabled,
-      'bg-neutral4 !border-neutral6 text-neutral7 cursor-not-allowed': disabled,
+      'border-neutral-400': inputValue !== '',
+      'bg-white hover:border-primary': !disabled,
+      'bg-neutral-200 !border-neutral-400 text-neutral-500 cursor-not-allowed': disabled,
       'w-full': isFullWidth,
-      'placeholder:text-neutral7': disabled,
+      'placeholder:text-neutral-500': disabled,
     }
   );
 
@@ -71,7 +71,7 @@ const TextArea = ({
       <div className="flex justify-between">
         <Label
           isRequired={isRequired}
-          className="text-[12px] font-bold  text-gray-500"
+          className="text-[12px] font-bold  text-neutral-500"
         >
           {label}
         </Label>
@@ -104,8 +104,8 @@ const TextArea = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <span
-            className={cn('text-xs text-neutral7', {
-              'text-error5': hasError,
+            className={cn('text-xs text-neutral-500', {
+              'text-tertiary': hasError,
               'opacity-0': !helperText,
             })}
           >
@@ -113,7 +113,7 @@ const TextArea = ({
           </span>
         </div>
         {maxChar && (
-          <span className="text-xs text-neutral7">
+          <span className="text-xs text-neutral-500">
             {inputValue.length}/{maxChar}
           </span>
         )}

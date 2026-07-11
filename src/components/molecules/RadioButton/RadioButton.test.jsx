@@ -53,7 +53,7 @@ describe("RadioButton Component", () => {
     render(<RadioButton {...defaultProps} isError />);
     const radioButtons = screen.getAllByRole("radio");
     radioButtons.forEach((radio) => {
-      expect(radio).toHaveClass("!border-error5");
+      expect(radio).toHaveClass("!border-tertiary");
     });
   });
 

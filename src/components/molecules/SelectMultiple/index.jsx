@@ -131,9 +131,9 @@ const SelectMultiple = ({
 
   const errorClassName = {
     field:
-      (touched?.[name] && errors?.[name]) || isError ? '!border-error5' : '',
+      (touched?.[name] && errors?.[name]) || isError ? '!border-tertiary' : '',
     helperText:
-      (touched?.[name] && errors?.[name]) || isError ? 'text-error5' : '',
+      (touched?.[name] && errors?.[name]) || isError ? 'text-tertiary' : '',
   };
 
   const hasValue = selectedValues.length > 0;
@@ -376,7 +376,7 @@ const SelectMultiple = ({
       {label && (
         <Label
           data-testid="label-container"
-          className=" text-[12px] font-bold text-gray-500"
+          className=" text-[12px] font-bold text-neutral-500"
           isRequired={isRequired}
         >
           {label}
@@ -391,16 +391,16 @@ const SelectMultiple = ({
           className={cn(
             'flex min-h-[40px] w-full cursor-pointer items-center gap-1 rounded-[6px] border bg-white px-3 py-2',
             {
-              'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7':
+              'cursor-not-allowed border-neutral-400 bg-neutral-200 text-neutral-500':
                 disabled,
-              'hover:border-blue6 focus:border-blue6 focus:outline-none':
+              'hover:border-primary focus:border-primary focus:outline-none':
                 !disabled,
-              'border-neutral6':
+              'border-neutral-400':
                 hasValue &&
                 !disabled &&
                 !(touched?.[name] && errors?.[name]) &&
                 !isError,
-              'border-neutral5':
+              'border-neutral-300':
                 !hasValue &&
                 !disabled &&
                 !(touched?.[name] && errors?.[name]) &&
@@ -416,7 +416,7 @@ const SelectMultiple = ({
                 {selectedOptions.map((option) => (
                   <div
                     key={option.value}
-                    className="bg-neutral2 flex items-center gap-1 rounded-[4px] bg-gray-100 px-2 py-1"
+                    className="bg-neutral2 flex items-center gap-1 rounded-[4px] bg-neutral-100 px-2 py-1"
                   >
                     <Paragraph
                       level={4}
@@ -432,7 +432,7 @@ const SelectMultiple = ({
                         }
                       }}
                       className={cn('rounded p-0.5', {
-                        'cursor-pointer hover:bg-neutral3': !disabled,
+                        'cursor-pointer hover:bg-neutral-100': !disabled,
                         'cursor-not-allowed opacity-50': disabled,
                       })}
                     >
@@ -444,8 +444,8 @@ const SelectMultiple = ({
             ) : (
               <Paragraph
                 className={cn('w-full truncate', {
-                  'text-neutral6': !disabled,
-                  'text-neutral7': disabled,
+                  'text-neutral-400': !disabled,
+                  'text-neutral-500': disabled,
                 })}
                 level={2}
               >
@@ -604,13 +604,13 @@ const SelectMultiple = ({
       {helperText && (
         <Paragraph
           level={4}
-          className={cn('relative z-0 text-neutral7', errorClassName.helperText)}
+          className={cn('relative z-0 text-neutral-500', errorClassName.helperText)}
         >
           {helperText}
         </Paragraph>
       )}
       {errors?.[name] && touched?.[name] && (
-        <Paragraph level={4} className="text-error mt-1 text-red-500">
+        <Paragraph level={4} className="text-error mt-1 text-tertiary">
           {errors?.[name]}
         </Paragraph>
       )}

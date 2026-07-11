@@ -108,21 +108,21 @@ const PetaOverlayPage = () => {
       return (
         <div className="flex h-full w-full flex-row items-center justify-center gap-1 sm:gap-2">
           <div
-            className="cursor-pointer text-[10px] font-bold uppercase text-blue-500 underline hover:text-blue-600 sm:text-[12px]"
+            className="cursor-pointer text-[10px] font-bold uppercase text-primary underline hover:text-primary sm:text-[12px]"
             onClick={() => handleViewLayer(e.data)}
           >
             LIHAT
           </div>
-          <div className="text-gray-400">|</div>
+          <div className="text-neutral-400">|</div>
           <div
-            className="cursor-pointer text-[10px] font-bold uppercase text-blue-500 underline hover:text-blue-600 sm:text-[12px]"
+            className="cursor-pointer text-[10px] font-bold uppercase text-primary underline hover:text-primary sm:text-[12px]"
             onClick={() => handleEditLayer(e.data)}
           >
             EDIT
           </div>
-          <div className="text-gray-400">|</div>
+          <div className="text-neutral-400">|</div>
           <div
-            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            className="cursor-pointer text-[10px] font-bold uppercase text-tertiary underline hover:text-tertiary sm:text-[12px]"
             onClick={() => handleDeleteLayer(e.data)}
           >
             HAPUS
@@ -138,7 +138,7 @@ const PetaOverlayPage = () => {
       const fileName = e.value.split('/').pop(); // Extract filename from URL
       return (
         <div
-          className="cursor-pointer text-gray-800 underline hover:text-blue-800"
+          className="cursor-pointer text-neutral-800 underline hover:text-primary"
           onClick={() => handleFileDownload(e.value)}
         >
           {fileName}

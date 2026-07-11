@@ -319,7 +319,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
               return (
                 <div key={item.label || item.path || index}>
                   <div
-                    className={`mb-2 flex cursor-pointer items-center p-2 ${isActive ? 'bg-primary text-white' : 'text-gray-900'
+                    className={`mb-2 flex cursor-pointer items-center p-2 ${isActive ? 'bg-primary text-white' : 'text-neutral-900'
                       } w-full rounded font-medium ${sidebarCollapsed ? 'justify-center' : 'justify-normal'
                       } relative`}
                     title={item.label}
@@ -379,7 +379,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                                 key={subItem.label || subItem.path || subIndex}
                                 className={`relative mb-2 ml-1 flex cursor-pointer items-center p-2 ${isSubItemActive(subItem?.path)
                                   ? 'text-primary'
-                                  : 'text-gray-400'
+                                  : 'text-neutral-400'
                                   } hover:bg-primary500 rounded font-medium`}
                                 title={subItem.label}
                                 aria-label={subItem.label}
@@ -447,7 +447,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
                           key={subItem.label || subItem.path || subIndex}
                           className={`mb-2 flex cursor-pointer items-center p-2 ${isSubItemActive(subItem?.path)
                             ? 'text-white'
-                            : 'text-gray-400'
+                            : 'text-neutral-400'
                             } rounded hover:bg-[#151A2D]`}
                           onClick={() => handleMenuItemClick(subItem?.path)}
                         >
@@ -461,7 +461,7 @@ const Sidebar = ({ isMobile = false, isSidebarOpen, width }) => {
           {!isMobileClient && (
             <div
               onClick={handleCollapse}
-              className={`mb-10 mt-auto flex cursor-pointer items-center rounded-[4px] p-2 transition-all duration-200 hover:bg-gray-100 ${sidebarCollapsed ? 'justify-center' : 'justify-between'
+              className={`mb-10 mt-auto flex cursor-pointer items-center rounded-[4px] p-2 transition-all duration-200 hover:bg-neutral-100 ${sidebarCollapsed ? 'justify-center' : 'justify-between'
                 }`}
             >
               {!sidebarCollapsed && (

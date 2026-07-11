@@ -81,7 +81,7 @@ const STDBProcessStepChart = ({ komoditas, startDate, endDate }) => {
   }, [komoditas, startDate, endDate]);
 
   return (
-    <div className="flex flex-col gap-6 w-full h-full border border-gray-300 p-4">
+    <div className="flex flex-col gap-6 w-full h-full border border-neutral-300 p-4">
       <Heading level={5}>
         Jumlah STDB berdasarkan tahapan proses penerbitan
       </Heading>

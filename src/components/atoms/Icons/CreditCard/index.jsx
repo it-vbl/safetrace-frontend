@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 import theme from '@/utils/tailwindTheme';
 
-const CreditCard = ({ color = theme.colors.blue8, size = 24, ...props }) => {
+const CreditCard = ({ color = theme.colors.primary, size = 24, ...props }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path

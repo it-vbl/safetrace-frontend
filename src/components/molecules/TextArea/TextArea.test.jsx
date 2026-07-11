@@ -94,7 +94,7 @@ describe("TextArea Unit Tests", () => {
     const textarea = getByPlaceholderText("Enter text here");
     const errorIcon = container.querySelector("svg");
 
-    expect(textarea).toHaveClass("!border-error5");
+    expect(textarea).toHaveClass("!border-tertiary");
     expect(errorIcon).toBeInTheDocument();
   });
 

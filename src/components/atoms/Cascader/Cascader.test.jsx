@@ -47,17 +47,17 @@ describe("Cascader", () => {
   it("should apply correct CSS classes when disabled", () => {
     render(<Cascader {...defaultProps} disabled={true} />);
     expect(screen.getByTestId("cascader-container")).toHaveClass(
-      "text-gray-300",
+      "text-neutral-300",
     );
   });
 
   it("should apply correct CSS classes when not disabled", () => {
     render(<Cascader {...defaultProps} />);
     expect(screen.getByTestId("cascader-container")).toHaveClass(
-      "text-neutral10",
+      "text-neutral-900",
     );
     expect(screen.getByTestId("cascader-container")).toHaveClass(
-      "hover:bg-blue1",
+      "hover:bg-bgColor",
     );
   });
 

@@ -48,7 +48,7 @@ const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChan
             value={verified}
             onChange={onVerifyChange}
             size={14}
-            labelClassName={`${data?.status_stdb === '3' ? 'text-gray-400' : 'text-primary'}  text-[12px] font-bold`}
+            labelClassName={`${data?.status_stdb === '3' ? 'text-neutral-400' : 'text-primary'}  text-[12px] font-bold`}
             label='Terverifikasi?'
             disabled={data?.status_stdb === '3'}
           />
@@ -68,7 +68,7 @@ const DataPemetaan = ({ data, mode = 'pendataan', verified = false, onVerifyChan
       {canDownload && (
         <div className='my-4 grid h-auto w-full grid-cols-3'>
           <div className='flex flex-col gap-y-[2px]'>
-            <Paragraph level={3} className='line-clamp-1 text-[12px] font-bold text-neutral7'>
+            <Paragraph level={3} className='line-clamp-1 text-[12px] font-bold text-neutral-500'>
               File
             </Paragraph>
             <div

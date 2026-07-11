@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const DeleteOutline = ({ size = 16, color = theme.colors.neutral9 }) => {
+const DeleteOutline = ({ size = 16, color = theme.colors.neutral[700] }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <path

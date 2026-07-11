@@ -7,10 +7,11 @@ import {
   abortAllRequests,
   addAbortController,
 } from '@/libs/utils/requestController';
+import env from '@/utils/env';
 
 let controller = new AbortController();
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 const TIMEOUT = 200000;
 
 const isServer = typeof window === 'undefined';

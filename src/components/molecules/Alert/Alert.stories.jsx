@@ -27,7 +27,7 @@ Hidden.args = {
 export const CustomClasses = Template.bind({});
 CustomClasses.args = {
   visible: true,
-  className: "bg-warning1 text-warning5",
+  className: "bg-yellow-50 text-warning5",
   textClassName: "font-bold",
   children: "This is a custom styled alert.",
 };

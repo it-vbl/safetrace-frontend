@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const RemoveRedEye = ({ size = 24, color = theme.colors.neutral8, ...props }) => {
+const RemoveRedEye = ({ size = 24, color = theme.colors.neutral[600], ...props }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path

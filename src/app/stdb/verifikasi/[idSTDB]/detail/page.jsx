@@ -20,6 +20,8 @@ import DataPolaTanam from '@/components/organisms/DataView/DataPolaTanam';
 import ModalKonfirmasiRekomendasiTerbitSTDB from '@/components/organisms/Modal/ModalKonfirmasiRekomendasiTerbitSTDB';
 import ModalKonfirmasiTolakVerifikasiSTDB from '@/components/organisms/Modal/ModalKonfirmasiTolakVerifikasiSTDB';
 import ModalKonfirmasiUbahSTDBKePendataan from '@/components/organisms/Modal/ModalKonfirmasiUbahSTDBKePendataan';
+import DataKebun from '@/components/organisms/STDB/DataKebun';
+import KebunDetail from '@/components/organisms/STDB/KebunDetail';
 import useDetailKebun from '@/hooks/useDetailKebun';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
@@ -35,285 +37,6 @@ import { CrossCircledIcon } from '@radix-ui/react-icons';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
-
-const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange = () => { }, verifyCheckList }) => {
-  const [activeTab, setActiveTab] = useState('Lahan');
-  const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
-
-  const isVerificated = detailKebun?.status_stdb === '3';
-
-  const tabs = useMemo(
-    () => [
-      {
-        label: 'Lahan',
-        value: 'lahan',
-
-        render: () => (
-          <DataLahan
-            onVerifyChange={(e) => {
-              onVerificationValueChange({ ...verifyCheckList, lahan: e.target.checked });
-            }}
-            verified={verifyCheckList?.lahan}
-            mode={mode}
-            data={detailKebun}
-          />
-        ),
-      },
-      {
-        label: 'Pola Tanam',
-        value: 'pola_tanam',
-        render: () => (
-          <DataPolaTanam
-            verified={verifyCheckList?.pola_tanam}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, pola_tanam: e.target.checked })}
-            mode={mode}
-            data={detailKebun}
-          />
-        ),
-      },
-      {
-        label: 'Komoditas',
-        value: 'komoditas',
-        render: () => (
-          <DataKomoditas
-            mode={mode}
-            komoditas={detailKebun?.komoditas}
-            data={detailKebun}
-            verified={verifyCheckList?.komoditas}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, komoditas: e.target.checked })}
-          />
-        ),
-      },
-      {
-        label: 'Jenis Pupuk',
-        value: 'jenis_pupuk',
-        render: () => (
-          <DataJenisPupuk
-            mode={mode}
-            data={detailKebun}
-            verified={verifyCheckList?.jenis_pupuk}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, jenis_pupuk: e.target.checked })}
-          />
-        ),
-      },
-      {
-        label: 'Mitra Penjualan',
-        value: 'mitra_penjualan',
-        render: () => (
-          <DataMitraPenjualan
-            mode={mode}
-            data={detailKebun}
-            verified={verifyCheckList?.mitra_penjualan}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, mitra_penjualan: e.target.checked })}
-          />
-        ),
-      },
-      {
-        label: 'Pemetaan',
-        value: 'peta',
-        render: () => (
-          <DataPemetaan
-            mode={mode}
-            data={detailKebun}
-            verified={verifyCheckList?.peta}
-            onVerifyChange={(e) => onVerificationValueChange({ ...verifyCheckList, peta: e.target.checked })}
-          />
-        ),
-      },
-    ],
-    [detailKebun, verifyCheckList]
-  );
-
-  return (
-    <div className='flex flex-row items-start gap-2'>
-      <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
-        {tabs.map((tab, index) => (
-          <div
-            className={`flex w-full cursor-pointer flex-row justify-between rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${activeTab === tab.label ? activeClassName : ''
-              }`}
-            key={index}
-            onClick={() => setActiveTab(tab.label)}
-            id={`tab-${tab.label}`}
-          >
-            <div>{tab.label}</div>
-            <Checkbox
-              onChange={(e) => {
-                !isVerificated
-                  ? onVerificationValueChange({ ...verifyCheckList, [tab.value]: e.target.checked })
-                  : null;
-              }}
-              disabled={isVerificated}
-              value={verifyCheckList?.[tab.value]}
-              size={14}
-            />
-          </div>
-        ))}
-      </div>
-      <div className='flex w-full flex-[8] items-start rounded-[4px] border border-gray-300 bg-gray-50 p-4'>
-        {tabs.find((tab) => tab.label === activeTab)?.render()}
-      </div>
-    </div>
-  );
-};
-
-const KebunDetail = ({ index, item }) => {
-  const { idSTDB } = useParams();
-  const queryParams = useSearchParams();
-  const idPekebun = queryParams.get('pekebunId');
-  const router = useRouter();
-
-  const [isVerificationComplete, setIsVerificationComplete] = useState(false);
-  const [verifiedList, setVerifiedList] = useState([]);
-  const [detailKebun, setDetailKebun] = useState(item);
-  const [statusVerifikasiKebun, setStatusVerifikasiKebun] = useState({
-    lahan: false,
-    pola_tanam: false,
-    komoditas: false,
-    jenis_pupuk: false,
-    mitra_penjualan: false,
-    peta: false,
-  });
-
-  const isVerificated = detailKebun?.status_stdb === '3';
-
-  const { fetchDetailKebun } = useDetailKebun();
-  const { fetchStatusVerifikasiKebun } = useSTDB();
-
-  const getDetailKebun = async () => {
-    const response = await fetchDetailKebun(item?.id);
-    const tempData = {
-      ...response,
-      peta: {
-        ...response?.peta,
-        geom: {
-          ...response?.peta?.geom,
-          coordinates: response?.peta?.geom?.coordinates?.[0]?.map((coord) => [coord[1], coord[0]]),
-        },
-        titik_koordinat: {
-          ...response?.peta?.titik_koordinat,
-          coordinates: [
-            response?.peta?.titik_koordinat?.coordinates[1],
-            response?.peta?.titik_koordinat?.coordinates[0],
-          ],
-        },
-      },
-    };
-    setDetailKebun(tempData);
-  };
-
-  const handleFetchStatusVerifikasiKebun = async () => {
-    try {
-      const data = await fetchStatusVerifikasiKebun(idSTDB, item?.id);
-      if (data) {
-        setStatusVerifikasiKebun({
-          lahan: data?.lahan || false,
-          pola_tanam: data?.pola_tanam || false,
-          komoditas: data?.komoditas || false,
-          jenis_pupuk: data?.jenis_pupuk || false,
-          mitra_penjualan: data?.mitra_penjualan || false,
-          peta: data?.peta || false,
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message);
-    }
-  };
-
-  useEffect(() => {
-    getDetailKebun();
-    handleFetchStatusVerifikasiKebun();
-  }, []);
-
-  const handleOnVerificationChange = (listVerified) => {
-    if (!isVerificated) {
-      setStatusVerifikasiKebun(listVerified);
-      const isComplete = Object.values(listVerified).every((value) => value === true);
-      setIsVerificationComplete(isComplete);
-    }
-  };
-
-  const handleVerifyKebun = async () => {
-    try {
-      const payload = {
-        stdb_id: idSTDB,
-        kebun_id: item?.id,
-        ...statusVerifikasiKebun,
-      };
-      const res = await prosesVerifikasiKebun(payload);
-      if (res.status == 200) {
-        getDetailKebun();
-        toast.success('Kebun berhasil di verifikasi');
-      }
-    } catch (err) {
-      toast.error('Kebun gagal di verifikasi');
-    }
-  };
-
-  const handleCancelVerification = async () => {
-    try {
-      const payload = {
-        stdb_id: idSTDB,
-        kebun_id: item?.id,
-      };
-      const res = await batalkanVerifikasiKebun(payload);
-      if (res.status == 200) {
-        getDetailKebun();
-        toast.success('Pembatalan verifikasi kebun berhasil');
-        setStatusVerifikasiKebun({
-          lahan: false,
-          pola_tanam: false,
-          komoditas: false,
-          jenis_pupuk: false,
-          mitra_penjualan: false,
-          peta: false,
-        });
-      }
-    } catch (err) {
-      toast.error('Pembatalan verifikasi kebun gagal');
-    }
-  };
-
-  return (
-    <Accordion
-      key={index}
-      title={`KEBUN KE - ${index + 1}`}
-      prefixTitleComponent={
-        isVerificated ? (
-          <div className='ml-3 rounded-[4px] bg-green-100 px-3 py-1 text-[12px] font-normal text-green-800'>
-            Terverifikasi
-          </div>
-        ) : (
-          <></>
-        )
-      }
-    >
-      <DataKebun
-        verifyCheckList={statusVerifikasiKebun}
-        onVerificationValueChange={handleOnVerificationChange}
-        mode='verifikasi'
-        detailKebun={detailKebun}
-      />
-      <div className='mt-4 flex w-full justify-between'>
-        {isVerificated ? (
-          <Button onClick={handleCancelVerification} variant='danger'>
-            Batalkan Verifikasi
-          </Button>
-        ) : (
-          <div />
-        )}
-
-        <Button
-          isDisabled={isVerificated ? true : !isVerificationComplete}
-          onClick={handleVerifyKebun}
-          variant='secondary'
-        >
-          Verifikasi Data Kebun
-        </Button>
-      </div>
-    </Accordion>
-  );
-};
 
 const VerificationPekebunContent = () => {
   const { idSTDB } = useParams();
@@ -403,7 +126,7 @@ const VerificationPekebunContent = () => {
 
   return (
     <div className='relative max-h-[calc(100vh-72px)] w-full'>
-      <div className='flex w-full flex-row justify-between border border-gray-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
+      <div className='flex w-full flex-row justify-between border border-neutral-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
         <div>ID PEKEBUN : {idPekebun}</div>
         <div>PENDATA : HADANI / HADANI@GMAIL.COM</div>
         <div>TERAKHIR DIUBAH : {moment(updated_at).format('DD-MM-YYYY hh:mm:ss')}</div>
@@ -504,7 +227,7 @@ const VerificationPekebunContent = () => {
 const VerificationPekebun = () => {
   return (
     <Suspense fallback={
-      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+      <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
         Memuat data...
       </div>
     }>

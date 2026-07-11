@@ -69,7 +69,7 @@ describe('Upload Component', () => {
 
   it('should render the component with error state', () => {
     render(<Upload {...defaultProps} error />);
-    expect(screen.getByTestId('upload-container')).toHaveClass('border-error5');
+    expect(screen.getByTestId('upload-container')).toHaveClass('border-tertiary');
   });
 
   it('should render the component with a custom label', () => {

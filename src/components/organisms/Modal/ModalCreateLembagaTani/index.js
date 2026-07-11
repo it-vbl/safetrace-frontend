@@ -97,7 +97,7 @@ const ModalCreateLembagaTani = ({ open, setOpen, onSubmit, onCancel }) => {
         />
       </div>
       <div className='mt-4 flex flex-row justify-end gap-2'>
-        <Button onClick={() => setOpen(false)} className='bg-red-500'>
+        <Button onClick={() => setOpen(false)} className='bg-tertiary'>
           Batalkan
         </Button>
         <Button onClick={handleSubmit}>Simpan</Button>

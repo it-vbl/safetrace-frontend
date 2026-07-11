@@ -9,14 +9,14 @@ const Breadcrumb = ({ crumbs = [], className, ...props }) => {
           <li
             key={index}
             className={`flex items-center text-base ${
-              index === crumbs.length - 1 ? 'text-blue8' : ''
+              index === crumbs.length - 1 ? 'text-primary' : ''
             }`}
             data-testid="breadcrumb-item"
           >
             {index === crumbs.length - 1 ? (
               item.name
             ) : item.url ? (
-              <Link className="text-base text-neutral8" href={item.url}>
+              <Link className="text-base text-neutral-600" href={item.url}>
                 {item.name}
               </Link>
             ) : (

@@ -42,24 +42,24 @@ const DatePicker = ({
       <div className="flex flex-row">
         <label
           htmlFor={name}
-          className={`text-[12px] font-bold text-gray-500 ${customStylelabel}`}
+          className={`text-[12px] font-bold text-neutral-500 ${customStylelabel}`}
         >
           {label}
         </label>
-        {requiredField && <span className="text-sm text-red-500">*</span>}
+        {requiredField && <span className="text-sm text-tertiary">*</span>}
       </div>
 
       <div
-        className={`flex h-[42px] w-full items-center justify-between rounded-[4px] border border-neutral5 px-3 ${
+        className={`flex h-[42px] w-full items-center justify-between rounded-[4px] border border-neutral-300 px-3 ${
           disabled
-            ? 'cursor-not-allowed bg-neutral4 text-neutral8'
+            ? 'cursor-not-allowed bg-neutral-200 text-neutral-600'
             : 'cursor-pointer bg-white'
         } ${inputContainerClassName}`}
         onClick={disabled ? () => {} : handleOnClick}
       >
         <p
           className={`text-[14px] ${
-            !value ? 'text-neutral6' : disabled ? 'text-neutral8' : 'text-black'
+            !value ? 'text-neutral-400' : disabled ? 'text-neutral-600' : 'text-black'
           }`}
         >
           {value ? value : placeholder}
@@ -68,7 +68,7 @@ const DatePicker = ({
           type="date"
           id={name}
           name={name}
-          className="w-0  rounded-[4px] outline-none placeholder:text-neutral5"
+          className="w-0  rounded-[4px] outline-none placeholder:text-neutral-300"
           onChange={_onChange}
           ref={dateInputRef}
           disabled={disabled}
@@ -82,7 +82,7 @@ const DatePicker = ({
       </div>
 
       {errors && touched && errors[name] && touched[name] && (
-        <div className="text-left text-sm text-red-500">{errors[name]}</div>
+        <div className="text-left text-sm text-tertiary">{errors[name]}</div>
       )}
     </div>
   );

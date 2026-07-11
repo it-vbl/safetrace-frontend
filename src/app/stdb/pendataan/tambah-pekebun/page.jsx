@@ -372,7 +372,7 @@ const CreatePekebun = () => {
           </>
         </Accordion>
         <div className='mt-4 flex flex-row justify-end gap-2'>
-          <Button onClick={() => router.back()} isLoading={isSubmitting} type='button' className='bg-red-500'>
+          <Button onClick={() => router.back()} isLoading={isSubmitting} type='button' className='bg-tertiary'>
             Batalkan
           </Button>
           <Button isLoading={isSubmitting} type='submit'>

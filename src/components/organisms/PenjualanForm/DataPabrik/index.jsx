@@ -275,11 +275,11 @@ const DataPabrik = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
+      <div className="rounded-lg border border-neutral-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">DETAIL PABRIK</h3>
 
         {/* Row 1 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-neutral-300 py-4">
           <Select
             label="Pabrik Penerima"
             name="pabrik_penerima"
@@ -344,7 +344,7 @@ const DataPabrik = ({
         </div>
 
         {/* Row 2 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 border-b border-dashed border-neutral-300 py-4">
           <Select
             label="Kecamatan"
             name="kecamatan"

@@ -133,7 +133,7 @@ const TraceabilityProduksiDetail = () => {
     return (
       <section
         key={`tahun-${yearData.tahun}`}
-        className="rounded border border-gray-300 bg-white p-6"
+        className="rounded border border-neutral-300 bg-white p-6"
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">TAHUN {yearData.tahun}</h3>
@@ -141,7 +141,7 @@ const TraceabilityProduksiDetail = () => {
             <div className="flex items-center gap-4">
               <button
                 type="button"
-                className="text-sm font-medium text-red-600 underline hover:text-red-700"
+                className="text-sm font-medium text-tertiary underline hover:text-tertiary"
                 onClick={() => {
                   setDeleteYearData(yearData);
                   setShowDeleteModal(true);
@@ -151,7 +151,7 @@ const TraceabilityProduksiDetail = () => {
               </button>
               <button
                 type="button"
-                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                className="text-sm font-medium text-primary underline hover:text-primary"
                 onClick={() => {
                   setEditYearData(yearData);
                   setIsEditOpen(true);
@@ -163,19 +163,19 @@ const TraceabilityProduksiDetail = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-700 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-neutral-700 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {firstRow.map((m) => (
             <div key={`${yearData.tahun}-${m.name}`} className="">
-              <div className="text-gray-500">{m.name}</div>
+              <div className="text-neutral-500">{m.name}</div>
               <div className="font-medium">{formatNumber(m.valueKg)} Kg</div>
             </div>
           ))}
 
-          <div className="col-span-2 border-b border-dashed border-gray-300 sm:col-span-3 md:col-span-4 lg:col-span-6" />
+          <div className="col-span-2 border-b border-dashed border-neutral-300 sm:col-span-3 md:col-span-4 lg:col-span-6" />
 
           {secondRow.map((m) => (
             <div key={`${yearData.tahun}-${m.name}`} className="">
-              <div className="text-gray-500">{m.name}</div>
+              <div className="text-neutral-500">{m.name}</div>
               <div className="font-medium">{formatNumber(m.valueKg)} Kg</div>
             </div>
           ))}
@@ -210,12 +210,12 @@ const TraceabilityProduksiDetail = () => {
       <div className="flex w-full flex-col gap-6">
         {/* DETAIL KEBUN Card */}
         {detail?.kebun && (
-          <section className="rounded border border-gray-300 bg-white p-6">
+          <section className="rounded border border-neutral-300 bg-white p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-neutral-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.kebun.id_kebun ?? '-'}

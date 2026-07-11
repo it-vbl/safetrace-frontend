@@ -327,9 +327,9 @@ const DetailKebun = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
+      <div className="rounded-lg border border-neutral-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">DETAIL KEBUN</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <InputText
             label="ID Kebun"
             name="id_kebun"
@@ -367,7 +367,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <InputText
             label="Lokasi Kebun"
             name="lokasi_kebun"
@@ -429,7 +429,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <InputText
             label="Luas Kebun (Ha)"
             name="luas"
@@ -458,7 +458,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="hidden lg:grid lg:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="hidden lg:grid lg:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <div className="flex flex-row items-end gap-2">
             <Select
               label="Waktu Tanam"
@@ -525,7 +525,7 @@ const DetailKebun = ({
         </div>
 
         {/* Tablet & Mobile Layout (2 Columns, 2 Rows on Tablet; 1 Column on Mobile) */}
-        <div className="grid lg:hidden grid-cols-1 md:grid-cols-2 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid lg:hidden grid-cols-1 md:grid-cols-2 gap-6 border-b border-dashed border-neutral-300 py-4">
           <Select
             label="Bulan Tanam"
             name="waktu_tanam_month"
@@ -589,7 +589,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <Select
             label="Jenis Legalitas"
             name="jenis_legalitas"
@@ -626,7 +626,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <InputText
             label="STDB"
             name="stdb"
@@ -664,7 +664,7 @@ const DetailKebun = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
           <InputText
             label="Tahun Peremajaan"
             name="tahun_peremajaan"
@@ -759,7 +759,7 @@ const DetailKebun = ({
         <div className="mt-4 flex flex-col sm:flex-row justify-between gap-4">
           <Button
             type="button"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-tertiary hover:bg-tertiary/90"
             onClick={onCancel}
             disabled={isSubmitting}
           >
@@ -767,7 +767,7 @@ const DetailKebun = ({
           </Button>
           <Button
             type="button"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-secondary"
             onClick={handleSubmit}
             isLoading={isSubmitting}
             isDisabled={isSubmitting}

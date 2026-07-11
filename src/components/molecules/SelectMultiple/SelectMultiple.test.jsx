@@ -56,7 +56,7 @@ describe("SelectMultiple Component", () => {
       render(
         <SelectMultiple {...defaultProps} isError helperText="Error message" />,
       );
-      expect(screen.getByText("Error message")).toHaveClass("text-error5");
+      expect(screen.getByText("Error message")).toHaveClass("text-tertiary");
     });
 
     it("disables the select when disabled prop is true", () => {

@@ -121,7 +121,7 @@ const Pemetaan = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
+      <div className="rounded-lg border border-neutral-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">PEMETAAN</h3>
         <DataPemetaan 
           data={pemetaanData} 
@@ -134,7 +134,7 @@ const Pemetaan = ({
           <div className="flex flex-col-reverse sm:flex-row gap-2">
             <Button
               type="button"
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-tertiary hover:bg-tertiary/90"
               onClick={onCancel}
               disabled={isSubmitting}
             >
@@ -142,7 +142,7 @@ const Pemetaan = ({
             </Button>
             <Button
               type="button"
-              className="bg-gray-600 hover:bg-gray-700"
+              className="bg-neutral-600 hover:bg-neutral-700"
               onClick={onPrevious}
               disabled={isSubmitting}
             >
@@ -151,7 +151,7 @@ const Pemetaan = ({
           </div>
           <Button
             type="button"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-secondary"
             onClick={() => formik.handleSubmit()}
             isLoading={isSubmitting}
           >

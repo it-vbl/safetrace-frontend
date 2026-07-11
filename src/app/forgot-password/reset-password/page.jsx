@@ -81,7 +81,7 @@ const ResetPasswordPage = () => {
             <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
           </div>
 
-          <div className="mb-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div className="mb-6 rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-6">
               <Link href={'/login'}>
                 <div className="flex flex-row items-center gap-3 font-bold">

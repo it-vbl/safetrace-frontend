@@ -11,8 +11,8 @@ const Alert = ({ children, visible, onClose = () => {}, className, textClassName
         'w-full items-center gap-3 rounded p-1',
         'flex transition-all duration-300 ease-in-out',
         {
-          'bg-error1 text-error5': variant === 'error',
-          'bg-green1 text-green8': variant === 'success',
+          'bg-error1 text-tertiary': variant === 'error',
+          'bg-bgColor text-primary': variant === 'success',
         },
         className,
         visible ? 'max-h-[60px] opacity-100' : 'my-0 max-h-0 overflow-hidden p-0 opacity-0'

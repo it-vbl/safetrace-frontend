@@ -120,7 +120,7 @@ const EditPetaniModal = ({
     >
       <form
         onSubmit={formik.handleSubmit}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm text-gray-700 mt-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm text-neutral-700 mt-4"
       >
         {/* Row 1 */}
         <Select
@@ -394,14 +394,14 @@ const EditPetaniModal = ({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded bg-red-600 px-6 py-2 text-white hover:bg-red-700"
+            className="rounded bg-tertiary px-6 py-2 text-white hover:bg-tertiary/90"
           >
             Batalkan
           </button>
           <button
             type="submit"
             disabled={formik.isSubmitting}
-            className="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+            className="rounded bg-primary px-6 py-2 text-white hover:bg-secondary"
           >
             Simpan
           </button>

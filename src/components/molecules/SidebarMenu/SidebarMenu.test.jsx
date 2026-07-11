@@ -35,15 +35,15 @@ describe("SidebarMenu", () => {
   it("should apply active class when active prop is true", () => {
     render(<SidebarMenu {...defaultProps} active={true} />);
     const link = screen.getByRole("link");
-    expect(link).toHaveClass("bg-blue1");
-    expect(link).toHaveClass("text-blue10");
+    expect(link).toHaveClass("bg-bgColor");
+    expect(link).toHaveClass("text-secondary");
   });
 
   it("should not apply active class when active prop is false", () => {
     render(<SidebarMenu {...defaultProps} active={false} />);
     const link = screen.getByRole("link");
-    expect(link).not.toHaveClass("bg-blue1");
-    expect(link).not.toHaveClass("!text-blue10");
+    expect(link).not.toHaveClass("bg-bgColor");
+    expect(link).not.toHaveClass("!text-secondary");
   });
 
   it("should apply custom className when provided", () => {
@@ -81,7 +81,7 @@ describe("SidebarMenu", () => {
     render(<SidebarMenu {...defaultProps} active={true} />);
     const link = screen.getByRole("link");
     fireEvent.mouseEnter(link);
-    expect(link).toHaveClass("bg-blue1");
+    expect(link).toHaveClass("bg-bgColor");
   });
 
   it("should maintain hover styles on mouse leave when not active", () => {
@@ -89,7 +89,7 @@ describe("SidebarMenu", () => {
     const link = screen.getByRole("link");
     fireEvent.mouseEnter(link);
     fireEvent.mouseLeave(link);
-    expect(link).toHaveClass("hover:!bg-blue0");
+    expect(link).toHaveClass("hover:!bg-bgColor");
   });
 
   // Snapshot test

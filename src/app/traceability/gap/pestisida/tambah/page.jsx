@@ -76,7 +76,7 @@ export default function TambahPestisidaPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
           Memuat data...
         </div>
       }
@@ -190,9 +190,9 @@ function TambahPestisidaContent() {
           onSubmit={formik.handleSubmit}
           className="mb-6 space-y-4 sm:space-y-6"
         >
-          <div className="rounded-[4px] border border-gray-300 bg-white">
-            <div className="border-b border-gray-200 p-4">
-              <Heading level={3} className="text-sm text-gray-600 sm:text-base">
+          <div className="rounded-[4px] border border-neutral-300 bg-white">
+            <div className="border-b border-neutral-200 p-4">
+              <Heading level={3} className="text-sm text-neutral-600 sm:text-base">
                 PENGGUNAAN PESTISIDA
               </Heading>
             </div>
@@ -217,7 +217,7 @@ function TambahPestisidaContent() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                 {/* Semester 1 */}
-                <div className="rounded border border-gray-200 bg-gray-50 p-4">
+                <div className="rounded border border-neutral-200 bg-neutral-50 p-4">
                   <div className="mb-2 text-sm font-semibold">Semester 1</div>
                   <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-2">
                     <Select
@@ -282,7 +282,7 @@ function TambahPestisidaContent() {
                 </div>
 
                 {/* Semester 2 */}
-                <div className="rounded border border-gray-200 bg-gray-50 p-4">
+                <div className="rounded border border-neutral-200 bg-neutral-50 p-4">
                   <div className="mb-2 text-sm font-semibold">Semester 2</div>
                   <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-2">
                     <Select

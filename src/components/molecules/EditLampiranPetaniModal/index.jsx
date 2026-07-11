@@ -153,7 +153,7 @@ const EditLampiranPetaniModal = ({
           />
         </div>
 
-        <div className="flex flex-col justify-end gap-3 border-t border-gray-200 pt-6 sm:flex-row">
+        <div className="flex flex-col justify-end gap-3 border-t border-neutral-200 pt-6 sm:flex-row">
           <Button
             variant="danger"
             onClick={() => setOpen(false)}

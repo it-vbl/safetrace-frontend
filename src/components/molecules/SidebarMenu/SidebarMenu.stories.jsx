@@ -20,7 +20,7 @@ export const Hovered = {
     label: "Home",
     icon: <Home />,
   },
-  render: (args) => <SidebarMenu className="SidebarMenu bg-blue1" {...args} />,
+  render: (args) => <SidebarMenu className="SidebarMenu bg-bgColor" {...args} />,
 };
 
 export const Active = {

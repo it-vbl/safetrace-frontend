@@ -287,7 +287,7 @@ const CreatePetaniTraceability = () => {
       <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-neutral-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <InputText
                 label="Id Petani"
                 name="id_petani"
@@ -323,7 +323,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-neutral-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <Select
                 label="Kelompok Tani"
                 name="kelompok_tani"
@@ -426,7 +426,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-neutral-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <InputText
                 label="Tempat Lahir"
                 name="tempat_lahir"
@@ -467,7 +467,7 @@ const CreatePetaniTraceability = () => {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-gray-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 border-b border-dashed border-neutral-300 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <Select
                 label="Status Pernikahan"
                 name="status_pernikahan"
@@ -648,7 +648,7 @@ const CreatePetaniTraceability = () => {
         <div className="mt-4 flex flex-col justify-end gap-2 px-4 sm:flex-row sm:gap-2 sm:px-0">
           <Button
             type="button"
-            className="w-full bg-red-600 hover:bg-red-700 sm:w-auto"
+            className="w-full bg-tertiary hover:bg-tertiary/90 sm:w-auto"
             onClick={() => router.back()}
             isLoading={formik.isSubmitting}
           >

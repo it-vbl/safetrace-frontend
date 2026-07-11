@@ -87,7 +87,7 @@ const MapDashboard = () => {
             Lihat
           </div>
           <div
-            className="uppercase underline text-red-500 font-bold text-[10px] sm:text-[12px] cursor-pointer hover:text-red-600"
+            className="uppercase underline text-tertiary font-bold text-[10px] sm:text-[12px] cursor-pointer hover:text-tertiary"
             onClick={() => handleOnDeleteClicked(e.data)}
           >
             Hapus

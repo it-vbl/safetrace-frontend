@@ -43,7 +43,7 @@ const ModalConfirmDeletePekebun = ({
         <Button
           isLoading={loading}
           onClick={() => setOpen(false)}
-          className="bg-red-500"
+          className="bg-tertiary"
         ></Button>
         <Button isLoading={loading} onClick={handleOnSubmit}>
           Ya, Hapus Data

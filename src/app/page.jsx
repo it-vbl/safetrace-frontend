@@ -208,13 +208,13 @@ const MapDashboard = () => {
       <div className="flex flex-row gap-2">
         <button
           onClick={handlePetaClick}
-          className="text-left font-bold text-orange-600 underline transition-colors hover:text-orange-700"
+          className="text-left font-bold text-tertiary underline transition-colors hover:text-tertiary"
         >
           PETA
         </button>
         <button
           onClick={handleDetailClick}
-          className="text-left font-bold text-blue-600 underline transition-colors hover:text-blue-700"
+          className="text-left font-bold text-primary underline transition-colors hover:text-primary"
         >
           DETAIL
         </button>
@@ -227,23 +227,23 @@ const MapDashboard = () => {
 
     // Map API values to display text
     let displayText = '-';
-    let chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
+    let chipClass = 'bg-neutral-100 text-neutral-800 border-neutral-300';
 
     if (risikoValue) {
       const lowerValue = risikoValue.toLowerCase();
       if (lowerValue === 'low') {
         displayText = 'Rendah';
-        chipClass = 'bg-green-100 text-green-800 border-green-300';
+        chipClass = 'bg-bgColor text-primary border-primary';
       } else if (lowerValue === 'medium') {
         displayText = 'Menengah';
-        chipClass = 'bg-orange-100 text-orange-800 border-orange-300';
+        chipClass = 'bg-error1 text-tertiary border-tertiary';
       } else if (lowerValue === 'high') {
         displayText = 'Tinggi';
-        chipClass = 'bg-red-100 text-red-800 border-red-300';
+        chipClass = 'bg-error1 text-tertiary border-tertiary';
       } else {
         // If value doesn't match expected values, show as-is
         displayText = risikoValue;
-        chipClass = 'bg-gray-100 text-gray-800 border-gray-300';
+        chipClass = 'bg-neutral-100 text-neutral-800 border-neutral-300';
       }
     }
 
@@ -263,8 +263,8 @@ const MapDashboard = () => {
       <span
         className={
           isSudah
-            ? 'font-semibold text-green-600'
-            : 'font-semibold text-red-600'
+            ? 'font-semibold text-primary'
+            : 'font-semibold text-tertiary'
         }
       >
         {value}
@@ -294,11 +294,11 @@ const MapDashboard = () => {
       <div className="flex flex-col gap-1">
         <button
           onClick={handleLihatClick}
-          className="text-left font-bold text-blue-600 underline transition-colors hover:text-blue-700"
+          className="text-left font-bold text-primary underline transition-colors hover:text-primary"
         >
           LIHAT
         </button>
-        {idAlert && <div className="text-sm text-gray-600">{idAlert}</div>}
+        {idAlert && <div className="text-sm text-neutral-600">{idAlert}</div>}
       </div>
     );
   };
@@ -839,7 +839,7 @@ const MapDashboard = () => {
   if (!canViewMap) {
     return (
       <div className="flex h-[calc(100vh-72px)] w-full items-center justify-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-neutral-600">
           Anda tidak memiliki akses untuk melihat MapView.
         </p>
       </div>

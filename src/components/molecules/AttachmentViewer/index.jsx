@@ -8,18 +8,18 @@ import { getCurrentUserRoles, isDisbunak } from '@/libs/permissions';
 const FileIcon = ({ type }) => {
   const configs = {
     image: {
-      bg: 'bg-blue-50',
-      color: 'text-blue-600',
+      bg: 'bg-bgColor',
+      color: 'text-primary',
       path: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
     },
     pdf: {
-      bg: 'bg-orange-50',
-      color: 'text-orange-700',
+      bg: 'bg-error1',
+      color: 'text-tertiary',
       path: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
     },
     file: {
-      bg: 'bg-gray-100',
-      color: 'text-gray-500',
+      bg: 'bg-neutral-100',
+      color: 'text-neutral-500',
       path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
     },
   };
@@ -82,10 +82,6 @@ const AttachmentViewer = ({
       link.click();
       link.remove();
 
-      setTimeout(() => {
-        window.open(fileUrl, '_blank');
-      }, 1000);
-
     } catch (err) {
       console.error(err);
       toast.error('Gagal mengunduh file');
@@ -97,17 +93,17 @@ const AttachmentViewer = ({
   return (
     <div className={`group flex flex-col ${className}`}>
       {/* Card */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
         {/* Header */}
-        <div className="flex items-center gap-2 border-b border-gray-100 px-3.5 py-2.5">
+        <div className="flex items-center gap-2 border-b border-neutral-100 px-3.5 py-2.5">
           <FileIcon type={fileType} />
-          <span className="flex-1 truncate text-sm font-medium text-gray-800">{label}</span>
+          <span className="flex-1 truncate text-sm font-medium text-neutral-800">{label}</span>
         </div>
 
         {/* Thumbnail Container */}
         <div
           onClick={() => setIsPreviewOpen(true)}
-          className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-gray-50 transition-colors hover:bg-gray-100"
+          className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-neutral-50 transition-colors hover:bg-neutral-100"
         >
           {displaySrc ? (
             <Image
@@ -119,15 +115,15 @@ const AttachmentViewer = ({
               unoptimized={true}
             />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gray-50 text-gray-300 transition-colors group-hover:bg-gray-100 group-hover:text-gray-400">
-              <div className="rounded-full bg-white p-4 shadow-sm ring-1 ring-gray-100 transition-transform group-hover:scale-110">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-neutral-50 text-neutral-300 transition-colors group-hover:bg-neutral-100 group-hover:text-neutral-400">
+              <div className="rounded-full bg-white p-4 shadow-sm ring-1 ring-neutral-100 transition-transform group-hover:scale-110">
                 <FileIcon type={fileType} />
               </div>
               <div className="flex flex-col items-center gap-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                   {fileType} Document
                 </span>
-                <span className="text-[9px] text-gray-400 italic">
+                <span className="text-[9px] text-neutral-400 italic">
                   Klik untuk preview
                 </span>
               </div>
@@ -136,7 +132,7 @@ const AttachmentViewer = ({
 
           {/* Hover overlay */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/25">
-            <span className="translate-y-1 rounded-full bg-white/95 px-4 py-1.5 text-xs font-semibold text-gray-800 opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <span className="translate-y-1 rounded-full bg-white/95 px-4 py-1.5 text-xs font-semibold text-neutral-800 opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
               Klik untuk preview
             </span>
           </div>
@@ -144,7 +140,7 @@ const AttachmentViewer = ({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-3.5 py-2">
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-neutral-400">
             {ext.toUpperCase()}{fileSize ? ` · ${fileSize}` : ''}
           </span>
 
@@ -152,7 +148,7 @@ const AttachmentViewer = ({
             <button
               onClick={handleDownload}
               disabled={isDownloading}
-              className="flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-md border border-primary/20 bg-bgColor px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-bgColor disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDownloading ? (
                 <svg className="h-3 w-3 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -179,19 +175,19 @@ const AttachmentViewer = ({
         isShowCloseIcon={true}
         showBottomButton={false}
       >
-        <div className="mt-4 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="mt-4 flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white">
           {/* Modal topbar */}
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
             <div className="flex items-center gap-2">
               <FileIcon type={fileType} />
-              <span className="text-sm font-medium text-gray-800">{label}</span>
+              <span className="text-sm font-medium text-neutral-800">{label}</span>
             </div>
 
             {mounted && !isDisbunakUser && (
               <button
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-gray-700 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-neutral-700 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isDownloading ? (
                   <svg className="h-3.5 w-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -241,7 +237,7 @@ const AttachmentViewer = ({
                       href={fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-white/90 active:scale-95"
+                      className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-neutral-900 transition-colors hover:bg-white/90 active:scale-95"
                     >
                       Buka File
                     </a>

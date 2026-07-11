@@ -50,7 +50,7 @@ ChildVariant.args = {
 export const CustomClassName = Template.bind({});
 CustomClassName.args = {
   children: "Custom Class Cascader",
-  className: "bg-blue-100 text-blue-800",
+  className: "bg-bgColor text-primary",
 };
 
 export const CustomTextClassName = Template.bind({});
@@ -93,7 +93,7 @@ AllFeaturesCombined.args = {
   icon: <RemoveRedEye />,
   checkbox: true,
   variant: "child",
-  className: "bg-green-100",
-  textClassName: "text-green-800 font-semibold",
+  className: "bg-bgColor",
+  textClassName: "text-primary font-semibold",
   onClick: () => alert("Combined Cascader clicked!"),
 };

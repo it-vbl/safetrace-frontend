@@ -12,7 +12,7 @@ const DataJenisPupuk = ({ data, onVerifyChange = (e) => {}, verified = false, mo
             value={verified}
             onChange={onVerifyChange}
             size={14}
-            labelClassName={`${data?.status_stdb === '3' ? 'text-gray-400' : 'text-primary'}  text-[12px] font-bold`}
+            labelClassName={`${data?.status_stdb === '3' ? 'text-neutral-400' : 'text-primary'}  text-[12px] font-bold`}
             label='Terverifikasi?'
             disabled={data?.status_stdb === '3'}
           />

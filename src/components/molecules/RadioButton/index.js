@@ -36,7 +36,7 @@ const RadioButton = ({
         {label && (
           <Label
             isRequired={isRequired}
-            className="text-[12px] font-bold text-gray-500"
+            className="text-[12px] font-bold text-neutral-500"
           >
             {label}
           </Label>
@@ -59,12 +59,12 @@ const RadioButton = ({
                 onChange={handleOnChange}
                 style={{ width: size, height: size }}
                 className={`${styles['radio-button']} cursor-pointer ${
-                  isError ? '!border-error5' : 'border-gray-500'
+                  isError ? '!border-tertiary' : 'border-neutral-500'
                 }`}
               />
 
               <Paragraph
-                className={`cursor-pointer text-neutral9 ${labelClassName}`}
+                className={`cursor-pointer text-neutral-700 ${labelClassName}`}
                 level={3}
               >
                 {option.label}
@@ -74,7 +74,7 @@ const RadioButton = ({
         </div>
       </div>
       {helperText && (
-        <Paragraph level={4} className="text-error5">
+        <Paragraph level={4} className="text-tertiary">
           {helperText}
         </Paragraph>
       )}

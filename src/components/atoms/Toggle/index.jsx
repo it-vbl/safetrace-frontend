@@ -48,7 +48,7 @@ const Toggle = ({
             value
               ? 'bg-primary after:bg-white border-primary after:translate-x-[8px]'
               : 'bg-white after:translate-x-0',
-            disabled && 'bg-neutral3'
+            disabled && 'bg-neutral-100'
           )}
         />
       </label>

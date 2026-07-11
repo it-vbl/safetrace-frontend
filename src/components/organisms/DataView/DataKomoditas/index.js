@@ -23,14 +23,14 @@ const DataKomoditas = ({ komoditas = [], mode = 'pendataan', onVerifyChange = (e
     return dataKomoditas?.[activeKomoditasIndex];
   }, [activeKomoditasIndex, dataKomoditas]);
 
-  const activeClassName = 'font-bold text-primary bg-gray-100 ';
+  const activeClassName = 'font-bold text-primary bg-neutral-100 ';
 
   return (
     <div className='flex w-full flex-col'>
       <div className='flex flex-row items-start justify-start'>
         {dataKomoditas?.map((data, index) => (
           <div
-            className={`cursor-pointer border-r border-t border-r-gray-300 border-t-gray-300 p-3 text-[14px] hover:bg-slate-100 ${
+            className={`cursor-pointer border-r border-t border-r-gray-300 border-t-gray-300 p-3 text-[14px] hover:bg-neutral-100 ${
               activeKomoditasIndex === index ? activeClassName : ''
             } ${
               index == 0
@@ -47,7 +47,7 @@ const DataKomoditas = ({ komoditas = [], mode = 'pendataan', onVerifyChange = (e
           </div>
         ))}
       </div>
-      <div className='border border-gray-300 p-4'>
+      <div className='border border-neutral-300 p-4'>
         <div className='flex flex-1 font-bold'>Informasi Pola Tanam</div>
         {mode === 'verifikasi' && (
           <div className='mt-3'>
@@ -55,7 +55,7 @@ const DataKomoditas = ({ komoditas = [], mode = 'pendataan', onVerifyChange = (e
               value={verified}
               onChange={onVerifyChange}
               size={14}
-              labelClassName={`${data?.status_stdb === '3' ? 'text-gray-400' : 'text-primary'}  text-[12px] font-bold`}
+              labelClassName={`${data?.status_stdb === '3' ? 'text-neutral-400' : 'text-primary'}  text-[12px] font-bold`}
               label='Terverifikasi?'
               disabled={data?.status_stdb === '3'}
             />

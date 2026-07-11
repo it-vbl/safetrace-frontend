@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const Call = ({ color = theme.colors.neutral9, size = 21 }) => {
+const Call = ({ color = theme.colors.neutral[700], size = 21 }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 20 21' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <path

@@ -44,20 +44,20 @@ const InputText = ({
   const isPassword = type === 'password'; // Use strict equality
 
   const filledClassName = {
-    field: inputValue !== '' ? 'border-neutral6' : '', // Use inputValue instead of value
+    field: inputValue !== '' ? 'border-neutral-400' : '', // Use inputValue instead of value
   };
   const disabledClassName = {
     field: disabled
-      ? 'bg-neutral4 border-neutral6'
-      : 'focus-within:border-blue6 hover:border-blue6',
+      ? 'bg-neutral-200 border-neutral-400'
+      : 'focus-within:border-primary hover:border-primary',
     input: disabled
-      ? 'cursor-not-allowed bg-neutral4 text-neutral7 placeholder:text-neutral7'
+      ? 'cursor-not-allowed bg-neutral-200 text-neutral-500 placeholder:text-neutral-500'
       : 'cursor-auto',
   };
 
   const errorClassName = {
-    field: touched?.[name] && errors?.[name] ? '!border-error5' : '',
-    helperText: touched?.[name] && errors?.[name] ? 'text-error5' : '',
+    field: touched?.[name] && errors?.[name] ? '!border-tertiary' : '',
+    helperText: touched?.[name] && errors?.[name] ? 'text-tertiary' : '',
   };
   const inputType = useMemo(() => {
     if (isPassword) {
@@ -223,7 +223,7 @@ const InputText = ({
       {label && (
         <Label
           isRequired={isRequired}
-          className="text-[12px] font-bold text-gray-500"
+          className="text-[12px] font-bold text-neutral-500"
           disabled={disabled}
         >
           {label}
@@ -231,15 +231,15 @@ const InputText = ({
       )}
       <div
         className={cn(
-          'group relative flex h-[42px] w-full min-w-0 items-center gap-[10px] rounded-[4px] border border-neutral5 bg-white',
+          'group relative flex h-[42px] w-full min-w-0 items-center gap-[10px] rounded-[4px] border border-neutral-300 bg-white',
           filledClassName.field,
           disabledClassName.field,
           errorClassName.field,
-          disabled && 'focus-within:border-neutral6'
+          disabled && 'focus-within:border-neutral-400'
         )}
       >
         {prefix && (
-          <div className="shrink-0 pl-3 text-neutral8">
+          <div className="shrink-0 pl-3 text-neutral-600">
             <Paragraph level={3}>{prefix}</Paragraph>
           </div>
         )}
@@ -251,7 +251,7 @@ const InputText = ({
           onBlur={handleOnBlur}
           placeholder={placeholder}
           className={cn(
-            'h-full w-full rounded-[4px] px-3 text-[14px] placeholder:text-neutral6 focus:outline-none',
+            'h-full w-full rounded-[4px] px-3 text-[14px] placeholder:text-neutral-400 focus:outline-none',
             className,
             disabledClassName.input
           )}
@@ -270,7 +270,7 @@ const InputText = ({
                 onClick={handleTogglePassword}
                 className={cn(
                   'shrink-0 cursor-pointer',
-                  disabled && 'cursor-not-allowed text-neutral6'
+                  disabled && 'cursor-not-allowed text-neutral-400'
                 )}
                 disabled={disabled}
                 aria-label="Toggle password visibility"
@@ -282,8 +282,8 @@ const InputText = ({
               <Paragraph
                 level={2}
                 className={cn(
-                  'w-auto text-neutral8',
-                  disabled && 'text-neutral6'
+                  'w-auto text-neutral-600',
+                  disabled && 'text-neutral-400'
                 )}
               >
                 {suffix}
@@ -295,13 +295,13 @@ const InputText = ({
       {helperText && (
         <Paragraph
           level={4}
-          className={cn('mt-1 text-neutral7', errorClassName.helperText)}
+          className={cn('mt-1 text-neutral-500', errorClassName.helperText)}
         >
           {helperText}
         </Paragraph>
       )}
       {errors?.[name] && touched?.[name] && (
-        <Paragraph level={4} className="text-error mt-1 text-red-500">
+        <Paragraph level={4} className="text-error mt-1 text-tertiary">
           {errors?.[name]}
         </Paragraph>
       )}

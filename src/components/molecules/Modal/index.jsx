@@ -42,7 +42,7 @@ const BaseModal = ({
 
   return (
     <div
-      className={`fixed inset-0 z-[1000] flex items-center justify-center bg-gray-800 bg-opacity-50 ${
+      className={`fixed inset-0 z-[1000] flex items-center justify-center bg-neutral-800 bg-opacity-50 ${
         isClickable ? 'cursor-pointer' : 'cursor-default'
       }`}
       onClick={handleOnWrapperClick}
@@ -52,7 +52,7 @@ const BaseModal = ({
       >
         <div className="flex items-center justify-between bg-[#FFFEFE]">
           {isShowLabel && (
-            <p className="text-[14px] font-bold leading-6 tracking-[1px] text-neutral10">
+            <p className="text-[14px] font-bold leading-6 tracking-[1px] text-neutral-900">
               {label}
             </p>
           )}

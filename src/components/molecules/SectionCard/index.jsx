@@ -13,12 +13,12 @@ const SectionCard = ({
 
   return (
     <section
-      className={`rounded-lg border border-gray-200 bg-white shadow-sm ${className}`}
+      className={`rounded-lg border border-neutral-200 bg-white shadow-sm ${className}`}
     >
-      <div className="flex flex-col gap-2 border-b border-gray-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 border-b border-neutral-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           {title ? (
-            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
           ) : null}
         </div>
         <div className="flex items-center gap-3">
@@ -28,7 +28,7 @@ const SectionCard = ({
               type="button"
               onClick={onAction}
               disabled={actionDisabled}
-              className="text-sm font-medium text-blue-700 underline transition hover:text-blue-900 disabled:cursor-not-allowed disabled:text-gray-400"
+              className="text-sm font-medium text-primary underline transition hover:text-primary disabled:cursor-not-allowed disabled:text-neutral-400"
             >
               {actionLabel}
             </button>

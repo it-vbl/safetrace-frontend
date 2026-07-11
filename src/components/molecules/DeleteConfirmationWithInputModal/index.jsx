@@ -59,11 +59,11 @@ const DeleteConfirmationWithInputModal = ({
       <form onSubmit={handleConfirm}>
         <Heading
           level={4}
-          className="text-lg font-semibold text-gray-800 sm:text-xl md:text-2xl"
+          className="text-lg font-semibold text-neutral-800 sm:text-xl md:text-2xl"
         >
           {title}
         </Heading>
-        <p className="my-4 text-gray-700">{displayMessage}</p>
+        <p className="my-4 text-neutral-700">{displayMessage}</p>
 
         <div className="mb-4">
           <InputText

@@ -41,7 +41,7 @@ export const OTPInput = forwardRef(function OTPInput({ value, onChange, index, o
       value={value}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
-      className='h-16 w-16 rounded-lg border-2 border-gray-300 bg-white text-center text-xl font-semibold focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500'
+      className='h-16 w-16 rounded-lg border-2 border-neutral-300 bg-white text-center text-xl font-semibold focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary'
     />
   );
 });

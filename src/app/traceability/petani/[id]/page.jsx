@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useParams, useRouter } from 'next/navigation';
 import moment from 'moment';
 
@@ -69,11 +70,6 @@ const TraceabilityPetaniDetail = () => {
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
   const [createLampiranLoading, setCreateLampiranLoading] = useState(false);
-  const [notification, setNotification] = useState({
-    show: false,
-    type: '',
-    message: '',
-  });
 
   const crumbs = [
     { label: 'HOME', href: '/' },
@@ -130,7 +126,6 @@ const TraceabilityPetaniDetail = () => {
 
   const handleUpdateLampiran = async (formData) => {
     setUpdateLampiranLoading(true);
-    setNotification({ show: false, type: '', message: '' });
     try {
       await updateLampiranPetani(id, formData);
       const res = await getDetailLampiranPetani(id);
@@ -138,28 +133,11 @@ const TraceabilityPetaniDetail = () => {
       setLampiran(data);
 
       setIsEditLampiranModalOpen(false);
-      setNotification({
-        show: true,
-        type: 'success',
-        message: 'Lampiran berhasil diperbarui!',
-      });
-
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 3000);
+      toast.success('Lampiran berhasil diperbarui!');
     } catch (error) {
       console.error('Error updating lampiran:', error);
-      setNotification({
-        show: true,
-        type: 'error',
-        message:
-          'Gagal memperbarui lampiran: ' +
-          (error?.response?.data?.message || error.message),
-      });
-
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 5000);
+      toast.error('Gagal memperbarui lampiran: ' +
+          (error?.response?.data?.message || error.message),);
     } finally {
       setUpdateLampiranLoading(false);
     }
@@ -167,7 +145,6 @@ const TraceabilityPetaniDetail = () => {
 
   const handleUpdatePetani = async (formData) => {
     setUpdateLoading(true);
-    setNotification({ show: false, type: '', message: '' });
 
     try {
       const updateData = {
@@ -202,28 +179,11 @@ const TraceabilityPetaniDetail = () => {
       setPetani(data);
 
       setIsEditModalOpen(false);
-      setNotification({
-        show: true,
-        type: 'success',
-        message: 'Data petani berhasil diperbarui!',
-      });
-
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 3000);
+      toast.success('Data petani berhasil diperbarui!');
     } catch (error) {
       console.error('Error updating petani:', error);
-      setNotification({
-        show: true,
-        type: 'error',
-        message:
-          'Gagal memperbarui data petani: ' +
-          (error?.response?.data?.message || error.message),
-      });
-
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 5000);
+      toast.error('Gagal memperbarui data petani: ' +
+          (error?.response?.data?.message || error.message),);
     } finally {
       setUpdateLoading(false);
     }
@@ -231,18 +191,9 @@ const TraceabilityPetaniDetail = () => {
 
   const handleCreateLampiran = async () => {
     setCreateLampiranLoading(true);
-    setNotification({ show: false, type: '', message: '' });
 
     if (!ktpFile && !kkFile && !nibFile) {
-      setNotification({
-        show: true,
-        type: 'error',
-        message: 'Mohon pilih minimal 1 file lampiran',
-      });
-
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 5000);
+      toast.error('Mohon pilih minimal 1 file lampiran',);
 
       setCreateLampiranLoading(false);
       return;
@@ -260,31 +211,15 @@ const TraceabilityPetaniDetail = () => {
 
       await fetchLampiran();
 
-      setNotification({
-        show: true,
-        type: 'success',
-        message: 'Lampiran berhasil diunggah!',
-      });
+      toast.success('Lampiran berhasil diunggah!');
 
       setKtpFile(null);
       setKkFile(null);
       setNibFile(null);
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 3000);
     } catch (error) {
       console.error('Error creating lampiran:', error);
-      setNotification({
-        show: true,
-        type: 'error',
-        message:
-          'Gagal mengunggah lampiran: ' +
-          (error?.response?.data?.message || error.message),
-      });
-
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 5000);
+      toast.error('Gagal mengunggah lampiran: ' +
+          (error?.response?.data?.message || error.message),);
     } finally {
       setCreateLampiranLoading(false);
     }
@@ -302,11 +237,11 @@ const TraceabilityPetaniDetail = () => {
       lampiranError?.response?.data?.message || lampiranError?.message;
     if (errorStatus === 500) {
       return (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
+        <div className="rounded-lg border border-tertiary/20 bg-error1 p-4 sm:p-6">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <svg
-                className="h-6 w-6 text-red-600"
+                className="h-6 w-6 text-tertiary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -320,16 +255,16 @@ const TraceabilityPetaniDetail = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-red-800 sm:text-base">
+              <h4 className="text-sm font-semibold text-tertiary sm:text-base">
                 Terjadi Kesalahan Server
               </h4>
-              <p className="mt-1 text-xs text-red-700 sm:text-sm">
+              <p className="mt-1 text-xs text-tertiary sm:text-sm">
                 Maaf, terjadi kesalahan pada server saat memuat data lampiran.
                 Silakan coba lagi dalam beberapa saat atau hubungi administrator
                 jika masalah berlanjut.
               </p>
               {errorMessage && (
-                <p className="mt-2 text-xs text-red-600 sm:text-sm">
+                <p className="mt-2 text-xs text-tertiary sm:text-sm">
                   Detail error: {errorMessage}
                 </p>
               )}
@@ -337,7 +272,7 @@ const TraceabilityPetaniDetail = () => {
                 <button
                   onClick={handleRetryLampiran}
                   disabled={lampiranLoading}
-                  className="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                  className="inline-flex items-center rounded-md bg-tertiary px-3 py-2 text-xs font-medium text-white hover:bg-tertiary/90 focus:outline-none focus:ring-2 focus:ring-tertiary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
                 >
                   {lampiranLoading ? (
                     <>
@@ -383,7 +318,7 @@ const TraceabilityPetaniDetail = () => {
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
+                  className="inline-flex items-center rounded-md border border-tertiary bg-white px-3 py-2 text-xs font-medium text-tertiary hover:bg-error1 focus:outline-none focus:ring-2 focus:ring-tertiary focus:ring-offset-2 sm:text-sm"
                 >
                   <svg
                     className="mr-2 h-4 w-4"
@@ -410,7 +345,7 @@ const TraceabilityPetaniDetail = () => {
     if (errorStatus === 404) {
       if (isViewOnly) {
         return (
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-neutral-600">
             Belum ada data lampiran.
           </div>
         );
@@ -491,11 +426,11 @@ const TraceabilityPetaniDetail = () => {
     }
 
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
+      <div className="rounded-lg border border-tertiary/20 bg-error1 p-4 sm:p-6">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
             <svg
-              className="h-6 w-6 text-red-600"
+              className="h-6 w-6 text-tertiary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -509,21 +444,21 @@ const TraceabilityPetaniDetail = () => {
             </svg>
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-red-800 sm:text-base">
+            <h4 className="text-sm font-semibold text-tertiary sm:text-base">
               Gagal Memuat Lampiran
             </h4>
-            <p className="mt-1 text-xs text-red-700 sm:text-sm">
+            <p className="mt-1 text-xs text-tertiary sm:text-sm">
               Terjadi kesalahan saat memuat data lampiran. Silakan coba lagi.
             </p>
             {errorMessage && (
-              <p className="mt-2 text-xs text-red-600 sm:text-sm">
+              <p className="mt-2 text-xs text-tertiary sm:text-sm">
                 {errorMessage}
               </p>
             )}
             <button
               onClick={handleRetryLampiran}
               disabled={lampiranLoading}
-              className="mt-3 inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+              className="mt-3 inline-flex items-center rounded-md bg-tertiary px-3 py-2 text-xs font-medium text-white hover:bg-tertiary/90 focus:outline-none focus:ring-2 focus:ring-tertiary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
             >
               {lampiranLoading ? 'Mencoba lagi...' : 'Coba Lagi'}
             </button>
@@ -536,39 +471,16 @@ const TraceabilityPetaniDetail = () => {
 
   return (
     <div className="flex w-full min-w-[320px] max-w-full flex-col gap-4 px-4 sm:gap-6 sm:px-6 lg:gap-8 lg:px-0">
-      {/* Notification */}
-      {notification.show && (
-        <div
-          className={`fixed right-2 top-4 z-50 max-w-xs rounded-lg p-3 shadow-lg sm:right-4 sm:max-w-sm sm:p-4 ${notification.type === 'success'
-            ? 'border border-green-400 bg-green-100 text-green-700'
-            : 'border border-red-400 bg-red-100 text-red-700'
-            }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="pr-2 text-xs font-medium sm:text-sm">
-              {notification.message}
-            </span>
-            <button
-              onClick={() =>
-                setNotification({ show: false, type: '', message: '' })
-              }
-              className="ml-2 flex-shrink-0 text-lg font-bold hover:opacity-70"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
 
       <BreadcrumbDetail items={crumbs} />
       <div className="flex flex-col gap-4 sm:gap-6">
-        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+        <section className="rounded border border-neutral-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">IDENTITAS</h3>
             {!isViewOnly && (
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                className="self-start text-sm text-primary underline hover:text-primary sm:self-auto"
                 disabled={updateLoading}
               >
                 Ubah Data
@@ -582,14 +494,14 @@ const TraceabilityPetaniDetail = () => {
             </div>
           )}
           {error && (
-            <div className="text-sm text-red-600">
+            <div className="text-sm text-tertiary">
               Gagal memuat data:{' '}
               {error?.response?.data?.message || error.message}
             </div>
           )}
 
           {!loading && !error && petani && (
-            <div className="grid grid-cols-1 gap-x-3 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="grid grid-cols-1 gap-x-3 gap-y-4 break-words text-sm text-neutral-700 sm:grid-cols-2 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
               {/* Row 1 */}
               <BorderBottomColData
                 label="Id Petani"
@@ -697,8 +609,8 @@ const TraceabilityPetaniDetail = () => {
                     return (
                       <span
                         className={`inline-block rounded px-2 py-1 text-xs font-semibold ${isGreen
-                          ? 'bg-green-200 text-green-800'
-                          : 'bg-red-200 text-red-800'
+                          ? 'bg-bgColor text-primary'
+                          : 'bg-error1 text-tertiary'
                           }`}
                       >
                         {label}
@@ -711,14 +623,14 @@ const TraceabilityPetaniDetail = () => {
           )}
         </section>
 
-        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+        <section className="rounded border border-neutral-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN IDENTITAS</h3>
 
             {lampiran && !isViewOnly && (
               <button
                 onClick={() => setIsEditLampiranModalOpen(true)}
-                className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                className="self-start text-sm text-primary underline hover:text-primary sm:self-auto"
                 disabled={updateLampiranLoading}
               >
                 Ubah Data
@@ -739,7 +651,7 @@ const TraceabilityPetaniDetail = () => {
               {!lampiran.file_ktp &&
                 !lampiran.file_kk &&
                 !lampiran.file_nib && (
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-neutral-600">
                     Belum ada data lampiran.
                   </div>
                 )}
@@ -747,7 +659,7 @@ const TraceabilityPetaniDetail = () => {
           )}
 
           {!lampiranLoading && !lampiranError && !lampiran && (
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-neutral-600">
               Belum ada data lampiran.
             </div>
           )}

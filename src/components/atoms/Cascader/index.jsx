@@ -25,8 +25,8 @@ const Cascader = ({
       className={cn(
         'flex w-full flex-row items-center gap-[10px] px-3 py-2',
         {
-          'text-gray-300': disabled,
-          'text-neutral10 hover:bg-primary/10': !disabled,
+          'text-neutral-300': disabled,
+          'text-neutral-900 hover:bg-primary/10': !disabled,
           'pl-[30px]': variant === 'child',
         },
         className

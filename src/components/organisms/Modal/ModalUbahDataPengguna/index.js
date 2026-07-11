@@ -122,7 +122,7 @@ const ModalUbahDataPengguna = ({
         <Button
           isLoading={isSubmitting}
           onClick={handleOnClose}
-          className="bg-red-500"
+          className="bg-tertiary"
         >
           Batalkan
         </Button>

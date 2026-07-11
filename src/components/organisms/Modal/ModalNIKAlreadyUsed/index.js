@@ -26,10 +26,10 @@ const ModalNIKAlreadyUsed = ({ open, setOpen, nik, idPekebun }) => {
         </p>
       </div>
       <div className="mt-4 flex flex-row justify-end gap-2">
-        <Button onClick={handleOnClose} className="bg-red-500">
+        <Button onClick={handleOnClose} className="bg-tertiary">
           Batalkan
         </Button>
-        <Button onClick={handleLihatDetail} className="bg-green-700">
+        <Button onClick={handleLihatDetail} className="bg-primary">
           Lihat Detail
         </Button>
       </div>

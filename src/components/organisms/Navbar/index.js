@@ -35,7 +35,7 @@ const Navbar = () => {
     const isActive = menu === '/' ? pathname === '/' : pathname.startsWith(menu);
     return isActive
       ? 'bg-primary text-white px-4 py-2 rounded-[4px] font-bold transition-all duration-300'
-      : 'text-black hover:text-primary px-4 py-2 transition-all duration-300 rounded-lg hover:bg-gray-50';
+      : 'text-black hover:text-primary px-4 py-2 transition-all duration-300 rounded-lg hover:bg-neutral-50';
   };
 
   useEffect(() => {

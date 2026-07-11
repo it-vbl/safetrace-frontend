@@ -88,7 +88,7 @@ const UserDetailPage = () => {
   return (
     <div className="w-full space-y-6">
       <BreadcrumbDetail items={breadcrumbItems} />
-      <section className="w-full border border-gray-300 bg-white">
+      <section className="w-full border border-neutral-300 bg-white">
         <div className="flex w-full flex-row items-center p-4">
           <div className="flex flex-1 items-center text-[14px] font-bold uppercase tracking-[1px]">
             Identitas Pengguna
@@ -96,7 +96,7 @@ const UserDetailPage = () => {
           <button
             type="button"
             onClick={() => setShowModalUpdateUser(true)}
-            className="ml-auto text-right text-sm font-medium text-blue-600 underline hover:text-blue-800"
+            className="ml-auto text-right text-sm font-medium text-primary underline hover:text-primary"
           >
             Ubah Data
           </button>
@@ -123,15 +123,15 @@ const UserDetailPage = () => {
               label="Dibuat Oleh"
               value={detailUser?.registered_via_label || '-'}
             />
-            <div className="col-span-1 my-2 border-b border-dashed border-gray-300 sm:col-span-2 lg:col-span-3 xl:col-span-5" />
+            <div className="col-span-1 my-2 border-b border-dashed border-neutral-300 sm:col-span-2 lg:col-span-3 xl:col-span-5" />
           </div>
           <div className="mt-2 flex flex-grow-0 flex-col items-start">
-            <div className="text-[12px] font-bold text-gray-500">Status</div>
+            <div className="text-[12px] font-bold text-neutral-500">Status</div>
             <div
               className={`inline-block rounded px-3 py-1 text-xs font-semibold ${
                 detailUser?.status === true || detailUser?.is_active
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-bgColor text-primary'
+                  : 'bg-error1 text-tertiary'
               }`}
             >
               {detailUser?.status === true || detailUser?.is_active

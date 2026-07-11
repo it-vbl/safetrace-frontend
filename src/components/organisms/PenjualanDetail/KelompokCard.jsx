@@ -56,7 +56,7 @@ const KelompokItem = ({ kelompok }) => {
               {petaniHref ? (
                 <Link
                   href={petaniHref}
-                  className="inline-flex items-center gap-1 text-blue-700 underline hover:text-blue-900"
+                  className="inline-flex items-center gap-1 text-primary underline hover:text-primary"
                 >
                   {petaniName}
                   <span aria-hidden className="text-xs">
@@ -67,7 +67,7 @@ const KelompokItem = ({ kelompok }) => {
                 petaniName
               )}
               {index < validAnggota.length - 1 && (
-                <span className="ml-2 text-gray-500">,</span>
+                <span className="ml-2 text-neutral-500">,</span>
               )}
             </span>
           );
@@ -77,17 +77,17 @@ const KelompokItem = ({ kelompok }) => {
   };
 
   return (
-    <div className="rounded-lg border-b border-dashed border-neutral5 py-4">
+    <div className="rounded-lg border-b border-dashed border-neutral-300 py-4">
       <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[12px] col-span-2 font-bold text-neutral7">
+          <span className="text-[12px] col-span-2 font-bold text-neutral-500">
             Kelompok Penyetor
           </span>
-          <div className="text-sm text-gray-900">
+          <div className="text-sm text-neutral-900">
             {kelompokHref ? (
               <Link
                 href={kelompokHref}
-                className="inline-flex items-center gap-1 text-blue-700 underline hover:text-blue-900"
+                className="inline-flex items-center gap-1 text-primary underline hover:text-primary"
               >
                 {kelompokName}
                 <span aria-hidden className="text-xs">
@@ -100,10 +100,10 @@ const KelompokItem = ({ kelompok }) => {
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-[12px] col-span-2 font-bold text-neutral7">
+          <span className="text-[12px] col-span-2 font-bold text-neutral-500">
             Anggota Petani Penyetor
           </span>
-          <div className="text-sm text-gray-900">{renderAnggotaValue()}</div>
+          <div className="text-sm text-neutral-900">{renderAnggotaValue()}</div>
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@ const KelompokCard = ({ data = [], onEdit }) => {
             <KelompokItem key={`${item?.id || index}`} kelompok={item} />
           ))
         ) : (
-          <div className="rounded border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
+          <div className="rounded border border-dashed border-neutral-200 p-6 text-center text-sm text-neutral-500">
             Data kelompok tani belum tersedia.
           </div>
         )}

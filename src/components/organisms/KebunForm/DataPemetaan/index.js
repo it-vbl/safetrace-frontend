@@ -204,7 +204,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
               </div>
             ) : null}
             <div>
-              <Paragraph className="mb-2 font-bold text-gray-400" level={4}>
+              <Paragraph className="mb-2 font-bold text-neutral-400" level={4}>
                 Daftar Koordinat
               </Paragraph>
               <div className="flex flex-col gap-4">

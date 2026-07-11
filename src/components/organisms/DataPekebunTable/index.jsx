@@ -98,14 +98,14 @@ const DataPekebunTable = ({
           </div>
           {filterPetaniId && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Filter petani:</span>
-              <div className="inline-flex items-center gap-2 rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm text-blue-800 shadow-sm">
+              <span className="text-sm text-neutral-600">Filter petani:</span>
+              <div className="inline-flex items-center gap-2 rounded-md border border-primary bg-bgColor px-3 py-1.5 text-sm text-primary shadow-sm">
                 <span className="font-medium">
                   Petani: {petaniName || `ID: ${filterPetaniId}`}
                 </span>
                 <button
                   onClick={onRemoveFilterPetani}
-                  className="ml-1 rounded-full p-0.5 text-blue-600 transition-colors duration-200 hover:bg-blue-100 hover:text-blue-800"
+                  className="ml-1 rounded-full p-0.5 text-primary transition-colors duration-200 hover:bg-bgColor hover:text-primary"
                   title="Hapus filter petani"
                 >
                   <X className="h-3.5 w-3.5" />

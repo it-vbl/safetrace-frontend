@@ -16,6 +16,8 @@ import DataMitraPenjualan from '@/components/organisms/DataView/DataMitraPenjual
 import DataPemetaan from '@/components/organisms/DataView/DataPemetaan';
 import DataPolaTanam from '@/components/organisms/DataView/DataPolaTanam';
 import ModalKonfirmasiPenerbitanSTDB from '@/components/organisms/Modal/ModalKonfirmasiPenerbitanSTDB';
+import DataKebun from '@/components/organisms/STDB/DataKebun';
+import KebunDetail from '@/components/organisms/STDB/KebunDetail';
 import useDetailKebun from '@/hooks/useDetailKebun';
 import usePekebuns from '@/hooks/usePekebuns';
 import useSTDB from '@/hooks/useSTDB';
@@ -25,106 +27,6 @@ import { CrossCircledIcon } from '@radix-ui/react-icons';
 
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
-
-const DataKebun = ({ detailKebun, mode = 'pendataan', onVerificationValueChange = () => { }, verifyCheckList }) => {
-  const [activeTab, setActiveTab] = useState('Lahan');
-  const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
-
-  const tabs = useMemo(
-    () => [
-      {
-        label: 'Lahan',
-        value: 'lahan',
-        render: () => <DataLahan verified={verifyCheckList?.lahan} mode={mode} data={detailKebun} />,
-      },
-      {
-        label: 'Pola Tanam',
-        value: 'pola_tanam',
-        render: () => <DataPolaTanam verified={verifyCheckList?.pola_tanam} mode={mode} data={detailKebun} />,
-      },
-      {
-        label: 'Komoditas',
-        value: 'komoditas',
-        render: () => <DataKomoditas mode={mode} komoditas={detailKebun?.komoditas} data={detailKebun} />,
-      },
-      {
-        label: 'Jenis Pupuk',
-        value: 'jenis_pupuk',
-        render: () => <DataJenisPupuk mode={mode} data={detailKebun} />,
-      },
-      {
-        label: 'Mitra Penjualan',
-        value: 'mitra_penjualan',
-        render: () => <DataMitraPenjualan mode={mode} data={detailKebun} />,
-      },
-      {
-        label: 'Pemetaan',
-        value: 'peta',
-        render: () => <DataPemetaan mode={mode} data={detailKebun} />,
-      },
-    ],
-    [detailKebun, verifyCheckList]
-  );
-
-  return (
-    <div className='flex flex-row items-start gap-2'>
-      <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
-        {tabs.map((tab, index) => (
-          <div
-            className={`flex w-full cursor-pointer flex-row justify-between rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${activeTab === tab.label ? activeClassName : ''
-              }`}
-            key={index}
-            onClick={() => setActiveTab(tab.label)}
-            id={`tab-${tab.label}`}
-          >
-            <div>{tab.label}</div>
-          </div>
-        ))}
-      </div>
-      <div className='flex w-full flex-[8] items-start rounded-[4px] border border-gray-300 bg-gray-50 p-4'>
-        {tabs.find((tab) => tab.label === activeTab)?.render()}
-      </div>
-    </div>
-  );
-};
-
-const KebunDetail = ({ index, item }) => {
-  const [detailKebun, setDetailKebun] = useState(item);
-
-  const { fetchDetailKebun } = useDetailKebun();
-
-  const getDetailKebun = async () => {
-    const response = await fetchDetailKebun(item?.id);
-    const tempData = {
-      ...response,
-      peta: {
-        ...response?.peta,
-        geom: {
-          ...response?.peta?.geom,
-          coordinates: response?.peta?.geom?.coordinates?.[0]?.map((coord) => [coord[1], coord[0]]),
-        },
-        titik_koordinat: {
-          ...response?.peta?.titik_koordinat,
-          coordinates: [
-            response?.peta?.titik_koordinat?.coordinates[1],
-            response?.peta?.titik_koordinat?.coordinates[0],
-          ],
-        },
-      },
-    };
-    setDetailKebun(tempData);
-  };
-
-  useEffect(() => {
-    getDetailKebun();
-  }, []);
-
-  return (
-    <Accordion key={index} title={`KEBUN KE - ${index + 1}`}>
-      <DataKebun detailKebun={detailKebun} />
-    </Accordion>
-  );
-};
 
 const VerificationPekebunContent = () => {
   const router = useRouter();
@@ -181,7 +83,7 @@ const VerificationPekebunContent = () => {
 
   return (
     <div className='relative max-h-[calc(100vh-72px)] w-full'>
-      <div className='flex w-full flex-row justify-between border border-gray-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
+      <div className='flex w-full flex-row justify-between border border-neutral-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
         <div>ID PEKEBUN : {idPekebun}</div>
         <div>PENDATA : HADANI / HADANI@GMAIL.COM</div>
         <div>TERAKHIR DIUBAH : {moment(updated_at).format('DD-MM-YYYY hh:mm:ss')}</div>
@@ -248,7 +150,7 @@ const VerificationPekebunContent = () => {
 const VerificationPekebun = () => {
   return (
     <Suspense fallback={
-      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+      <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
         Memuat data...
       </div>
     }>

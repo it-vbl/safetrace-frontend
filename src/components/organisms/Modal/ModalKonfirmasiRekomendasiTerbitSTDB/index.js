@@ -27,7 +27,7 @@ const ModalKonfirmasiRekomendasiTerbitSTDB = ({ open, setOpen, onSubmit, namaPek
         </span>
       </div>
       <div className='mt-4 flex flex-row justify-end gap-2'>
-        <Button isLoading={loading} onClick={() => setOpen(false)} className='bg-red-500'>
+        <Button isLoading={loading} onClick={() => setOpen(false)} className='bg-tertiary'>
           Batalkan
         </Button>
         <Button isLoading={loading} onClick={handleSubmit}>

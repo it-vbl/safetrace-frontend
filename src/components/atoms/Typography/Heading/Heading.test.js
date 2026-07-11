@@ -12,7 +12,7 @@ describe("Heading", () => {
   });
 
   test("Passing className", () => {
-    const { container } = render(<Heading className="bg-red-400" />);
+    const { container } = render(<Heading className="bg-tertiary" />);
 
     expect(container).toMatchSnapshot();
   });

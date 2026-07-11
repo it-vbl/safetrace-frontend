@@ -113,8 +113,8 @@ const ModalTambahPetaOverlay = ({
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-[12px] font-bold text-gray-500">
-            File .zip / .geojson <span className="text-red-500">*</span>
+          <label className="text-[12px] font-bold text-neutral-500">
+            File .zip / .geojson <span className="text-tertiary">*</span>
           </label>
           <Upload
             label=""
@@ -134,7 +134,7 @@ const ModalTambahPetaOverlay = ({
             url={fileUrl}
           />
           {errors.file && touched.file && requireFile && (
-            <p className="mt-1 text-sm text-red-500">{errors.file}</p>
+            <p className="mt-1 text-sm text-tertiary">{errors.file}</p>
           )}
         </div>
       </div>

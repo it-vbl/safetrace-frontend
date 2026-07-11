@@ -9,7 +9,7 @@ const CustomTableColSeeAction = ({ onClick = () => {} }) => {
     <div className='flex h-full items-center justify-center'>
       <div className='flex cursor-pointer flex-row gap-1' onClick={onClick}>
         <RemoveRedEye size={16} color={theme.colors.blue9} data-testid='remove-red-eye-icon' />
-        <Paragraph className='text-blue9' level={4}>
+        <Paragraph className='text-primary' level={4}>
           Lihat
         </Paragraph>
       </div>

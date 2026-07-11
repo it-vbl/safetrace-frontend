@@ -157,21 +157,21 @@ const ProfilePopup = ({ children }) => {
         {isOpen &&
           createPortal(
             <div
-              className="fixed z-[1000] w-48 rounded-md border border-gray-200 bg-white shadow-lg"
+              className="fixed z-[1000] w-48 rounded-md border border-neutral-200 bg-white shadow-lg"
               ref={popupRef}
               style={{
                 top: `${popupPosition.top + 8}px`,
                 right: `${popupPosition.right}px`,
               }}
             >
-              <div className="block border-b border-gray-200 px-4 py-2 text-sm font-semibold text-gray-800 md:hidden">
+              <div className="block border-b border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-800 md:hidden">
                 {fullName || 'Pengguna'}
               </div>
               <div className="py-1">
                 {canSeeUsers && (
                   <button
                     onClick={handleUsersClick}
-                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                   >
                     <Users2Icon size={18} className="mr-2" />
                     <span>Pengguna</span>
@@ -180,7 +180,7 @@ const ProfilePopup = ({ children }) => {
                 {canSeePetaOverlay && (
                   <button
                     onClick={handlePetaOverlayClick}
-                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                   >
                     <StackIcon size={18} className="mr-2" />
                     <span>Peta Overlay</span>
@@ -189,7 +189,7 @@ const ProfilePopup = ({ children }) => {
                 {canSeeProfile && (
                   <button
                     onClick={handleProfileClick}
-                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                   >
                     <UserIcon size={18} className="mr-2" />
                     <span>Profile</span>
@@ -198,7 +198,7 @@ const ProfilePopup = ({ children }) => {
                 {canChangePassword && (
                   <button
                     onClick={handleGantiKataSandiClick}
-                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                   >
                     <LockIcon size={18} className="mr-2" />
                     <span>Ganti Kata Sandi</span>
@@ -206,7 +206,7 @@ const ProfilePopup = ({ children }) => {
                 )}
                 <button
                   onClick={handleLogoutClick}
-                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                 >
                   <LogOutIcon size={18} className="mr-2" />
                   <span>Logout</span>

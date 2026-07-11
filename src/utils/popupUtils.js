@@ -30,7 +30,7 @@ export function getPopupHtml(layerId, featureProperties) {
       const value = featureProperties[key];
       return `
         <div class="border-b border-dashed pr-6 !mb-2">
-          <p class="!m-0 !mb-2 !p-0 text-[12px] font-bold text-gray-400">${displayText}</p>
+          <p class="!m-0 !mb-2 !p-0 text-[12px] font-bold text-neutral-400">${displayText}</p>
           <p class="!m-0 !mb-4 !p-0 text-[14px]">${value}</p>
         </div>
       `;

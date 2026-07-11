@@ -48,7 +48,7 @@ export const data = {
 
 export default function App() {
   return (
-    <div className='flex flex-col items-start border border-gray-300 p-8'>
+    <div className='flex flex-col items-start border border-neutral-300 p-8'>
       <Heading>Jumlah Lahan Tanam Per Komoditas</Heading>
       <Bar options={options} data={data} />
     </div>

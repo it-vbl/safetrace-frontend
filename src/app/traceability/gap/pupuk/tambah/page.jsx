@@ -232,11 +232,11 @@ const TambahTahunPupukContent = () => {
     <div className="flex w-full flex-col gap-4">
       <BreadcrumbDetail items={crumbs} />
 
-      <section className="rounded border border-gray-300 bg-white p-6">
+      <section className="rounded border border-neutral-300 bg-white p-6">
         <div className="mb-4">
           <Heading
             level={4}
-            className="text-sm font-semibold text-gray-800 md:text-base"
+            className="text-sm font-semibold text-neutral-800 md:text-base"
           >
             PEMUPUKAN
           </Heading>
@@ -825,7 +825,7 @@ const TambahTahunPupukContent = () => {
 const TambahTahunPupukPage = () => {
   return (
     <Suspense fallback={
-      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+      <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
         Memuat data...
       </div>
     }>

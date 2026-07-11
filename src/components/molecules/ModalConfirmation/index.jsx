@@ -45,7 +45,7 @@ const ModalConfirmation = ({
         <Button
           isLoading={loading}
           onClick={() => setOpen(false)}
-          className="bg-red-500"
+          className="bg-tertiary"
           variant={variant}
         >
           {cancelText}

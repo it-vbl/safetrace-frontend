@@ -29,7 +29,7 @@ const Pagination = ({
     onPageChange(totalPages);
   };
 
-  const chevronsStyles = (disabled) => cn('cursor-pointer text-blue8', disabled && 'text-neutral5 cursor-not-allowed');
+  const chevronsStyles = (disabled) => cn('cursor-pointer text-primary', disabled && 'text-neutral-300 cursor-not-allowed');
 
   return (
     <div
@@ -66,11 +66,11 @@ const Pagination = ({
           disableInitialCallback={true}
           renderOnZeroPageCount={null}
           containerClassName='flex gap-2 md:flex-wrap'
-          pageLinkClassName='px-3 py-2 rounded-lg text-neutral9 font-normal text-sm md:text-base'
-          activeLinkClassName='px-3 py-2 text-white bg-blue8'
+          pageLinkClassName='px-3 py-2 rounded-lg text-neutral-700 font-normal text-sm md:text-base'
+          activeLinkClassName='px-3 py-2 text-white bg-primary'
           previousClassName={cn('flex items-center justify-center px-3', chevronsStyles(currentPage === 1))}
           nextClassName={cn('flex items-center justify-center px-3', chevronsStyles(currentPage === totalPages))}
-          breakClassName='font-bold text-neutral9'
+          breakClassName='font-bold text-neutral-700'
         />
 
         <div

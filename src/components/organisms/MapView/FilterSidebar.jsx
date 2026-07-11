@@ -71,7 +71,7 @@ const FilterSidebar = ({
   return (
     <div
       id="filter-sidebar"
-      className={`absolute left-4 top-4 z-[500] !h-[calc(100%-32px)] w-[250px] overflow-x-auto rounded-[4px] border border-gray-200 bg-white p-4 shadow-lg transition-all duration-300 ease-in-out ${
+      className={`absolute left-4 top-4 z-[500] !h-[calc(100%-32px)] w-[250px] overflow-x-auto rounded-[4px] border border-neutral-200 bg-white p-4 shadow-lg transition-all duration-300 ease-in-out ${
         mapviewFilterSidebarOpen ? 'translate-x-0' : '-translate-x-[200%]'
       }`}
     >
@@ -80,7 +80,7 @@ const FilterSidebar = ({
       <div className="flex flex-col gap-6">
         {/* STATIK LAYER Section */}
         <div className="flex flex-col gap-3">
-          <Heading level={6} className="text-[14px] font-bold text-gray-800">
+          <Heading level={6} className="text-[14px] font-bold text-neutral-800">
             STATIK LAYER
           </Heading>
           <div className="flex flex-col gap-3">
@@ -109,7 +109,7 @@ const FilterSidebar = ({
         {/* PETA OVERLAY Section */}
         {petaOverlays.length > 0 && (
           <div className="flex flex-col gap-3">
-            <Heading level={6} className="text-[14px] font-bold text-gray-800">
+            <Heading level={6} className="text-[14px] font-bold text-neutral-800">
               PETA OVERLAY
             </Heading>
             <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto">
@@ -139,7 +139,7 @@ const FilterSidebar = ({
 
         {/* BASEMAP Section */}
         <div className="flex flex-col gap-3">
-          <Heading level={6} className="text-[14px] font-bold text-gray-800">
+          <Heading level={6} className="text-[14px] font-bold text-neutral-800">
             BASEMAP
           </Heading>
           <RadioButton

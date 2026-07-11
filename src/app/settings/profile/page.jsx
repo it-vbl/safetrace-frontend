@@ -51,13 +51,13 @@ const ProfilePage = () => {
     <div className="flex w-full flex-col">
       <h1 className="text-2xl font-bold">PROFIL</h1>
       <div className="mt-4 flex w-full flex-col gap-4 pb-8">
-        <div className="flex w-full items-start rounded-[4px] border border-gray-300 bg-white p-4">
+        <div className="flex w-full items-start rounded-[4px] border border-neutral-300 bg-white p-4">
           <div className="w-full">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">IDENTITAS</h2>
               <button
                 type="button"
-                className="text-right text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                className="text-right text-sm font-medium text-primary underline hover:text-primary"
                 onClick={() => setModalOpen(true)}
               >
                 Ubah Data

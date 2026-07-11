@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const Chevron = ({ size = 16, color = theme.colors.neutral1, position = 'down' }) => {
+const Chevron = ({ size = 16, color = '#FFFFFF', position = 'down' }) => {
   const _position = {
     up: 'rotate-180',
     down: 'rotate-0',

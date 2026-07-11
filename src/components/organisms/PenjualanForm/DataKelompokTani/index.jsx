@@ -142,21 +142,21 @@ const PetaniMemberSelector = ({
 
   return (
     <div className="space-y-1 w-full">
-      <label className="block text-[12px] font-bold text-gray-500">
+      <label className="block text-[12px] font-bold text-neutral-500">
         {label}
       </label>
 
       {/* Selected Members Chips with Search Input */}
-      <div className="flex items-center gap-2 rounded-[4px] border border-gray-300 bg-white px-3 min-h-[40px] overflow-x-auto w-full max-w-full">
+      <div className="flex items-center gap-2 rounded-[4px] border border-neutral-300 bg-white px-3 min-h-[40px] overflow-x-auto w-full max-w-full">
         <div className="flex items-center gap-2 flex-shrink-0">
           {selectedMembers.map((member) => (
             <div
               key={member.id}
-              className="inline-flex items-center gap-1 rounded-[4px] bg-gray-100 px-2 py-1 text-sm whitespace-nowrap flex-shrink-0"
+              className="inline-flex items-center gap-1 rounded-[4px] bg-neutral-100 px-2 py-1 text-sm whitespace-nowrap flex-shrink-0"
             >
               <button
                 onClick={() => handleRemoveSelectedMember(member.id)}
-                className="rounded-full p-0.5 text-gray-400 hover:text-red-500 flex-shrink-0"
+                className="rounded-full p-0.5 text-neutral-400 hover:text-tertiary flex-shrink-0"
                 title="Hapus"
               >
                 <X className="h-3 w-3" />
@@ -173,18 +173,18 @@ const PetaniMemberSelector = ({
           placeholder="Cari anggota..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-shrink-0 min-w-[150px] border-0 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-gray-400"
+          className="flex-shrink-0 min-w-[150px] border-0 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-neutral-400"
         />
       </div>
 
       {/* Available Members List */}
-      <div className="max-h-[200px] overflow-y-auto rounded-[4px] border border-gray-200 bg-white">
+      <div className="max-h-[200px] overflow-y-auto rounded-[4px] border border-neutral-200 bg-white">
         {loading ? (
-          <div className="px-4 py-8 text-center text-sm text-gray-500">
+          <div className="px-4 py-8 text-center text-sm text-neutral-500">
             Memuat data...
           </div>
         ) : filteredMembers.length === 0 ? (
-          <div className="px-4 py-8 text-center text-sm text-gray-500">
+          <div className="px-4 py-8 text-center text-sm text-neutral-500">
             {kelompokTaniId
               ? 'Tidak ada anggota tersedia'
               : 'Pilih Kelompok Penyetor terlebih dahulu'}
@@ -198,23 +198,23 @@ const PetaniMemberSelector = ({
               return (
                 <div
                   key={member.id}
-                  className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-50 ${
-                    isSelected ? 'bg-gray-50' : ''
+                  className={`flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 ${
+                    isSelected ? 'bg-neutral-50' : ''
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => handleCheckboxChange(member)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-neutral-700">
                     {member.id_petani}
                   </span>
-                  <span className="flex-1 text-sm font-medium text-gray-900">
+                  <span className="flex-1 text-sm font-medium text-neutral-900">
                     {member.nama}
                   </span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-neutral-600">
                     {member.jenis_kelamin}
                   </span>
                 </div>
@@ -269,7 +269,7 @@ const KelompokPenyetorSection = ({
   };
 
   return (
-    <div className="space-y-4 w-full border-b border-dashed border-gray-300 pb-6 last:border-b-0">
+    <div className="space-y-4 w-full border-b border-dashed border-neutral-300 pb-6 last:border-b-0">
       <div className="flex flex-col lg:flex-row gap-4 w-full">
         <div className="flex flex-1 min-w-0 lg:min-w-[200px]">
           <Select
@@ -509,7 +509,7 @@ const DataKelompokTani = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
+      <div className="rounded-lg border border-neutral-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">DETAIL KELOMPOK TANI</h3>
 
         <div className="space-y-6">
@@ -538,7 +538,7 @@ const DataKelompokTani = ({
         </div>
 
         {formik.errors.kelompokPenyetorList && (
-          <div className="mt-2 text-sm text-red-500">
+          <div className="mt-2 text-sm text-tertiary">
             {typeof formik.errors.kelompokPenyetorList === 'string'
               ? formik.errors.kelompokPenyetorList
               : Array.isArray(formik.errors.kelompokPenyetorList)

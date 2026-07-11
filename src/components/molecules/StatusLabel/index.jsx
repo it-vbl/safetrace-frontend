@@ -13,16 +13,16 @@ const StatusLabel = ({ status = 'success', text = '', className }) => {
       case 'siswa':
       case 'aktif':
         return {
-          bg: 'bg-green1',
-          text: 'text-green8',
+          bg: 'bg-bgColor',
+          text: 'text-primary',
         };
       case 'menunggu':
       case 'pending':
       case 'menunggu':
       case 'pindah_sekolah':
         return {
-          bg: 'bg-warning1',
-          text: 'text-warning8',
+          bg: 'bg-yellow-50',
+          text: 'text-yellow-600',
         };
       case 'failed':
       case 'belum bayar':
@@ -31,17 +31,17 @@ const StatusLabel = ({ status = 'success', text = '', className }) => {
       case 'gagal':
         return {
           bg: 'bg-error1',
-          text: 'text-error7',
+          text: 'text-tertiary',
         };
       case 'tamat':
         return {
-          bg: 'bg-blue1',
-          text: 'text-blue8',
+          bg: 'bg-bgColor',
+          text: 'text-primary',
         };
       case 'dropout':
         return {
-          bg: 'bg-neutral3',
-          text: 'text-neutral7',
+          bg: 'bg-neutral-100',
+          text: 'text-neutral-500',
         };
       default:
         return {

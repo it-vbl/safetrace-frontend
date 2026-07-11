@@ -11,7 +11,7 @@ export default {
 export const Default = {
   args: {
     onChange: () => console.log("File changed"),
-    className: "cursor-pointer text-blue-500 underline",
+    className: "cursor-pointer text-primary underline",
     id: "default-upload",
     label: "Upload File",
     allowedFiles: ["image/jpeg", "image/png", "application/pdf"],
@@ -38,7 +38,7 @@ export const RestrictedFileTypes = {
 export const CustomStyling = {
   args: {
     ...Default.args,
-    className: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600",
+    className: "bg-primary text-white px-4 py-2 rounded hover:bg-secondary",
     id: "styled-upload",
   },
 };

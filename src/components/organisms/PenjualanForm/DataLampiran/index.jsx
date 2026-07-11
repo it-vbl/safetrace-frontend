@@ -125,7 +125,7 @@ const DataLampiran = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
+      <div className="rounded-lg border border-neutral-300 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">LAMPIRAN</h3>
         </div>
@@ -161,7 +161,7 @@ const DataLampiran = ({
           <div className="flex flex-col-reverse sm:flex-row gap-2">
             <Button
               type="button"
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-tertiary hover:bg-tertiary/90"
               onClick={onCancel}
               disabled={isBusy}
             >
@@ -169,7 +169,7 @@ const DataLampiran = ({
             </Button>
             <Button
               type="button"
-              className="bg-gray-600 hover:bg-gray-700"
+              className="bg-neutral-600 hover:bg-neutral-700"
               onClick={onPrevious}
               disabled={isBusy}
             >
@@ -178,7 +178,7 @@ const DataLampiran = ({
           </div>
           <Button
             type="button"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-secondary"
             onClick={handleSubmit}
             isLoading={isBusy}
           >

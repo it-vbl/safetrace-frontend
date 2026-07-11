@@ -28,8 +28,8 @@ const SidebarMenu = ({
         <div>
           <div
             className={cn('flex cursor-pointer items-center justify-between rounded-full p-[10px]', {
-              'bg-blue1 !text-blue10': active,
-              'hover:bg-blue0 hover:text-blue8': !active,
+              'bg-bgColor !text-secondary': active,
+              'hover:bg-bgColor hover:text-primary': !active,
             })}
             data-testid={`sidebar-menu-${label?.toLowerCase()?.split(' ')?.join('-')}`}
             onClick={handleOnSubMenuClick}
@@ -64,9 +64,9 @@ const SidebarMenu = ({
               <Link href={item?.url} key={item?.label}>
                 <Paragraph
                   level={3}
-                  className={cn('text-neutral10 py-[10px] pl-9 font-normal', {
-                    'text-blue10 font-bold': new RegExp(`^${item.url}(?:/|$)`).test(pathname),
-                    'hover:text-blue8': pathname != item.url,
+                  className={cn('text-neutral-900 py-[10px] pl-9 font-normal', {
+                    'text-secondary font-bold': new RegExp(`^${item.url}(?:/|$)`).test(pathname),
+                    'hover:text-primary': pathname != item.url,
                   })}
                   data-testid={`sidebar-menu-${item?.label?.toLowerCase()?.split(' ')?.join('-')}`}
                 >
@@ -81,8 +81,8 @@ const SidebarMenu = ({
           className={cn(
             'flex w-full cursor-pointer flex-row items-center justify-start gap-[10px] rounded-full p-[10px]',
             {
-              'bg-blue1 text-blue10': active,
-              'hover:!bg-blue0 hover:text-blue8': !active,
+              'bg-bgColor text-secondary': active,
+              'hover:!bg-bgColor hover:text-primary': !active,
             },
             className
           )}
@@ -96,8 +96,8 @@ const SidebarMenu = ({
             })}
           <Paragraph
             level={3}
-            className={cn('hover:text-blue8 font-semibold', {
-              'text-blue10': active,
+            className={cn('hover:text-primary font-semibold', {
+              'text-secondary': active,
             })}
           >
             {label}

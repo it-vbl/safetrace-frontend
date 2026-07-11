@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const Bell = ({ color = theme.colors.neutral10, size = 20, ...props }) => {
+const Bell = ({ color = theme.colors.neutral[900], size = 20, ...props }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path

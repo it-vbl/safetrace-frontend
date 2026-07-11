@@ -1,201 +1,106 @@
-# Safe Traceability System — Frontend
+# Safetrace - Frontend
 
-Open-source frontend for a **GIS-based plantation traceability dashboard**. Connect it to your own REST API backend to manage farmers, plantations, STDB documents, GAP compliance, and interactive map layers.
+Safetrace adalah aplikasi frontend open-source berbasis Sistem Informasi Geografis (GIS) untuk dashboard ketertelusuran (traceability) perkebunan. Frontend ini dapat dihubungkan ke backend REST API Anda sendiri untuk mengelola data petani, perkebunan, dokumen STDB, kepatuhan GAP, dan layer peta interaktif.
 
-## Overview
+## Fitur Utama
 
-This application provides role-based access to:
+- Dashboard peta interaktif (GIS): visualisasi poligon perkebunan, peringatan deforestasi, filter spasial, dan layer khusus menggunakan Leaflet.
+- Traceability (ketertelusuran): pengelolaan data petani, kebun, penjualan, hingga kepatuhan standar GAP yang meliputi produksi, pestisida, pupuk, dan limbah B3.
+- Pengaturan dan role-based access: manajemen pengguna, profil, kontrol peran (Admin, Ketua Kelompok Tani, Dinas, Mitra Pabrik), dan konfigurasi layer peta.
 
-- **Peta** — Interactive map dashboard with plantation polygons, deforestation alerts, static layers, and custom map overlays
-- **Traceability** — Farmers, plantations, sales, GAP compliance (production, pesticides, fertilizer, hazardous waste), training, workers, and reporting
-- **STDB** — Registration, verification, issuance, and lifecycle tracking of plantation registration documents
-- **Settings** — User management, profile, and map overlay configuration
+## Teknologi yang Digunakan
 
-Access to each module is controlled by a role-based permission matrix in [`src/libs/permissions.js`](src/libs/permissions.js).
+- Framework: Next.js 15 (App Router, Turbopack)
+- UI: React 19 dan Tailwind CSS
+- State management: Redux Toolkit
+- Peta: Leaflet, React Leaflet, Turf.js
+- Tabel dan chart: AG Grid, Chart.js, D3
+- Form: Formik dan Yup
+- API client: Axios
+- Komponen UI: Atomic Design dan Radix UI
 
-## Tech Stack
+## Prasyarat
 
-| Layer | Technology |
-| --- | --- |
-| Framework | [Next.js 15](https://nextjs.org) (App Router, Turbopack in dev) |
-| UI | [React 19](https://react.dev), [Tailwind CSS](https://tailwindcss.com) |
-| State | [Redux Toolkit](https://redux-toolkit.js.org) |
-| Data tables | [AG Grid](https://www.ag-grid.com) |
-| Maps | [Leaflet](https://leafletjs.com), [React Leaflet](https://react-leaflet.js.org), Turf.js |
-| Charts | Chart.js, D3, Nivo |
-| Forms | Formik, Yup |
-| HTTP | Axios |
-| Components | Atomic design (`atoms` / `molecules` / `organisms`), [Radix UI](https://www.radix-ui.com), [shadcn/ui](https://ui.shadcn.com) primitives |
+Sebelum memulai, pastikan sistem Anda telah memiliki:
 
-## Prerequisites
+- Node.js versi 18 atau lebih baru (disarankan versi 20 ke atas)
+- npm (atau pnpm / yarn)
 
-- Node.js 18+
-- npm
-- A running REST API backend compatible with this frontend
+## Instalasi dan Setup
 
-## Getting Started
+### 1. Clone repository
 
-### 1. Install dependencies
+```bash
+git clone https://github.com/adamdavareln/safe-tracibility-system-fe.git
+cd safe-traceability-system-fe
+```
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configure environment
+### 3. Konfigurasi environment variables
 
-Copy the example env file and set your values:
+Salin file contoh environment menjadi file .env:
 
 ```bash
-cp .env.local.example .env.local
+cp .env.local.example .env
 ```
 
-| Variable | Description |
-| --- | --- |
-| `NEXT_PUBLIC_BASE_URL` | Backend API base URL (required) |
-| `NEXT_PUBLIC_SITE_URL` | Frontend site URL (default: `http://localhost:3000`) |
-| `NEXT_PUBLIC_IMAGE_DOMAIN` | Comma-separated hostnames allowed for Next.js `<Image>` (e.g. your backend CDN) |
+Buka file .env di text editor Anda, lalu isi nilai berikut:
 
-### 3. Run the development server
+- NEXT_PUBLIC_BASE_URL: URL utama backend REST API Anda. Wajib diisi.
+
+### 4. Jalankan aplikasi
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Unauthenticated users are redirected to `/login`.
+Aplikasi dapat diakses di http://localhost:3000
 
-### 4. Build for production
+## Daftar Script
 
-```bash
-npm run build
-npm start
-```
+- `npm run dev`: menjalankan server development (menggunakan Turbopack agar lebih cepat).
+- `npm run build`: membuat build produksi yang telah teroptimasi.
+- `npm run start`: menjalankan server dari hasil build produksi.
+- `npm run lint`: menjalankan ESLint untuk mengecek potensi error pada kode.
 
-## Customization
+## Struktur Folder Proyek
 
-This repo is designed so deployers can re-brand without touching component code.
+Proyek ini dibangun menggunakan arsitektur Atomic Design untuk mempermudah skalabilitas UI komponen.
 
-### Brand colors and app name
-
-Edit [`src/config/brand.ts`](src/config/brand.ts):
-
-```ts
-const brand = {
-  appName: 'Your App Name',
-  appDescription: 'Your app description',
-  colors: {
-    primary: '#2559A6',
-    secondary: '#D1FBED',
-    tertiary: '#D8F733',
-    bgColor: '#EDF5F7',
-    checkbox: '#0c7c59',
-    layoutBg: '#F7F9FD',
-  },
-};
-```
-
-- Tailwind classes (`bg-primary`, `text-primary`, `bg-layoutBg`, etc.) are generated from this file via [`tailwind.config.ts`](tailwind.config.ts).
-- Update `--color-checkbox` in [`src/styles/globals.css`](src/styles/globals.css) to match `brand.colors.checkbox` for checkbox styling.
-
-### Logos and images
-
-Edit [`src/config/assets.ts`](src/config/assets.ts) to point to your asset paths:
-
-```ts
-const assets = {
-  navbar: {
-    logo: '/sistem-informasi-petani.png',
-    logoMobile: '/sistem-informasi-petani-mobile.png',
-    logoCompact: '/your-logo.png',
-  },
-  login: {
-    logo: '/your-logo.png',
-    background: '/login-bg.png',
-    partnership: '/partnership.png',
-  },
-  sidebar: {
-    institutionalLogos: ['/logos/logo1.png', '/logos/logo2.png'],
-  },
-};
-```
-
-Replace or add files under [`public/`](public/). Institutional logos live in [`public/logos/`](public/logos/).
-
-## Application Modules
-
-### Peta (`/`)
-
-Map-first dashboard showing plantation polygons, filters, deforestation alert layers, and configurable map overlays.
-
-### Traceability (`/traceability/*`)
-
-Farmer records, plantation management with map geometry, sales, GAP compliance modules, training, workers, and reports.
-
-### STDB (`/stdb/*`)
-
-Registration, verification, issuance, and lifecycle tracking of plantation registration documents.
-
-### Settings (`/settings/*`)
-
-User profile, user management, and map overlay configuration.
-
-## Roles
-
-Defined in [`src/libs/permissions.js`](src/libs/permissions.js):
-
-| Role ID | Role |
-| --- | --- |
-| 1 | Admin |
-| 3 | Ketua Kelompok Tani |
-| 4 | Disbunak Kalbar |
-| 5 | Disbunak Sekadau |
-| 6 | Mitra Pabrik |
-
-Sidebar and navbar items are filtered at runtime based on the logged-in user's roles (stored in cookies).
-
-## Authentication
-
-Authentication uses JWT tokens stored in cookies (`token`, `refreshToken`). The client-side guard in [`src/components/providers/ClientLayout.jsx`](src/components/providers/ClientLayout.jsx) redirects unauthenticated users to `/login`.
-
-API calls attach the bearer token via an Axios interceptor in [`src/services/api.js`](src/services/api.js). On `401` responses, the client attempts a token refresh before logging out.
-
-## Project Structure
-
-```
+```text
 src/
-├── app/                  # Next.js App Router pages and layouts
-├── config/               # Brand and asset configuration (customize here)
-├── components/
-│   ├── atoms/
-│   ├── molecules/
-│   ├── organisms/
-│   ├── providers/
-│   └── ui/
-├── constants/
-├── hooks/
-├── libs/                 # Permissions, utilities
-├── services/             # API service modules (one file per domain)
-├── store/                # Redux store and slices
-├── styles/               # Global CSS
-└── utils/
-public/
-├── logos/                # Institutional logos (swap these)
-└── ...                   # Login background, navbar logos, etc.
+├── app/                  # Direktori utama Next.js App Router (Pages & Layouts)
+├── assets/               # Berkas ikon, gambar SVG statis khusus project
+├── components/           # Komponen UI Reusable (Atomic Design)
+│   ├── atoms/            # Elemen terkecil (Button, Input, Icon)
+│   ├── molecules/        # Gabungan atoms (Form Field, Card Header)
+│   ├── organisms/        # Kumpulan molekul (Modal, Form Complex, Header)
+│   ├── providers/        # Context Providers (Redux Provider, Toast, Theme)
+│   └── ui/               # Komponen dari Radix UI / Shadcn
+├── config/               # Konfigurasi Tema (Brand colors) dan Aset dasar
+├── constants/            # Variabel statis / Enum yang digunakan global
+├── hooks/                # Custom React hooks (Fetch data, logic reuse)
+├── i18n/                 # Konfigurasi dan data terjemahan bahasa
+├── libs/                 # Utilitas library (Permissions, helpers)
+├── services/             # Integrasi REST API endpoints menggunakan Axios
+├── store/                # Konfigurasi state management Redux (Slices)
+├── styles/               # File global CSS (globals.css, tailwind base)
+├── types/                # Definisi type / interface (jika ada typescript parts)
+└── utils/                # Fungsi bantuan umum (formatter, env var util)
+
+public/                   # File statis publik (Logo, Background, Icons browser)
 ```
 
-## Docker
+## Kustomisasi Tema dan Logo
 
-```bash
-docker build -t safe-tracibility-system-fe .
-docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_BASE_URL=<api-url> \
-  -e NEXT_PUBLIC_IMAGE_DOMAIN=<image-host> \
-  safe-tracibility-system-fe
-```
+1. Brand colors: ubah warna tema di `src/config/brand.ts`. Kelas Tailwind akan digenerate otomatis berdasarkan file ini.
+2. Logo dan aset: ubah path file (logo lembaga, background login, dan lainnya) melalui `src/config/assets.ts`, lalu simpan file fisiknya di direktori /public.
 
-## Backend API
+## Lisensi
 
-This frontend expects a REST API backend. Domain logic is organized under [`src/services/`](src/services/) — one module per resource (`petani.js`, `kebun.js`, `stdb.js`, `wilayah.js`, etc.). Point `NEXT_PUBLIC_BASE_URL` at your backend instance.
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+MIT. Lihat file LICENSE untuk selengkapnya.

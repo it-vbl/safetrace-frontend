@@ -55,8 +55,8 @@ CustomFooter.args = {
   children: <p>This modal has a custom footer</p>,
   footer: (
     <div className="flex justify-end space-x-2">
-      <button className="rounded bg-gray-200 px-4 py-2">Cancel</button>
-      <button className="rounded bg-blue-500 px-4 py-2 text-white">Save</button>
+      <button className="rounded bg-neutral-200 px-4 py-2">Cancel</button>
+      <button className="rounded bg-primary px-4 py-2 text-white">Save</button>
     </div>
   ),
 };

@@ -7,8 +7,8 @@ import { AgGridReact } from 'ag-grid-react';
 import debounce from 'lodash/debounce';
 import { useDispatch } from 'react-redux';
 
-import Checkbox from '@/components/atoms/Checkbox';
 import Button from '@/components/atoms/Button';
+import Checkbox from '@/components/atoms/Checkbox';
 import Close from '@/components/atoms/Icons/Close';
 import Statistic from '@/components/atoms/Icons/Statistic';
 import STDBStatusChip from '@/components/atoms/STDBStatusChip';
@@ -309,7 +309,7 @@ const MapDashboard = () => {
         </div>
       </div>
       <div
-        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-black50/60 bg-white p-4 transition-all duration-300 ${
+        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-neutral-500/60 bg-white p-4 transition-all duration-300 ${
           activeFilter === 'komoditas' ? 'translate-x-0' : '-translate-x-[200%]'
         }`}
       >
@@ -328,7 +328,7 @@ const MapDashboard = () => {
         </div>
       </div>
       <div
-        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-black50/60 bg-white  transition-all duration-300 ${
+        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-neutral-500/60 bg-white  transition-all duration-300 ${
           activeFilter === 'kecamatan' ? 'translate-x-0' : '-translate-x-[200%]'
         }`}
       >
@@ -347,7 +347,7 @@ const MapDashboard = () => {
         </div>
       </div>
       <div
-        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-black50/60 bg-white  transition-all duration-300 ${
+        className={`absolute left-[52px] top-[calc(72px+9px)] z-[400] rounded-[4px] border-[2px] border-neutral-500/60 bg-white  transition-all duration-300 ${
           activeFilter === 'tilelayer' ? 'translate-x-0' : '-translate-x-[200%]'
         }`}
       >

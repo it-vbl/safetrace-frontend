@@ -51,7 +51,7 @@ const TableSizeSelector = ({
       ref={containerRef}
       className='border-secondary2 relative z-0 flex items-center rounded-lg border bg-white'
     >
-      <Paragraph level={3} className='text-neutral10 px-3'>
+      <Paragraph level={3} className='text-neutral-900 px-3'>
         Tampil
       </Paragraph>
       <div
@@ -59,7 +59,7 @@ const TableSizeSelector = ({
         className='border-secondary2 flex h-full cursor-pointer items-center gap-x-2 border-x px-3 py-[13px]'
         onClick={() => setShowList(!showList)}
       >
-        <Paragraph level={3} className='text-neutral10'>
+        <Paragraph level={3} className='text-neutral-900'>
           {selectedOption}
         </Paragraph>
 
@@ -67,7 +67,7 @@ const TableSizeSelector = ({
           <ChevronDown />
         </div>
       </div>
-      <Paragraph level={3} className='text-neutral10 px-3'>
+      <Paragraph level={3} className='text-neutral-900 px-3'>
         Data
       </Paragraph>
 

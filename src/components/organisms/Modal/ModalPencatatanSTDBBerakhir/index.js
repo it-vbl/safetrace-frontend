@@ -60,7 +60,7 @@ const ModalPencatatanSTDBBerakhir = ({ open, setOpen, onSubmit, namaPekebun, jum
         />
       </div>
       <div className='mt-4 flex flex-row justify-end gap-2'>
-        <Button isLoading={isSubmitting} onClick={() => setOpen(false)} className='bg-red-500'>
+        <Button isLoading={isSubmitting} onClick={() => setOpen(false)} className='bg-tertiary'>
           Batalkan
         </Button>
         <Button isLoading={isSubmitting} onClick={handleSubmit}>

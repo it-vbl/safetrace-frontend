@@ -1,15 +1,19 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import env from '@/utils/env';
 
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   images: {
-    domains: (process.env.NEXT_PUBLIC_IMAGE_DOMAIN || '')
+    remotePatterns: (env.NEXT_PUBLIC_IMAGE_DOMAIN || '')
       .split(',')
       .map((domain) => domain.trim())
-      .filter(Boolean),
+      .filter(Boolean)
+      .map((domain) => ({
+        hostname: domain,
+      })),
   },
   eslint: {
     ignoreDuringBuilds: true,

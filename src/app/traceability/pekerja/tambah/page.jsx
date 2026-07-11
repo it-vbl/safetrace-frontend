@@ -39,7 +39,7 @@ export default function TambahPekerjaPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
           Memuat data...
         </div>
       }
@@ -225,7 +225,7 @@ function TambahPekerjaContent() {
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <Select
                 label="Kelompok Tani"
                 name="kelompokTani"
@@ -269,7 +269,7 @@ function TambahPekerjaContent() {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <Select
                 label="Jenis Kelamin"
                 name="jenisKelamin"
@@ -307,7 +307,7 @@ function TambahPekerjaContent() {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <DatePicker
                 label="Tanggal Lahir"
                 name="tanggalLahir"
@@ -342,7 +342,7 @@ function TambahPekerjaContent() {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <Select
                 label="Status Pekerja"
                 name="statusPekerja"
@@ -434,7 +434,7 @@ function TambahPekerjaContent() {
         <div className="mt-4 flex flex-col-reverse sm:flex-row justify-end gap-4">
           <Button
             type="button"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-tertiary hover:bg-tertiary/90"
             onClick={handleCancel}
             disabled={isLoading}
           >

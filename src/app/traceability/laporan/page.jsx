@@ -160,7 +160,7 @@ const LaporanPage = () => {
                 </div>
                 {!isViewOnly && (
                     <div
-                        className="cursor-pointer text-[10px] font-bold uppercase text-red-600 underline hover:text-red-700 sm:text-[12px] whitespace-nowrap"
+                        className="cursor-pointer text-[10px] font-bold uppercase text-tertiary underline hover:text-tertiary sm:text-[12px] whitespace-nowrap"
                         onClick={() => handleDeleteClicked(e.data)}
                     >
                         HAPUS

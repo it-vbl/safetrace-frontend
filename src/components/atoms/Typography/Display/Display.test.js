@@ -12,7 +12,7 @@ describe("Display", () => {
   });
 
   test("Passing className", () => {
-    const { container } = render(<Display className="bg-red-400" />);
+    const { container } = render(<Display className="bg-tertiary" />);
 
     expect(container).toMatchSnapshot();
   });

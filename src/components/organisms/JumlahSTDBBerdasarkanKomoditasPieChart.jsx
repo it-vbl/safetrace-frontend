@@ -130,7 +130,7 @@ const JumlahSTDBBerdasarkanKomoditasPieChart = ({
 
   return (
     <div
-      className={`flex flex-col gap-6 w-full h-full border border-gray-300 p-4`}
+      className={`flex flex-col gap-6 w-full h-full border border-neutral-300 p-4`}
     >
       <Heading level={5}>Jumlah STDB Terbit Berdasarkan Komoditas</Heading>
       <div className="w-[50%] h-[50%] self-center">

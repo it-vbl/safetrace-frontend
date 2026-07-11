@@ -14,22 +14,22 @@ const RingkasanCard = ({
   onButtonClick,
 }) => {
   return (
-    <div className="bg-white p-4 shadow-sm flex flex-col justify-between w-full max-w-md border border-gray-300 rounded-[4px]">
+    <div className="bg-white p-4 shadow-sm flex flex-col justify-between w-full max-w-md border border-neutral-300 rounded-[4px]">
       <div>
         {labelText && (
-          <div className="bg-gray-300 text-gray-700 text-xs rounded px-2 py-1 inline-block mb-2">
+          <div className="bg-neutral-300 text-neutral-700 text-xs rounded px-2 py-1 inline-block mb-2">
             {labelText}
           </div>
         )}
-        <div className=" grid grid-cols-2 gap-2 text-green-700 font-bold text-lg mt-2">
+        <div className=" grid grid-cols-2 gap-2 text-primary font-bold text-lg mt-2">
           <div className="text-[20px]">
-            {pekebunCount} <span className="text-gray-700 font-normal text-[14px]">Pekebun</span>
+            {pekebunCount} <span className="text-neutral-700 font-normal text-[14px]">Pekebun</span>
           </div>
           <div className="text-[20px]">
-            {kebunCount} <span className="text-gray-700 font-normal text-[14px]">Kebun</span>
+            {kebunCount} <span className="text-neutral-700 font-normal text-[14px]">Kebun</span>
           </div>
           <div className="text-[20px]">
-            {haCount} <span className="text-gray-700 font-normal text-[14px]">ha</span>
+            {haCount} <span className="text-neutral-700 font-normal text-[14px]">ha</span>
           </div>
         </div>
       </div>
@@ -39,7 +39,7 @@ const RingkasanCard = ({
           size="medium"
           isFullWidth
           onClick={onButtonClick}
-          className="border-green-700 text-green-700 hover:bg-green-50"
+          className="border-primary text-primary hover:bg-bgColor"
         >
           {buttonText}
         </Button>

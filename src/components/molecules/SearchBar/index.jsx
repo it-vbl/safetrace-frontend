@@ -53,10 +53,10 @@ const SearchBar = ({
   return (
     <div
       className={cn(
-        'relative flex h-[42px] w-[300px] rounded-[6px] border border-neutral6 bg-white px-4 py-2.5',
+        'relative flex h-[42px] w-[300px] rounded-[6px] border border-neutral-400 bg-white px-4 py-2.5',
         className,
         {
-          'cursor-not-allowed bg-neutral4': disabled,
+          'cursor-not-allowed bg-neutral-200': disabled,
         }
       )}
     >
@@ -87,7 +87,7 @@ const SearchBar = ({
 
       {showSuffix && (
         <>
-          <div className="mr-3 h-full w-[2px] bg-neutral4" />
+          <div className="mr-3 h-full w-[2px] bg-neutral-200" />
           {suffixComponent()}
         </>
       )}

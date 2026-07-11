@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const Check = ({ size = 20, color = theme.colors.blue8, ...props }) => {
+const Check = ({ size = 20, color = theme.colors.primary, ...props }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path

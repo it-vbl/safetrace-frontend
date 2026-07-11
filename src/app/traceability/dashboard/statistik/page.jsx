@@ -139,10 +139,10 @@ const TraceabilityDashboard = () => {
   if (error) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-        <p className="text-red-500">{error}</p>
+        <p className="text-tertiary">{error}</p>
         <button
           onClick={fetchData}
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-secondary"
         >
           Coba Lagi
         </button>

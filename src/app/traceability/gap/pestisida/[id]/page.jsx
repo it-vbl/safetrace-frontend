@@ -488,12 +488,12 @@ const TraceabilityPestisidaDetail = () => {
       <div className="flex flex-col gap-6">
         {/* DETAIL KEBUN Card */}
         {detail && (
-          <section className="rounded border border-gray-300 bg-white p-6">
+          <section className="rounded border border-neutral-300 bg-white p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold">DETAIL KEBUN</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-neutral-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               <BorderBottomColData
                 label="Id Kebun"
                 value={detail.id_kebun ?? '-'}

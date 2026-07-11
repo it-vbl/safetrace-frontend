@@ -1,11 +1,11 @@
 const StatusChip = ({ value, label }) => {
   const statusClasses = {
-    1: 'bg-blue-100 text-blue-700', // Pendataan
+    1: 'bg-bgColor text-primary', // Pendataan
     2: 'bg-yellow-100 text-yellow-700', // Verifikasi
-    3: 'bg-red-100 text-red-700', // Tidak Terbit
-    4: 'bg-purple-100 text-purple-700', // Penerbitan
-    5: 'bg-green-100 text-green-700', // Data Terbit
-    6: 'bg-green-200 text-gray-700', // Data Terbit
+    3: 'bg-error1 text-tertiary', // Tidak Terbit
+    4: 'bg-bgColor text-purple-700', // Penerbitan
+    5: 'bg-bgColor text-primary', // Data Terbit
+    6: 'bg-bgColor text-neutral-700', // Data Terbit
     7: 'bg-black-200 text-black-700', // Data Berakhir
   };
 

@@ -9,7 +9,7 @@ import { ChevronRight } from 'lucide-react';
 const BreadcrumbDetail = ({ items }) => {
   return (
     <nav
-      className="flex items-center text-xs sm:text-sm font-semibold text-gray-700"
+      className="flex items-center text-xs sm:text-sm font-semibold text-neutral-700"
       aria-label="Breadcrumb"
     >
       <ol className="inline-flex items-center space-x-1">
@@ -23,14 +23,14 @@ const BreadcrumbDetail = ({ items }) => {
                     {item.label}
                   </div>
                 ) : (
-                  <a href={item.href} className="hover:underline text-gray-500">
+                  <a href={item.href} className="hover:underline text-neutral-500">
                     {item.label}
                   </a>
                 )}
               </li>
               {!isLast && (
                 <li>
-                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-400" />
                 </li>
               )}
             </React.Fragment>

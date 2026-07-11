@@ -57,7 +57,7 @@ function buildNamaLaporan(jenisLaporan, extra) {
 
 export default function TambahLaporanPage() {
     return (
-        <Suspense fallback={<div className="flex w-full justify-center py-10 text-sm text-gray-500">Memuat data...</div>}>
+        <Suspense fallback={<div className="flex w-full justify-center py-10 text-sm text-neutral-500">Memuat data...</div>}>
             <TambahLaporanContent forcedType="bulanan" />
         </Suspense>
     );
@@ -159,8 +159,8 @@ function TambahLaporanContent({ forcedType }) {
         if (jenisLaporan === 'statistik_bulanan') {
             return (
                 <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">
-                        Bulan Laporan <span className="text-red-500">*</span>
+                    <label className="text-sm font-medium text-neutral-700">
+                        Bulan Laporan <span className="text-tertiary">*</span>
                     </label>
                     <div className="flex gap-2">
                         <div className="flex-1">
@@ -187,7 +187,7 @@ function TambahLaporanContent({ forcedType }) {
                         </div>
                     </div>
                     {touched.bulan && errors.bulan && (
-                        <p className="text-xs text-red-500">{errors.bulan}</p>
+                        <p className="text-xs text-tertiary">{errors.bulan}</p>
                     )}
                 </div>
             );
@@ -256,7 +256,7 @@ function TambahLaporanContent({ forcedType }) {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Accordion defaultIsOpen title="IDENTITAS">
                     <>
-                        <div className={`${gridClass} border-b border-dashed border-gray-300 py-4`}>
+                        <div className={`${gridClass} border-b border-dashed border-neutral-300 py-4`}>
                             {jenisLaporan !== 'laporan_petani' && (
                                 <>
                                     {secondaryFields}
@@ -286,8 +286,8 @@ function TambahLaporanContent({ forcedType }) {
 
                         <div className="grid grid-cols-1 gap-6 py-4">
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-gray-700">
-                                    Kebutuhan <span className="text-red-500">*</span>
+                                <label className="text-sm font-medium text-neutral-700">
+                                    Kebutuhan <span className="text-tertiary">*</span>
                                 </label>
                                 <textarea
                                     name="kebutuhan"
@@ -295,11 +295,11 @@ function TambahLaporanContent({ forcedType }) {
                                     value={kebutuhan}
                                     onChange={(e) => { setKebutuhan(e.target.value); setTouched(t => ({ ...t, kebutuhan: true })); }}
                                     rows={3}
-                                    className={`w-full rounded-md border px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${touched.kebutuhan && errors.kebutuhan ? 'border-red-400' : 'border-gray-300'
+                                    className={`w-full rounded-md border px-3 py-2 text-sm text-neutral-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary focus:border-primary transition ${touched.kebutuhan && errors.kebutuhan ? 'border-tertiary' : 'border-neutral-300'
                                         }`}
                                 />
                                 {touched.kebutuhan && errors.kebutuhan && (
-                                    <p className="text-xs text-red-500">{errors.kebutuhan}</p>
+                                    <p className="text-xs text-tertiary">{errors.kebutuhan}</p>
                                 )}
                             </div>
                         </div>
@@ -309,7 +309,7 @@ function TambahLaporanContent({ forcedType }) {
                 <div className="mt-4 flex flex-col-reverse sm:flex-row justify-end gap-4">
                     <Button
                         type="button"
-                        className="bg-red-600 hover:bg-red-700"
+                        className="bg-tertiary hover:bg-tertiary/90"
                         onClick={() => router.push('/traceability/laporan')}
                         disabled={isLoading}
                     >

@@ -147,7 +147,7 @@ const TraceabilityPekerjaDetail = () => {
     return (
       <section
         key={pekerja.id}
-        className="rounded border border-gray-300 bg-white p-6"
+        className="rounded border border-neutral-300 bg-white p-6"
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">IDENTITAS PEKERJA</h3>
@@ -155,13 +155,13 @@ const TraceabilityPekerjaDetail = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => handleDeleteClick(pekerja)}
-                className="text-sm font-medium text-red-600 underline hover:text-red-800"
+                className="text-sm font-medium text-tertiary underline hover:text-tertiary"
               >
                 Hapus Data
               </button>
               <Link
                 href={`/traceability/pekerja/ubah/${pekerja.id}`}
-                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                className="text-sm font-medium text-primary underline hover:text-primary"
               >
                 Ubah Data
               </Link>
@@ -169,7 +169,7 @@ const TraceabilityPekerjaDetail = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-neutral-700">
           <BorderBottomColData label="Nama" value={pekerja?.nama || '-'} />
           <BorderBottomColData
             label="Jenis Kelamin"
@@ -242,7 +242,7 @@ const TraceabilityPekerjaDetail = () => {
       <div className="flex flex-col gap-6">
         {/* IDENTITAS PEMILIK Section */}
         {pekerjaData?.identitas_pemilik ? (
-          <section className="rounded border border-gray-300 bg-white p-6">
+          <section className="rounded border border-neutral-300 bg-white p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold">IDENTITAS PEMILIK</h3>
             </div>
@@ -254,14 +254,14 @@ const TraceabilityPekerjaDetail = () => {
             )}
 
             {error && (
-              <div className="text-sm text-red-600">
+              <div className="text-sm text-tertiary">
                 Gagal memuat data:{' '}
                 {error?.response?.data?.message || error.message}
               </div>
             )}
 
             {!loading && !error && pekerjaData?.identitas_pemilik && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-4 text-sm text-neutral-700">
                 <BorderBottomColData
                   label="Id Petani"
                   value={pekerjaData.identitas_pemilik?.id_petani || '-'}
@@ -320,8 +320,8 @@ const TraceabilityPekerjaDetail = () => {
         ) : (
           !loading &&
           !error && (
-            <section className="flex flex-col items-center justify-center rounded border border-gray-300 bg-white p-8 text-center">
-              <p className="mb-4 text-gray-500">
+            <section className="flex flex-col items-center justify-center rounded border border-neutral-300 bg-white p-8 text-center">
+              <p className="mb-4 text-neutral-500">
                 Data petani tidak ditemukan atau belum lengkap.
               </p>
             </section>
@@ -336,8 +336,8 @@ const TraceabilityPekerjaDetail = () => {
                 renderIdentitasPekerjaSection(pekerja, index)
               )
             ) : (
-              <section className="flex flex-col items-center justify-center rounded border border-gray-300 bg-white p-8 text-center">
-                <p className="mb-4 text-gray-500">
+              <section className="flex flex-col items-center justify-center rounded border border-neutral-300 bg-white p-8 text-center">
+                <p className="mb-4 text-neutral-500">
                   Belum ada data pekerja yang terdaftar untuk petani ini.
                 </p>
                 {!isViewOnly && (

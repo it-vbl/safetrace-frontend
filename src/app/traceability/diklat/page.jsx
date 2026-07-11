@@ -411,7 +411,7 @@ const DiklatPage = () => {
 
     return (
       <span
-        className={`text-xs font-medium ${isSuccess ? 'text-green-600' : 'text-red-600'
+        className={`text-xs font-medium ${isSuccess ? 'text-primary' : 'text-tertiary'
           }`}
       >
         {label}
@@ -620,26 +620,26 @@ const DiklatPage = () => {
   //     className={`group relative overflow-hidden rounded-xl border p-4 transition-all duration-300 ease-out
   //       ${onClick ? 'cursor-pointer' : ''}
   //       ${isActive
-  //         ? 'border-green8 bg-[#F0FDF4] shadow-[0_4px_12px_rgba(0,0,0,0.05)] -translate-y-[2px]'
-  //         : 'border-gray-200 bg-white hover:border-green8/40 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:-translate-y-[1px]'
+  //         ? 'border-primary bg-[#F0FDF4] shadow-[0_4px_12px_rgba(0,0,0,0.05)] -translate-y-[2px]'
+  //         : 'border-neutral-200 bg-white hover:border-primary/40 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:-translate-y-[1px]'
   //       }
   //     `}
   //   >
   //     {/* Subtle Top Border Indicator when active */}
   //     <div
-  //       className={`absolute left-0 top-0 h-1 w-full transition-all duration-300 ${isActive ? 'bg-green8 opacity-100' : 'bg-transparent opacity-0'
+  //       className={`absolute left-0 top-0 h-1 w-full transition-all duration-300 ${isActive ? 'bg-primary opacity-100' : 'bg-transparent opacity-0'
   //         }`}
   //     />
 
   //     <div className="relative z-10 flex flex-col gap-1">
   //       <div
-  //         className={`text-xs font-medium tracking-wide transition-colors duration-300 sm:text-sm ${isActive ? 'text-green8' : 'text-gray-500 group-hover:text-gray-700'
+  //         className={`text-xs font-medium tracking-wide transition-colors duration-300 sm:text-sm ${isActive ? 'text-primary' : 'text-neutral-500 group-hover:text-neutral-700'
   //           }`}
   //       >
   //         {title}
   //       </div>
   //       <div
-  //         className={`text-xl font-bold transition-colors duration-300 sm:text-2xl ${isActive ? 'text-gray-900' : 'text-gray-800'
+  //         className={`text-xl font-bold transition-colors duration-300 sm:text-2xl ${isActive ? 'text-neutral-900' : 'text-neutral-800'
   //           }`}
   //       >
   //         {value}
@@ -648,10 +648,10 @@ const DiklatPage = () => {
 
   //     {/* Indicator Dot */}
   //     <div
-  //       className={`absolute -right-2 -top-2 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-500 ${isActive ? 'scale-100 bg-green8/10 opacity-100' : 'scale-50 opacity-0'
+  //       className={`absolute -right-2 -top-2 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full transition-all duration-500 ${isActive ? 'scale-100 bg-primary/10 opacity-100' : 'scale-50 opacity-0'
   //         }`}
   //     >
-  //       <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green8" />
+  //       <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-primary" />
   //     </div>
   //   </div>
   // );
@@ -668,13 +668,13 @@ const DiklatPage = () => {
         <form onSubmit={handleSubmit}>
           <Heading
             level={4}
-            className="text-base font-bold text-gray-800 sm:text-lg md:text-xl"
+            className="text-base font-bold text-neutral-800 sm:text-lg md:text-xl"
           >
             UBAH STATUS DIKLAT
           </Heading>
           <div className="my-3 flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1 sm:my-4 sm:gap-4 sm:pr-2">
             {/* SL */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="SL"
                 containerClassName="w-full"
@@ -694,7 +694,7 @@ const DiklatPage = () => {
             </div>
 
             {/* P&C */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="P&C (RSPO/ISPO)"
                 containerClassName="w-full"
@@ -714,7 +714,7 @@ const DiklatPage = () => {
             </div>
 
             {/* K3 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="K3"
                 containerClassName="w-full"
@@ -734,7 +734,7 @@ const DiklatPage = () => {
             </div>
 
             {/* SOP */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="SOP"
                 containerClassName="w-full"
@@ -754,7 +754,7 @@ const DiklatPage = () => {
             </div>
 
             {/* FGD/PDG */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="FGD"
                 containerClassName="w-full"
@@ -774,7 +774,7 @@ const DiklatPage = () => {
             </div>
 
             {/* Pestisida */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="Pestisida"
                 containerClassName="w-full"
@@ -794,7 +794,7 @@ const DiklatPage = () => {
             </div>
 
             {/* Manajemen API */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="Manajemen API"
                 containerClassName="w-full"
@@ -814,7 +814,7 @@ const DiklatPage = () => {
             </div>
 
             {/* Pengendalian HPT */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="Pengendalian HPT"
                 containerClassName="w-full"
@@ -834,7 +834,7 @@ const DiklatPage = () => {
             </div>
 
             {/* NKT (Nilai Konservasi Tinggi) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-4 border-neutral-100">
               <Select
                 label="NKT (Nilai Konservasi Tinggi)"
                 containerClassName="w-full"

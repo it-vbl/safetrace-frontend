@@ -5,8 +5,8 @@ import Paragraph from '../Typography/Paragraph';
 const Label = ({ children, isRequired = false, className = '', ...props }) => {
   return (
     <div className='flex flex-row'>
-      <Paragraph level={3} className={`font-medium text-neutral11 ${className}`} {...props}>
-        {children} {isRequired && <span className='text-red-500'>*</span>}
+      <Paragraph level={3} className={`font-medium text-neutral-900 ${className}`} {...props}>
+        {children} {isRequired && <span className='text-tertiary'>*</span>}
       </Paragraph>
     </div>
   );

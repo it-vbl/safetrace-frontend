@@ -645,7 +645,7 @@ const EditPenjualanContent = () => {
   if (isLoading) {
     return (
       <div className="flex w-full items-center justify-center py-12">
-        <div className="text-gray-600">Memuat data...</div>
+        <div className="text-neutral-600">Memuat data...</div>
       </div>
     );
   }

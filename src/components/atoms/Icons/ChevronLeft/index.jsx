@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const ChevronLeft = ({ size = 16, color = theme.colors.blue8, ...props }) => {
+const ChevronLeft = ({ size = 16, color = theme.colors.primary, ...props }) => {
   return (
     <svg
       width={size}

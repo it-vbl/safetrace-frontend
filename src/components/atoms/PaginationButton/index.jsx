@@ -15,7 +15,7 @@ export function PaginationButton({ direction, onClick, disabled = false, classNa
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'h-9 w-9 border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50',
+        'h-9 w-9 border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
         className
       )}
       aria-label={direction === 'prev' ? 'Previous page' : 'Next page'}

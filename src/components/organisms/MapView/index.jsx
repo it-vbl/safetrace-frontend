@@ -474,7 +474,7 @@ export default function MyMap(props) {
                   </div>
                   <div className="w-[600px]">
                     {/* Resiko Deforestasi Banner */}
-                    <div className="bg-orange-300  px-3 py-2 rounded mb-4 flex items-center justify-center gap-2">
+                    <div className="bg-tertiary  px-3 py-2 rounded mb-4 flex items-center justify-center gap-2">
                       <FileWarningIcon size={16} />
                       <Paragraph className="!m-0 text-[14px] font-semibold">
                         Resiko Deforestasi : {data?.risiko_deforestasi || '-'}
@@ -509,8 +509,8 @@ export default function MyMap(props) {
                         <div className="grid grid-cols-3 gap-x-4">
                           {/* Column 1 */}
                           <div className="flex flex-col">
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Titik Koordinat
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -522,24 +522,24 @@ export default function MyMap(props) {
                                   : '-'}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Kelompok
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
                                 {data?.kelompok || data?.kelompok_tani || '-'}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Waktu Tanam
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
                                 {formatWaktuTanam(data?.waktu_tanam)}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Legalitas
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -549,7 +549,7 @@ export default function MyMap(props) {
                               </Paragraph>
                             </div>
                             <div className="flex flex-col gap-1 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 STDB
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -560,16 +560,16 @@ export default function MyMap(props) {
 
                           {/* Column 2 */}
                           <div className="flex flex-col">
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Id Kebun
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
                                 {data?.id_kebun || '-'}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Lokasi
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -578,13 +578,13 @@ export default function MyMap(props) {
                                   '-'}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 RSPO
                               </Paragraph>
                               <Paragraph
                                 className={`!m-0 text-[14px] ${data?.is_rspo || data?.rspo === 'Sudah'
-                                    ? 'text-green-600 font-semibold'
+                                    ? 'text-primary font-semibold'
                                     : ''
                                   }`}
                               >
@@ -594,7 +594,7 @@ export default function MyMap(props) {
                               </Paragraph>
                             </div>
                             <div className="flex flex-col gap-1 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 No Legalitas
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -607,8 +607,8 @@ export default function MyMap(props) {
 
                           {/* Column 3 */}
                           <div className="flex flex-col">
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Petani
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -617,8 +617,8 @@ export default function MyMap(props) {
                                   '-'}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Luas Kebun (Ha)
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -629,13 +629,13 @@ export default function MyMap(props) {
                                     : '0.00'}
                               </Paragraph>
                             </div>
-                            <div className="flex flex-col gap-1 border-b border-dashed border-gray-300 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                            <div className="flex flex-col gap-1 border-b border-dashed border-neutral-300 py-3">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 ISPO
                               </Paragraph>
                               <Paragraph
                                 className={`!m-0 text-[14px] ${data?.is_ispo || data?.ispo === 'Sudah'
-                                    ? 'text-green-600 font-semibold'
+                                    ? 'text-primary font-semibold'
                                     : ''
                                   }`}
                               >
@@ -645,7 +645,7 @@ export default function MyMap(props) {
                               </Paragraph>
                             </div>
                             <div className="flex flex-col gap-1 py-3">
-                              <Paragraph className="!m-0 text-[12px] font-bold text-gray-400">
+                              <Paragraph className="!m-0 text-[12px] font-bold text-neutral-400">
                                 Pemilik Legalitas
                               </Paragraph>
                               <Paragraph className="!m-0 text-[14px]">
@@ -692,66 +692,66 @@ export default function MyMap(props) {
           return `
             <div class="w-full">
               <div class="flex items-center justify-between mb-2">
-                <p class="font-bold text-red-600 text-[16px] m-0">ALERT DEFORESTASI</p>
+                <p class="font-bold text-tertiary text-[16px] m-0">ALERT DEFORESTASI</p>
               </div>
               <div class="w-[500px]">
-                <div class="bg-red-100 px-3 rounded mb-4 flex items-center justify-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-red-600">
+                <div class="bg-error1 px-3 rounded mb-4 flex items-center justify-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-tertiary">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                     <line x1="12" y1="9" x2="12" y2="13"></line>
                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                   </svg>
-                  <p class="m-0 text-[14px] font-semibold text-red-600">
+                  <p class="m-0 text-[14px] font-semibold text-tertiary">
                     Alert ID: ${alert?.label || '-'}
                   </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-x-4">
                   <div class="flex flex-col">
-                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Lokasi Alert</p>
+                    <div class="flex flex-col border-b border-dashed border-neutral-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Lokasi Alert</p>
                       <p class="m-0 text-[14px]">${lokasiCoords}</p>
                     </div>
-                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Area Deforestasi</p>
+                    <div class="flex flex-col border-b border-dashed border-neutral-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Area Deforestasi</p>
                       <p class="m-0 text-[14px]">${alert?.area_ha ? `${alert.area_ha.toFixed(1)} Ha` : '-'
             }</p>
                     </div>
-                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Tanggal Terdeteksi</p>
+                    <div class="flex flex-col border-b border-dashed border-neutral-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Tanggal Terdeteksi</p>
                       <p class="m-0 text-[14px]">${alert?.date || '-'}</p>
                     </div>
                     <div class="flex flex-col py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Alert Type</p>
-                      <p class="m-0 text-[14px] font-semibold text-red-600">${alert?.source_type?.toUpperCase() || '-'
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Alert Type</p>
+                      <p class="m-0 text-[14px] font-semibold text-tertiary">${alert?.source_type?.toUpperCase() || '-'
             }</p>
                     </div>
                   </div>
 
                   <div class="flex flex-col">
-                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Provinsi</p>
+                    <div class="flex flex-col border-b border-dashed border-neutral-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Provinsi</p>
                       <p class="m-0 text-[14px]">${alert?.provinsi || '-'}</p>
                     </div>
-                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Kabupaten</p>
+                    <div class="flex flex-col border-b border-dashed border-neutral-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Kabupaten</p>
                       <p class="m-0 text-[14px]">${alert?.kabupaten || '-'}</p>
                     </div>
-                    <div class="flex flex-col border-b border-dashed border-gray-300 py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Kecamatan</p>
+                    <div class="flex flex-col border-b border-dashed border-neutral-300 py-0">
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Kecamatan</p>
                       <p class="m-0 text-[14px]">${alert?.kecamatan || '-'}</p>
                     </div>
                     <div class="flex flex-col py-0">
-                      <p class="m-0 text-[12px] font-bold text-gray-400">Desa/Kelurahan</p>
+                      <p class="m-0 text-[12px] font-bold text-neutral-400">Desa/Kelurahan</p>
                       <p class="m-0 text-[14px]">${alert?.desa || '-'}</p>
                     </div>
                   </div>
                 </div>
 
                 ${alert?.obyek_terdampak
-              ? `<div class="mt-3 pt-3 border-t border-dashed border-gray-300">
+              ? `<div class="mt-3 pt-3 border-t border-dashed border-neutral-300">
                         <div class="flex flex-col">
-                          <p class="m-0 text-[12px] font-bold text-gray-400">Obyek Terdampak</p>
+                          <p class="m-0 text-[12px] font-bold text-neutral-400">Obyek Terdampak</p>
                           <p class="m-0 text-[14px]">${alert.obyek_terdampak}</p>
                         </div>
                       </div>`

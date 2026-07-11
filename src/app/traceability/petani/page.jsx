@@ -294,7 +294,7 @@ const PetaniPage = () => {
         </div>
         {!isViewOnly && (
           <div
-            className="cursor-pointer text-[10px] font-bold uppercase text-red-500 underline hover:text-red-600 sm:text-[12px]"
+            className="cursor-pointer text-[10px] font-bold uppercase text-tertiary underline hover:text-tertiary sm:text-[12px]"
             onClick={() => handleDeleteClicked(e.data)}
           >
             HAPUS
@@ -397,8 +397,8 @@ const PetaniPage = () => {
           return (
             <div
               className={`w-fit rounded px-2 py-1 text-center text-xs font-bold ${isActive
-                ? 'bg-green-100 text-green-600'
-                : 'bg-red-100 text-red-600'
+                ? 'bg-bgColor text-primary'
+                : 'bg-error1 text-tertiary'
                 }`}
             >
               {isActive ? 'Aktif' : 'Keluar'}

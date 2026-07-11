@@ -18,14 +18,14 @@ describe("ColData", () => {
   });
 
   test("Render with passing className", () => {
-    const { container } = render(<ColData className="bg-red-300" />);
+    const { container } = render(<ColData className="bg-tertiary" />);
 
     expect(container).toMatchSnapshot();
   });
 
   test("Render with passing all props", () => {
     const { container } = render(
-      <ColData label="Testing" value="Testing" className="bg-red-300" />,
+      <ColData label="Testing" value="Testing" className="bg-tertiary" />,
     );
 
     expect(container).toMatchSnapshot();

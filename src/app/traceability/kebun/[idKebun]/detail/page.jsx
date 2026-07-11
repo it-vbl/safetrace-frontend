@@ -11,7 +11,7 @@ import BreadcrumbDetail from '@/components/molecules/BreadcrumbDetail';
 import ModalEditKebun from '@/components/molecules/ModalEditKebun';
 import ModalEditLampiran from '@/components/molecules/ModalEditLampiran';
 import ModalEditPeta from '@/components/molecules/ModalEditPeta';
-import { getCurrentUserRoles, hasPermission,isViewOnlyRole } from '@/libs/permissions';
+import { getCurrentUserRoles, hasPermission, isViewOnlyRole } from '@/libs/permissions';
 import { downloadSHPKebun } from '@/services/kebun';
 import { getDetailKebun, getLampiranKebun } from '@/services/pekebun';
 
@@ -31,8 +31,8 @@ const DOCUMENT_CONFIGS = [
     badge: 'SERTIFIKAT',
     fileKey: 'file_legalitas',
     thumbKey: 'thumb_legalitas',
-    accentBorder: 'border-blue-200',
-    accentBackground: 'bg-blue-50',
+    accentBorder: 'border-primary/20',
+    accentBackground: 'bg-bgColor',
   },
   {
     id: 'stdb',
@@ -40,8 +40,8 @@ const DOCUMENT_CONFIGS = [
     badge: 'STDB',
     fileKey: 'file_stdb',
     thumbKey: 'thumb_stdb',
-    accentBorder: 'border-orange-200',
-    accentBackground: 'bg-orange-50',
+    accentBorder: 'border-tertiary/20',
+    accentBackground: 'bg-error1',
   },
   {
     id: 'rspo',
@@ -49,8 +49,8 @@ const DOCUMENT_CONFIGS = [
     badge: 'RSPO',
     fileKey: 'file_rspo',
     thumbKey: 'thumb_rspo',
-    accentBorder: 'border-green-200',
-    accentBackground: 'bg-green-50',
+    accentBorder: 'border-primary/20',
+    accentBackground: 'bg-bgColor',
   },
   {
     id: 'ispo',
@@ -58,8 +58,8 @@ const DOCUMENT_CONFIGS = [
     badge: 'ISPO',
     fileKey: 'file_ispo',
     thumbKey: 'thumb_ispo',
-    accentBorder: 'border-purple-200',
-    accentBackground: 'bg-purple-50',
+    accentBorder: 'border-primary/20',
+    accentBackground: 'bg-bgColor',
   },
 ];
 
@@ -190,8 +190,8 @@ const DetailKebunPage = () => {
     return (
       <span
         className={`inline-block rounded px-2 py-1 text-xs font-semibold ${status === 'Sudah'
-          ? 'bg-green-200 text-green-800'
-          : 'bg-red-200 text-red-800'
+          ? 'bg-bgColor text-primary'
+          : 'bg-error1 text-tertiary'
           }`}
       >
         {status}
@@ -207,7 +207,7 @@ const DetailKebunPage = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-            <p className="text-gray-600">Memuat data kebun...</p>
+            <p className="text-neutral-600">Memuat data kebun...</p>
           </div>
         </div>
       </div>
@@ -220,7 +220,7 @@ const DetailKebunPage = () => {
         <BreadcrumbDetail items={crumbs} />
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <p className="text-gray-600">Data kebun tidak ditemukan</p>
+            <p className="text-neutral-600">Data kebun tidak ditemukan</p>
           </div>
         </div>
       </div>
@@ -233,13 +233,13 @@ const DetailKebunPage = () => {
 
       <div className="flex flex-col gap-4 sm:gap-6">
         {/* === DETAIL SECTION === */}
-        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+        <section className="rounded border border-neutral-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-semibold sm:text-lg">DETAIL KEBUN</h3>
             {!isViewOnly && (
               <button
                 onClick={() => setShowEditModal(true)}
-                className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
+                className="self-start text-sm font-medium text-primary underline hover:text-primary sm:self-auto"
               >
                 Ubah Data
               </button>
@@ -247,7 +247,7 @@ const DetailKebunPage = () => {
           </div>
 
           {/* === GRID LAYOUT FOR KEBUN DETAIL === */}
-          <div className="grid grid-cols-1 gap-x-4 gap-y-4 text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-x-4 gap-y-4 text-sm text-neutral-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {/* Row 1: Identitas Dasar */}
             <BorderBottomColData label="Id Kebun" value={kebunData.id_kebun || '-'} />
             <BorderBottomColData label="Petani" value={kebunData.nama_petani || '-'} />
@@ -282,7 +282,7 @@ const DetailKebunPage = () => {
         </section>
 
         {/* === MAP SECTION === */}
-        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+        <section className="rounded border border-neutral-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-semibold sm:text-lg">PETA</h3>
             {kebunData?.geom && (
@@ -291,7 +291,7 @@ const DetailKebunPage = () => {
                   <button
                     type="button"
                     onClick={handleDownloadPeta}
-                    className="text-sm font-medium text-green-700 underline hover:text-green-800"
+                    className="text-sm font-medium text-tertiary underline hover:text-tertiary"
                   >
                     Unduh SHP
                   </button>
@@ -299,7 +299,7 @@ const DetailKebunPage = () => {
                 {!isViewOnly && (
                   <button
                     onClick={() => setShowEditPetaModal(true)}
-                    className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+                    className="text-sm font-medium text-primary underline hover:text-primary"
                   >
                     Ubah Data
                   </button>
@@ -309,7 +309,7 @@ const DetailKebunPage = () => {
             {!kebunData?.geom && !isViewOnly && (
               <button
                 onClick={() => setShowEditPetaModal(true)}
-                className="self-start text-sm font-medium text-blue-700 underline hover:text-blue-800 sm:self-auto"
+                className="self-start text-sm font-medium text-primary underline hover:text-primary sm:self-auto"
               >
                 Tambah Data
               </button>
@@ -317,7 +317,7 @@ const DetailKebunPage = () => {
           </div>
 
           {kebunData?.geom ? (
-            <div className="h-96 w-full overflow-hidden rounded border bg-gray-100">
+            <div className="h-96 w-full overflow-hidden rounded border bg-neutral-100">
               <Map
                 mapClassName="h-full w-full"
                 polygons={kebunData?.geom}
@@ -357,22 +357,22 @@ const DetailKebunPage = () => {
               />
             </div>
           ) : (
-            <div className="flex h-96 w-full items-center justify-center rounded border bg-gray-50">
+            <div className="flex h-96 w-full items-center justify-center rounded border bg-neutral-50">
               <div className="text-center">
-                <p className="text-gray-500">Kebun belum memiliki data peta</p>
+                <p className="text-neutral-500">Kebun belum memiliki data peta</p>
               </div>
             </div>
           )}
         </section>
 
         {/* === LAMPIRAN SECTION === */}
-        <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+        <section className="rounded border border-neutral-300 bg-white p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="mb-2 text-base font-semibold sm:mb-4 sm:text-lg">LAMPIRAN</h3>
             {!isViewOnly && (
               <button
                 onClick={() => setShowEditLampiranModal(true)}
-                className="self-start text-sm text-blue-600 underline hover:text-blue-800 sm:self-auto"
+                className="self-start text-sm text-primary underline hover:text-primary sm:self-auto"
               >
                 Ubah Data
               </button>
@@ -395,7 +395,7 @@ const DetailKebunPage = () => {
                 !lampiranData?.file_rspo &&
                 !lampiranData?.file_ispo &&
                 !lampiranData?.file_gambar_peta && (
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-neutral-600">
                     Belum ada data lampiran.
                   </div>
                 )}
@@ -403,7 +403,7 @@ const DetailKebunPage = () => {
           )}
 
           {!lampiranData && (
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-neutral-600">
               Belum ada data lampiran.
             </div>
           )}

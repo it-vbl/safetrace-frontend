@@ -225,13 +225,13 @@ const PenjualanDetailPage = () => {
               onEdit={isViewOnly ? undefined : () => handleEditData('pabrik')}
             />
 
-            <section className="rounded border border-gray-300 bg-white p-4 sm:p-6">
+            <section className="rounded border border-neutral-300 bg-white p-4 sm:p-6">
               <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="mb-2 font-semibold sm:mb-4">LAMPIRAN</h3>
                 {!isViewOnly && (
                   <button
                     onClick={() => handleEditData('lampiran')}
-                    className="self-start text-sm text-primary underline hover:text-blue-800 sm:self-auto"
+                    className="self-start text-sm text-primary underline hover:text-primary sm:self-auto"
                   >
                     Ubah Data
                   </button>
@@ -249,13 +249,13 @@ const PenjualanDetailPage = () => {
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-sm text-gray-500">Belum ada lampiran.</div>
+                  <div className="col-span-full text-sm text-neutral-500">Belum ada lampiran.</div>
                 )}
               </div>
             </section>
           </div>
         ) : !loading ? (
-          <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white p-10 text-gray-500">
+          <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-white p-10 text-neutral-500">
             Data detail penjualan tidak ditemukan.
           </div>
         ) : null}

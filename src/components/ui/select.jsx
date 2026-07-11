@@ -64,8 +64,8 @@ export function SelectTrigger({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
-        'focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2',
+        'flex h-10 w-full items-center justify-between rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm',
+        'focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-50',
         className
       )}
@@ -117,7 +117,7 @@ export function SelectContent({ children, isOpen, triggerRef }) {
         width: coords.width,
         transform: placement === 'top' ? 'translateY(-100%)' : 'none',
       }}
-      className="z-[9999] max-h-60 overflow-auto rounded-md border border-gray-300 bg-white shadow-lg"
+      className="z-[9999] max-h-60 overflow-auto rounded-md border border-neutral-300 bg-white shadow-lg"
     >
       {children}
     </div>
@@ -135,8 +135,8 @@ export function SelectItem({ value, children, onSelect, selectedValue }) {
     <div
       className={cn(
         'relative flex cursor-pointer select-none items-center px-3 py-2 text-sm',
-        'hover:bg-gray-100 focus:bg-gray-100',
-        isSelected && 'bg-gray-100 font-medium'
+        'hover:bg-neutral-100 focus:bg-neutral-100',
+        isSelected && 'bg-neutral-100 font-medium'
       )}
       onClick={() => onSelect(value)}
     >

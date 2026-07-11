@@ -89,7 +89,7 @@ describe("InputText Component", () => {
   it("displays error state correctly", () => {
     render(<InputText {...defaultProps} isError helperText="Error message" />);
     const helperText = screen.getByText("Error message");
-    expect(helperText).toHaveClass("text-error5");
+    expect(helperText).toHaveClass("text-tertiary");
   });
 
   it("handles password type correctly", () => {
@@ -117,7 +117,7 @@ describe("InputText Component", () => {
     render(<InputText {...defaultProps} disabled />);
     const input = screen.getByTestId("input-text");
     expect(input).toHaveClass("cursor-not-allowed");
-    expect(input).toHaveClass("bg-neutral4");
+    expect(input).toHaveClass("bg-neutral-200");
   });
 });
 

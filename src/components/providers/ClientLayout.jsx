@@ -85,7 +85,7 @@ export default function ClientLayout({ children }) {
                 ? '100%'
                 : `calc(100% - ${size.SIDEBAR_WIDTH}px)`,
           }}
-          className="flex w-full max-w-full flex-1 flex-col bg-slate-600 transition-all duration-300"
+          className="flex w-full max-w-full flex-1 flex-col bg-neutral-600 transition-all duration-300"
         >
           <div
             className={`flex max-w-full flex-1 overflow-y-auto bg-layoutBg ${

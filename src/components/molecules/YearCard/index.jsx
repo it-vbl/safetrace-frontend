@@ -39,7 +39,7 @@ const YearCard = ({
   return (
     <section
       key={`tahun-${yearData.tahun}`}
-      className={`rounded border border-gray-300 bg-white p-6 ${className}`}
+      className={`rounded border border-neutral-300 bg-white p-6 ${className}`}
     >
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-semibold">TAHUN {yearData.tahun}</h3>
@@ -48,7 +48,7 @@ const YearCard = ({
             {onDelete && (
               <button
                 type="button"
-                className="text-sm font-medium text-red-600 underline hover:text-red-700"
+                className="text-sm font-medium text-tertiary underline hover:text-tertiary"
                 onClick={handleDelete}
               >
                 Hapus
@@ -57,7 +57,7 @@ const YearCard = ({
             {onEdit && (
               <button
                 type="button"
-                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                className="text-sm font-medium text-primary underline hover:text-primary"
                 onClick={handleEdit}
               >
                 Ubah Data
@@ -67,10 +67,10 @@ const YearCard = ({
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-x-4 gap-y-3 text-sm text-gray-700 sm:flex-row">
+      <div className="flex w-full flex-col gap-x-4 gap-y-3 text-sm text-neutral-700 sm:flex-row">
         {/* Semester Switch */}
         <div className="flex flex-row items-start">
-          <div className="rounded border border-gray-300 bg-white p-2">
+          <div className="rounded border border-neutral-300 bg-white p-2">
             <div className="space-y-2">
               {['Semester 1', 'Semester 2'].map((semester) => {
                 const isActive = semester === activeSemester;
@@ -81,8 +81,8 @@ const YearCard = ({
                     onClick={() => setActiveSemester(semester)}
                     className={`${
                       isActive
-                        ? 'border-blue-300 bg-blue-50 !font-bold text-primary'
-                        : 'border-gray-300 bg-gray-50 text-gray-700'
+                        ? 'border-primary bg-bgColor !font-bold text-primary'
+                        : 'border-neutral-300 bg-neutral-50 text-neutral-700'
                     } w-full rounded border px-4 py-2 text-left font-medium`}
                   >
                     {semester}
@@ -95,13 +95,13 @@ const YearCard = ({
 
         {/* Usage Panel */}
         <div className="flex flex-1">
-          <div className="rounded border border-gray-300 bg-white p-4 w-full">
+          <div className="rounded border border-neutral-300 bg-white p-4 w-full">
             <div className="mb-3 font-semibold">{title}</div>
             <div className="grid grid-cols-1 gap-x-6 gap-y-3 break-words sm:grid-cols-2 lg:grid-cols-4">
               {dataFields.map((field) => (
                 <React.Fragment key={field.key}>
                   <div>
-                    <div className="text-gray-500">
+                    <div className="text-neutral-500">
                       {field.label} Waktu Aplikasi
                     </div>
                     <div className="font-medium leading-relaxed">
@@ -109,7 +109,7 @@ const YearCard = ({
                     </div>
                   </div>
                   <div>
-                    <div className="text-gray-500">{field.label} Jumlah</div>
+                    <div className="text-neutral-500">{field.label} Jumlah</div>
                     <div className="font-medium leading-relaxed">
                       {formatNumber(usage[field.key]?.jumlah)} {field.unit}
                     </div>

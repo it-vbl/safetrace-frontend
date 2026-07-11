@@ -60,7 +60,7 @@ export default function TambahProduksiPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
           Memuat data...
         </div>
       }
@@ -173,9 +173,9 @@ function TambahProduksiContent() {
       <BreadcrumbDetail items={crumbs} />
 
       <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-6">
-        <div className="rounded-[4px] border border-gray-300 bg-white">
-          <div className="border-b border-gray-200 p-4">
-            <Heading level={3} className="text-sm text-gray-600 sm:text-base">
+        <div className="rounded-[4px] border border-neutral-300 bg-white">
+          <div className="border-b border-neutral-200 p-4">
+            <Heading level={3} className="text-sm text-neutral-600 sm:text-base">
               HASIL PRODUKSI
             </Heading>
           </div>

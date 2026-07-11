@@ -51,17 +51,17 @@ const NavbarProfile = ({ avatarUrl, studentName, schoolType }) => {
   return (
     <div className='relative'>
       <div
-        className='bg-neutral3 flex h-12 cursor-pointer items-center gap-2 rounded-full px-3 py-2'
+        className='bg-neutral-100 flex h-12 cursor-pointer items-center gap-2 rounded-full px-3 py-2'
         onClick={handleOnChevronClick}
       >
         <Avatar url={avatarUrl} />
         <div className='flex flex-col'>
-          <Paragraph level={2} className='text-blue6 font-bold'>
+          <Paragraph level={2} className='text-primary font-bold'>
             Hi, {studentName}
           </Paragraph>
           <Paragraph level={4}>{schoolType}</Paragraph>
         </div>
-        <ExpandMore color={theme.colors.blue10} size={16} className='bg-blue0 rounded-full' />
+        <ExpandMore color={theme.colors.blue10} size={16} className='bg-bgColor rounded-full' />
       </div>
       {isDropdownOpen && (
         <div className='absolute right-0 z-[999] mt-2 w-full rounded-md bg-white shadow-sm' ref={dropdown}>

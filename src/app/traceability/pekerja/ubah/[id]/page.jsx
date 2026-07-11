@@ -36,7 +36,7 @@ export default function UbahPekerjaPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
           Memuat data...
         </div>
       }
@@ -208,7 +208,7 @@ function UbahPekerjaContent() {
   if (isFetching) {
     return (
       <div className="flex w-full items-center justify-center py-20">
-        <div className="text-gray-500">Memuat data pekerja...</div>
+        <div className="text-neutral-500">Memuat data pekerja...</div>
       </div>
     );
   }
@@ -219,7 +219,7 @@ function UbahPekerjaContent() {
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <Accordion defaultIsOpen title="IDENTITAS">
           <>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <InputText
                 label="Nama"
                 name="nama"
@@ -257,7 +257,7 @@ function UbahPekerjaContent() {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <InputText
                 label="No. KTP"
                 name="noKTP"
@@ -292,7 +292,7 @@ function UbahPekerjaContent() {
                 isRequired
               />
             </div>
-            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <InputText
                 label="No. KK"
                 name="noKK"
@@ -329,7 +329,7 @@ function UbahPekerjaContent() {
                 touched={formik.touched}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-gray-300 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-dashed border-neutral-300 py-4">
               <SelectMultiple
                 label="Jenis Pekerjaan"
                 name="jenisPekerjaan"
@@ -422,7 +422,7 @@ function UbahPekerjaContent() {
         <div className="mt-4 flex justify-end gap-2">
           <Button
             type="button"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-tertiary hover:bg-tertiary/90"
             onClick={handleCancel}
             disabled={isLoading}
           >

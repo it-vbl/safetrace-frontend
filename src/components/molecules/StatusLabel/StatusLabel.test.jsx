@@ -11,8 +11,8 @@ describe("StatusLabel component", () => {
     );
 
     expect(screen.getByText("Operation successful")).toBeInTheDocument();
-    expect(container.firstChild).toHaveClass("bg-green1");
-    expect(screen.getByText("Operation successful")).toHaveClass("text-green8");
+    expect(container.firstChild).toHaveClass("bg-bgColor");
+    expect(screen.getByText("Operation successful")).toHaveClass("text-primary");
   });
 
   test("renders correctly with status pending", () => {
@@ -21,8 +21,8 @@ describe("StatusLabel component", () => {
     );
 
     expect(screen.getByText("Operation pending")).toBeInTheDocument();
-    expect(container.firstChild).toHaveClass("bg-warning1");
-    expect(screen.getByText("Operation pending")).toHaveClass("text-warning8");
+    expect(container.firstChild).toHaveClass("bg-yellow-50");
+    expect(screen.getByText("Operation pending")).toHaveClass("text-yellow-600");
   });
 
   test("renders correctly with status failed", () => {
@@ -32,7 +32,7 @@ describe("StatusLabel component", () => {
 
     expect(screen.getByText("Operation failed")).toBeInTheDocument();
     expect(container.firstChild).toHaveClass("bg-error1");
-    expect(screen.getByText("Operation failed")).toHaveClass("text-error7");
+    expect(screen.getByText("Operation failed")).toHaveClass("text-tertiary");
   });
 });
 

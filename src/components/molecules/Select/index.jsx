@@ -300,9 +300,9 @@ const Select = ({
 
   const errorClassName = {
     field:
-      (touched?.[name] && errors?.[name]) || isError ? '!border-error5' : '',
+      (touched?.[name] && errors?.[name]) || isError ? '!border-tertiary' : '',
     helperText:
-      (touched?.[name] && errors?.[name]) || isError ? 'text-error5' : '',
+      (touched?.[name] && errors?.[name]) || isError ? 'text-tertiary' : '',
   };
 
   const hasValue = (val) => val !== null && val !== undefined && val !== '';
@@ -319,7 +319,7 @@ const Select = ({
       {label && (
         <Label
           data-testid="label-container"
-          className=" text-[12px] font-bold text-gray-500"
+          className=" text-[12px] font-bold text-neutral-500"
           isRequired={isRequired}
         >
           {label}
@@ -335,16 +335,16 @@ const Select = ({
           className={cn(
             ' flex min-h-[40px] w-full cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[6px] border bg-white px-3 py-2',
             {
-              'cursor-not-allowed border-neutral6 bg-neutral4 text-neutral7':
+              'cursor-not-allowed border-neutral-400 bg-neutral-200 text-neutral-500':
                 disabled,
-              'hover:border-blue6 focus:border-blue6 focus:outline-none':
+              'hover:border-primary focus:border-primary focus:outline-none':
                 !disabled,
-              'border-neutral6':
+              'border-neutral-400':
                 hasValue(selectedValue) &&
                 !disabled &&
                 !(touched?.[name] && errors?.[name]) &&
                 !isError,
-              'border-neutral5':
+              'border-neutral-300':
                 !hasValue(selectedValue) &&
                 !disabled &&
                 !(touched?.[name] && errors?.[name]) &&
@@ -358,8 +358,8 @@ const Select = ({
             data-testid="selected-value"
             className={cn('w-full overflow-hidden text-[14px]', {
               '': hasValue(selectedValue) && !disabled,
-              'text-neutral6': !hasValue(selectedValue) && !disabled,
-              'text-neutral7': disabled,
+              'text-neutral-400': !hasValue(selectedValue) && !disabled,
+              'text-neutral-500': disabled,
             })}
             level={2}
           >
@@ -377,7 +377,7 @@ const Select = ({
               width={20}
               height={20}
               className={cn(
-                'mr-2 scale-100 text-red-500 transition-all duration-300',
+                'mr-2 scale-100 text-tertiary transition-all duration-300',
                 {
                   'cursor-pointer hover:rotate-180 hover:scale-[1.1]':
                     !disabled,
@@ -535,7 +535,7 @@ const Select = ({
           data-testid="helper-text"
           level={4}
           className={cn(
-            'relative z-0 text-neutral7',
+            'relative z-0 text-neutral-500',
             errorClassName.helperText
           )}
         >
@@ -543,7 +543,7 @@ const Select = ({
         </Paragraph>
       )}
       {errors?.[name] && touched?.[name] && (
-        <Paragraph level={4} className="text-error mt-1 text-red-500">
+        <Paragraph level={4} className="text-error mt-1 text-tertiary">
           {errors?.[name]}
         </Paragraph>
       )}

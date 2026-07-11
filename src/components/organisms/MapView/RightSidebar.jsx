@@ -140,22 +140,22 @@ const RightSidebar = ({
       {
         label: 'Total Alert',
         value: sidebarStats.total_alert || 0,
-        color: 'text-red-600',
+        color: 'text-tertiary',
       },
       {
         label: 'Total Area Deforestasi',
         value: sidebarStats.total_luas_deforestation || 0,
-        color: 'text-red-600',
+        color: 'text-tertiary',
       },
       {
         label: 'Total Petani',
         value: sidebarStats.total_petani || 0,
-        color: 'text-blue-600',
+        color: 'text-primary',
       },
       {
         label: 'Total Kebun',
         value: sidebarStats.total_kebun || 0,
-        color: 'text-blue-600',
+        color: 'text-primary',
       },
     ],
     [sidebarStats]
@@ -334,7 +334,7 @@ const RightSidebar = ({
         }
         className={`absolute transition-all duration-200 ease-in-out ${
           mapviewRightSidebarOpen ? 'right-[276px]' : 'right-[12px]'
-        }  top-[16px] z-[500] h-[32px] w-[32px] cursor-pointer justify-end rounded-[4px] border border-gray-300 bg-white`}
+        }  top-[16px] z-[500] h-[32px] w-[32px] cursor-pointer justify-end rounded-[4px] border border-neutral-300 bg-white`}
       >
         <div className="flex h-full w-full items-center justify-center">
           <ChevronLeft
@@ -345,14 +345,14 @@ const RightSidebar = ({
       </div>
       <div
         id="right-sidebar"
-        className={`floating-scrollbar absolute right-4 top-4 z-[500] !h-[calc(100%-32px)] w-[250px] overflow-y-auto overflow-x-visible rounded-[4px] border border-gray-200 bg-white p-3 shadow-lg transition-all duration-300 ease-in-out ${
+        className={`floating-scrollbar absolute right-4 top-4 z-[500] !h-[calc(100%-32px)] w-[250px] overflow-y-auto overflow-x-visible rounded-[4px] border border-neutral-200 bg-white p-3 shadow-lg transition-all duration-300 ease-in-out ${
           mapviewRightSidebarOpen ? 'translate-x-0' : 'translate-x-[200%]'
         }`}
       >
         <div className="flex flex-col gap-6">
           {/* PERIODE Section */}
           <div className="flex flex-col gap-3">
-            <Heading level={6} className="text-[14px] font-bold text-gray-800">
+            <Heading level={6} className="text-[14px] font-bold text-neutral-800">
               PERIODE
             </Heading>
             <DateRange
@@ -366,7 +366,7 @@ const RightSidebar = ({
           </div>
 
           <div className="flex flex-col gap-3">
-            <Heading level={6} className="text-[14px] font-bold text-gray-800">
+            <Heading level={6} className="text-[14px] font-bold text-neutral-800">
               STATISTIK
             </Heading>
 
@@ -374,7 +374,7 @@ const RightSidebar = ({
             <div className="grid grid-cols-2 gap-2">
               {statistics.map((stat, index) => (
                 <div key={index} className="flex flex-col items-start">
-                  <div className="mt-1 text-xs font-bold leading-tight text-gray-600">
+                  <div className="mt-1 text-xs font-bold leading-tight text-neutral-600">
                     {stat.label}
                   </div>
                   <span className={`text-xl font-bold ${stat.color}`}>
@@ -389,14 +389,14 @@ const RightSidebar = ({
           <div className="flex flex-col gap-2">
             <Heading
               level={6}
-              className="text-[12px] font-semibold text-gray-800"
+              className="text-[12px] font-semibold text-neutral-800"
             >
               Total Penjualan
             </Heading>
             <div className="h-[200px] w-full">
               {loading ? (
                 <div className="flex h-full items-center justify-center">
-                  <span className="text-xs text-gray-500">Loading...</span>
+                  <span className="text-xs text-neutral-500">Loading...</span>
                 </div>
               ) : (
                 <Bar data={totalPenjualanChartData} options={barChartOptions} />
@@ -408,14 +408,14 @@ const RightSidebar = ({
           <div className="flex flex-col gap-2">
             <Heading
               level={6}
-              className="text-[12px] font-semibold text-gray-800"
+              className="text-[12px] font-semibold text-neutral-800"
             >
               Berat Timbangan
             </Heading>
             <div className="h-[200px] w-full">
               {loading ? (
                 <div className="flex h-full items-center justify-center">
-                  <span className="text-xs text-gray-500">Loading...</span>
+                  <span className="text-xs text-neutral-500">Loading...</span>
                 </div>
               ) : (
                 <Bar data={beratTimbanganChartData} options={barChartOptions} />
@@ -427,14 +427,14 @@ const RightSidebar = ({
           <div className="flex flex-col gap-2">
             <Heading
               level={6}
-              className="text-[12px] font-semibold text-gray-800"
+              className="text-[12px] font-semibold text-neutral-800"
             >
               Berat Timbangan per Pabrik
             </Heading>
             <div className="h-[250px] w-full">
               {loading ? (
                 <div className="flex h-full items-center justify-center">
-                  <span className="text-xs text-gray-500">Loading...</span>
+                  <span className="text-xs text-neutral-500">Loading...</span>
                 </div>
               ) : (
                 <Doughnut

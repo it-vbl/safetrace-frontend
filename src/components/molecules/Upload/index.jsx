@@ -8,7 +8,7 @@ import Label from '@/components/atoms/Label';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import UploadAction from '@/components/atoms/UploadAction';
 
-import Toast from '../Toast';
+import { toast } from 'react-toastify';
 
 const Upload = ({
   error = false,
@@ -26,7 +26,7 @@ const Upload = ({
 }) => {
   const [errorState, setErrorState] = useState('');
   const [valueFile, setValueFile] = useState(file);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
+
 
   const validateFile = (file) => {
     if (!file || !file.name) return 'File tidak valid';
@@ -146,7 +146,9 @@ const Upload = ({
     setValueFile(value);
     setErrorState('');
     onChangeValue({ name, size, uploadDate, value });
-    setShowSuccessToast(true);
+    if (isToastShowed) {
+      toast.success('Gambar Berhasil Ditambahkan!');
+    }
   };
 
   useEffect(() => {
@@ -293,8 +295,8 @@ const Upload = ({
     <div className="flex flex-col gap-1" data-testid="upload">
       {label && <Label isRequired={isRequired}>{label}</Label>}
       <div
-        className={`flex items-center justify-between rounded-md border-2 px-3 py-3 md:px-6 md:py-[21px] ${error ? 'border-error5' : 'border-gray-400'
-          } gap-x-2 border-dashed ${disabled ? 'bg-gray-200' : ''}`}
+        className={`flex items-center justify-between rounded-md border-2 px-3 py-3 md:px-6 md:py-[21px] ${error ? 'border-tertiary' : 'border-neutral-400'
+          } gap-x-2 border-dashed ${disabled ? 'bg-neutral-200' : ''}`}
         data-testid="upload-container"
       >
         <div className="flex flex-col overflow-hidden">
@@ -341,7 +343,7 @@ const Upload = ({
         <div className="flex-shrink-0">
           {valueFile ? (
             <Button
-              className="!bg-blue5 !px-2 !py-1 text-xs hover:!bg-opacity-50 sm:text-sm"
+              className="!bg-primary !px-2 !py-1 text-xs hover:!bg-opacity-50 sm:text-sm"
               size="extraSmall"
               type="button"
               onClick={handleOnSeeClick}
@@ -354,8 +356,8 @@ const Upload = ({
               disabled={disabled}
               onChange={handleOnFileChange}
               className={`h-auto cursor-pointer rounded-md border border-primary px-2 py-1 text-[10px] font-bold leading-[14px] text-primary sm:px-4 sm:py-[7px] sm:text-[12px] ${!disabled
-                  ? 'hover:bg-primaryLight1'
-                  : '!border-gray-400 text-gray-400'
+                  ? 'hover:bg-bgColor'
+                  : '!border-neutral-400 text-neutral-400'
                 } md:h-7`}
               id={`upload-file-${keyField}`}
               label="Unggah File"
@@ -366,17 +368,9 @@ const Upload = ({
           )}
         </div>
       </div>
-      {errorState && <p className="mt-2 text-sm text-red-500">{errorState}</p>}
+      {errorState && <p className="mt-2 text-sm text-tertiary">{errorState}</p>}
 
-      {isToastShowed && (
-        <Toast
-          show={showSuccessToast}
-          toastId={`upload-file-component-${label?.trim('')}`}
-          message="Gambar Berhasil Ditambahkan!"
-          type="success"
-          setToast={() => setShowSuccessToast(false)}
-        />
-      )}
+
     </div>
   );
 };

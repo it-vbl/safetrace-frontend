@@ -31,7 +31,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 const DataKebun = ({ data }) => {
   const [activeTab, setActiveTab] = useState('Lahan');
-  const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
+  const activeClassName = 'font-bold text-primary bg-neutral-100 border border-neutral-300';
 
   const [detailKebun, setDetailKebun] = useState(null);
 
@@ -81,10 +81,10 @@ const DataKebun = ({ data }) => {
 
   return (
     <div className='flex flex-row items-start gap-2'>
-      <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
+      <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-neutral-300 p-2'>
         {tabs.map((tab, index) => (
           <div
-            className={`w-full cursor-pointer rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${
+            className={`w-full cursor-pointer rounded-[4px] p-3 text-[14px] hover:bg-neutral-100 ${
               activeTab === tab.label ? activeClassName : ''
             }`}
             key={index}
@@ -95,7 +95,7 @@ const DataKebun = ({ data }) => {
           </div>
         ))}
       </div>
-      <div className='flex w-full flex-[8] items-start rounded-[4px] border border-gray-300 bg-gray-50 p-4'>
+      <div className='flex w-full flex-[8] items-start rounded-[4px] border border-neutral-300 bg-neutral-50 p-4'>
         {tabs.find((tab) => tab.label === activeTab)?.render()}
       </div>
     </div>
@@ -187,7 +187,7 @@ const MapDashboard = () => {
 
   return (
     <div className='flex h-full w-full flex-col'>
-      <div className='flex w-full flex-row justify-between border border-gray-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
+      <div className='flex w-full flex-row justify-between border border-neutral-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
         <div>ID PEKEBUN : {idPekebun}</div>
         <div>PENDATA : HADANI / HADANI@GMAIL.COM</div>
         <div>TERAKHIR DIUBAH : {moment(updated_at).format('DD-MM-YYYY hh:mm:ss')}</div>
@@ -257,7 +257,7 @@ const MapDashboard = () => {
               }
               prefixTitleComponent={
                 item.is_draft ? (
-                  <div className='ml-3 rounded-[4px] bg-blue-100 px-3 py-1 text-[12px] font-normal text-blue-800'>
+                  <div className='ml-3 rounded-[4px] bg-bgColor px-3 py-1 text-[12px] font-normal text-primary'>
                     Draft
                   </div>
                 ) : (
@@ -282,7 +282,7 @@ const MapDashboard = () => {
         <Portal>
           <div className='w-full border-t border-t-gray-300 bg-white px-8 py-4  '>
             {listKebun.length > 0 && selectedKebunId.length === 0 && (
-              <div className='mb-4 flex w-full flex-row items-center justify-center gap-2 bg-blue-100 py-2 text-center text-[14px] text-blue-950'>
+              <div className='mb-4 flex w-full flex-row items-center justify-center gap-2 bg-bgColor py-2 text-center text-[14px] text-primary'>
                 <BiBell color={theme.colors.blue[900]} size={24} /> Pilihlah data kebun yang ingin dilampirkan dalam
                 proses pengajuan STDB baru
               </div>

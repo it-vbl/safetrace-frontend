@@ -19,7 +19,7 @@ describe("Summary Component", () => {
   });
 
   test("applies custom lastTextColor to the last item", () => {
-    const lastTextColor = "text-red-500";
+    const lastTextColor = "text-tertiary";
     render(<Summary data={mockData} lastTextColor={lastTextColor} />);
 
     const lastValue = screen.getAllByText(mockData[2].value)[0];

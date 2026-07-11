@@ -92,7 +92,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-300 bg-white p-6">
+      <div className="rounded-lg border border-neutral-300 bg-white p-6">
         <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
         <form onSubmit={formik.handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
@@ -131,7 +131,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
               {formik.touched.file_peta &&
                 formik.errors.file_peta &&
                 !petaFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_peta}
                   </p>
                 )}
@@ -171,7 +171,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
               {formik.touched.file_legalitas &&
                 formik.errors.file_legalitas &&
                 !legalitasFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_legalitas}
                   </p>
                 )}
@@ -211,7 +211,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
               {formik.touched.file_stdb &&
                 formik.errors.file_stdb &&
                 !stdbFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_stdb}
                   </p>
                 )}
@@ -251,7 +251,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
               {formik.touched.file_rspo &&
                 formik.errors.file_rspo &&
                 !rspoFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_rspo}
                   </p>
                 )}
@@ -291,7 +291,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
               {formik.touched.file_ispo &&
                 formik.errors.file_ispo &&
                 !ispoFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_ispo}
                   </p>
                 )}
@@ -303,7 +303,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
           <div className="flex flex-col-reverse sm:flex-row gap-2">
             <Button
               type="button"
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-tertiary hover:bg-tertiary/90"
               onClick={onCancel}
               disabled={isSubmitting}
             >
@@ -311,7 +311,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
             </Button>
             <Button
               type="button"
-              className="bg-gray-600 hover:bg-gray-700"
+              className="bg-neutral-600 hover:bg-neutral-700"
               onClick={onPrevious}
               disabled={isSubmitting}
             >
@@ -320,7 +320,7 @@ const Lampiran = ({ idKebun, onNext, onPrevious, onCancel, isSubmitting }) => {
           </div>
           <Button
             type="button"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-secondary"
             onClick={handleSubmit}
             isLoading={isSubmitting}
           >

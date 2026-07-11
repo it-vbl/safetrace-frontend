@@ -64,7 +64,7 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
 
   const yearOptions = useYearOptions();
 
-  const activeClassName = 'font-bold text-primary bg-gray-100 ';
+  const activeClassName = 'font-bold text-primary bg-neutral-100 ';
 
   useEffect(() => {
     setListKomoditas(data?.komoditas);
@@ -107,7 +107,7 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
       <div className='flex flex-row items-start justify-start'>
         {dataKomoditas?.map((data, index) => (
           <div
-            className={`cursor-pointer border-r border-t border-r-gray-300 border-t-gray-300 p-3 py-2 text-[14px] hover:bg-slate-100 ${activeKomoditasIndex === index ? activeClassName : ''
+            className={`cursor-pointer border-r border-t border-r-gray-300 border-t-gray-300 p-3 py-2 text-[14px] hover:bg-neutral-100 ${activeKomoditasIndex === index ? activeClassName : ''
               } ${index == 0 ? ' rounded-tl-[4px] border-x border-x-gray-300' : ''} ${index === komoditas?.length - 1 ? ' rounded-tr-[4px]' : ''
               }`}
             key={index}
@@ -128,7 +128,7 @@ const DataKomoditas = ({ komoditas, formik, data, passed = false }) => {
           </Button>
         ) : null}
       </div>
-      <div className='border border-gray-300 p-4'>
+      <div className='border border-neutral-300 p-4'>
         <div className='flex flex-1 font-bold'>Informasi Komoditas</div>
         <div className='grid h-auto w-full grid-cols-3 gap-4'>
           <Select

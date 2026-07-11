@@ -11,7 +11,7 @@ const Accordion = ({
 }) => {
   const [isOpen, setIsOpen] = useState(defaultIsOpen);
   return (
-    <div className="w-full border border-gray-300 bg-white">
+    <div className="w-full border border-neutral-300 bg-white">
       <div
         className="flex w-full cursor-pointer flex-row items-center p-4"
         onClick={() => setIsOpen(!isOpen)}

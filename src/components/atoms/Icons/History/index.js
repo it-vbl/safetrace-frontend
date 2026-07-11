@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 import theme from '@/utils/tailwindTheme';
 
-const History = ({ color = theme.colors.neutral9, size = 16, ...props }) => {
+const History = ({ color = theme.colors.neutral[700], size = 16, ...props }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path

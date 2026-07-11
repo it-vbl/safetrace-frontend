@@ -14,10 +14,10 @@ const sizeClassName = {
 
 const variantClassName = {
   primary: 'bg-primary hover:bg-primary/10 text-white disabled:bg-grey-200',
-  secondary: 'border border-primary hover:bg-primary/10 text-primary disabled:bg-gray-200',
+  secondary: 'border border-primary hover:bg-primary/10 text-primary disabled:bg-neutral-200',
   tertiary:
-    'border-neutral6 border bg-neutral1 hover:bg-secondary2 disabled:bg-gray-200 text-neutral8 disabled:bg-neutral3',
-  danger: 'hover:bg-error1 disabled:bg-gray-200 bg-error6 text-white disabled:bg-neutral3',
+    'border-neutral-400 border bg-white hover:bg-secondary2 disabled:bg-neutral-200 text-neutral-600 disabled:bg-neutral-100',
+  danger: 'hover:bg-error1 disabled:bg-neutral-200 bg-tertiary text-white disabled:bg-neutral-100',
 };
 
 const iconColor = {
@@ -47,7 +47,7 @@ const Button = ({
     baseClassName,
     sizeClassName[size],
     variantClassName[variant],
-    (isLoading || isDisabled) && 'cursor-not-allowed !bg-gray-300 border-none text-gray-500',
+    (isLoading || isDisabled) && 'cursor-not-allowed !bg-neutral-300 border-none text-neutral-500',
     className
   );
 

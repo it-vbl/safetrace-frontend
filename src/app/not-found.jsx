@@ -9,12 +9,12 @@ export default function NotFound() {
       <Heading level={2} className="mb-1 text-lg font-bold">
         Halaman Tidak Ditemukan
       </Heading>
-      <Paragraph level={3} className="mb-4 text-center text-sm text-gray-500">
+      <Paragraph level={3} className="mb-4 text-center text-sm text-neutral-500">
         Maaf, halaman yang Anda cari tidak dapat ditemukan.
       </Paragraph>
       <Link
         href="/"
-        className="rounded bg-primary px-4 py-2 text-white hover:bg-primaryDark4"
+        className="rounded bg-primary px-4 py-2 text-white hover:bg-primary"
       >
         Kembali ke Beranda
       </Link>

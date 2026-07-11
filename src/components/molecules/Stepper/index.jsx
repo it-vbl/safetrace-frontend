@@ -14,7 +14,7 @@ const Stepper = ({
   return (
     <div
       className={cn(
-        'flex w-full overflow-x-auto items-center justify-start md:justify-center gap-2 border border-gray-300 p-2 rounded-[4px] bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
+        'flex w-full overflow-x-auto items-center justify-start md:justify-center gap-2 border border-neutral-300 p-2 rounded-[4px] bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
         className
       )}
     >
@@ -31,7 +31,7 @@ const Stepper = ({
             key={stepNumber}
             className={cn(
               'flex flex-shrink-0 items-center cursor-pointer px-3 md:px-4 py-2 transition-all duration-200 whitespace-nowrap',
-              isCurrent && 'bg-gray-100 rounded-lg ',
+              isCurrent && 'bg-neutral-100 rounded-lg ',
               isDisabled && 'cursor-not-allowed'
             )}
             onClick={() => onStepClick && onStepClick(stepNumber)}
@@ -40,12 +40,12 @@ const Stepper = ({
             <div
               className={cn(
                 'flex items-center justify-center w-6 h-6 rounded-full border mr-3',
-                isCompleted && 'border-blue-600 bg-blue-600 text-white',
-                isCurrent && 'border-blue-600 text-blue-600',
+                isCompleted && 'border-primary bg-primary text-white',
+                isCurrent && 'border-primary text-primary',
                 isCompleted && isCurrent && ' text-white',
                 isFuture &&
                   !isCompleted &&
-                  'border-gray-300 bg-white text-gray-500'
+                  'border-neutral-300 bg-white text-neutral-500'
               )}
             >
               {isCompleted ? (
@@ -69,7 +69,7 @@ const Stepper = ({
             <span
               className={cn(
                 'text-sm font-bold',
-                (isCompleted || isCurrent) && 'text-blue-600',
+                (isCompleted || isCurrent) && 'text-primary',
                 isFuture && 'text-black'
               )}
             >

@@ -1,6 +1,6 @@
 import theme from '@/utils/tailwindTheme';
 
-const PinAddress = ({ size = 24, color = theme.colors.blue6 }) => {
+const PinAddress = ({ size = 24, color = theme.colors.primary }) => {
   return (
     <svg width={size} height={size} viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <path

@@ -106,7 +106,7 @@ const LoginPage = () => {
             />
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:px-10">
+          <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm sm:px-10">
             <div className="flex flex-col gap-2 text-center">
               <Heading
                 level={1}
@@ -116,7 +116,7 @@ const LoginPage = () => {
               </Heading>
               <Paragraph
                 level={2}
-                className="text-sm font-normal text-gray-700 sm:text-base"
+                className="text-sm font-normal text-neutral-700 sm:text-base"
               >
                 Masukan email dan kata sandi untuk mulai menggunakan dashboard
                 {` ${brand.appName}.`}
@@ -175,7 +175,7 @@ const LoginPage = () => {
             />
           </div>
 
-          <div className="text-center text-xs font-medium text-gray-600">
+          <div className="text-center text-xs font-medium text-neutral-600">
             © {new Date().getFullYear()} {brand.appName}. All rights reserved.
           </div>
         </div>

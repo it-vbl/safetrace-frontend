@@ -37,7 +37,7 @@ const DataKebun = ({
   onTabChange = () => { },
   komoditasFilled = false,
 }) => {
-  const activeClassName = 'font-bold text-primary bg-gray-100 border border-gray-300';
+  const activeClassName = 'font-bold text-primary bg-neutral-100 border border-neutral-300';
   const passedClassName = 'text-primary';
 
   const [detailKebun, setDetailKebun] = useState(null);
@@ -109,10 +109,10 @@ const DataKebun = ({
 
   return (
     <div className='flex flex-row items-start gap-2'>
-      <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-gray-300 p-2'>
+      <div className='flex h-auto flex-[2] flex-col rounded-[4px] border border-neutral-300 p-2'>
         {tabs.map((tab, index) => (
           <div
-            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-[4px] p-3 text-[14px] hover:bg-slate-100 ${activeTab === tab.value
+            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-[4px] p-3 text-[14px] hover:bg-neutral-100 ${activeTab === tab.value
                 ? activeClassName
                 : initialActiveTab > tab.value || (komoditasFilled && tab.value === 2)
                   ? passedClassName
@@ -129,7 +129,7 @@ const DataKebun = ({
           </div>
         ))}
       </div>
-      <div className='flex w-full flex-[8] items-start rounded-[4px] border border-gray-300 bg-gray-50 p-4'>
+      <div className='flex w-full flex-[8] items-start rounded-[4px] border border-neutral-300 bg-neutral-50 p-4'>
         {tabs.find((tab) => tab.value === activeTab)?.render()}
       </div>
     </div>
@@ -347,7 +347,7 @@ const TambahKebunContent = () => {
 
   return (
     <div className='relative max-h-[calc(100vh-72px)] w-full'>
-      <div className='flex w-full flex-row justify-between border border-gray-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
+      <div className='flex w-full flex-row justify-between border border-neutral-300 bg-secondary p-4 text-[12px] italic tracking-[8%]'>
         <div>ID PEKEBUN : {idPekebun}</div>
         <div>PENDATA : HADANI / HADANI@GMAIL.COM</div>
         <div>TERAKHIR DIUBAH : {moment(updated_at).format('DD-MM-YYYY hh:mm:ss')}</div>
@@ -403,7 +403,7 @@ const TambahKebunContent = () => {
 const TambahKebun = () => {
   return (
     <Suspense fallback={
-      <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+      <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
         Memuat data...
       </div>
     }>

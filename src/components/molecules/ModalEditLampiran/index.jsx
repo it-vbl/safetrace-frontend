@@ -196,7 +196,7 @@ const ModalEditLampiran = ({
       className="w-[95vw] sm:w-[90vw] lg:max-w-4xl max-w-none"
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
-        <div className="rounded-lg border border-gray-300 bg-white p-6">
+        <div className="rounded-lg border border-neutral-300 bg-white p-6">
           <h3 className="mb-4 text-lg font-semibold">LAMPIRAN KEBUN</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
             <div>
@@ -226,7 +226,7 @@ const ModalEditLampiran = ({
               {formik.touched.file_peta &&
                 formik.errors.file_peta &&
                 !petaFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_peta}
                   </p>
                 )}
@@ -258,7 +258,7 @@ const ModalEditLampiran = ({
               {formik.touched.file_legalitas &&
                 formik.errors.file_legalitas &&
                 !legalitasFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_legalitas}
                   </p>
                 )}
@@ -290,7 +290,7 @@ const ModalEditLampiran = ({
               {formik.touched.file_stdb &&
                 formik.errors.file_stdb &&
                 !stdbFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_stdb}
                   </p>
                 )}
@@ -322,7 +322,7 @@ const ModalEditLampiran = ({
               {formik.touched.file_rspo &&
                 formik.errors.file_rspo &&
                 !rspoFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_rspo}
                   </p>
                 )}
@@ -354,7 +354,7 @@ const ModalEditLampiran = ({
               {formik.touched.file_ispo &&
                 formik.errors.file_ispo &&
                 !ispoFile && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-tertiary">
                     {formik.errors.file_ispo}
                   </p>
                 )}

@@ -42,13 +42,13 @@ describe("Toggle", () => {
     const { getByTestId } = render(<Toggle disabled />);
 
     expect(getByTestId("toggle-background")).toHaveClass(
-      "bg-neutral3 after:border-neutral3",
+      "bg-neutral-100 after:border-neutral-100",
     );
   });
   test("ClassName should be match in value true and disabled false", () => {
     const { getByTestId } = render(<Toggle value={true} disabled={false} />);
 
-    expect(getByTestId("toggle-background")).toHaveClass("bg-green6");
+    expect(getByTestId("toggle-background")).toHaveClass("bg-primary");
   });
 });
 

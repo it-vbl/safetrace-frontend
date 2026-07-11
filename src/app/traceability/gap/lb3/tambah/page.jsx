@@ -122,9 +122,9 @@ const TambahTahunLB3PageContent = () => {
 
       <div className="flex flex-col gap-6">
         {/* Form Section */}
-        <section className="rounded border border-gray-300 bg-white p-6">
+        <section className="rounded border border-neutral-300 bg-white p-6">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-neutral-800">
               LIMBAH BAHAN BERBAHAYA BERACUN
             </h2>
           </div>
@@ -219,7 +219,7 @@ const TambahTahunLB3Page = () => {
   return (
     <Suspense
       fallback={
-        <div className="flex w-full justify-center py-10 text-sm text-gray-500">
+        <div className="flex w-full justify-center py-10 text-sm text-neutral-500">
           Memuat data...
         </div>
       }

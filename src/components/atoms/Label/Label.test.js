@@ -30,7 +30,7 @@ describe("Label", () => {
   });
 
   test("Pass className props", () => {
-    const { container } = render(<Label className="bg-red-400" />);
+    const { container } = render(<Label className="bg-tertiary" />);
 
     expect(container).toMatchSnapshot();
   });

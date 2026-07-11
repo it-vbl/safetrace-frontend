@@ -31,7 +31,7 @@ describe("CustomTableColSeeAction", () => {
   it("should have the correct text color", () => {
     render(<CustomTableColSeeAction />);
     const text = screen.getByText("Lihat");
-    expect(text).toHaveClass("text-blue9");
+    expect(text).toHaveClass("text-primary");
   });
 
   it("should have a cursor pointer style", () => {

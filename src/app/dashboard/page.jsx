@@ -147,7 +147,7 @@ const MapDashboard = () => {
 
   const DashboardCard = ({ value, tagBg, tag }) => {
     return (
-      <div className="flex flex-col items-start rounded-[2px] border border-gray-300 p-3 sm:p-4">
+      <div className="flex flex-col items-start rounded-[2px] border border-neutral-300 p-3 sm:p-4">
         <span className="text-2xl sm:text-3xl lg:text-4xl font-bold">
           {numberFormat(value)}
         </span>

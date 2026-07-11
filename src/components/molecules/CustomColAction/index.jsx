@@ -52,7 +52,7 @@ const CustomColAction = ({ params, actions }) => {
               data-testid={"table-action-" + params.data.no}
               id={"table-action-" + params.data.no}
               style={{ left: location.left, top: location.top }}
-              className="bg-primary5 absolute top-9 -translate-x-full translate-y-4 rounded-md border-neutral4 bg-white p-1 shadow-sm"
+              className="bg-primary5 absolute top-9 -translate-x-full translate-y-4 rounded-md border-neutral-200 bg-white p-1 shadow-sm"
               ref={modalRef}
             >
               {actions?.map((item, index) => (

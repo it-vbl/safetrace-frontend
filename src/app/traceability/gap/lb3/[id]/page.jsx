@@ -262,8 +262,8 @@ const LB3DetailPage = () => {
         <BreadcrumbDetail items={crumbs} />
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Memuat detail LB3...</p>
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+            <p className="mt-4 text-neutral-600">Memuat detail LB3...</p>
           </div>
         </div>
       </div>
@@ -286,12 +286,12 @@ const LB3DetailPage = () => {
 
       <div className="flex flex-col gap-6">
         {/* DETAIL KEBUN Section */}
-        <section className="rounded border border-gray-300 bg-white p-6">
+        <section className="rounded border border-neutral-300 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">DETAIL KEBUN</h3>
           </div>
 
-          <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-neutral-700 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             <BorderBottomColData
               label="Id Kebun"
               value={kebunData.idKebun || '-'}
@@ -327,20 +327,20 @@ const LB3DetailPage = () => {
         {tahunData.map((tahun, index) => (
           <section
             key={`tahun-${tahun.tahun}-${index}`}
-            className="rounded border border-gray-300 bg-white p-6"
+            className="rounded border border-neutral-300 bg-white p-6"
           >
             <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <h3 className="text-lg font-semibold">TAHUN {tahun.tahun}</h3>
               {!isViewOnly && (
                 <div className="flex gap-4">
                   <button
-                    className="text-sm font-medium text-red-600 underline hover:text-red-800"
+                    className="text-sm font-medium text-tertiary underline hover:text-tertiary"
                     onClick={() => handleDeleteTahun(tahun.tahun)}
                   >
                     Hapus
                   </button>
                   <button
-                    className="text-sm font-medium text-blue-700 underline hover:text-blue-800"
+                    className="text-sm font-medium text-primary underline hover:text-primary"
                     onClick={() => handleEditTahun(tahun.tahun)}
                   >
                     Ubah Data
@@ -349,7 +349,7 @@ const LB3DetailPage = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-gray-700 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 break-words text-sm text-neutral-700 sm:grid-cols-3">
               {tahun.wasteData.map((waste, wasteIndex) => (
                 <BorderBottomColData
                   key={`waste-${waste.type}-${wasteIndex}`}
