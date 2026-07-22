@@ -8,11 +8,11 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
-import assets from '@/config/assets';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import InputText from '@/components/molecules/InputText';
+import assets from '@/config/assets';
 import { forgotPasswordReset } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 

@@ -8,10 +8,10 @@ import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
-import assets from '@/config/assets';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import OTPInput from '@/components/molecules/OTPInput';
+import assets from '@/config/assets';
 import { forgotPassword, forgotPasswordVerifyOTP } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 
