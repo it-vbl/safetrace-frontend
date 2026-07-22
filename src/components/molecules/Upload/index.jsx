@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 
 import Button from '@/components/atoms/Button';
 import Document from '@/components/atoms/Icons/Document';
 import Label from '@/components/atoms/Label';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
 import UploadAction from '@/components/atoms/UploadAction';
-
-import { toast } from 'react-toastify';
 
 const Upload = ({
   error = false,

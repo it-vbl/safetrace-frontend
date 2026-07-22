@@ -25,9 +25,9 @@ export default function SipekebunLogo({ className, isNavbar = false }) {
       <Image
         src={logoSrc}
         width={200}
-        height={isNavbar ? (mounted && isMobileScreen ? 32 : 16) : 42}
+        height={isNavbar ? (mounted && isMobileScreen ? 32 : 42) : 42}
         alt="logo"
-        style={{ width: 'auto', height: isNavbar ? (mounted && isMobileScreen ? 32 : 16) : 42 }}
+        style={{ width: 'auto', height: isNavbar ? (mounted && isMobileScreen ? 32 : 42) : 42 }}
       />
     </div>
   );

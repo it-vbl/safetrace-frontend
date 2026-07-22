@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/generate-image-manifest.js",
+    "prebuild": "node scripts/generate-image-manifest.js",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",

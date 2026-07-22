@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
-import bannerLogin from '@/assets/images/login-bg.png';
+import assets from '@/config/assets';
 import Button from '@/components/atoms/Button';
 import Heading from '@/components/atoms/Typography/Heading';
 import Paragraph from '@/components/atoms/Typography/Paragraph';
@@ -16,7 +16,7 @@ import InputText from '@/components/molecules/InputText';
 import { forgotPassword } from '@/services/auth';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 
-import LogoSipekebun from '../../../public/keling-kumang-logo.png';
+
 
 const LoginPage = () => {
   const router = useRouter();
@@ -60,7 +60,7 @@ const LoginPage = () => {
       <div className="relative max-lg:hidden py-8 pl-8 lg:flex lg:w-[60%] lg:shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/login-bg.png"
+          src={assets.login.background}
           alt="banner-login"
           className="h-full w-full rounded-xl object-cover"
         />
@@ -69,7 +69,7 @@ const LoginPage = () => {
       <div className="flex w-full items-center justify-center px-8 lg:w-[40%] lg:shrink-0">
         <div className="w-full max-w-xl">
           <div className="mb-8 flex items-center justify-center">
-            <Image src={LogoSipekebun} width="auto" height={42} alt="logo" />
+            <Image src={assets.login.logo} width={200} height={42} style={{ width: 'auto', height: 42 }} alt="logo" />
           </div>
 
           <div className="mb-6 rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">

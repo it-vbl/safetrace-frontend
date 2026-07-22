@@ -1,6 +1,7 @@
 const brand = {
-  appName: 'SIP',
+  appName: 'Safetrace',
   appDescription: 'Sistem Informasi Perkebunan',
+  metaTitle: 'Safetrace - Dashboard',
   colors: {
     primary: '#167D3C',
     secondary: '#157F3D',

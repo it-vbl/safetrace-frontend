@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 
 import ClientLayout from '@/components/providers/ClientLayout';
 import { MobileScreenProvider } from '@/components/providers/MobileScreenProvider';
+import brand from '@/config/brand';
 import { ReduxProvider } from '@/libs/redux/provider';
 
 import '@/styles/globals.css';
@@ -12,7 +13,7 @@ const DMSans = DM_Sans({
 });
 
 export const metadata = {
-  title: 'SIP - Dashboard',
+  title: brand.metaTitle,
 };
 
 // Prevent Next.js Full Route Cache from setting s-maxage=31536000 on HTML.

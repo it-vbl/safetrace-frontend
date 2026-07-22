@@ -1,19 +1,30 @@
+import manifest from '@/assets/image-manifest.json';
+
+const getImage = (fileName: string) => {
+  const ext = (manifest as Record<string, string>)[fileName];
+  if (!ext) {
+    console.warn(`[Assets] Image "${fileName}" not found in public directory.`);
+    return `/${fileName}.png`; // fallback
+  }
+  return `/${fileName}.${ext}`;
+};
+
 const assets = {
   navbar: {
-    logo: '/sistem-informasi-petani.png',
-    logoMobile: '/sistem-informasi-petani-mobile.png',
-    logoCompact: '/keling-kumang-logo.png',
+    logo: getImage('safetrace'),
+    logoMobile: getImage('safetrace'),
+    logoCompact: getImage('safetrace'),
   },
   login: {
-    logo: '/keling-kumang-logo.png',
-    background: '/login-bg.png',
-    partnership: '/partnership.png',
+    logo: getImage('safetrace'),
+    background: getImage('login-bg'),
+    partnership: getImage('partnership'),
   },
   sidebar: {
     institutionalLogos: [
-      '/logos/logo1.png',
-      '/logos/logo2.png',
-      '/logos/logo3.png',
+      getImage('logos/logo1'),
+      getImage('logos/logo2'),
+      getImage('logos/logo3'),
     ],
   },
 };
