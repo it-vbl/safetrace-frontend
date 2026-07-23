@@ -24,7 +24,7 @@ const noSidebarRoutes = [
   '/forgot-password/reset-password',
   '/register',
 ];
-const noPaddingRoutes = [...noSidebarRoutes, '/stdb/ringkasan'];
+const noPaddingRoutes = [...noSidebarRoutes];
 
 const publicRoutes = [
   '/login',

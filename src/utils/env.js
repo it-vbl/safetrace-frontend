@@ -12,4 +12,5 @@ for (const key of requiredVars) {
   }
 }
 
-export default env;
+module.exports = env;
+module.exports.default = env;
