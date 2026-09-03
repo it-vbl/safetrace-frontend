@@ -69,6 +69,7 @@ const TraceabilityPetaniDetail = () => {
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
+  const [fotoProfileFile, setFotoProfileFile] = useState(null);
   const [createLampiranLoading, setCreateLampiranLoading] = useState(false);
 
   const crumbs = [
@@ -137,7 +138,7 @@ const TraceabilityPetaniDetail = () => {
     } catch (error) {
       console.error('Error updating lampiran:', error);
       toast.error('Gagal memperbarui lampiran: ' +
-          (error?.response?.data?.message || error.message),);
+        (error?.response?.data?.message || error.message),);
     } finally {
       setUpdateLampiranLoading(false);
     }
@@ -183,7 +184,7 @@ const TraceabilityPetaniDetail = () => {
     } catch (error) {
       console.error('Error updating petani:', error);
       toast.error('Gagal memperbarui data petani: ' +
-          (error?.response?.data?.message || error.message),);
+        (error?.response?.data?.message || error.message),);
     } finally {
       setUpdateLoading(false);
     }
@@ -192,7 +193,7 @@ const TraceabilityPetaniDetail = () => {
   const handleCreateLampiran = async () => {
     setCreateLampiranLoading(true);
 
-    if (!ktpFile && !kkFile && !nibFile) {
+    if (!ktpFile && !kkFile && !nibFile && !fotoProfileFile) {
       toast.error('Mohon pilih minimal 1 file lampiran',);
 
       setCreateLampiranLoading(false);
@@ -202,9 +203,10 @@ const TraceabilityPetaniDetail = () => {
     try {
       const payload = {
         petani_id: id,
-        file_ktp: ktpFile,
-        file_kk: kkFile,
-        file_nib: nibFile,
+        ...(fotoProfileFile && { foto_profile: fotoProfileFile }),
+        ...(ktpFile && { file_ktp: ktpFile }),
+        ...(kkFile && { file_kk: kkFile }),
+        ...(nibFile && { file_nib: nibFile }),
       };
 
       await createLampiranPetani(payload);
@@ -216,10 +218,11 @@ const TraceabilityPetaniDetail = () => {
       setKtpFile(null);
       setKkFile(null);
       setNibFile(null);
+      setFotoProfileFile(null);
     } catch (error) {
       console.error('Error creating lampiran:', error);
       toast.error('Gagal mengunggah lampiran: ' +
-          (error?.response?.data?.message || error.message),);
+        (error?.response?.data?.message || error.message),);
     } finally {
       setCreateLampiranLoading(false);
     }
@@ -352,7 +355,26 @@ const TraceabilityPetaniDetail = () => {
       }
       return (
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-2 md:gap-6">
+            <Upload
+              label="Foto Profil"
+              file={
+                fotoProfileFile
+                  ? {
+                    name: fotoProfileFile.name,
+                    size: (fotoProfileFile.size / 1048576).toFixed(1),
+                    uploadDate: new Date().toLocaleDateString('en-US'),
+                    value: fotoProfileFile,
+                  }
+                  : null
+              }
+              onChangeValue={(data) => setFotoProfileFile(data.value)}
+              allowedFiles={['image/jpeg', 'image/png', 'image/webp']}
+              maxSize={10}
+              keyField="foto_profile"
+              name="foto_profile"
+            />
+
             <Upload
               label="KTP"
               file={
@@ -643,12 +665,22 @@ const TraceabilityPetaniDetail = () => {
           {lampiranError && renderLampiranError()}
 
           {!lampiranLoading && !lampiranError && lampiran && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              <AttachmentViewer label="KTP" fileUrl={lampiran.file_ktp} thumbUrl={lampiran.thumb_ktp} />
-              <AttachmentViewer label="KK" fileUrl={lampiran.file_kk} thumbUrl={lampiran.thumb_kk} />
-              <AttachmentViewer label="NIB" fileUrl={lampiran.file_nib} thumbUrl={lampiran.thumb_nib} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {lampiran.foto_profile && (
+                <AttachmentViewer label="Foto Profil" fileUrl={lampiran.foto_profile} thumbUrl={lampiran.thumb_foto_profile || lampiran.foto_profile} />
+              )}
+              {lampiran.file_ktp && (
+                <AttachmentViewer label="KTP" fileUrl={lampiran.file_ktp} thumbUrl={lampiran.thumb_ktp} />
+              )}
+              {lampiran.file_kk && (
+                <AttachmentViewer label="KK" fileUrl={lampiran.file_kk} thumbUrl={lampiran.thumb_kk} />
+              )}
+              {lampiran.file_nib && (
+                <AttachmentViewer label="NIB" fileUrl={lampiran.file_nib} thumbUrl={lampiran.thumb_nib} />
+              )}
 
-              {!lampiran.file_ktp &&
+              {!lampiran.foto_profile &&
+                !lampiran.file_ktp &&
                 !lampiran.file_kk &&
                 !lampiran.file_nib && (
                   <div className="text-sm text-neutral-600">
@@ -710,6 +742,7 @@ const TraceabilityPetaniDetail = () => {
           open={isEditLampiranModalOpen}
           setOpen={setIsEditLampiranModalOpen}
           initialValues={{
+            foto_profile: lampiran?.foto_profile || null,
             file_ktp: lampiran?.file_ktp || null,
             file_kk: lampiran?.file_kk || null,
             file_nib: lampiran?.file_nib || null,

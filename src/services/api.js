@@ -324,10 +324,12 @@ const APIInstance = {
       } else {
         // Konversi object ke FormData
         const keys = Object.keys(data);
-        keys.map((key) => {
-          data[key] instanceof File
-            ? formData.append(key, data[key], data[key].name)
-            : formData.append(key, data[key]);
+        keys.forEach((key) => {
+          if (data[key] !== null && data[key] !== undefined) {
+            data[key] instanceof File
+              ? formData.append(key, data[key], data[key].name)
+              : formData.append(key, data[key]);
+          }
         });
       }
 
@@ -485,9 +487,11 @@ const APIInstance = {
       payload = new FormData();
       const keys = Object.keys(data);
       keys.forEach((key) => {
-        data[key] instanceof File
-          ? payload.append(key, data[key], data[key].name)
-          : payload.append(key, data[key]);
+        if (data[key] !== null && data[key] !== undefined) {
+          data[key] instanceof File
+            ? payload.append(key, data[key], data[key].name)
+            : payload.append(key, data[key]);
+        }
       });
     }
 
