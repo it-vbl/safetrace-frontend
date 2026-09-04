@@ -60,6 +60,7 @@ const CreatePetaniTraceability = () => {
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
+  const [fotoProfileFile, setFotoProfileFile] = useState(null);
   const [customKelompokTani, setCustomKelompokTani] = useState([]);
   const [isAddingKelompokTani, setIsAddingKelompokTani] = useState(false);
 
@@ -202,10 +203,11 @@ const CreatePetaniTraceability = () => {
           );
 
           try {
-            const hasFiles = ktpFile || kkFile || nibFile;
+            const hasFiles = ktpFile || kkFile || nibFile || fotoProfileFile;
             if (hasFiles && petaniId) {
               const lampiranPayload = {
                 petani_id: petaniId,
+                ...(fotoProfileFile && { foto_profile: fotoProfileFile }),
                 ...(ktpFile && { file_ktp: ktpFile }),
                 ...(kkFile && { file_kk: kkFile }),
                 ...(nibFile && { file_nib: nibFile }),
@@ -584,7 +586,26 @@ const CreatePetaniTraceability = () => {
 
         <Accordion defaultIsOpen title="LAMPIRAN IDENTITAS">
           <>
-            <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-2 md:gap-6">
+              <Upload
+                label="Foto Profil"
+                file={
+                  fotoProfileFile
+                    ? {
+                      name: fotoProfileFile.name,
+                      size: (fotoProfileFile.size / 1048576).toFixed(1),
+                      uploadDate: new Date().toLocaleDateString('en-US'),
+                      value: fotoProfileFile,
+                    }
+                    : null
+                }
+                onChangeValue={(data) => setFotoProfileFile(data.value)}
+                allowedFiles={['image/jpeg', 'image/png', 'image/webp']}
+                maxSize={10}
+                keyField="foto_profile"
+                name="foto_profile"
+              />
+
               <Upload
                 label="KTP"
                 file={
