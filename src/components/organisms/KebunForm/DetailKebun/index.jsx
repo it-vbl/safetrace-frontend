@@ -145,7 +145,7 @@ const DetailKebun = ({
     jenis_legalitas: Yup.string().required('Jenis Legalitas harus diisi'),
     no_legalitas: Yup.string().required('No. Legalitas harus diisi'),
     pemilik_legalitas: Yup.string().required('Pemilik Legalitas harus diisi'),
-    stdb: Yup.string().required('STDB harus diisi'),
+    stdb: Yup.string().nullable(),
     komoditas: Yup.string().required('Komoditas harus diisi'),
     total_prod_per_tahun: Yup.string().required('Total produksi harus diisi'),
     tahun_peremajaan: Yup.string().required('Tahun peremajaan harus diisi'),
@@ -636,7 +636,6 @@ const DetailKebun = ({
             onBlur={formik.handleBlur}
             errors={formik.errors}
             touched={formik.touched}
-            isRequired
           />
           <Select
             label="Komoditas"
