@@ -39,22 +39,26 @@ const parseKgInput = (v) => {
 
 const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
   const initialValues = useMemo(() => {
-    const s1 = yearData?.semester?.['Tahap 1'] ?? {
-      npk: { waktu: '', jumlah: 0 },
-      nitrogen: { waktu: '', jumlah: 0 },
-      pospat: { waktu: '', jumlah: 0 },
-      kalium: { waktu: '', jumlah: 0 },
-      boron: { waktu: '', jumlah: 0 },
-      magnesium: { waktu: '', jumlah: 0 },
-    };
-    const s2 = yearData?.semester?.['Tahap 2'] ?? {
-      npk: { waktu: '', jumlah: 0 },
-      nitrogen: { waktu: '', jumlah: 0 },
-      pospat: { waktu: '', jumlah: 0 },
-      kalium: { waktu: '', jumlah: 0 },
-      boron: { waktu: '', jumlah: 0 },
-      magnesium: { waktu: '', jumlah: 0 },
-    };
+    const s1 =
+      yearData?.semester?.['Tahap 1'] ??
+      yearData?.semester?.['Semester 1'] ?? {
+        npk: { waktu: '', jumlah: 0 },
+        nitrogen: { waktu: '', jumlah: 0 },
+        pospat: { waktu: '', jumlah: 0 },
+        kalium: { waktu: '', jumlah: 0 },
+        boron: { waktu: '', jumlah: 0 },
+        magnesium: { waktu: '', jumlah: 0 },
+      };
+    const s2 =
+      yearData?.semester?.['Tahap 2'] ??
+      yearData?.semester?.['Semester 2'] ?? {
+        npk: { waktu: '', jumlah: 0 },
+        nitrogen: { waktu: '', jumlah: 0 },
+        pospat: { waktu: '', jumlah: 0 },
+        kalium: { waktu: '', jumlah: 0 },
+        boron: { waktu: '', jumlah: 0 },
+        magnesium: { waktu: '', jumlah: 0 },
+      };
     const s3 = yearData?.semester?.['Tahap 3'] ?? {
       npk: { waktu: '', jumlah: 0 },
       nitrogen: { waktu: '', jumlah: 0 },
@@ -150,38 +154,63 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
     validationSchema,
     onSubmit: (values) => {
       // Convert month numbers back to month names for onSave callback
-      const updated = {
-        'Tahap 1': {
-          npk: {
-            waktu: monthNumberToName(values.s1_npk_waktu) || '-',
-            jumlah: parseKgInput(values.s1_npk_jumlah),
-          },
-          nitrogen: {
-            waktu: monthNumberToName(values.s1_nitrogen_waktu) || '-',
-            jumlah: parseKgInput(values.s1_nitrogen_jumlah),
-          },
-          pospat: {
-            waktu: monthNumberToName(values.s1_pospat_waktu) || '-',
-            jumlah: parseKgInput(values.s1_pospat_jumlah),
-          },
-          kalium: {
-            waktu: monthNumberToName(values.s1_kalium_waktu) || '-',
-            jumlah: parseKgInput(values.s1_kalium_jumlah),
-          },
-          boron: {
-            waktu: monthNumberToName(values.s1_boron_waktu) || '-',
-            jumlah: parseKgInput(values.s1_boron_jumlah),
-          },
-          magnesium: {
-            waktu: monthNumberToName(values.s1_magnesium_waktu) || '-',
-            jumlah: parseKgInput(values.s1_magnesium_jumlah),
-          },
+      const tahap1 = {
+        npk: {
+          waktu: monthNumberToName(values.s1_npk_waktu) || '-',
+          jumlah: parseKgInput(values.s1_npk_jumlah),
         },
-        'Tahap 2': {
-          npk: {
-            waktu: monthNumberToName(values.s2_npk_waktu) || '-',
-            jumlah: parseKgInput(values.s2_npk_jumlah),
-          },
+        nitrogen: {
+          waktu: monthNumberToName(values.s1_nitrogen_waktu) || '-',
+          jumlah: parseKgInput(values.s1_nitrogen_jumlah),
+        },
+        pospat: {
+          waktu: monthNumberToName(values.s1_pospat_waktu) || '-',
+          jumlah: parseKgInput(values.s1_pospat_jumlah),
+        },
+        kalium: {
+          waktu: monthNumberToName(values.s1_kalium_waktu) || '-',
+          jumlah: parseKgInput(values.s1_kalium_jumlah),
+        },
+        boron: {
+          waktu: monthNumberToName(values.s1_boron_waktu) || '-',
+          jumlah: parseKgInput(values.s1_boron_jumlah),
+        },
+        magnesium: {
+          waktu: monthNumberToName(values.s1_magnesium_waktu) || '-',
+          jumlah: parseKgInput(values.s1_magnesium_jumlah),
+        },
+      };
+      const tahap2 = {
+        npk: {
+          waktu: monthNumberToName(values.s2_npk_waktu) || '-',
+          jumlah: parseKgInput(values.s2_npk_jumlah),
+        },
+        nitrogen: {
+          waktu: monthNumberToName(values.s2_nitrogen_waktu) || '-',
+          jumlah: parseKgInput(values.s2_nitrogen_jumlah),
+        },
+        pospat: {
+          waktu: monthNumberToName(values.s2_pospat_waktu) || '-',
+          jumlah: parseKgInput(values.s2_pospat_jumlah),
+        },
+        kalium: {
+          waktu: monthNumberToName(values.s2_kalium_waktu) || '-',
+          jumlah: parseKgInput(values.s2_kalium_jumlah),
+        },
+        boron: {
+          waktu: monthNumberToName(values.s2_boron_waktu) || '-',
+          jumlah: parseKgInput(values.s2_boron_jumlah),
+        },
+        magnesium: {
+          waktu: monthNumberToName(values.s2_magnesium_waktu) || '-',
+          jumlah: parseKgInput(values.s2_magnesium_jumlah),
+        },
+      };
+      const updated = {
+        'Semester 1': tahap1,
+        'Semester 2': tahap2,
+        'Tahap 1': tahap1,
+        'Tahap 2': tahap2,
         'Tahap 3': {
           npk: {
             waktu: monthNumberToName(values.s3_npk_waktu) || '-',
@@ -206,27 +235,6 @@ const EditPupukModal = ({ open, onClose, yearData, onSave }) => {
           magnesium: {
             waktu: monthNumberToName(values.s3_magnesium_waktu) || '-',
             jumlah: parseKgInput(values.s3_magnesium_jumlah),
-          },
-        },
-          nitrogen: {
-            waktu: monthNumberToName(values.s2_nitrogen_waktu) || '-',
-            jumlah: parseKgInput(values.s2_nitrogen_jumlah),
-          },
-          pospat: {
-            waktu: monthNumberToName(values.s2_pospat_waktu) || '-',
-            jumlah: parseKgInput(values.s2_pospat_jumlah),
-          },
-          kalium: {
-            waktu: monthNumberToName(values.s2_kalium_waktu) || '-',
-            jumlah: parseKgInput(values.s2_kalium_jumlah),
-          },
-          boron: {
-            waktu: monthNumberToName(values.s2_boron_waktu) || '-',
-            jumlah: parseKgInput(values.s2_boron_jumlah),
-          },
-          magnesium: {
-            waktu: monthNumberToName(values.s2_magnesium_waktu) || '-',
-            jumlah: parseKgInput(values.s2_magnesium_jumlah),
           },
         },
       };

@@ -94,7 +94,10 @@ const Pemetaan = ({
       }
 
       // Convert coordinates to GeoJSON format
-      const polygonCoords = values.peta.map((coord) => [coord.lng, coord.lat]);
+      const polygonCoords = values.peta.map((coord) => [
+        parseFloat(coord.lng),
+        parseFloat(coord.lat),
+      ]);
       if (polygonCoords.length > 0) {
         polygonCoords.push(polygonCoords[0]); // Close the polygon
       }

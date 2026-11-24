@@ -21,12 +21,7 @@ export const handleStep1 = async (values, idKebun) => {
       waktu_tanam: `${values.waktu_tanam_year}-${values.waktu_tanam_month}-01`,
       is_rspo: values.rspo === 'sudah',
       is_ispo: values.ispo === 'sudah',
-      jenis_legalitas:
-        values.jenis_legalitas === 'shm'
-          ? '1'
-          : values.jenis_legalitas === 'skgr'
-          ? '2'
-          : '3',
+      jenis_legalitas: values.jenis_legalitas,
       nomor_legalitas: values.no_legalitas,
       pemilik_legalitas: values.pemilik_legalitas,
       nomor_stdb: values.stdb,
@@ -57,12 +52,7 @@ export const handleStep1 = async (values, idKebun) => {
       waktu_tanam: `${values.waktu_tanam_year}-${values.waktu_tanam_month}-01`,
       is_rspo: values.rspo === 'sudah',
       is_ispo: values.ispo === 'sudah',
-      jenis_legalitas:
-        values.jenis_legalitas === 'shm'
-          ? '1'
-          : values.jenis_legalitas === 'skgr'
-          ? '2'
-          : '3',
+      jenis_legalitas: values.jenis_legalitas,
       nomor_legalitas: values.no_legalitas,
       pemilik_legalitas: values.pemilik_legalitas,
       nomor_stdb: values.stdb,

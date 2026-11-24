@@ -63,7 +63,10 @@ const ModalEditPeta = ({ isOpen, onClose, kebunData, onSuccess }) => {
           }
         } else {
           // Convert coordinates to the expected format
-          const coordinates = values.peta?.map((coord) => [coord.lng, coord.lat]);
+          const coordinates = values.peta?.map((coord) => [
+            parseFloat(coord.lng),
+            parseFloat(coord.lat),
+          ]);
 
           // Ensure the polygon is closed (first and last coordinates are the same)
           if (coordinates.length > 0) {

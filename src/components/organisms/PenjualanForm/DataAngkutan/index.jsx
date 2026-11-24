@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import moment from 'moment';
 import * as Yup from 'yup';
@@ -10,6 +10,7 @@ import InputText from '@/components/molecules/InputText';
 import { formatDecimalInput,parseDecimalInput } from '@/utils/decimalFormat';
 
 const DataAngkutan = ({ angkutanData, onNext, onCancel, isSubmitting }) => {
+  const skipAutoCalcRef = useRef(Boolean(angkutanData));
   const validationSchema = Yup.object().shape({
     tanggal_penjualan: Yup.string().required('Tanggal Penjualan harus diisi'),
     driver: Yup.string().required('Driver harus diisi'),
@@ -155,6 +156,7 @@ const DataAngkutan = ({ angkutanData, onNext, onCancel, isSubmitting }) => {
   // Update form values when angkutanData changes
   useEffect(() => {
     if (angkutanData) {
+      skipAutoCalcRef.current = true;
       formik.setValues({
         tanggal_penjualan: angkutanData.tanggal_penjualan
           ? moment(angkutanData.tanggal_penjualan, 'YYYY-MM-DD').format(
@@ -194,6 +196,7 @@ const DataAngkutan = ({ angkutanData, onNext, onCancel, isSubmitting }) => {
 
   // Auto-calculate berat_bersih when berat_timbangan, tarra, or t_potongan_kg changes
   useEffect(() => {
+    if (skipAutoCalcRef.current) return;
     const beratTimbangan =
       parseFloat(parseDecimalInput(formik.values.berat_timbangan)) || 0;
     const tarra = parseFloat(parseDecimalInput(formik.values.tarra)) || 0;
@@ -215,6 +218,7 @@ const DataAngkutan = ({ angkutanData, onNext, onCancel, isSubmitting }) => {
 
   // Auto-calculate t_potongan_kg when berat_timbangan and t_potongan_persen change
   useEffect(() => {
+    if (skipAutoCalcRef.current) return;
     const beratTimbangan =
       parseFloat(parseDecimalInput(formik.values.berat_timbangan)) || 0;
     const tPotonganPersen =
@@ -236,6 +240,7 @@ const DataAngkutan = ({ angkutanData, onNext, onCancel, isSubmitting }) => {
 
   // Auto-calculate total_penjualan when berat_bersih and harga_per_kilo change
   useEffect(() => {
+    if (skipAutoCalcRef.current) return;
     const beratBersih =
       parseFloat(parseDecimalInput(formik.values.berat_bersih)) || 0;
     const hargaPerKilo =
@@ -254,6 +259,17 @@ const DataAngkutan = ({ angkutanData, onNext, onCancel, isSubmitting }) => {
       );
     }
   }, [formik.values.berat_bersih, formik.values.harga_per_kilo]);
+
+  useEffect(() => {
+    skipAutoCalcRef.current = false;
+  }, [
+    formik.values.berat_timbangan,
+    formik.values.tarra,
+    formik.values.t_potongan_persen,
+    formik.values.t_potongan_kg,
+    formik.values.berat_bersih,
+    formik.values.harga_per_kilo,
+  ]);
 
   const handleDateChange = (e) => {
     const dateValue = e.target.value;
