@@ -246,7 +246,7 @@ const TraceabilityProduksiDetail = () => {
               />
               <BorderBottomColData
                 label="Prod/Ha/Th"
-                value={`${formatNumber(detail.kebun.prod_per_ha_th_ton)} Ton`}
+                value={`${formatNumber((Number(detail.kebun.prod_per_ha_th_ton) || 0) / 1000)} Ton`}
               />
             </div>
           </section>

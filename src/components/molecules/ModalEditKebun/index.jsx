@@ -211,7 +211,7 @@ const ModalEditKebun = ({ isOpen, onClose, kebunData, onSuccess }) => {
     jenis_legalitas: Yup.string().required('Jenis Legalitas wajib dipilih'),
     nomor_legalitas: Yup.string().required('Nomor Legalitas wajib diisi'),
     pemilik_legalitas: Yup.string().required('Pemilik Legalitas wajib diisi'),
-    nomor_stdb: Yup.string().required('Nomor STDB wajib diisi'),
+    nomor_stdb: Yup.string().nullable(),
     komoditas: Yup.string().required('Komoditas wajib diisi'),
     total_prod_per_tahun: Yup.string().required('Total produksi wajib diisi'),
     tahun_peremajaan: Yup.string().required('Tahun peremajaan wajib diisi'),

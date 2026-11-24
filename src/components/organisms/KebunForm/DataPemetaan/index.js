@@ -47,12 +47,14 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
   };
 
   const handleSaveEdit = (index) => {
+    const parsedLat = parseFloat(editingCoord.lat);
+    const parsedLng = parseFloat(editingCoord.lng);
     setCoords(
       coords.map((coord, i) =>
         i === index
           ? {
-            lat: editingCoord.lat || coord.lat,
-            lng: editingCoord.lng || coord.lng,
+            lat: Number.isFinite(parsedLat) ? parsedLat : coord.lat,
+            lng: Number.isFinite(parsedLng) ? parsedLng : coord.lng,
           }
           : coord
       )
@@ -188,13 +190,20 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
                   />
 
                   <Button
+                    type="button"
                     size="small"
                     onClick={() => {
-                      if (!newCoord.lat || !newCoord.lng) {
+                      if (!newCoord?.lat || !newCoord?.lng) {
                         toast.error('Pastikan latitude dan longitude terisi');
                         return;
                       }
-                      setCoords([...coords, newCoord]);
+                      const lat = parseFloat(newCoord.lat);
+                      const lng = parseFloat(newCoord.lng);
+                      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                        toast.error('Pastikan latitude dan longitude berupa angka yang valid');
+                        return;
+                      }
+                      setCoords([...coords, { lat, lng }]);
                       setNewCoord({ lat: '', lng: '' });
                     }}
                   >
@@ -240,6 +249,7 @@ const DataPemetaan = ({ data, formik, mode = 'create', idKebun, petaniId }) => {
                               type="longitude"
                             />
                             <Button
+                              type="button"
                               size="small"
                               onClick={() => handleSaveEdit(index)}
                             >

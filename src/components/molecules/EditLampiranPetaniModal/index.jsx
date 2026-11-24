@@ -12,6 +12,7 @@ const validationSchema = Yup.object({
   file_ktp: Yup.mixed().nullable(),
   file_kk: Yup.mixed().nullable(),
   file_nib: Yup.mixed().nullable(),
+  foto_profile: Yup.mixed().nullable(),
 });
 
 const EditLampiranPetaniModal = ({
@@ -24,12 +25,14 @@ const EditLampiranPetaniModal = ({
   const [ktpFile, setKtpFile] = useState(null);
   const [kkFile, setKkFile] = useState(null);
   const [nibFile, setNibFile] = useState(null);
+  const [fotoProfileFile, setFotoProfileFile] = useState(null);
 
   const formik = useFormik({
     initialValues: {
       file_ktp: null,
       file_kk: null,
       file_nib: null,
+      foto_profile: null,
       ...initialValues,
     },
     validationSchema,
@@ -44,6 +47,10 @@ const EditLampiranPetaniModal = ({
       }
       if (nibFile) {
         formData.append('file_nib', nibFile);
+      }
+
+      if (fotoProfileFile) {
+        formData.append('foto_profile', fotoProfileFile);
       }
 
       onSave(formData);
@@ -65,11 +72,11 @@ const EditLampiranPetaniModal = ({
     () =>
       ktpFile
         ? {
-            name: ktpFile.name,
-            size: ktpFile.size,
-            uploadDate: new Date().toISOString(),
-            value: ktpFile,
-          }
+          name: ktpFile.name,
+          size: ktpFile.size,
+          uploadDate: new Date().toISOString(),
+          value: ktpFile,
+        }
         : getExistingFile(initialValues.file_ktp, 'File KTP saat ini'),
     [ktpFile, initialValues.file_ktp]
   );
@@ -78,11 +85,11 @@ const EditLampiranPetaniModal = ({
     () =>
       kkFile
         ? {
-            name: kkFile.name,
-            size: kkFile.size,
-            uploadDate: new Date().toISOString(),
-            value: kkFile,
-          }
+          name: kkFile.name,
+          size: kkFile.size,
+          uploadDate: new Date().toISOString(),
+          value: kkFile,
+        }
         : getExistingFile(initialValues.file_kk, 'File KK saat ini'),
     [kkFile, initialValues.file_kk]
   );
@@ -91,13 +98,26 @@ const EditLampiranPetaniModal = ({
     () =>
       nibFile
         ? {
-            name: nibFile.name,
-            size: nibFile.size,
-            uploadDate: new Date().toISOString(),
-            value: nibFile,
-          }
+          name: nibFile.name,
+          size: nibFile.size,
+          uploadDate: new Date().toISOString(),
+          value: nibFile,
+        }
         : getExistingFile(initialValues.file_nib, 'File NIB saat ini'),
     [nibFile, initialValues.file_nib]
+  );
+
+  const fotoProfileFileData = useMemo(
+    () =>
+      fotoProfileFile
+        ? {
+          name: fotoProfileFile.name,
+          size: fotoProfileFile.size,
+          uploadDate: new Date().toISOString(),
+          value: fotoProfileFile,
+        }
+        : getExistingFile(initialValues.foto_profile, 'Foto Profil saat ini'),
+    [fotoProfileFile, initialValues.foto_profile]
   );
 
   return (
@@ -110,6 +130,20 @@ const EditLampiranPetaniModal = ({
     >
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <div className="flex flex-col gap-6 py-4">
+          <Upload
+            label="Foto Profil"
+            file={fotoProfileFileData}
+            onChangeValue={(data) => {
+              setFotoProfileFile(data.value);
+            }}
+            allowedFiles={['image/jpeg', 'image/png', 'image/webp']}
+            maxSize={10}
+            isRequired={false}
+            keyField="foto_profile"
+            name="foto_profile"
+            url={initialValues.foto_profile}
+          />
+
           <Upload
             label="KTP"
             file={ktpFileData}
